@@ -1,0 +1,11 @@
+{
+  "name": "skredvarselgarmin",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Dag Stuan",
+  "license": "ISC",
+  "devDependencies": {
+    "@markw65/prettier-plugin-monkeyc": "^1.0.44",
+    "prettier": "^2.8.4"
+  }
+}
