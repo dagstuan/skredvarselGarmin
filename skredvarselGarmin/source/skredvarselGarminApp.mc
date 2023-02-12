@@ -6,9 +6,6 @@ import Toybox.System;
 using Toybox.Background;
 using Toybox.Application.Storage;
 
-const SelectedRegionIdsStorageKey = "selectedRegionIds";
-const FavoriteRegionIdStorageKey = "favoriteRegion";
-
 (:background)
 class skredvarselGarminApp extends Application.AppBase {
   var skredvarselApi as SkredvarselApi = new SkredvarselApi();
@@ -18,16 +15,6 @@ class skredvarselGarminApp extends Application.AppBase {
   function initialize() {
     AppBase.initialize();
 
-    Storage.setValue(SelectedRegionIdsStorageKey, [
-      "3022",
-      "3023",
-      "3024",
-      "3031",
-      "3032",
-      "3034",
-      "3010",
-      "3011",
-    ]);
     Storage.setValue(FavoriteRegionIdStorageKey, "3022");
   }
 

@@ -11,10 +11,9 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
   public function initialize(
     skredvarselApi as SkredvarselApi,
-    regionId as String,
-    id as String
+    regionId as String
   ) {
-    CustomMenuItem.initialize(id, {});
+    CustomMenuItem.initialize(regionId, {});
 
     _skredvarselApi = skredvarselApi;
     _regionId = regionId;
@@ -33,13 +32,11 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
       updateForecastData();
     }
 
-    var marginRight = 25;
-
     if (_forecastData != null) {
       var avalancheForecast = new AvalancheForecastRenderer(
         _regionId,
         _forecastData,
-        marginRight
+        ForecastMenu.MarginRight
       );
       avalancheForecast.draw(dc);
     } else {

@@ -10,13 +10,25 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
 
   //! Handle an item being selected
   //! @param item The selected menu item
-  public function onSelect(item as ForecastMenuItem) as Void {
-    System.println("select!");
-    WatchUi.pushView(
-      new ForecastView(item.getRegionId()),
-      null,
-      WatchUi.SLIDE_UP
-    );
+  public function onSelect(item as Ui.CustomMenuItem) as Void {
+    var id = item.getId();
+
+    if (id.equals("edit")) {
+      System.println("Edit!");
+      WatchUi.pushView(
+        new EditMenu(),
+        new EditMenuDelegate(),
+        WatchUi.SLIDE_LEFT
+      );
+    } else {
+      System.println("select!");
+      WatchUi.pushView(
+        new ForecastView((item as ForecastMenuItem).getRegionId()),
+        null,
+        WatchUi.SLIDE_UP
+      );
+    }
+
     WatchUi.requestUpdate();
   }
 

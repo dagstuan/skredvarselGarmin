@@ -65,9 +65,10 @@ class AvalancheForecastRenderer {
       }
 
       var lengthThisElem = lengthPerFullElem;
+      var spaceLeft = width - currXOffset;
 
-      if (currXOffset + lengthThisElem > width) {
-        lengthThisElem -= width - currXOffset;
+      if (lengthThisElem > spaceLeft) {
+        lengthThisElem = spaceLeft;
 
         if (lengthThisElem <= 0) {
           // no room for this element

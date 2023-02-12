@@ -73,3 +73,44 @@ function parseDate(dateString as String) as Time.Moment {
     :second => dateString.substring(17, 19).toNumber(),
   });
 }
+
+function arrayContainsString(arr as Array<String>, str as String) {
+  for (var i = 0; i < arr.size(); i++) {
+    if (arr[i].equals(str)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function addToArray(curArray as Array, newValue) {
+  var curSize = curArray.size();
+  var newArray = new [curSize + 1];
+  for (var i = 0; i < curSize; i++) {
+    newArray[i] = curArray[i];
+  }
+  newArray[curSize] = newValue;
+  return newArray;
+}
+
+function removeStringFromArray(curArray as Array<String>, value as String) {
+  if (arrayContainsString(curArray, value)) {
+    var curSize = curArray.size();
+    var newArray = new [curSize - 1];
+
+    var j = 0;
+    for (var i = 0; i < curSize; i++) {
+      var elem = curArray[i];
+      if (elem.equals(value)) {
+        continue;
+      }
+
+      newArray[j] = elem;
+      j++;
+    }
+    return newArray;
+  }
+
+  return curArray;
+}
