@@ -1,0 +1,11 @@
+<strings>
+  <string id="AppName" scope="glance">Skredvarsel</string>
+	<string id="Loading" scope="glance">Laster</string>
+	<string id="Edit">Rediger</string>
+	<string id="Remove">Fjern</string>
+	<string id="RemoveAsFavorite">Fjern som favoritt</string>
+	<string id="SetAsFavorite">Sett som favoritt</string>
+  <string id="AddRegions">Legg til regioner</string>
+	<string id="PickRegions">Velg regioner</string>
+	<string id="EditForecast">Rediger varsel</string>
+</strings>

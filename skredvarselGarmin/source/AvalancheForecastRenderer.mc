@@ -13,7 +13,7 @@ class AvalancheForecastRenderer {
   private var _numWarnings;
 
   private var _daysToShow = 4;
-  private var _gap = 4;
+  private var _gap = 3;
   private var _numGaps = _daysToShow - 1;
   private var _lineHeight = 8;
 
@@ -85,7 +85,7 @@ class AvalancheForecastRenderer {
       }
 
       var dangerLevel = warning.dangerLevel;
-      var color = colorize(dangerLevel.toNumber());
+      var color = colorize(dangerLevel);
 
       var lineStart = currXOffset;
       var lineEnd = currXOffset + lengthThisElem;
@@ -99,13 +99,16 @@ class AvalancheForecastRenderer {
         _lineHeight
       );
 
-      if (lengthThisElem == lengthPerFullElem) {
+      var dangerLevelString = dangerLevel.toString();
+      var font = Graphics.FONT_GLANCE;
+      var textWidth = dc.getTextWidthInPixels(dangerLevelString, font);
+      if (currXOffset > 0 && textWidth < lengthThisElem) {
         dc.setColor(color, Graphics.COLOR_TRANSPARENT);
         dc.drawText(
           currXOffset,
-          height - dc.getFontHeight(Graphics.FONT_GLANCE),
-          Graphics.FONT_GLANCE,
-          dangerLevel,
+          height - dc.getFontHeight(font),
+          font,
+          dangerLevel.toString(),
           Graphics.TEXT_JUSTIFY_LEFT
         );
       }

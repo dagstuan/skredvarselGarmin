@@ -9,6 +9,8 @@ const BaseApiUrl = "https://skredvarsel-garmin-api.fly.dev";
 
 (:background)
 class GetAvalancheForecastRequestDelegate {
+  hidden var _skredvarselStorage as SkredvarselStorage;
+
   hidden var _callback;
   hidden var _regionId;
 
@@ -16,6 +18,7 @@ class GetAvalancheForecastRequestDelegate {
 
   // Set up the callback to the view
   function initialize(
+    skredvarselStorage as SkredvarselStorage,
     queue as CommandExecutor,
     regionId as String,
     callback as (Method() as Void)
@@ -23,14 +26,13 @@ class GetAvalancheForecastRequestDelegate {
     _queue = queue;
     _callback = callback;
     _regionId = regionId;
+    _skredvarselStorage = skredvarselStorage;
   }
 
   function makeRequest() {
     var now = Time.now();
     var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
-    var threeDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 3);
-    var start = now.subtract(threeDays);
-    //var start = now.subtract(twoDays);
+    var start = now.subtract(twoDays);
     var end = now.add(twoDays);
 
     var path =
@@ -62,11 +64,9 @@ class GetAvalancheForecastRequestDelegate {
     data as Dictionary<String, Object?> or String or Null
   ) as Void {
     if (responseCode == 200) {
-      var cacheKey = getCacheKeyForRegion(_regionId);
-
       Sys.println("Request Successful for region: " + _regionId); // print success
 
-      Storage.setValue(cacheKey, data);
+      _skredvarselStorage.setForecastDataForRegion(_regionId, data);
     } else {
       Sys.println("Response: " + responseCode); // print response code
     }

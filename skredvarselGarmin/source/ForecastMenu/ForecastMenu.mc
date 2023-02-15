@@ -1,60 +1,54 @@
 import Toybox.Lang;
-import Toybox.WatchUi;
 
+using Toybox.WatchUi as Ui;
 using Toybox.Application.Storage;
 using Toybox.Graphics as Gfx;
 
-public class ForecastMenu extends WatchUi.CustomMenu {
+public class ForecastMenu extends Ui.CustomMenu {
   public static const MarginRight = 25;
 
   private const _editItemId = "edit";
 
   private var _skredvarselApi as SkredvarselApi;
-  private var _logo as BitmapResource?;
+  private var _skredvarselStorage as SkredvarselStorage;
 
-  private var _existingRegionItems as Array<String> = new [0];
+  private var _existingRegionIds as Array<String> = new [0];
 
-  public function initialize(skredvarselApi) {
+  public function initialize(
+    skredvarselApi as SkredvarselApi,
+    skredvarselStorage as SkredvarselStorage
+  ) {
     CustomMenu.initialize(60, Graphics.COLOR_BLACK, {});
     _skredvarselApi = skredvarselApi;
+    _skredvarselStorage = skredvarselStorage;
   }
 
   function onShow() {
-    _logo =
-      WatchUi.loadResource($.Rez.Drawables.LauncherIcon) as BitmapResource;
+    var regionIds = _skredvarselStorage.getSelectedRegionIds();
 
-    var regionIds = SkredvarselStorage.getSelectedRegionIds();
-
-    var editElementIndex = findItemById(_editItemId);
-    if (editElementIndex > 0) {
-      deleteItem(editElementIndex);
-    }
-
-    // Remove items that should no longer exist
-    var numExistingItems = _existingRegionItems.size();
-    if (numExistingItems > 0) {
-      for (var i = 0; i < numExistingItems; i++) {
-        var existingRegionId = _existingRegionItems[i];
-        if (!arrayContainsString(regionIds, existingRegionId)) {
-          var index = findItemById(existingRegionId);
-          if (index > 0) {
-            deleteItem(index);
-          }
+    var regionsChanged = false;
+    if (regionIds.size() != _existingRegionIds) {
+      regionsChanged = true;
+    } else {
+      for (var i = 0; i < regionIds.size(); i++) {
+        if (!regionIds[i].equals(_existingRegionIds[i])) {
+          regionsChanged = true;
         }
       }
     }
 
-    // Add items that are new.
-    for (var i = 0; i < regionIds.size(); i++) {
-      var regionId = regionIds[i];
-      if (!arrayContainsString(_existingRegionItems, regionId)) {
+    if (regionsChanged) {
+      deleteAllItems();
+
+      for (var i = 0; i < regionIds.size(); i++) {
+        var regionId = regionIds[i];
         addItem(new ForecastMenuItem(_skredvarselApi, regionId));
       }
+
+      addItem(new ForecastMenuEditMenuItem(_editItemId));
+
+      _existingRegionIds = regionIds;
     }
-
-    _existingRegionItems = regionIds;
-
-    addItem(new ForecastMenuEditMenuItem(_editItemId));
   }
 
   function drawTitle(dc as Gfx.Dc) {
@@ -64,18 +58,17 @@ public class ForecastMenu extends WatchUi.CustomMenu {
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
     dc.clear();
 
-    if (_logo != null) {
-      var offsetX = _logo.getWidth() / 2;
-      var logoX = width / 2 - offsetX;
+    var iconResource = getIconResourceToDraw();
+    var icon = Ui.loadResource(iconResource);
+    var iconX = width / 2 - $.halfWidthDangerLevelIcon;
+    dc.drawBitmap(iconX, 10, icon);
 
-      dc.drawBitmap(logoX, 10, _logo);
-    }
-
+    var text = Ui.loadResource($.Rez.Strings.AppName);
     dc.drawText(
       width / 2,
       height / 2 + 15,
       Graphics.FONT_XTINY,
-      "Skredvarsel",
+      text,
       Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
     );
 
@@ -90,5 +83,31 @@ public class ForecastMenu extends WatchUi.CustomMenu {
       width - marginLeftRight,
       height - offsetFromBottom
     );
+  }
+
+  private function getIconResourceToDraw() as Symbol {
+    var favoriteRegionId = _skredvarselStorage.getFavoriteRegionId();
+
+    if (favoriteRegionId != null) {
+      var forecastForFavoriteRegion =
+        _skredvarselApi.getForecastForRegion(favoriteRegionId);
+
+      if (forecastForFavoriteRegion != null) {
+        var dangerLevelToday = forecastForFavoriteRegion.getDangerLevelToday();
+
+        return $.getIconResourceForDangerLevel(dangerLevelToday);
+      }
+
+      return $.Rez.Drawables.LauncherIcon;
+    }
+
+    return $.Rez.Drawables.LauncherIcon;
+  }
+
+  function deleteAllItems() {
+    var deleteResult = deleteItem(0);
+    while (deleteResult != null) {
+      deleteResult = deleteItem(0);
+    }
   }
 }

@@ -3,9 +3,18 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 
 public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
+  private var _skredvarselApi as SkredvarselApi;
+  private var _skredvarselStorage as SkredvarselStorage;
+
   //! Constructor
-  public function initialize() {
+  public function initialize(
+    skredvarselApi as SkredvarselApi,
+    skredvarselStorage as SkredvarselStorage
+  ) {
     Menu2InputDelegate.initialize();
+
+    _skredvarselApi = skredvarselApi;
+    _skredvarselStorage = skredvarselStorage;
   }
 
   //! Handle an item being selected
@@ -14,17 +23,17 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
     var id = item.getId();
 
     if (id.equals("edit")) {
-      System.println("Edit!");
       WatchUi.pushView(
-        new EditMenu(),
-        new EditMenuDelegate(),
+        new EditMenu(_skredvarselStorage),
+        new EditMenuDelegate(_skredvarselStorage),
         WatchUi.SLIDE_LEFT
       );
     } else {
-      System.println("select!");
+      var regionId = (item as ForecastMenuItem).getRegionId();
+
       WatchUi.pushView(
-        new ForecastView((item as ForecastMenuItem).getRegionId()),
-        null,
+        new ForecastView(_skredvarselApi, regionId),
+        new ForecastViewDelegate(_skredvarselStorage, regionId),
         WatchUi.SLIDE_UP
       );
     }
@@ -35,15 +44,5 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
   //! Handle the back key being pressed
   public function onBack() as Void {
     WatchUi.popView(WatchUi.SLIDE_DOWN);
-  }
-
-  public function onNextPage() as Boolean {
-    System.println("nextpage!");
-    return true;
-  }
-
-  public function onPreviousPage() as Boolean {
-    System.println("prevpage!");
-    return true;
   }
 }

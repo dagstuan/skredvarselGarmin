@@ -8,18 +8,18 @@ using Toybox.WatchUi as Ui;
 
 (:background)
 public class SkredvarselApi {
+  hidden var _skredvarselStorage as SkredvarselStorage;
   hidden var _queue;
 
-  public function initialize() {
+  public function initialize(skredvarselStorage as SkredvarselStorage) {
     _queue = new CommandExecutor();
+    _skredvarselStorage = skredvarselStorage;
   }
 
   public function getForecastForRegion(
     regionId as String
   ) as AvalancheForecast? {
-    var cacheKey = $.getCacheKeyForRegion(regionId);
-
-    var fromStorage = Storage.getValue(cacheKey) as AvalancheForecastData?;
+    var fromStorage = _skredvarselStorage.getForecastDataForRegion(regionId);
 
     return fromStorage != null
       ? new AvalancheForecast(regionId, fromStorage)
@@ -46,6 +46,7 @@ public class SkredvarselApi {
     }
 
     var delegate = new GetAvalancheForecastRequestDelegate(
+      _skredvarselStorage,
       _queue,
       regionId,
       callback

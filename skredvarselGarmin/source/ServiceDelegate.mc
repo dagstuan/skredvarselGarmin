@@ -2,18 +2,25 @@ import Toybox.System;
 
 (:background)
 class ServiceDelegate extends System.ServiceDelegate {
-  private var _skredvarselApi;
+  private var _skredvarselApi as SkredvarselApi;
+  private var _skredvarselStorage as SkredvarselStorage;
 
   private var _regionsToReload = 0;
 
-  public function initialize(skredvarselApi) {
+  public function initialize(
+    skredvarselApi as SkredvarselApi,
+    skredvarselStorage as SkredvarselStorage
+  ) {
     ServiceDelegate.initialize();
 
     _skredvarselApi = skredvarselApi;
+    _skredvarselStorage = skredvarselStorage;
   }
 
   public function onTemporalEvent() as Void {
-    var regions = $.getSelectedRegionIds();
+    $.logMessage("Temporal event triggered.");
+
+    var regions = _skredvarselStorage.getSelectedRegionIds();
 
     _regionsToReload = regions.size();
 
@@ -25,8 +32,8 @@ class ServiceDelegate extends System.ServiceDelegate {
     }
   }
 
-  public function onReloadedRegion() {
-    System.println("reloaded region");
+  public function onReloadedRegion() as Void {
+    $.logMessage("reloaded region");
     _regionsToReload -= 1;
 
     if (_regionsToReload == 0) {

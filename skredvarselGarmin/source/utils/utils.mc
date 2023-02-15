@@ -62,6 +62,21 @@ function getFormattedDate(moment as Time.Moment) as String {
   ]);
 }
 
+(:background)
+function getFormattedTime(moment as Time.Moment) as String {
+  var info = Gregorian.utcInfo(moment, Time.FORMAT_MEDIUM);
+
+  return Lang.format("$1$:$2$:$3$ $4$ $5$ $6$ $7$", [
+    info.hour < 10 ? "0" + info.hour : info.hour,
+    info.min < 10 ? "0" + info.min : info.min,
+    info.sec < 10 ? "0" + info.sec : info.sec,
+    info.day_of_week,
+    info.day,
+    info.month,
+    info.year,
+  ]);
+}
+
 (:glance)
 function parseDate(dateString as String) as Time.Moment {
   return Gregorian.moment({
@@ -113,4 +128,27 @@ function removeStringFromArray(curArray as Array<String>, value as String) {
   }
 
   return curArray;
+}
+
+(:background)
+public function logMessage(message as String) {
+  System.println($.getFormattedTime(Time.now()) + " - " + message);
+}
+
+const halfWidthDangerLevelIcon = 20;
+
+function getIconResourceForDangerLevel(dangerLevel as Number) {
+  switch (dangerLevel) {
+    case 1:
+      return $.Rez.Drawables.Level1;
+    case 2:
+      return $.Rez.Drawables.Level2;
+    case 3:
+      return $.Rez.Drawables.Level3;
+    case 4:
+    case 5:
+      return $.Rez.Drawables.Level4_5;
+    default:
+      return $.Rez.Drawables.NoLevel;
+  }
 }

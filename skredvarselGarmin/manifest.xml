@@ -5,7 +5,7 @@
         Use "Monkey C: Edit Application" from the Visual Studio Code command palette
         to update the application attributes.
     -->
-  <iq:application id="85868709-facb-4e15-811d-25ca67ea05ba" type="watch-app" name="@Strings.AppName" entry="skredvarselGarminApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="4.1.0">
+  <iq:application id="85868709-facb-4e15-811d-25ca67ea05ba" type="watch-app" name="@Strings.AppName" entry="skredvarselGarminApp" launcherIcon="@Drawables.LauncherIcon" minApiLevel="3.2.0">
     <!--
             Use the following from the Visual Studio Code comand palette to edit
             the build targets:
@@ -14,6 +14,8 @@
             "Monkey C: Edit Products" - Lets you add or remove any product
         -->
     <iq:products>
+      <iq:product id="fenix5plus"/>
+      <iq:product id="fenix6pro"/>
       <iq:product id="fenix7"/>
     </iq:products>
     <!--

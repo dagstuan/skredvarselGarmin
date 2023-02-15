@@ -1,6 +1,5 @@
 import Toybox.Lang;
 
-using Toybox.System;
 using Toybox.Communications;
 
 (:background)
@@ -81,7 +80,7 @@ class WebRequestCommand extends Command {
   }
 
   function start() {
-    System.println("Fetching: " + _url);
+    $.logMessage("Fetching: " + _url);
     Communications.makeWebRequest(
       _url,
       _params,
@@ -94,7 +93,7 @@ class WebRequestCommand extends Command {
     responseCode as Number,
     data as Null or Dictionary or String
   ) as Void {
-    System.println("Response: " + responseCode);
+    $.logMessage("Response: " + responseCode);
     _callback.invoke(responseCode, data);
     _callback = null;
 

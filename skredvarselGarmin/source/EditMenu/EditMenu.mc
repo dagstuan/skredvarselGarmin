@@ -3,10 +3,11 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 
 public class EditMenu extends Ui.Menu2 {
-  public function initialize() {
-    Menu2.initialize({ :title => "Edit regions" });
+  public function initialize(skredvarselStorage as SkredvarselStorage) {
+    Menu2.initialize({ :title => $.Rez.Strings.PickRegions });
 
-    var selectedRegionIds = $.getSelectedRegionIds() as Array<String>;
+    var selectedRegionIds =
+      skredvarselStorage.getSelectedRegionIds() as Array<String>;
 
     var regionIds = $.Regions.keys();
     for (var i = 0; i < regionIds.size(); i++) {
