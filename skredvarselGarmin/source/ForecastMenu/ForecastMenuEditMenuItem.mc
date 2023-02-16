@@ -14,7 +14,7 @@ public class ForecastMenuEditMenuItem extends Ui.CustomMenuItem {
     var editText = Ui.loadResource($.Rez.Strings.Edit);
 
     dc.drawText(
-      (dc.getWidth() - ForecastMenu.MarginRight) / 2,
+      (dc.getWidth() - ForecastMenu.Margin) / 2,
       dc.getHeight() / 2,
       Graphics.FONT_MEDIUM,
       editText,

@@ -12,6 +12,11 @@ class GlanceView extends Ui.GlanceView {
 
   private var _forecastData as AvalancheForecast?;
 
+  private var _avalancheForecastRenderer as AvalancheForecastRenderer;
+
+  private var _width as Number?;
+  private var _height as Number?;
+
   function initialize(
     skredvarselApi as SkredvarselApi,
     skredvarselStorage as SkredvarselStorage
@@ -20,56 +25,42 @@ class GlanceView extends Ui.GlanceView {
     _skredvarselApi = skredvarselApi;
 
     _regionId = skredvarselStorage.getFavoriteRegionId();
+    _avalancheForecastRenderer = new AvalancheForecastRenderer();
+
     setForecastDataFromStorage();
   }
 
   function onShow() {
-    if (_regionId != null) {
-      _skredvarselApi.loadForecastForRegionIfRequired(
-        _regionId,
-        method(:onReceive)
-      );
+    if (_regionId != null && _forecastData == null) {
+      _skredvarselApi.loadForecastForRegion(_regionId, method(:onReceive));
     }
   }
 
+  function onLayout(dc as Gfx.Dc) {
+    _width = dc.getWidth();
+    _height = dc.getHeight();
+  }
+
   function onUpdate(dc as Gfx.Dc) {
-    if (_regionId == null) {
+    if (_forecastData == null) {
+      setForecastDataFromStorage();
+    }
+
+    if (_forecastData != null) {
+      _avalancheForecastRenderer.setData(_regionId, _forecastData);
+      _avalancheForecastRenderer.draw(dc, 0, 0, _width, _height);
+    } else {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
-      var appNameText = Ui.loadResource($.Rez.Strings.AppName) as String;
+      var loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
 
       dc.drawText(
         0,
         dc.getHeight() / 2,
-        Graphics.FONT_MEDIUM,
-        appNameText,
-        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+        Graphics.FONT_GLANCE,
+        loadingText,
+        Graphics.TEXT_JUSTIFY_LEFT
       );
-    } else {
-      if (_forecastData == null) {
-        setForecastDataFromStorage();
-      }
-
-      if (_forecastData != null) {
-        var forecast = new AvalancheForecastRenderer(
-          _regionId,
-          _forecastData,
-          0
-        );
-        forecast.draw(dc);
-      } else {
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-
-        var loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
-
-        dc.drawText(
-          0,
-          dc.getHeight() / 2,
-          Graphics.FONT_GLANCE,
-          loadingText,
-          Graphics.TEXT_JUSTIFY_LEFT
-        );
-      }
     }
   }
 

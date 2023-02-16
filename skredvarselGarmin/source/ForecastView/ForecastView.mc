@@ -29,11 +29,10 @@ public class ForecastView extends Ui.View {
       :justification => Gfx.TEXT_JUSTIFY_CENTER,
     });
 
-    _skredvarselApi.loadForecastForRegionIfRequired(
-      _regionId,
-      method(:onReceive)
-    );
     getForecastFromCache();
+    if (_forecast == null) {
+      _skredvarselApi.loadForecastForRegion(_regionId, method(:onReceive));
+    }
   }
 
   //! Update the view

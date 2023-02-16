@@ -26,17 +26,6 @@ public class SkredvarselApi {
       : null;
   }
 
-  public function loadForecastForRegionIfRequired(
-    regionId as String,
-    callback as (Method() as Void)
-  ) {
-    var warningFromStorage = getForecastForRegion(regionId);
-
-    if (warningFromStorage == null) {
-      loadForecastForRegion(regionId, callback);
-    }
-  }
-
   public function loadForecastForRegion(
     regionId as String?,
     callback as (Method() as Void)

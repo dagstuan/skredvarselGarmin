@@ -40,9 +40,4 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
 
     WatchUi.requestUpdate();
   }
-
-  //! Handle the back key being pressed
-  public function onBack() as Void {
-    WatchUi.popView(WatchUi.SLIDE_DOWN);
-  }
 }

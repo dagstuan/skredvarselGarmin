@@ -2,12 +2,17 @@ import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
+using Toybox.System as System;
 
 public class ForecastMenuItem extends Ui.CustomMenuItem {
   private var _regionId as String;
   private var _skredvarselApi as SkredvarselApi;
 
-  private var _forecast as AvalancheForecast?;
+  private var _hasForecast as Boolean = false;
+
+  private var _avalancheForecastRenderer as AvalancheForecastRenderer;
+
+  private var _screenWidth as Number;
 
   public function initialize(
     skredvarselApi as SkredvarselApi,
@@ -17,28 +22,37 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
     _skredvarselApi = skredvarselApi;
     _regionId = regionId;
+    _avalancheForecastRenderer = new AvalancheForecastRenderer();
 
-    _skredvarselApi.loadForecastForRegionIfRequired(
-      _regionId,
-      method(:onReceive)
-    );
+    var deviceSettings = System.getDeviceSettings();
+    _screenWidth = deviceSettings.screenWidth;
+
     getForecastFromCache();
+    if (!_hasForecast) {
+      _skredvarselApi.loadForecastForRegion(_regionId, method(:onReceive));
+    }
   }
 
   //! Draw the item string at the center of the item.
   //! @param dc Device context
-  public function draw(dc) as Void {
-    if (_forecast == null) {
+  public function draw(dc as Gfx.Dc) as Void {
+    if (!_hasForecast) {
       getForecastFromCache();
     }
 
-    if (_forecast != null) {
-      var avalancheForecast = new AvalancheForecastRenderer(
-        _regionId,
-        _forecast,
-        ForecastMenu.MarginRight
+    var width = dc.getWidth();
+    var height = dc.getHeight();
+
+    if (_hasForecast) {
+      var marginLeft = width == _screenWidth ? 10 : 0;
+      var marginRight = width == _screenWidth ? 10 : 25;
+      _avalancheForecastRenderer.draw(
+        dc,
+        marginLeft,
+        0,
+        width - marginRight,
+        height
       );
-      avalancheForecast.draw(dc);
     } else {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
@@ -55,7 +69,12 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   }
 
   private function getForecastFromCache() as Void {
-    _forecast = _skredvarselApi.getForecastForRegion(_regionId);
+    var forecast = _skredvarselApi.getForecastForRegion(_regionId);
+
+    if (forecast != null) {
+      _avalancheForecastRenderer.setData(_regionId, forecast);
+      _hasForecast = true;
+    }
   }
 
   public function onReceive() as Void {

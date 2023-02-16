@@ -5,7 +5,7 @@ using Toybox.Application.Storage;
 using Toybox.Graphics as Gfx;
 
 public class ForecastMenu extends Ui.CustomMenu {
-  public static const MarginRight = 25;
+  public static const Margin = 25;
 
   private const _editItemId = "edit";
 
@@ -18,7 +18,7 @@ public class ForecastMenu extends Ui.CustomMenu {
     skredvarselApi as SkredvarselApi,
     skredvarselStorage as SkredvarselStorage
   ) {
-    CustomMenu.initialize(60, Graphics.COLOR_BLACK, {});
+    CustomMenu.initialize(60, Gfx.COLOR_BLACK, {});
     _skredvarselApi = skredvarselApi;
     _skredvarselStorage = skredvarselStorage;
   }

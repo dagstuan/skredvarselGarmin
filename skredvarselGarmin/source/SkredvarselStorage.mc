@@ -82,7 +82,8 @@ public class SkredvarselStorage {
   ) as AvalancheForecastData? {
     var cacheKey = getCacheKeyForRegion(regionId);
 
-    return Storage.getValue(cacheKey) as AvalancheForecastData?;
+    var value = Storage.getValue(cacheKey) as AvalancheForecastData?;
+    return value;
   }
 
   public function setForecastDataForRegion(

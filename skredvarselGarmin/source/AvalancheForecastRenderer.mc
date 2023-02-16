@@ -6,9 +6,8 @@ using Toybox.Time.Gregorian;
 
 (:glance)
 class AvalancheForecastRenderer {
-  private var _regionId as String;
-  private var _forecast as AvalancheForecast;
-  private var _marginRight;
+  private var _regionId as String?;
+  private var _forecast as AvalancheForecast?;
 
   private var _numWarnings;
 
@@ -26,32 +25,36 @@ class AvalancheForecastRenderer {
     .toFloat();
   private var _twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
 
-  public function initialize(
-    regionId as String,
-    forecast as AvalancheForecast,
-    marginRight as Number
-  ) {
+  public function initialize() {}
+
+  public function setData(regionId as String, forecast as AvalancheForecast) {
     _regionId = regionId;
     _forecast = forecast;
-    _marginRight = marginRight;
 
     _numWarnings = _forecast.warnings.size();
   }
 
-  public function draw(dc as Gfx.Dc) {
-    var width = dc.getWidth() - _marginRight;
-    var height = dc.getHeight();
+  public function draw(
+    dc as Gfx.Dc,
+    x0 as Number,
+    y0 as Number,
+    width as Number,
+    height as Number
+  ) {
+    if (_forecast == null) {
+      return;
+    }
 
-    drawTitle(dc);
-
-    var lengthPerFullElem = (width - _numGaps * _gap) / _daysToShow;
+    drawTitle(dc, x0, y0);
 
     var now = Time.getCurrentTime({
       :currentTimeType => Time.CURRENT_TIME_DEFAULT,
     });
     var earlyCutoffTime = now.subtract(_twoDays);
 
-    var currXOffset = 0;
+    var lengthPerFullElem = (width - _numGaps * _gap) / _daysToShow;
+
+    var currXOffset = x0;
 
     for (var i = 0; i < _numWarnings; i++) {
       var warning = _forecast.warnings[i];
@@ -94,7 +97,7 @@ class AvalancheForecastRenderer {
 
       dc.fillRectangle(
         lineStart,
-        height / 2 - _lineHeight / 2,
+        y0 + (height / 2 - _lineHeight / 2),
         lineEnd - lineStart,
         _lineHeight
       );
@@ -106,7 +109,7 @@ class AvalancheForecastRenderer {
         dc.setColor(color, Graphics.COLOR_TRANSPARENT);
         dc.drawText(
           currXOffset,
-          height - dc.getFontHeight(font),
+          y0 + (height - dc.getFontHeight(font)),
           font,
           dangerLevel.toString(),
           Graphics.TEXT_JUSTIFY_LEFT
@@ -116,37 +119,39 @@ class AvalancheForecastRenderer {
       currXOffset += lengthThisElem + _gap;
     }
 
-    drawMarker(dc);
+    drawMarker(dc, x0, y0, width, height);
   }
 
-  private function drawTitle(dc as Gfx.Dc) {
+  private function drawTitle(dc as Gfx.Dc, x0 as Number, y0 as Number) {
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
     dc.drawText(
-      0,
-      0,
+      x0,
+      y0,
       Graphics.FONT_GLANCE,
       $.Regions[_regionId],
       Graphics.TEXT_JUSTIFY_LEFT
     );
   }
 
-  private function drawMarker(dc as Gfx.Dc) {
-    var width = dc.getWidth() - _marginRight;
-    var height = dc.getHeight();
-
-    var markerX = width / 2 - _markerWidth / 2;
-
+  private function drawMarker(
+    dc as Gfx.Dc,
+    x0 as Number,
+    y0 as Number,
+    width as Number,
+    height as Number
+  ) {
+    var markerX = (x0 + width) / 2 - _markerWidth / 2;
     var minY = height / 2 - _markerHeight / 2;
 
     dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
     dc.fillRectangle(
       markerX - _strokeOffset / 2,
-      minY,
+      y0 + minY,
       _markerWidth + _strokeOffset,
       _markerHeight
     );
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_WHITE);
-    dc.fillRectangle(markerX, minY, _markerWidth, _markerHeight);
+    dc.fillRectangle(markerX, y0 + minY, _markerWidth, _markerHeight);
   }
 }

@@ -44,17 +44,45 @@ class skredvarselGarminApp extends Application.AppBase {
   // Return the initial view of your application here
   function getInitialView() as Array<Views or InputDelegates>? {
     registerTemporalEvent();
-    return (
-      [
-        new ForecastMenu(_skredvarselApi, _skredvarselStorage),
-        new ForecastMenuInputDelegate(_skredvarselApi, _skredvarselStorage),
-      ] as Array<Views or InputDelegates>
+
+    var mainView = new ForecastMenu(_skredvarselApi, _skredvarselStorage);
+    var mainViewDelegate = new ForecastMenuInputDelegate(
+      _skredvarselApi,
+      _skredvarselStorage
     );
+
+    var deviceSettings = System.getDeviceSettings();
+    if (
+      deviceSettings has :isGlanceModeEnabled &&
+      deviceSettings.isGlanceModeEnabled
+    ) {
+      var monkeyVersion = deviceSettings.monkeyVersion;
+
+      if (monkeyVersion[0] < 4) {
+        // CIQ less than 4 does not support having a menu as
+        // a main view. Need to use an intermediate view.
+        return [new IntermediateBaseView(mainView, mainViewDelegate)];
+      }
+
+      return [mainView, mainViewDelegate];
+    }
+
+    return [
+      new WidgetView(_skredvarselApi, _skredvarselStorage),
+      new WidgetViewDelegate(mainView, mainViewDelegate),
+    ];
   }
 
   (:glance)
   function getGlanceView() {
     registerTemporalEvent();
+
+    var favoriteRegionId = _skredvarselStorage.getFavoriteRegionId();
+
+    if (favoriteRegionId == null) {
+      return null;
+    }
+
     return [new GlanceView(_skredvarselApi, _skredvarselStorage)];
   }
 
