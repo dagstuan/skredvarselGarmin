@@ -76,13 +76,6 @@ class skredvarselGarminApp extends Application.AppBase {
   (:glance)
   function getGlanceView() {
     registerTemporalEvent();
-
-    var favoriteRegionId = _skredvarselStorage.getFavoriteRegionId();
-
-    if (favoriteRegionId == null) {
-      return null;
-    }
-
     return [new GlanceView(_skredvarselApi, _skredvarselStorage)];
   }
 

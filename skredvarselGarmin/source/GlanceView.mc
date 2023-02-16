@@ -42,25 +42,39 @@ class GlanceView extends Ui.GlanceView {
   }
 
   function onUpdate(dc as Gfx.Dc) {
-    if (_forecastData == null) {
-      setForecastDataFromStorage();
-    }
-
-    if (_forecastData != null) {
-      _avalancheForecastRenderer.setData(_regionId, _forecastData);
-      _avalancheForecastRenderer.draw(dc, 0, 0, _width, _height);
-    } else {
+    if (_regionId == null) {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
-      var loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
+      var appNameText = Ui.loadResource($.Rez.Strings.AppName) as String;
 
       dc.drawText(
         0,
-        dc.getHeight() / 2,
+        _height / 2,
         Graphics.FONT_GLANCE,
-        loadingText,
-        Graphics.TEXT_JUSTIFY_LEFT
+        appNameText,
+        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
+    } else {
+      if (_forecastData == null) {
+        setForecastDataFromStorage();
+      }
+
+      if (_forecastData != null) {
+        _avalancheForecastRenderer.setData(_regionId, _forecastData);
+        _avalancheForecastRenderer.draw(dc, 0, 0, _width, _height);
+      } else {
+        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+
+        var loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
+
+        dc.drawText(
+          0,
+          dc.getHeight() / 2,
+          Graphics.FONT_GLANCE,
+          loadingText,
+          Graphics.TEXT_JUSTIFY_LEFT
+        );
+      }
     }
   }
 

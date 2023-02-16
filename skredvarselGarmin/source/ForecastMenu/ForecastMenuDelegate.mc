@@ -34,7 +34,7 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
       WatchUi.pushView(
         new ForecastView(_skredvarselApi, regionId),
         new ForecastViewDelegate(_skredvarselStorage, regionId),
-        WatchUi.SLIDE_UP
+        WatchUi.SLIDE_LEFT
       );
     }
 
