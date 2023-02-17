@@ -14,18 +14,24 @@ class skredvarselGarminApp extends Application.AppBase {
     _skredvarselStorage
   );
 
-  var REFRESH_INTERVAL_MINUTES = 120;
+  var NORMAL_REFRESH_INTERVAL_MINUTES = 120;
+  var QUICK_REFRESH_INTERVAL_MINUTES = 10;
 
   function initialize() {
     AppBase.initialize();
   }
 
   private function registerTemporalEvent() {
+    var phoneConnected = $.hasPhoneConnection();
+    var refreshIntervalMinutes = phoneConnected
+      ? NORMAL_REFRESH_INTERVAL_MINUTES
+      : QUICK_REFRESH_INTERVAL_MINUTES;
+
     var lastRunTime = Background.getLastTemporalEventTime();
 
     var now = new Time.Moment(Time.now().value());
 
-    var refreshInterval = new Time.Duration(REFRESH_INTERVAL_MINUTES * 60);
+    var refreshInterval = new Time.Duration(refreshIntervalMinutes * 60);
     var registeredEvent = Background.getTemporalEventRegisteredTime();
     if (lastRunTime == null) {
       $.logMessage("Background refresh never done. Running immediately.");
@@ -35,7 +41,7 @@ class skredvarselGarminApp extends Application.AppBase {
       registeredEvent.value() != refreshInterval.value()
     ) {
       $.logMessage(
-        "Registering temporal event in " + REFRESH_INTERVAL_MINUTES + " minutes"
+        "Registering temporal event in " + refreshIntervalMinutes + " minutes"
       );
       Background.registerForTemporalEvent(refreshInterval);
     }
@@ -83,8 +89,8 @@ class skredvarselGarminApp extends Application.AppBase {
     return [new ServiceDelegate(_skredvarselApi, _skredvarselStorage)];
   }
 
-  public function onBackgroundData(data as Boolean?) as Void {
-    if (data) {
+  public function onBackgroundData(fetchedData as Boolean?) as Void {
+    if (fetchedData) {
       WatchUi.requestUpdate();
     }
 

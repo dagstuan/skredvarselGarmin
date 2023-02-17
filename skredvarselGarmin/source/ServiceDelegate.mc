@@ -1,3 +1,4 @@
+import Toybox.Lang;
 import Toybox.System;
 
 (:background)
@@ -19,6 +20,12 @@ class ServiceDelegate extends System.ServiceDelegate {
 
   public function onTemporalEvent() as Void {
     $.logMessage("Temporal event triggered.");
+
+    if (!$.hasPhoneConnection()) {
+      $.logMessage("No connection available. Skipping loading forecast.");
+      Background.exit(false);
+      return;
+    }
 
     var regions = _skredvarselStorage.getSelectedRegionIds();
 

@@ -34,6 +34,11 @@ public class SkredvarselApi {
       throw new SkredvarselGarminException("Invalid region specified.");
     }
 
+    if (!$.hasPhoneConnection()) {
+      $.logMessage("No connection available. Skipping loading forecast.");
+      return;
+    }
+
     var delegate = new GetAvalancheForecastRequestDelegate(
       _skredvarselStorage,
       _queue,

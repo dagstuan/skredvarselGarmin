@@ -34,6 +34,19 @@ const Regions = {
   "3037" => "Heiane",
 };
 
+(:background)
+function hasPhoneConnection() as Boolean {
+  var deviceSettings = System.getDeviceSettings();
+  if (
+    deviceSettings has :connectionAvailable &&
+    deviceSettings.connectionAvailable
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 (:glance)
 function colorize(dangerLevel as Number) as Graphics.ColorType {
   if (dangerLevel == 1) {

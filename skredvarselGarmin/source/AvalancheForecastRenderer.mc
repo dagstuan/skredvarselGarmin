@@ -105,7 +105,7 @@ class AvalancheForecastRenderer {
       var dangerLevelString = dangerLevel.toString();
       var font = Graphics.FONT_GLANCE;
       var textWidth = dc.getTextWidthInPixels(dangerLevelString, font);
-      if (currXOffset > 0 && textWidth < lengthThisElem) {
+      if (currXOffset > x0 && textWidth < lengthThisElem) {
         dc.setColor(color, Graphics.COLOR_TRANSPARENT);
         dc.drawText(
           currXOffset,
