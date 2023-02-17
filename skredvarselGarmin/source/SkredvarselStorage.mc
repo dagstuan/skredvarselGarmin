@@ -6,7 +6,7 @@ const SelectedRegionIdsStorageKey = "selectedRegionIds";
 
 (:background)
 public class SkredvarselStorage {
-  private static function getCacheKeyForRegion(regionId as String) {
+  public static function getCacheKeyForRegion(regionId as String) {
     return "WebRequestCache_warning_for_region_" + regionId;
   }
 
@@ -84,15 +84,6 @@ public class SkredvarselStorage {
 
     var value = Storage.getValue(cacheKey) as AvalancheForecastData?;
     return value;
-  }
-
-  public function setForecastDataForRegion(
-    regionId as String,
-    data as AvalancheForecastData
-  ) {
-    var cacheKey = getCacheKeyForRegion(regionId);
-
-    Storage.setValue(cacheKey, data);
   }
 
   private function removeForecastDataForRegion(regionId as String) {

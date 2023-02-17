@@ -39,12 +39,22 @@ public class SkredvarselApi {
       return;
     }
 
-    var delegate = new GetAvalancheForecastRequestDelegate(
-      _skredvarselStorage,
-      _queue,
-      regionId,
-      callback
-    );
+    var now = Time.now();
+    var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
+    var start = now.subtract(twoDays);
+    var end = now.add(twoDays);
+
+    var path =
+      "/simpleWarningsByRegion/" +
+      regionId +
+      "/1/" +
+      getFormattedDate(start) +
+      "/" +
+      getFormattedDate(end);
+
+    var storageKey = _skredvarselStorage.getCacheKeyForRegion(regionId);
+
+    var delegate = new WebRequestDelegate(_queue, path, storageKey, callback);
     delegate.makeRequest();
   }
 }

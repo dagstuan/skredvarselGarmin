@@ -19,10 +19,10 @@ class ServiceDelegate extends System.ServiceDelegate {
   }
 
   public function onTemporalEvent() as Void {
-    $.logMessage("Temporal event triggered.");
+    $.logMessage("Temporal event triggered. Reloading region data.");
 
     if (!$.hasPhoneConnection()) {
-      $.logMessage("No connection available. Skipping loading forecast.");
+      $.logMessage("No connection available. Skipping reloading regions.");
       Background.exit(false);
       return;
     }
@@ -40,10 +40,10 @@ class ServiceDelegate extends System.ServiceDelegate {
   }
 
   public function onReloadedRegion() as Void {
-    $.logMessage("reloaded region");
     _regionsToReload -= 1;
 
     if (_regionsToReload == 0) {
+      $.logMessage("Done reloaded regions.");
       Background.exit(true);
     }
   }
