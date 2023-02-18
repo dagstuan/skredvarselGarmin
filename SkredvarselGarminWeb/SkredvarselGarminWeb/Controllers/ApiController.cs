@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using SkredvarselGarminWeb.Mappers;
 using SkredvarselGarminWeb.Models;
 using SkredvarselGarminWeb.VarsomApi;
 
@@ -26,5 +27,13 @@ public class ApiController
             ValidFrom = w.ValidFrom,
             ValidTo = w.ValidTo
         });
+    }
+
+    [HttpGet("detailedWarningByRegion/{regionId}/{langKey}/{date}")]
+    public async Task<DetailedAvalancheWarning?> GetDetailedAvalancheWarningByRegion(string regionId, string langKey, DateOnly date)
+    {
+        var warning = await _varsomApi.GetDetailedWarningByRegion(regionId, langKey, date);
+
+        return warning?.ToDetailedAvalancheWarning();
     }
 }

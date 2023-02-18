@@ -4,9 +4,9 @@ using Toybox.System;
 using Toybox.Time;
 
 (:glance)
-public class AvalancheForecast {
+public class SimpleAvalancheForecast {
   public var regionId as String;
-  public var warnings as Array<AvalancheWarning>;
+  public var warnings as Array<SimpleAvalancheWarning>;
 
   public function initialize(
     regionId as String,
@@ -15,10 +15,12 @@ public class AvalancheForecast {
     me.regionId = regionId;
 
     var numWarnings = data.size();
-    me.warnings = new Array<AvalancheWarning>[numWarnings];
+    me.warnings = new Array<SimpleAvalancheWarning>[numWarnings];
 
     for (var i = 0; i < numWarnings; i++) {
-      me.warnings[i] = new AvalancheWarning(data[i] as AvalancheWarningData);
+      me.warnings[i] = new SimpleAvalancheWarning(
+        data[i] as AvalancheWarningData
+      );
     }
   }
 

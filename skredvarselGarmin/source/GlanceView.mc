@@ -5,14 +5,16 @@ using Toybox.Graphics as Gfx;
 using Toybox.System as Sys;
 using Toybox.Time.Gregorian;
 
+using AvalancheUi;
+
 (:glance)
 class GlanceView extends Ui.GlanceView {
   private var _skredvarselApi as SkredvarselApi;
   private var _regionId as String?;
 
-  private var _forecastData as AvalancheForecast?;
+  private var _forecastData as SimpleAvalancheForecast?;
 
-  private var _avalancheForecastRenderer as AvalancheForecastRenderer;
+  private var _avalancheForecastRenderer as AvalancheUi.ForecastTimeline;
 
   private var _width as Number?;
   private var _height as Number?;
@@ -25,14 +27,17 @@ class GlanceView extends Ui.GlanceView {
     _skredvarselApi = skredvarselApi;
 
     _regionId = skredvarselStorage.getFavoriteRegionId();
-    _avalancheForecastRenderer = new AvalancheForecastRenderer();
+    _avalancheForecastRenderer = new AvalancheUi.ForecastTimeline();
 
     setForecastDataFromStorage();
   }
 
   function onShow() {
     if (_regionId != null && _forecastData == null) {
-      _skredvarselApi.loadForecastForRegion(_regionId, method(:onReceive));
+      _skredvarselApi.loadSimpleForecastForRegion(
+        _regionId,
+        method(:onReceive)
+      );
     }
   }
 
@@ -82,7 +87,7 @@ class GlanceView extends Ui.GlanceView {
     _forecastData = _skredvarselApi.getForecastForRegion(_regionId);
   }
 
-  function onReceive() as Void {
+  function onReceive(data) as Void {
     setForecastDataFromStorage();
     Ui.requestUpdate();
   }

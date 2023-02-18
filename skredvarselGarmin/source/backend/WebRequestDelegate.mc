@@ -5,21 +5,21 @@ using Toybox.Time.Gregorian;
 using Toybox.System as Sys;
 using Toybox.Application.Storage;
 
-const BaseApiUrl = "https://skredvarsel-garmin-web.fly.dev/api";
+const BaseApiUrl = "https://skredvarsel.app/api";
 
 (:background)
 class WebRequestDelegate {
   private var _queue;
   private var _path as String;
   private var _storageKey as String?;
-  private var _callback as (Method() as Void);
+  private var _callback as (Method(data) as Void);
 
   // Set up the callback to the view
   function initialize(
     queue as CommandExecutor,
     path as String,
     storageKey as String?,
-    callback as (Method() as Void)
+    callback as (Method(data) as Void)
   ) {
     _queue = queue;
     _path = path;
@@ -55,6 +55,6 @@ class WebRequestDelegate {
       $.logMessage("Failed request. Response code: " + responseCode);
     }
 
-    _callback.invoke();
+    _callback.invoke(data);
   }
 }

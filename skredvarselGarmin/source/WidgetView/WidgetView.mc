@@ -3,14 +3,16 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
 
+using AvalancheUi;
+
 public class WidgetView extends Ui.View {
   private var _regionId as String?;
-  private var _forecastData as AvalancheForecast?;
+  private var _forecastData as SimpleAvalancheForecast?;
 
   private var _skredvarselApi as SkredvarselApi;
   private var _skredvarselStorage as SkredvarselStorage;
 
-  private var _avalancheForecastRenderer as AvalancheForecastRenderer;
+  private var _avalancheForecastRenderer as AvalancheUi.ForecastTimeline;
 
   private var _width as Number?;
   private var _height as Number?;
@@ -24,7 +26,7 @@ public class WidgetView extends Ui.View {
     _skredvarselApi = skredvarselApi;
     _skredvarselStorage = skredvarselStorage;
 
-    _avalancheForecastRenderer = new AvalancheForecastRenderer();
+    _avalancheForecastRenderer = new AvalancheUi.ForecastTimeline();
 
     _regionId = skredvarselStorage.getFavoriteRegionId();
     setForecastDataFromStorage();
@@ -32,7 +34,10 @@ public class WidgetView extends Ui.View {
 
   function onShow() {
     if (_regionId != null && _forecastData == null) {
-      _skredvarselApi.loadForecastForRegion(_regionId, method(:onReceive));
+      _skredvarselApi.loadSimpleForecastForRegion(
+        _regionId,
+        method(:onReceive)
+      );
     }
   }
 
@@ -101,7 +106,7 @@ public class WidgetView extends Ui.View {
     _forecastData = _skredvarselApi.getForecastForRegion(_regionId);
   }
 
-  function onReceive() as Void {
+  function onReceive(data) as Void {
     setForecastDataFromStorage();
     Ui.requestUpdate();
   }

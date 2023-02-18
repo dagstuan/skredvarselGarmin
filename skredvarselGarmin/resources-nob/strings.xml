@@ -1,6 +1,6 @@
 <strings>
   <string id="AppName" scope="glance">Skredvarsel</string>
-	<string id="Loading" scope="glance">Laster</string>
+	<string id="Loading" scope="glance">Laster...</string>
 	<string id="Edit">Rediger</string>
 	<string id="Remove">Fjern</string>
 	<string id="HitBackToExit">Trykk tilbake.</string>
@@ -9,4 +9,5 @@
   <string id="AddRegions">Legg til regioner</string>
 	<string id="PickRegions">Velg regioner</string>
 	<string id="EditForecast">Rediger varsel</string>
+	<string id="NoProblems">Ingen skredproblemer.</string>
 </strings>

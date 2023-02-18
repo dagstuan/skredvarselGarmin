@@ -3,15 +3,18 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 
 class ForecastViewDelegate extends Ui.BehaviorDelegate {
+  private var _view as ForecastView;
   private var _regionId as String;
   private var _skredvarselStorage as SkredvarselStorage;
 
   public function initialize(
+    view as ForecastView,
     skredvarselStorage as SkredvarselStorage,
     regionId as String
   ) {
     BehaviorDelegate.initialize();
 
+    _view = view;
     _skredvarselStorage = skredvarselStorage;
     _regionId = regionId;
   }
@@ -42,7 +45,8 @@ class ForecastViewDelegate extends Ui.BehaviorDelegate {
   }
 
   public function onSelect() as Boolean {
-    $.logMessage("Select!");
+    // $.logMessage("Select!");
+    _view.updateIndex();
     return true;
   }
 }

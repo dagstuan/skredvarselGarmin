@@ -1,17 +1,17 @@
-# fly.toml file generated for skredvarsel-garmin-web on 2023-02-17T20:38:08+01:00
+# fly.toml file generated for skredvarsel-garmin-web on 2023-02-18T13:06:36+01:00
 
 app = "skredvarsel-garmin-web"
 kill_signal = "SIGINT"
 kill_timeout = 5
 processes = []
 
+[build]
+  dockerfile = "Dockerfile"
+
 [env]
 
 [experimental]
   auto_rollback = true
-
-[build]
-  dockerfile = "Dockerfile"
 
 [[services]]
   http_checks = []

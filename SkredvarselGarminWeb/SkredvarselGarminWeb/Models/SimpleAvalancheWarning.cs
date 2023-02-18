@@ -2,7 +2,7 @@ namespace SkredvarselGarminWeb.Models;
 
 public class SimpleAvalancheWarning
 {
-    public string DangerLevel { get; init; } = "unknown";
+    public int DangerLevel { get; init; } = 0;
     public DateTime ValidFrom { get; init; }
     public DateTime ValidTo { get; init; }
 }

@@ -1,6 +1,6 @@
 <strings>
 	<string id="AppName" scope="glance">Skredvarsel</string>
-	<string id="Loading" scope="glance">Loading</string>
+	<string id="Loading" scope="glance">Loading...</string>
 	<string id="Edit">Edit</string>
 	<string id="Remove">Remove</string>
 	<string id="HitBackToExit">Hit back to exit.</string>
@@ -9,4 +9,5 @@
 	<string id="AddRegions">Add regions</string>
 	<string id="PickRegions">Pick regions</string>
 	<string id="EditForecast">Edit forecast</string>
+	<string id="NoProblems">No avalanche problems.</string>
 </strings>

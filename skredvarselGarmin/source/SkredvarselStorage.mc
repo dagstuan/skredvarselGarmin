@@ -10,6 +10,10 @@ public class SkredvarselStorage {
     return "WebRequestCache_warning_for_region_" + regionId;
   }
 
+  // public static function getCacheKeyForDetailedRegion(regionId as String) {
+  //   return "WebRequestCache_detailed_warning_for_region_" + regionId;
+  // }
+
   public function getSelectedRegionIds() as Array<String> {
     var valueFromStorage = Storage.getValue($.SelectedRegionIdsStorageKey);
 

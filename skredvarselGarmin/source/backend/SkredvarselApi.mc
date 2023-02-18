@@ -18,17 +18,17 @@ public class SkredvarselApi {
 
   public function getForecastForRegion(
     regionId as String
-  ) as AvalancheForecast? {
+  ) as SimpleAvalancheForecast? {
     var fromStorage = _skredvarselStorage.getForecastDataForRegion(regionId);
 
     return fromStorage != null
-      ? new AvalancheForecast(regionId, fromStorage)
+      ? new SimpleAvalancheForecast(regionId, fromStorage)
       : null;
   }
 
-  public function loadForecastForRegion(
+  public function loadSimpleForecastForRegion(
     regionId as String?,
-    callback as (Method() as Void)
+    callback as (Method(data) as Void)
   ) {
     if (regionId == null || !Regions.hasKey(regionId)) {
       throw new SkredvarselGarminException("Invalid region specified.");
@@ -55,6 +55,30 @@ public class SkredvarselApi {
     var storageKey = _skredvarselStorage.getCacheKeyForRegion(regionId);
 
     var delegate = new WebRequestDelegate(_queue, path, storageKey, callback);
+    delegate.makeRequest();
+  }
+
+  public function loadDetailedWarningForRegion(
+    regionId as String?,
+    callback as (Method(data) as Void)
+  ) {
+    if (regionId == null || !Regions.hasKey(regionId)) {
+      throw new SkredvarselGarminException("Invalid region specified.");
+    }
+
+    if (!$.hasPhoneConnection()) {
+      $.logMessage("No connection available. Skipping loading forecast.");
+      return;
+    }
+
+    var now = Time.now();
+
+    var path =
+      "/detailedWarningByRegion/" + regionId + "/1/" + getFormattedDate(now);
+
+    // var storageKey = _skredvarselStorage.getCacheKeyForDetailedRegion(regionId);
+
+    var delegate = new WebRequestDelegate(_queue, path, null, callback);
     delegate.makeRequest();
   }
 }

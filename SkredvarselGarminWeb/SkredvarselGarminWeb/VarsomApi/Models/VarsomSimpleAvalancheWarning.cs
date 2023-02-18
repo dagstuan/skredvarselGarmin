@@ -1,13 +1,13 @@
 namespace SkredvarselGarminWeb.VarsomApi.Models;
 
-public class VarsomAvalancheWarning
+public class VarsomSimpleAvalancheWarning
 {
     public int RegId { get; init; }
     public int RegionId { get; init; }
     public string RegionName { get; init; } = "Unknown";
     public int RegionTypeId { get; init; }
     public string RegionTypeName { get; init; } = "Unknown";
-    public string DangerLevel { get; init; } = "Unknown";
+    public int DangerLevel { get; init; } = 0;
     public DateTime ValidFrom { get; init; }
     public DateTime ValidTo { get; init; }
     public DateTime NextWarningTime { get; init; }

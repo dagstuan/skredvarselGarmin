@@ -32,14 +32,14 @@ class ServiceDelegate extends System.ServiceDelegate {
     _regionsToReload = regions.size();
 
     for (var i = 0; i < regions.size(); i++) {
-      _skredvarselApi.loadForecastForRegion(
+      _skredvarselApi.loadSimpleForecastForRegion(
         regions[i],
         method(:onReloadedRegion)
       );
     }
   }
 
-  public function onReloadedRegion() as Void {
+  public function onReloadedRegion(data) as Void {
     _regionsToReload -= 1;
 
     if (_regionsToReload == 0) {

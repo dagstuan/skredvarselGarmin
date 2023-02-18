@@ -4,13 +4,15 @@ using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
 using Toybox.System as System;
 
+using AvalancheUi;
+
 public class ForecastMenuItem extends Ui.CustomMenuItem {
   private var _regionId as String;
   private var _skredvarselApi as SkredvarselApi;
 
   private var _hasForecast as Boolean = false;
 
-  private var _avalancheForecastRenderer as AvalancheForecastRenderer;
+  private var _avalancheForecastRenderer as AvalancheUi.ForecastTimeline;
 
   private var _screenWidth as Number;
 
@@ -22,14 +24,17 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
     _skredvarselApi = skredvarselApi;
     _regionId = regionId;
-    _avalancheForecastRenderer = new AvalancheForecastRenderer();
+    _avalancheForecastRenderer = new AvalancheUi.ForecastTimeline();
 
     var deviceSettings = System.getDeviceSettings();
     _screenWidth = deviceSettings.screenWidth;
 
     getForecastFromCache();
     if (!_hasForecast) {
-      _skredvarselApi.loadForecastForRegion(_regionId, method(:onReceive));
+      _skredvarselApi.loadSimpleForecastForRegion(
+        _regionId,
+        method(:onReceive)
+      );
     }
   }
 
@@ -77,7 +82,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     }
   }
 
-  public function onReceive() as Void {
+  public function onReceive(data) as Void {
     getForecastFromCache();
     Ui.requestUpdate();
   }
