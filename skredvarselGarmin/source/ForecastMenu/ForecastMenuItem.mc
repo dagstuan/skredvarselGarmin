@@ -74,10 +74,13 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   }
 
   private function getForecastFromCache() as Void {
-    var forecast = _skredvarselApi.getSimpleForecastForRegion(_regionId);
+    var forecastData = _skredvarselApi.getSimpleForecastForRegion(_regionId);
 
-    if (forecast != null) {
-      _forecastTimeline.setData(_regionId, forecast);
+    if (forecastData != null) {
+      _forecastTimeline.setData(
+        _regionId,
+        new SimpleAvalancheForecast(_regionId, forecastData[0])
+      );
       _hasForecast = true;
     }
   }

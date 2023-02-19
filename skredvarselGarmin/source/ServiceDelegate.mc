@@ -22,7 +22,7 @@ class ServiceDelegate extends System.ServiceDelegate {
   public function onTemporalEvent() as Void {
     $.logMessage("Temporal event triggered. Reloading region data.");
 
-    if (!$.canMakeWebRequest()) {
+    if ($.canMakeWebRequest() == false) {
       $.logMessage("No connection available. Skipping reload.");
       Background.exit(false);
       return;

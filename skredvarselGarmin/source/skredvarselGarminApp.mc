@@ -1,8 +1,8 @@
 import Toybox.Application;
 import Toybox.Lang;
-import Toybox.WatchUi;
 import Toybox.System;
 
+using Toybox.WatchUi as Ui;
 using Toybox.Background;
 using Toybox.Application.Storage;
 
@@ -14,24 +14,18 @@ class skredvarselGarminApp extends Application.AppBase {
     _skredvarselStorage
   );
 
-  var NORMAL_REFRESH_INTERVAL_MINUTES = 120;
-  var QUICK_REFRESH_INTERVAL_MINUTES = 10;
+  var REFRESH_INTERVAL_MINUTES = 120;
 
   function initialize() {
     AppBase.initialize();
   }
 
   private function registerTemporalEvent() {
-    var canMakeWebRequest = $.canMakeWebRequest();
-    var refreshIntervalMinutes = canMakeWebRequest
-      ? NORMAL_REFRESH_INTERVAL_MINUTES
-      : QUICK_REFRESH_INTERVAL_MINUTES;
-
     var lastRunTime = Background.getLastTemporalEventTime();
 
     var now = new Time.Moment(Time.now().value());
 
-    var refreshInterval = new Time.Duration(refreshIntervalMinutes * 60);
+    var refreshInterval = new Time.Duration(REFRESH_INTERVAL_MINUTES * 60);
     var registeredEvent = Background.getTemporalEventRegisteredTime();
     if (lastRunTime == null) {
       $.logMessage("Background refresh never done. Running immediately.");
@@ -41,14 +35,14 @@ class skredvarselGarminApp extends Application.AppBase {
       registeredEvent.value() != refreshInterval.value()
     ) {
       $.logMessage(
-        "Registering temporal event in " + refreshIntervalMinutes + " minutes"
+        "Registering temporal event in " + REFRESH_INTERVAL_MINUTES + " minutes"
       );
       Background.registerForTemporalEvent(refreshInterval);
     }
   }
 
   // Return the initial view of your application here
-  function getInitialView() as Array<Views or InputDelegates>? {
+  function getInitialView() as Array<Ui.Views or Ui.InputDelegates>? {
     registerTemporalEvent();
 
     var mainView = new ForecastMenu(_skredvarselApi, _skredvarselStorage);
@@ -91,7 +85,7 @@ class skredvarselGarminApp extends Application.AppBase {
 
   public function onBackgroundData(fetchedData as Boolean?) as Void {
     if (fetchedData) {
-      WatchUi.requestUpdate();
+      Ui.requestUpdate();
     }
 
     registerTemporalEvent();

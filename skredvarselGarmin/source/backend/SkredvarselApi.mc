@@ -16,22 +16,12 @@ public class SkredvarselApi {
     _skredvarselStorage = skredvarselStorage;
   }
 
-  public function getSimpleForecastForRegion(
-    regionId as String
-  ) as SimpleAvalancheForecast? {
-    var fromStorage =
-      _skredvarselStorage.getSimpleForecastDataForRegion(regionId);
-
-    return fromStorage != null
-      ? new SimpleAvalancheForecast(regionId, fromStorage[0])
-      : null;
+  public function getSimpleForecastForRegion(regionId as String) as Array? {
+    return _skredvarselStorage.getSimpleForecastDataForRegion(regionId);
   }
 
   public function getDetailedWarningForRegion(regionId as String) as Array? {
-    var fromStorage =
-      _skredvarselStorage.getDetailedWarningDataForRegion(regionId);
-
-    return fromStorage != null ? fromStorage : null;
+    return _skredvarselStorage.getDetailedWarningDataForRegion(regionId);
   }
 
   public function loadSimpleForecastForRegion(
@@ -42,7 +32,7 @@ public class SkredvarselApi {
       throw new SkredvarselGarminException("Invalid region specified.");
     }
 
-    if (!$.canMakeWebRequest()) {
+    if ($.canMakeWebRequest() == false) {
       $.logMessage("No connection available. Skipping loading forecast.");
       return;
     }
@@ -75,7 +65,7 @@ public class SkredvarselApi {
       throw new SkredvarselGarminException("Invalid region specified.");
     }
 
-    if (!$.canMakeWebRequest()) {
+    if ($.canMakeWebRequest() == false) {
       $.logMessage("No connection available. Skipping loading forecast.");
       return;
     }

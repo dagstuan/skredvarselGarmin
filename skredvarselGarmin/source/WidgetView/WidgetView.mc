@@ -104,7 +104,11 @@ public class WidgetView extends Ui.View {
   }
 
   private function setForecastDataFromStorage() as Void {
-    _forecastData = _skredvarselApi.getSimpleForecastForRegion(_regionId);
+    var data = _skredvarselApi.getSimpleForecastForRegion(_regionId);
+
+    if (data != null) {
+      _forecastData = new SimpleAvalancheForecast(_regionId, data[0]);
+    }
   }
 
   function onReceive(data) as Void {
@@ -142,11 +146,16 @@ public class WidgetView extends Ui.View {
     var favoriteRegionId = _skredvarselStorage.getFavoriteRegionId();
 
     if (favoriteRegionId != null) {
-      var forecastForFavoriteRegion =
+      var dataForFavoriteRegion =
         _skredvarselApi.getSimpleForecastForRegion(favoriteRegionId);
 
-      if (forecastForFavoriteRegion != null) {
-        var dangerLevelToday = forecastForFavoriteRegion.getDangerLevelToday();
+      if (dataForFavoriteRegion != null) {
+        var forecast = new SimpleAvalancheForecast(
+          favoriteRegionId,
+          dataForFavoriteRegion[0]
+        );
+
+        var dangerLevelToday = forecast.getDangerLevelToday();
 
         return $.getIconResourceForDangerLevel(dangerLevelToday);
       }

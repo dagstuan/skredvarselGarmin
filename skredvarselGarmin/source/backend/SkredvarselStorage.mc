@@ -90,13 +90,7 @@ public class SkredvarselStorage {
   public function getSimpleForecastDataForRegion(regionId as String) as Array? {
     var cacheKey = getSimpleForecastCacheKeyForRegion(regionId);
 
-    var value = Storage.getValue(cacheKey);
-
-    if (value == null || !(value instanceof Array)) {
-      return null;
-    }
-
-    return value;
+    return getFromStorage(cacheKey);
   }
 
   public function getDetailedWarningDataForRegion(
@@ -104,13 +98,22 @@ public class SkredvarselStorage {
   ) as Array? {
     var cacheKey = getDetailedWarningCacheKeyForRegion(regionId);
 
-    var value = Storage.getValue(cacheKey);
+    return getFromStorage(cacheKey);
+  }
 
-    if (value == null || !(value instanceof Array)) {
-      return null;
+  private function getFromStorage(storageKey as String) {
+    var value = Storage.getValue(storageKey);
+
+    if (
+      value != null &&
+      value instanceof Array &&
+      value.size() == 2 &&
+      value[1] instanceof Number
+    ) {
+      return value;
     }
 
-    return value;
+    return null;
   }
 
   private function removeForecastDataForRegion(regionId as String) {

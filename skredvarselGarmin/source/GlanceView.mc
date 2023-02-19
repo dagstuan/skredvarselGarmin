@@ -91,7 +91,11 @@ class GlanceView extends Ui.GlanceView {
   }
 
   private function setForecastDataFromStorage() as Void {
-    _forecastData = _skredvarselApi.getSimpleForecastForRegion(_regionId);
+    var data = _skredvarselApi.getSimpleForecastForRegion(_regionId);
+
+    if (data != null) {
+      _forecastData = new SimpleAvalancheForecast(_regionId, data[0]);
+    }
   }
 
   function onReceive(data) as Void {

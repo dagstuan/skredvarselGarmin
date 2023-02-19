@@ -87,11 +87,16 @@ public class ForecastMenu extends Ui.CustomMenu {
     var favoriteRegionId = _skredvarselStorage.getFavoriteRegionId();
 
     if (favoriteRegionId != null) {
-      var forecastForFavoriteRegion =
+      var forecastData =
         _skredvarselApi.getSimpleForecastForRegion(favoriteRegionId);
 
-      if (forecastForFavoriteRegion != null) {
-        var dangerLevelToday = forecastForFavoriteRegion.getDangerLevelToday();
+      if (forecastData != null) {
+        var forecast = new SimpleAvalancheForecast(
+          favoriteRegionId,
+          forecastData[0]
+        );
+
+        var dangerLevelToday = forecast.getDangerLevelToday();
 
         return $.getIconResourceForDangerLevel(dangerLevelToday);
       }
