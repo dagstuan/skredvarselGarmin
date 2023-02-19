@@ -9,5 +9,7 @@
 	<string id="AddRegions">Add regions</string>
 	<string id="PickRegions">Pick regions</string>
 	<string id="EditForecast">Edit forecast</string>
+	<string id="Level">Faregrad</string>
+	<string id="Today">I dag</string>
 	<string id="NoProblems">No avalanche problems.</string>
 </strings>

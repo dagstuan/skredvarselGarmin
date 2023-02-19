@@ -8,6 +8,7 @@ class ProgressDelegate extends Ui.BehaviorDelegate {
   }
 
   public function onBack() as Boolean {
+    Ui.popView(Ui.SLIDE_RIGHT);
     return true;
   }
 }

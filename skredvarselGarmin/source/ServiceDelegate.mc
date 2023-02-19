@@ -6,7 +6,7 @@ class ServiceDelegate extends System.ServiceDelegate {
   private var _skredvarselApi as SkredvarselApi;
   private var _skredvarselStorage as SkredvarselStorage;
 
-  private var _regionsToReload = 0;
+  private var _regionsToReload as Array<String> = [];
 
   public function initialize(
     skredvarselApi as SkredvarselApi,
@@ -21,30 +21,50 @@ class ServiceDelegate extends System.ServiceDelegate {
   public function onTemporalEvent() as Void {
     $.logMessage("Temporal event triggered. Reloading region data.");
 
-    if (!$.hasPhoneConnection()) {
-      $.logMessage("No connection available. Skipping reloading regions.");
-      Background.exit(false);
+    var monkeyVersion = $.getMonkeyVersion();
+    if (
+      monkeyVersion[0] < 4 &&
+      !(monkeyVersion[0] >= 3 && monkeyVersion[1] >= 2)
+    ) {
+      $.logMessage(
+        "Api version " +
+          monkeyVersion[0] +
+          "." +
+          monkeyVersion[1] +
+          "." +
+          monkeyVersion[2] +
+          ". No API support for modifying store in background. Not refreshing data."
+      );
       return;
     }
 
-    var regions = _skredvarselStorage.getSelectedRegionIds();
+    _regionsToReload = _skredvarselStorage.getSelectedRegionIds();
 
-    _regionsToReload = regions.size();
-
-    for (var i = 0; i < regions.size(); i++) {
-      _skredvarselApi.loadSimpleForecastForRegion(
-        regions[i],
-        method(:onReloadedRegion)
-      );
-    }
+    reloadNextRegion();
   }
 
   public function onReloadedRegion(data) as Void {
-    _regionsToReload -= 1;
+    var reloadedNextRegion = reloadNextRegion();
 
-    if (_regionsToReload == 0) {
+    if (reloadedNextRegion == false) {
       $.logMessage("Done reloaded regions.");
       Background.exit(true);
     }
+  }
+
+  private function reloadNextRegion() as Boolean {
+    if (_regionsToReload.size() > 0) {
+      var nextRegion = _regionsToReload[0];
+      _regionsToReload = _regionsToReload.slice(1, null);
+
+      _skredvarselApi.loadSimpleForecastForRegion(
+        nextRegion,
+        method(:onReloadedRegion)
+      );
+
+      return true;
+    }
+
+    return false;
   }
 }

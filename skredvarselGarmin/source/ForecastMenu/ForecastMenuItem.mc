@@ -12,7 +12,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
   private var _hasForecast as Boolean = false;
 
-  private var _avalancheForecastRenderer as AvalancheUi.ForecastTimeline;
+  private var _avalancheForecastTimeline as AvalancheUi.ForecastTimeline;
 
   private var _screenWidth as Number;
 
@@ -24,10 +24,9 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
     _skredvarselApi = skredvarselApi;
     _regionId = regionId;
-    _avalancheForecastRenderer = new AvalancheUi.ForecastTimeline();
+    _avalancheForecastTimeline = new AvalancheUi.ForecastTimeline();
 
-    var deviceSettings = System.getDeviceSettings();
-    _screenWidth = deviceSettings.screenWidth;
+    _screenWidth = $.getDeviceScreenWidth();
 
     getForecastFromCache();
     if (!_hasForecast) {
@@ -51,7 +50,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     if (_hasForecast) {
       var marginLeft = width == _screenWidth ? 10 : 0;
       var marginRight = width == _screenWidth ? 10 : 25;
-      _avalancheForecastRenderer.draw(
+      _avalancheForecastTimeline.draw(
         dc,
         marginLeft,
         0,
@@ -77,7 +76,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     var forecast = _skredvarselApi.getForecastForRegion(_regionId);
 
     if (forecast != null) {
-      _avalancheForecastRenderer.setData(_regionId, forecast);
+      _avalancheForecastTimeline.setData(_regionId, forecast);
       _hasForecast = true;
     }
   }

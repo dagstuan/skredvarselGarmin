@@ -10,4 +10,6 @@
 	<string id="PickRegions">Velg regioner</string>
 	<string id="EditForecast">Rediger varsel</string>
 	<string id="NoProblems">Ingen skredproblemer.</string>
+	<string id="Today">I dag</string>
+	<string id="Level">Faregrad</string>
 </strings>

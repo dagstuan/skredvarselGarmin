@@ -62,15 +62,16 @@ module AvalancheUi {
     private function drawDownArrow(dc as Gfx.Dc) {
       var shaftWidth = 0.3334 * _width;
       var shaftHeight = 0.5 * _height;
+      var spaceLeftRight = (_width - shaftWidth) / 2;
 
       dc.fillPolygon([
         [_locX, _locY + shaftHeight],
-        [_locX + _width / 2, _locY],
+        [_locX + spaceLeftRight, _locY + shaftHeight],
+        [_locX + spaceLeftRight, _locY],
+        [_locX + spaceLeftRight + shaftWidth, _locY],
+        [_locX + spaceLeftRight + shaftWidth, _locY + shaftHeight],
         [_locX + _width, _locY + shaftHeight],
-        [_locX + _width - shaftWidth, _locY + shaftHeight],
-        [_locX + _width - shaftWidth, _locY + _height],
-        [_locX + shaftWidth, _locY + _height],
-        [_locX + shaftWidth, _locY + _height - shaftHeight],
+        [_locX + _width / 2, _locY + _height],
       ]);
     }
   }

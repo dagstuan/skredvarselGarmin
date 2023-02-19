@@ -1,37 +1,39 @@
 import Toybox.Lang;
 
-using Toybox.Graphics;
+using Toybox.Graphics as Gfx;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.System;
 using Toybox.Math;
 
+const DrawOutlines = false;
+
 (:background)
 const Regions = {
-  "3003" => "Nordenskiöld Land",
   "3006" => "Finnmarkskysten",
-  "3007" => "Vest-Finnmark",
-  "3009" => "Nord-Troms",
-  "3010" => "Lyngen",
-  "3011" => "Tromsø",
-  "3012" => "Sør-Troms",
-  "3013" => "Indre Troms",
-  "3014" => "Lofoten og Vesterålen",
-  "3015" => "Ofoten",
-  "3016" => "Salten",
-  "3017" => "Svartisen",
-  "3018" => "Helgeland",
-  "3022" => "Trollheimen",
-  "3023" => "Romsdal",
-  "3024" => "Sunnmøre",
-  "3027" => "Indre Fjordane",
-  "3028" => "Jotunheimen",
-  "3029" => "Indre Sogn",
-  "3031" => "Voss",
   "3032" => "Hallingdal",
   "3034" => "Hardanger",
-  "3035" => "Vest-Telemark",
   "3037" => "Heiane",
+  "3018" => "Helgeland",
+  "3027" => "Indre Fjordane",
+  "3029" => "Indre Sogn",
+  "3013" => "Indre Troms",
+  "3028" => "Jotunheimen",
+  "3014" => "Lofoten og Vesterålen",
+  "3010" => "Lyngen",
+  "3009" => "Nord-Troms",
+  "3003" => "Nordenskiöld Land",
+  "3015" => "Ofoten",
+  "3023" => "Romsdal",
+  "3016" => "Salten",
+  "3024" => "Sunnmøre",
+  "3017" => "Svartisen",
+  "3012" => "Sør-Troms",
+  "3022" => "Trollheimen",
+  "3011" => "Tromsø",
+  "3007" => "Vest-Finnmark",
+  "3035" => "Vest-Telemark",
+  "3031" => "Voss",
 };
 
 (:background)
@@ -47,8 +49,19 @@ function hasPhoneConnection() as Boolean {
   return false;
 }
 
+(:background)
+function getMonkeyVersion() as Array<Number> {
+  var deviceSettings = System.getDeviceSettings();
+  return deviceSettings.monkeyVersion;
+}
+
+function getDeviceScreenWidth() as Number {
+  var deviceSettings = System.getDeviceSettings();
+  return deviceSettings.screenWidth;
+}
+
 (:glance)
-function colorize(dangerLevel as Number) as Graphics.ColorType {
+function colorize(dangerLevel as Number) as Gfx.ColorType {
   if (dangerLevel == 1) {
     return 0x00ff00;
   } else if (dangerLevel == 2) {
@@ -164,4 +177,33 @@ function getIconResourceForDangerLevel(dangerLevel as Number) {
     default:
       return $.Rez.Drawables.NoLevel;
   }
+}
+
+function getScreenWidthAtPoint(deviceScreenWidth as Numeric, y as Numeric) {
+  var radius = deviceScreenWidth / 2;
+  return (
+    2 *
+    radius *
+    Math.sin(
+      Math.toRadians(2 * Math.toDegrees(Math.acos(1 - y.toFloat() / radius))) /
+        2
+    )
+  ).toNumber();
+}
+
+function drawOutline(
+  dc as Gfx.Dc,
+  x0 as Numeric,
+  y0 as Numeric,
+  width as Numeric,
+  height as Numeric
+) {
+  if (!$.DrawOutlines) {
+    return;
+  }
+
+  dc.setPenWidth(1);
+  dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+
+  dc.drawRectangle(x0, y0, width, height);
 }
