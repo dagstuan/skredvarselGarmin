@@ -16,14 +16,22 @@ public class SkredvarselApi {
     _skredvarselStorage = skredvarselStorage;
   }
 
-  public function getForecastForRegion(
+  public function getSimpleForecastForRegion(
     regionId as String
   ) as SimpleAvalancheForecast? {
-    var fromStorage = _skredvarselStorage.getForecastDataForRegion(regionId);
+    var fromStorage =
+      _skredvarselStorage.getSimpleForecastDataForRegion(regionId);
 
     return fromStorage != null
-      ? new SimpleAvalancheForecast(regionId, fromStorage)
+      ? new SimpleAvalancheForecast(regionId, fromStorage[0])
       : null;
+  }
+
+  public function getDetailedWarningForRegion(regionId as String) as Array? {
+    var fromStorage =
+      _skredvarselStorage.getDetailedWarningDataForRegion(regionId);
+
+    return fromStorage != null ? fromStorage : null;
   }
 
   public function loadSimpleForecastForRegion(
@@ -34,7 +42,7 @@ public class SkredvarselApi {
       throw new SkredvarselGarminException("Invalid region specified.");
     }
 
-    if (!$.hasPhoneConnection()) {
+    if (!$.canMakeWebRequest()) {
       $.logMessage("No connection available. Skipping loading forecast.");
       return;
     }
@@ -52,7 +60,8 @@ public class SkredvarselApi {
       "/" +
       getFormattedDate(end);
 
-    var storageKey = _skredvarselStorage.getCacheKeyForRegion(regionId);
+    var storageKey =
+      _skredvarselStorage.getSimpleForecastCacheKeyForRegion(regionId);
 
     var delegate = new WebRequestDelegate(_queue, path, storageKey, callback);
     delegate.makeRequest();
@@ -66,7 +75,7 @@ public class SkredvarselApi {
       throw new SkredvarselGarminException("Invalid region specified.");
     }
 
-    if (!$.hasPhoneConnection()) {
+    if (!$.canMakeWebRequest()) {
       $.logMessage("No connection available. Skipping loading forecast.");
       return;
     }
@@ -76,9 +85,10 @@ public class SkredvarselApi {
     var path =
       "/detailedWarningByRegion/" + regionId + "/1/" + getFormattedDate(now);
 
-    // var storageKey = _skredvarselStorage.getCacheKeyForDetailedRegion(regionId);
+    var storageKey =
+      _skredvarselStorage.getDetailedWarningCacheKeyForRegion(regionId);
 
-    var delegate = new WebRequestDelegate(_queue, path, null, callback);
+    var delegate = new WebRequestDelegate(_queue, path, storageKey, callback);
     delegate.makeRequest();
   }
 }

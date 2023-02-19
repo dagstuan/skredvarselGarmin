@@ -14,7 +14,7 @@ class GlanceView extends Ui.GlanceView {
 
   private var _forecastData as SimpleAvalancheForecast?;
 
-  private var _avalancheForecastRenderer as AvalancheUi.ForecastTimeline;
+  private var _forecastTimeline as AvalancheUi.ForecastTimeline?;
 
   private var _width as Number?;
   private var _height as Number?;
@@ -27,7 +27,6 @@ class GlanceView extends Ui.GlanceView {
     _skredvarselApi = skredvarselApi;
 
     _regionId = skredvarselStorage.getFavoriteRegionId();
-    _avalancheForecastRenderer = new AvalancheUi.ForecastTimeline();
 
     setForecastDataFromStorage();
   }
@@ -44,6 +43,14 @@ class GlanceView extends Ui.GlanceView {
   function onLayout(dc as Gfx.Dc) {
     _width = dc.getWidth();
     _height = dc.getHeight();
+
+    _forecastTimeline = new AvalancheUi.ForecastTimeline();
+    _forecastTimeline.setSettings({
+      :locX => 0,
+      :locY => 0,
+      :width => _width,
+      :height => _height,
+    });
   }
 
   function onUpdate(dc as Gfx.Dc) {
@@ -65,8 +72,8 @@ class GlanceView extends Ui.GlanceView {
       }
 
       if (_forecastData != null) {
-        _avalancheForecastRenderer.setData(_regionId, _forecastData);
-        _avalancheForecastRenderer.draw(dc, 0, 0, _width, _height);
+        _forecastTimeline.setData(_regionId, _forecastData);
+        _forecastTimeline.draw(dc);
       } else {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
@@ -84,7 +91,7 @@ class GlanceView extends Ui.GlanceView {
   }
 
   private function setForecastDataFromStorage() as Void {
-    _forecastData = _skredvarselApi.getForecastForRegion(_regionId);
+    _forecastData = _skredvarselApi.getSimpleForecastForRegion(_regionId);
   }
 
   function onReceive(data) as Void {

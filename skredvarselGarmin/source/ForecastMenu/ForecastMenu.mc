@@ -88,7 +88,7 @@ public class ForecastMenu extends Ui.CustomMenu {
 
     if (favoriteRegionId != null) {
       var forecastForFavoriteRegion =
-        _skredvarselApi.getForecastForRegion(favoriteRegionId);
+        _skredvarselApi.getSimpleForecastForRegion(favoriteRegionId);
 
       if (forecastForFavoriteRegion != null) {
         var dangerLevelToday = forecastForFavoriteRegion.getDangerLevelToday();

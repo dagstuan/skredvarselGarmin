@@ -49,7 +49,7 @@ class WebRequestDelegate {
     if (responseCode == 200) {
       if (_storageKey != null) {
         $.logMessage("Storing in storage with key: " + _storageKey);
-        Storage.setValue(_storageKey, data);
+        Storage.setValue(_storageKey, [data, Time.now().value()]);
       }
     } else {
       $.logMessage("Failed request. Response code: " + responseCode);

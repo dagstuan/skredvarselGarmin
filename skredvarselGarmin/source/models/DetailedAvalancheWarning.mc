@@ -9,7 +9,7 @@ public class DetailedAvalancheWarning {
   public var mainText as String;
   public var avalancheProblems as Array<AvalancheProblem>;
 
-  public function initialize(warningData as AvalancheWarningData) {
+  public function initialize(warningData as DetailedAvalancheWarningData) {
     dangerLevel = warningData.get("dangerLevel").toNumber();
     validFrom = parseDate(warningData.get("validFrom"));
     validTo = parseDate(warningData.get("validTo"));

@@ -6,7 +6,8 @@ class ServiceDelegate extends System.ServiceDelegate {
   private var _skredvarselApi as SkredvarselApi;
   private var _skredvarselStorage as SkredvarselStorage;
 
-  private var _regionsToReload as Array<String> = [];
+  private var _simpleRegionsToReload as Array<String> = [];
+  private var _detailedRegionsToReload as Array<String> = [];
 
   public function initialize(
     skredvarselApi as SkredvarselApi,
@@ -20,6 +21,12 @@ class ServiceDelegate extends System.ServiceDelegate {
 
   public function onTemporalEvent() as Void {
     $.logMessage("Temporal event triggered. Reloading region data.");
+
+    if (!$.canMakeWebRequest()) {
+      $.logMessage("No connection available. Skipping reload.");
+      Background.exit(false);
+      return;
+    }
 
     var monkeyVersion = $.getMonkeyVersion();
     if (
@@ -38,7 +45,9 @@ class ServiceDelegate extends System.ServiceDelegate {
       return;
     }
 
-    _regionsToReload = _skredvarselStorage.getSelectedRegionIds();
+    var selectedRegionIds = _skredvarselStorage.getSelectedRegionIds();
+    _simpleRegionsToReload = selectedRegionIds;
+    _detailedRegionsToReload = selectedRegionIds.slice(0, 2);
 
     reloadNextRegion();
   }
@@ -53,11 +62,21 @@ class ServiceDelegate extends System.ServiceDelegate {
   }
 
   private function reloadNextRegion() as Boolean {
-    if (_regionsToReload.size() > 0) {
-      var nextRegion = _regionsToReload[0];
-      _regionsToReload = _regionsToReload.slice(1, null);
+    if (_simpleRegionsToReload.size() > 0) {
+      var nextRegion = _simpleRegionsToReload[0];
+      _simpleRegionsToReload = _simpleRegionsToReload.slice(1, null);
 
       _skredvarselApi.loadSimpleForecastForRegion(
+        nextRegion,
+        method(:onReloadedRegion)
+      );
+
+      return true;
+    } else if (_detailedRegionsToReload.size() > 0) {
+      var nextRegion = _detailedRegionsToReload[0];
+      _detailedRegionsToReload = _detailedRegionsToReload.slice(1, null);
+
+      _skredvarselApi.loadDetailedWarningForRegion(
         nextRegion,
         method(:onReloadedRegion)
       );

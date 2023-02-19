@@ -11,8 +11,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   private var _skredvarselApi as SkredvarselApi;
 
   private var _hasForecast as Boolean = false;
-
-  private var _avalancheForecastTimeline as AvalancheUi.ForecastTimeline;
+  private var _forecastTimeline as AvalancheUi.ForecastTimeline?;
 
   private var _screenWidth as Number;
 
@@ -24,7 +23,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
     _skredvarselApi = skredvarselApi;
     _regionId = regionId;
-    _avalancheForecastTimeline = new AvalancheUi.ForecastTimeline();
+    _forecastTimeline = new AvalancheUi.ForecastTimeline();
 
     _screenWidth = $.getDeviceScreenWidth();
 
@@ -50,13 +49,15 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     if (_hasForecast) {
       var marginLeft = width == _screenWidth ? 10 : 0;
       var marginRight = width == _screenWidth ? 10 : 25;
-      _avalancheForecastTimeline.draw(
-        dc,
-        marginLeft,
-        0,
-        width - marginRight,
-        height
-      );
+
+      _forecastTimeline.setSettings({
+        :locX => marginLeft,
+        :locY => 0,
+        :width => width - marginRight,
+        :height => height,
+      });
+
+      _forecastTimeline.draw(dc);
     } else {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
@@ -73,10 +74,10 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   }
 
   private function getForecastFromCache() as Void {
-    var forecast = _skredvarselApi.getForecastForRegion(_regionId);
+    var forecast = _skredvarselApi.getSimpleForecastForRegion(_regionId);
 
     if (forecast != null) {
-      _avalancheForecastTimeline.setData(_regionId, forecast);
+      _forecastTimeline.setData(_regionId, forecast);
       _hasForecast = true;
     }
   }

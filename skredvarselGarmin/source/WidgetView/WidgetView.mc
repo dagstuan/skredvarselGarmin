@@ -12,7 +12,7 @@ public class WidgetView extends Ui.View {
   private var _skredvarselApi as SkredvarselApi;
   private var _skredvarselStorage as SkredvarselStorage;
 
-  private var _avalancheForecastRenderer as AvalancheUi.ForecastTimeline;
+  private var _forecastTimeline as AvalancheUi.ForecastTimeline?;
 
   private var _width as Number?;
   private var _height as Number?;
@@ -25,8 +25,6 @@ public class WidgetView extends Ui.View {
 
     _skredvarselApi = skredvarselApi;
     _skredvarselStorage = skredvarselStorage;
-
-    _avalancheForecastRenderer = new AvalancheUi.ForecastTimeline();
 
     _regionId = skredvarselStorage.getFavoriteRegionId();
     setForecastDataFromStorage();
@@ -44,6 +42,21 @@ public class WidgetView extends Ui.View {
   function onLayout(dc as Gfx.Dc) {
     _width = dc.getWidth();
     _height = dc.getHeight();
+
+    var margin = 10;
+
+    var forecastWidth = _width - margin;
+    var forecastHeight = 80;
+    var x0 = margin;
+    var y0 = (_height * 0.55 - forecastHeight / 2).toNumber();
+
+    _forecastTimeline = new AvalancheUi.ForecastTimeline();
+    _forecastTimeline.setSettings({
+      :locX => x0,
+      :locY => y0,
+      :width => forecastWidth,
+      :height => forecastHeight,
+    });
   }
 
   //! Update the view
@@ -72,20 +85,8 @@ public class WidgetView extends Ui.View {
       }
 
       if (_forecastData != null) {
-        var margin = 10;
-        var forecastHeight = 80;
-        var forecastWidth = _width - margin;
-        var x0 = margin;
-        var y0 = (_height * 0.55 - forecastHeight / 2).toNumber();
-
-        _avalancheForecastRenderer.setData(_regionId, _forecastData);
-        _avalancheForecastRenderer.draw(
-          dc,
-          x0,
-          y0,
-          forecastWidth,
-          forecastHeight
-        );
+        _forecastTimeline.setData(_regionId, _forecastData);
+        _forecastTimeline.draw(dc);
       } else {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
@@ -103,7 +104,7 @@ public class WidgetView extends Ui.View {
   }
 
   private function setForecastDataFromStorage() as Void {
-    _forecastData = _skredvarselApi.getForecastForRegion(_regionId);
+    _forecastData = _skredvarselApi.getSimpleForecastForRegion(_regionId);
   }
 
   function onReceive(data) as Void {
@@ -142,7 +143,7 @@ public class WidgetView extends Ui.View {
 
     if (favoriteRegionId != null) {
       var forecastForFavoriteRegion =
-        _skredvarselApi.getForecastForRegion(favoriteRegionId);
+        _skredvarselApi.getSimpleForecastForRegion(favoriteRegionId);
 
       if (forecastForFavoriteRegion != null) {
         var dangerLevelToday = forecastForFavoriteRegion.getDangerLevelToday();

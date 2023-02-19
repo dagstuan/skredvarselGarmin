@@ -10,7 +10,7 @@ public class AvalancheProblem {
   public var exposedHeightFill as Number;
   public var validExpositions as String;
 
-  public function initialize(warningData as AvalancheWarningData) {
+  public function initialize(warningData as DetailedAvalancheWarningData) {
     avalancheProblemTypeId = warningData
       .get("avalancheProblemTypeId")
       .toNumber();

@@ -1,18 +1,24 @@
 import Toybox.Lang;
 
 using Toybox.Application.Storage;
+using Toybox.Time;
+using Toybox.Time.Gregorian;
 
 const SelectedRegionIdsStorageKey = "selectedRegionIds";
 
 (:background)
 public class SkredvarselStorage {
-  public static function getCacheKeyForRegion(regionId as String) {
+  public static function getSimpleForecastCacheKeyForRegion(
+    regionId as String
+  ) {
     return "WebRequestCache_warning_for_region_" + regionId;
   }
 
-  // public static function getCacheKeyForDetailedRegion(regionId as String) {
-  //   return "WebRequestCache_detailed_warning_for_region_" + regionId;
-  // }
+  public static function getDetailedWarningCacheKeyForRegion(
+    regionId as String
+  ) {
+    return "WebRequestCache_detailed_warning_for_region_" + regionId;
+  }
 
   public function getSelectedRegionIds() as Array<String> {
     var valueFromStorage = Storage.getValue($.SelectedRegionIdsStorageKey);
@@ -81,19 +87,35 @@ public class SkredvarselStorage {
     }
   }
 
-  public function getForecastDataForRegion(
-    regionId as String
-  ) as AvalancheForecastData? {
-    var cacheKey = getCacheKeyForRegion(regionId);
+  public function getSimpleForecastDataForRegion(regionId as String) as Array? {
+    var cacheKey = getSimpleForecastCacheKeyForRegion(regionId);
 
-    var value = Storage.getValue(cacheKey) as AvalancheForecastData?;
+    var value = Storage.getValue(cacheKey);
+
+    if (value == null || !(value instanceof Array)) {
+      return null;
+    }
+
+    return value;
+  }
+
+  public function getDetailedWarningDataForRegion(
+    regionId as String
+  ) as Array? {
+    var cacheKey = getDetailedWarningCacheKeyForRegion(regionId);
+
+    var value = Storage.getValue(cacheKey);
+
+    if (value == null || !(value instanceof Array)) {
+      return null;
+    }
+
     return value;
   }
 
   private function removeForecastDataForRegion(regionId as String) {
-    var cacheKey = getCacheKeyForRegion(regionId);
-
-    Storage.deleteValue(cacheKey);
+    Storage.deleteValue(getSimpleForecastCacheKeyForRegion(regionId));
+    Storage.deleteValue(getDetailedWarningCacheKeyForRegion(regionId));
   }
 
   private function setSelectedRegionIdsInStorage(regionIds as Array<String>) {

@@ -10,7 +10,7 @@ public class SimpleAvalancheForecast {
 
   public function initialize(
     regionId as String,
-    data as AvalancheForecastData
+    data as SimpleAvalancheForecastData
   ) {
     me.regionId = regionId;
 
@@ -19,7 +19,7 @@ public class SimpleAvalancheForecast {
 
     for (var i = 0; i < numWarnings; i++) {
       me.warnings[i] = new SimpleAvalancheWarning(
-        data[i] as AvalancheWarningData
+        data[i] as SimpleAvalancheWarningData
       );
     }
   }

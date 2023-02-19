@@ -37,12 +37,12 @@ const Regions = {
 };
 
 (:background)
-function hasPhoneConnection() as Boolean {
+function canMakeWebRequest() as Boolean {
   var deviceSettings = System.getDeviceSettings();
-  if (
-    deviceSettings has :connectionAvailable &&
-    deviceSettings.connectionAvailable
-  ) {
+  var connectionInfo = deviceSettings.connectionInfo;
+
+  var bluetoothState = connectionInfo[:bluetooth][:state];
+  if (bluetoothState.equals(System.CONNECTION_STATE_CONNECTED)) {
     return true;
   }
 

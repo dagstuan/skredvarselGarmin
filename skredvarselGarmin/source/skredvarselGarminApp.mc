@@ -22,8 +22,8 @@ class skredvarselGarminApp extends Application.AppBase {
   }
 
   private function registerTemporalEvent() {
-    var phoneConnected = $.hasPhoneConnection();
-    var refreshIntervalMinutes = phoneConnected
+    var canMakeWebRequest = $.canMakeWebRequest();
+    var refreshIntervalMinutes = canMakeWebRequest
       ? NORMAL_REFRESH_INTERVAL_MINUTES
       : QUICK_REFRESH_INTERVAL_MINUTES;
 

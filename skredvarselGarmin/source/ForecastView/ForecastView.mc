@@ -2,18 +2,23 @@ import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
+using Toybox.Time as Time;
+using Toybox.Time.Gregorian;
 
 public class ForecastView extends Ui.View {
+  private const TIME_TO_CONSIDER_STALE = Gregorian.SECONDS_PER_HOUR * 2;
+  private const TIME_TO_SHOW_LOADING = Gregorian.SECONDS_PER_DAY;
   private const ANIMATION_TIME_SECONDS = 0.3;
 
   private var _skredvarselApi as SkredvarselApi;
   private var _regionId as String;
   private var _warning as DetailedAvalancheWarning?;
+  private var _warningFetchedTime as Time.Moment?;
 
   private var _width as Numeric?;
   private var _height as Numeric?;
 
-  private var _deviceScreenWidth as Numeric?;
+  private var _deviceScreenWidth as Numeric;
 
   private var _progressBar as Ui.ProgressBar?;
 
@@ -28,31 +33,53 @@ public class ForecastView extends Ui.View {
 
     _skredvarselApi = skredvarselApi;
     _regionId = regionId;
+
+    _deviceScreenWidth = $.getDeviceScreenWidth();
   }
 
   public function onShow() {
-    if (_warning == null) {
+    getWarningFromCache();
+    if (
+      _warning == null ||
+      Time.now().compare(_warningFetchedTime) > TIME_TO_SHOW_LOADING
+    ) {
+      // Har ikke warning. Vis loading.
+      var loadingText = Ui.loadResource($.Rez.Strings.Loading);
+      _progressBar = new Ui.ProgressBar(loadingText, null);
+      Ui.pushView(_progressBar, new ProgressDelegate(), Ui.SLIDE_BLINK);
+
+      _skredvarselApi.loadDetailedWarningForRegion(
+        _regionId,
+        method(:onReceive)
+      );
+    } else if (
+      Time.now().compare(_warningFetchedTime) > TIME_TO_CONSIDER_STALE
+    ) {
+      $.logMessage("Stale forecast, try to reload in background");
+
       _skredvarselApi.loadDetailedWarningForRegion(
         _regionId,
         method(:onReceive)
       );
 
-      var loadingText = Ui.loadResource($.Rez.Strings.Loading);
+      // Har warning, men den er stale. Vis bildet og last i bakgrunnen.
+    }
+  }
 
-      _progressBar = new Ui.ProgressBar(loadingText, null);
-      Ui.pushView(_progressBar, new ProgressDelegate(), Ui.SLIDE_BLINK);
+  private function getWarningFromCache() as Void {
+    var data = _skredvarselApi.getDetailedWarningForRegion(_regionId);
+
+    if (data != null) {
+      _warning = new DetailedAvalancheWarning(data[0]);
+      _warningFetchedTime = new Time.Moment(data[1]);
     }
   }
 
   public function onLayout(dc as Gfx.Dc) {
     _width = dc.getWidth();
     _height = dc.getHeight();
-
-    _deviceScreenWidth = $.getDeviceScreenWidth();
   }
 
-  //! Update the view
-  //! @param dc Device context
   public function onUpdate(dc as Gfx.Dc) as Void {
     dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
     dc.clear();

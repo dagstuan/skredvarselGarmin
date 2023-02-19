@@ -5,6 +5,13 @@ using Toybox.Time;
 using Toybox.Time.Gregorian;
 
 module AvalancheUi {
+  typedef ForecastTimelineSettings as {
+    :locX as Numeric,
+    :locY as Numeric,
+    :width as Numeric,
+    :height as Numeric,
+  };
+
   (:glance)
   class ForecastTimeline {
     private var _regionId as String?;
@@ -24,7 +31,29 @@ module AvalancheUi {
     private var _oneDayValue = (new Time.Duration(Gregorian.SECONDS_PER_DAY))
       .value()
       .toFloat();
-    private var _twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
+
+    private var _earlyCutoffTime as Time.Moment?;
+
+    private var _locX as Numeric?;
+    private var _locY as Numeric?;
+    private var _width as Numeric?;
+    private var _height as Numeric?;
+
+    public function setSettings(settings as ForecastTimelineSettings) {
+      _locX = settings[:locX];
+      _locY = settings[:locY];
+      _width = settings[:width];
+      _height = settings[:height];
+    }
+
+    private function setEarlyCutoffTime() {
+      var now = Time.getCurrentTime({
+        :currentTimeType => Time.CURRENT_TIME_DEFAULT,
+      });
+      _earlyCutoffTime = now.subtract(
+        new Time.Duration(Gregorian.SECONDS_PER_DAY * 2)
+      );
+    }
 
     public function setData(
       regionId as String,
@@ -34,29 +63,20 @@ module AvalancheUi {
       _forecast = forecast;
 
       _numWarnings = _forecast.warnings.size();
+
+      setEarlyCutoffTime();
     }
 
-    public function draw(
-      dc as Gfx.Dc,
-      x0 as Number,
-      y0 as Number,
-      width as Number,
-      height as Number
-    ) {
+    public function draw(dc as Gfx.Dc) {
       if (_forecast == null) {
         return;
       }
 
-      drawTitle(dc, x0, y0);
+      drawTitle(dc, _locX, _locY);
 
-      var now = Time.getCurrentTime({
-        :currentTimeType => Time.CURRENT_TIME_DEFAULT,
-      });
-      var earlyCutoffTime = now.subtract(_twoDays);
+      var lengthPerFullElem = (_width - _numGaps * _gap) / _daysToShow;
 
-      var lengthPerFullElem = (width - _numGaps * _gap) / _daysToShow;
-
-      var currXOffset = x0;
+      var currXOffset = _locX;
 
       for (var i = 0; i < _numWarnings; i++) {
         var warning = _forecast.warnings[i];
@@ -64,13 +84,13 @@ module AvalancheUi {
         var validFrom = warning.validFrom;
         var validTo = warning.validTo;
 
-        if (validTo.lessThan(earlyCutoffTime)) {
+        if (validTo.lessThan(_earlyCutoffTime)) {
           // Forecast is earlier than we will render.
           continue;
         }
 
         var lengthThisElem = lengthPerFullElem;
-        var spaceLeft = width - currXOffset;
+        var spaceLeft = _width - currXOffset;
 
         if (lengthThisElem > spaceLeft) {
           lengthThisElem = spaceLeft;
@@ -81,10 +101,10 @@ module AvalancheUi {
           }
         }
 
-        if (validFrom.lessThan(earlyCutoffTime)) {
+        if (validFrom.lessThan(_earlyCutoffTime)) {
           // First element will be shorter
 
-          var durationToShow = validTo.compare(earlyCutoffTime);
+          var durationToShow = validTo.compare(_earlyCutoffTime);
           var percentToShow = durationToShow / _oneDayValue;
           lengthThisElem = lengthThisElem * percentToShow;
         }
@@ -99,7 +119,7 @@ module AvalancheUi {
 
         dc.fillRectangle(
           lineStart,
-          y0 + (height / 2 - _lineHeight / 2),
+          _locY + (_height / 2 - _lineHeight / 2),
           lineEnd - lineStart,
           _lineHeight
         );
@@ -107,11 +127,11 @@ module AvalancheUi {
         var dangerLevelString = dangerLevel.toString();
         var font = Graphics.FONT_GLANCE;
         var textWidth = dc.getTextWidthInPixels(dangerLevelString, font);
-        if (currXOffset > x0 && textWidth < lengthThisElem) {
+        if (currXOffset > _locX && textWidth < lengthThisElem) {
           dc.setColor(color, Graphics.COLOR_TRANSPARENT);
           dc.drawText(
             currXOffset,
-            y0 + (height - dc.getFontHeight(font)),
+            _locY + (_height - dc.getFontHeight(font)),
             font,
             dangerLevel.toString(),
             Graphics.TEXT_JUSTIFY_LEFT
@@ -121,7 +141,7 @@ module AvalancheUi {
         currXOffset += lengthThisElem + _gap;
       }
 
-      drawMarker(dc, x0, y0, width, height);
+      drawMarker(dc, _locX, _locY, _width, _height);
     }
 
     private function drawTitle(dc as Gfx.Dc, x0 as Number, y0 as Number) {

@@ -1,5 +1,7 @@
 import Toybox.Lang;
 
-typedef AvalancheWarningData as Dictionary<String, String>;
+typedef SimpleAvalancheWarningData as Dictionary<String, String>;
 
-typedef AvalancheForecastData as Array<AvalancheWarningData>?;
+typedef SimpleAvalancheForecastData as Array<SimpleAvalancheWarningData>?;
+
+typedef DetailedAvalancheWarningData as Dictionary<String, String>?;
