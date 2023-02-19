@@ -17,6 +17,9 @@ public class WidgetView extends Ui.View {
   private var _width as Number?;
   private var _height as Number?;
 
+  private var _appNameText as Ui.Resource?;
+  private var _loadingText as Ui.Resource?;
+
   public function initialize(
     skredvarselApi as SkredvarselApi,
     skredvarselStorage as SkredvarselStorage
@@ -31,6 +34,9 @@ public class WidgetView extends Ui.View {
   }
 
   function onShow() {
+    _appNameText = Ui.loadResource($.Rez.Strings.AppName) as String;
+    _loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
+
     if (_regionId != null && _forecastData == null) {
       _skredvarselApi.loadSimpleForecastForRegion(
         _regionId,
@@ -70,13 +76,11 @@ public class WidgetView extends Ui.View {
     if (_regionId == null) {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
-      var appNameText = Ui.loadResource($.Rez.Strings.AppName) as String;
-
       dc.drawText(
         0,
         dc.getHeight() / 2,
         Graphics.FONT_MEDIUM,
-        appNameText,
+        _appNameText,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
     } else {
@@ -90,17 +94,20 @@ public class WidgetView extends Ui.View {
       } else {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
-        var loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
-
         dc.drawText(
           0,
           dc.getHeight() / 2,
           Graphics.FONT_GLANCE,
-          loadingText,
+          _loadingText,
           Graphics.TEXT_JUSTIFY_LEFT
         );
       }
     }
+  }
+
+  public function onHide() {
+    _appNameText = null;
+    _loadingText = null;
   }
 
   private function setForecastDataFromStorage() as Void {
@@ -125,12 +132,11 @@ public class WidgetView extends Ui.View {
     var iconX = _width / 2 - $.halfWidthDangerLevelIcon;
     dc.drawBitmap(iconX, 10, icon);
 
-    var text = Ui.loadResource($.Rez.Strings.AppName);
     dc.drawText(
       _width / 2,
       _height * 0.25,
       Graphics.FONT_XTINY,
-      text,
+      _appNameText,
       Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
     );
 

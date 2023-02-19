@@ -15,6 +15,8 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
   private var _screenWidth as Number;
 
+  private var _loadingText as Ui.Resource;
+
   public function initialize(
     skredvarselApi as SkredvarselApi,
     regionId as String
@@ -26,6 +28,8 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     _forecastTimeline = new AvalancheUi.ForecastTimeline();
 
     _screenWidth = $.getDeviceScreenWidth();
+
+    _loadingText = Ui.loadResource($.Rez.Strings.Loading);
 
     getForecastFromCache();
     if (!_hasForecast) {
@@ -61,13 +65,11 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     } else {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
-      var loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
-
       dc.drawText(
         0,
         dc.getHeight() / 2,
         Graphics.FONT_GLANCE,
-        loadingText,
+        _loadingText,
         Graphics.TEXT_JUSTIFY_LEFT
       );
     }

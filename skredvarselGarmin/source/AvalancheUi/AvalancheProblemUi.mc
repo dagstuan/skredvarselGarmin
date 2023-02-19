@@ -56,11 +56,31 @@ module AvalancheUi {
 
     public function draw(dc as Gfx.Dc) {
       drawOutlines(dc);
-      drawExpositions(dc);
-      drawExposedHeights(dc);
-      drawHeightTextElements(dc);
-      drawDivider(dc);
-      drawProblemText(dc);
+
+      var paddingLeftRight = _width * 0.1;
+      var paddingBetween = _width * 0.05;
+      var elemHeight = _height * 0.75;
+      var elemWidth = (_width - paddingLeftRight * 2 - paddingBetween * 2) / 3;
+
+      var x0 = _locX + paddingLeftRight;
+      var y0 = _locY + _height - elemHeight;
+      var width = elemWidth;
+      var height = elemHeight;
+
+      drawExpositions(dc, x0, y0, width, height);
+
+      x0 += elemWidth + paddingBetween;
+      drawExposedHeights(dc, x0, y0, width, height);
+
+      x0 += elemWidth + paddingBetween;
+      drawHeightTextElements(dc, x0, y0, width, height);
+
+      x0 = _locX;
+      y0 = _locY;
+      width = _width;
+      height = _height * 0.25;
+
+      drawProblemText(dc, x0, y0, width, height);
     }
 
     private function drawOutlines(dc as Gfx.Dc) {
@@ -71,29 +91,19 @@ module AvalancheUi {
       dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
       dc.setPenWidth(1);
       $.drawOutline(dc, _locX, _locY, _width, _height);
-
-      dc.drawLine(
-        _locX,
-        _locY + _height * 0.5,
-        _locX + _width,
-        _locY + _height * 0.5
-      );
-
-      dc.drawLine(
-        _locX + _width * 0.5,
-        _locY,
-        _locX + _width * 0.5,
-        _locY + _height
-      );
     }
 
-    private function drawExpositions(dc as Gfx.Dc) {
-      var x0 = _locX + _quarterWidth / 2;
-      var y0 = _locY + _halfHeight;
-      var width = _quarterWidth;
-      var height = _halfHeight;
+    private function drawExpositions(
+      dc as Gfx.Dc,
+      x0 as Numeric,
+      y0 as Numeric,
+      width as Numeric,
+      height as Numeric
+    ) {
       var sizeModifier = 1;
       $.drawOutline(dc, x0, y0, width, height);
+
+      var minSize = $.min(width, height);
 
       var validExpositions = new AvalancheUi.ValidExpositions({
         :validExpositions => _problem.validExpositions,
@@ -101,20 +111,25 @@ module AvalancheUi {
         :nonDangerFillColor => _nonDangerFillColor,
         :locX => x0 + width / 2,
         :locY => y0 + height / 2,
-        :radius => (width / 2) * sizeModifier,
+        :radius => (minSize / 2) * sizeModifier,
       });
 
       validExpositions.draw(dc);
     }
 
-    private function drawExposedHeights(dc as Gfx.Dc) {
-      var x0 = _locX;
-      var y0 = _locY;
-      var width = _quarterWidth;
-      var height = _halfHeight;
+    private function drawExposedHeights(
+      dc as Gfx.Dc,
+      x0 as Numeric,
+      y0 as Numeric,
+      width as Numeric,
+      height as Numeric
+    ) {
       $.drawOutline(dc, x0, y0, width, height);
+
+      var minSize = $.min(width, height);
+
       var sizeModifier = 0.9;
-      var exposedWidth = _quarterWidth * sizeModifier;
+      var exposedWidth = minSize * sizeModifier;
 
       var exposedHeightUi = new AvalancheUi.ExposedHeight({
         :exposedHeight1 => _problem.exposedHeight1,
@@ -130,40 +145,29 @@ module AvalancheUi {
       exposedHeightUi.draw(dc);
     }
 
-    private function drawHeightTextElements(dc as Gfx.Dc) {
-      var contentX0 = _locX + _quarterWidth;
-      var topContentY0 = _locY;
-      var contentWidth = _quarterWidth;
-      var contentHeight = _quarterHeight;
+    private function drawHeightTextElements(
+      dc as Gfx.Dc,
+      x0 as Numeric,
+      y0 as Numeric,
+      width as Numeric,
+      height as Numeric
+    ) {
+      var halfHeight = height / 2;
 
-      $.drawOutline(dc, contentX0, topContentY0, contentWidth, contentHeight);
+      $.drawOutline(dc, x0, y0, width, halfHeight);
 
-      var bottomContentY0 = _locY + _quarterHeight;
+      var bottomY0 = y0 + halfHeight;
 
-      $.drawOutline(
-        dc,
-        contentX0,
-        bottomContentY0,
-        contentWidth,
-        contentHeight
-      );
+      $.drawOutline(dc, x0, bottomY0, width, halfHeight);
 
       if (_problem.exposedHeightFill == 1) {
-        drawHeightArrow(
-          dc,
-          contentX0,
-          topContentY0,
-          contentHeight,
-          contentWidth,
-          BOTTOM,
-          UP
-        );
+        drawHeightArrow(dc, x0, y0, halfHeight, width, BOTTOM, UP);
         drawHeightText(
           dc,
-          contentX0,
-          bottomContentY0,
-          contentHeight,
-          contentWidth,
+          x0,
+          bottomY0,
+          halfHeight,
+          width,
           TOP,
           _problem.exposedHeight1 + "m"
         );
@@ -171,22 +175,14 @@ module AvalancheUi {
       if (_problem.exposedHeightFill == 2) {
         drawHeightText(
           dc,
-          contentX0,
-          topContentY0,
-          contentHeight,
-          contentWidth,
+          x0,
+          y0,
+          halfHeight,
+          width,
           BOTTOM,
           _problem.exposedHeight1 + "m"
         );
-        drawHeightArrow(
-          dc,
-          contentX0,
-          bottomContentY0,
-          contentHeight,
-          contentWidth,
-          TOP,
-          DOWN
-        );
+        drawHeightArrow(dc, x0, bottomY0, halfHeight, width, TOP, DOWN);
       }
 
       // TODO: Exposedheightfill3 og 4
@@ -228,9 +224,12 @@ module AvalancheUi {
       alignment as TextElementsAlignment,
       direction as AvalancheUi.ArrowDirection
     ) {
+      var font = Gfx.FONT_XTINY;
+      var fontHeight = Gfx.getFontHeight(font);
+
       var heightModifier = 0.7;
-      var arrowWidth = 15;
-      var arrowHeight = height * heightModifier;
+      var arrowHeight = fontHeight;
+      var arrowWidth = fontHeight * 0.66;
 
       var arrowY0 = alignment == TOP ? y0 : y0 + height - arrowHeight;
 
@@ -260,28 +259,27 @@ module AvalancheUi {
       );
     }
 
-    private function drawProblemText(dc as Gfx.Dc) {
+    private function drawProblemText(
+      dc as Gfx.Dc,
+      x0 as Numeric,
+      y0 as Numeric,
+      width as Numeric,
+      height as Numeric
+    ) {
       dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
       var text = _problem.avalancheProblemTypeName;
       var font = Gfx.FONT_XTINY;
+      var fontHeight = Gfx.getFontHeight(font);
 
-      var textWidth = _halfWidth;
-      var textHeight = _height;
-
-      var x0 = _locX + _halfWidth + _quarterWidth;
-      var y0 = _locY + _halfHeight;
-
-      var rectx0 = _locX + _halfWidth;
-      var recty0 = _locY;
-      $.drawOutline(dc, rectx0, recty0, textWidth, textHeight);
-      var fitText = Gfx.fitTextToArea(text, font, textWidth, textHeight, true);
+      $.drawOutline(dc, x0, y0, width, height);
+      var fitText = Gfx.fitTextToArea(text, font, width, height, true);
 
       dc.drawText(
-        x0,
-        y0,
+        x0 + width / 2,
+        y0 + (height / 2 - fontHeight / 2),
         font,
         fitText,
-        Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
+        Gfx.TEXT_JUSTIFY_CENTER
       );
     }
   }

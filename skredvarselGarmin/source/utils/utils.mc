@@ -88,21 +88,6 @@ function getFormattedDate(moment as Time.Moment) as String {
   ]);
 }
 
-(:background)
-function getFormattedTime(moment as Time.Moment) as String {
-  var info = Gregorian.utcInfo(moment, Time.FORMAT_MEDIUM);
-
-  return Lang.format("$1$:$2$:$3$ $4$ $5$ $6$ $7$", [
-    info.hour < 10 ? "0" + info.hour : info.hour,
-    info.min < 10 ? "0" + info.min : info.min,
-    info.sec < 10 ? "0" + info.sec : info.sec,
-    info.day_of_week,
-    info.day,
-    info.month,
-    info.year,
-  ]);
-}
-
 (:glance)
 function parseDate(dateString as String) as Time.Moment {
   return Gregorian.moment({
@@ -158,25 +143,35 @@ function removeStringFromArray(curArray as Array<String>, value as String) {
 
 (:background)
 public function logMessage(message as String) {
-  System.println($.getFormattedTime(Time.now()) + " - " + message);
+  var info = Gregorian.utcInfo(Time.now(), Time.FORMAT_MEDIUM);
+
+  var formattedTime = Lang.format("$1$:$2$:$3$ $4$ $5$ $6$ $7$", [
+    info.hour < 10 ? "0" + info.hour : info.hour,
+    info.min < 10 ? "0" + info.min : info.min,
+    info.sec < 10 ? "0" + info.sec : info.sec,
+    info.day_of_week,
+    info.day,
+    info.month,
+    info.year,
+  ]);
+
+  System.println(formattedTime + " - " + message);
 }
 
 const halfWidthDangerLevelIcon = 20;
 
 function getIconResourceForDangerLevel(dangerLevel as Number) {
-  switch (dangerLevel) {
-    case 1:
-      return $.Rez.Drawables.Level1;
-    case 2:
-      return $.Rez.Drawables.Level2;
-    case 3:
-      return $.Rez.Drawables.Level3;
-    case 4:
-    case 5:
-      return $.Rez.Drawables.Level4_5;
-    default:
-      return $.Rez.Drawables.NoLevel;
+  if (dangerLevel == 1) {
+    return $.Rez.Drawables.Level1;
+  } else if (dangerLevel == 2) {
+    return $.Rez.Drawables.Level2;
+  } else if (dangerLevel == 3) {
+    return $.Rez.Drawables.Level3;
+  } else if (dangerLevel == 4 || dangerLevel == 5) {
+    return $.Rez.Drawables.Level4_5;
   }
+
+  return $.Rez.Drawables.NoLevel;
 }
 
 function getScreenWidthAtPoint(deviceScreenWidth as Numeric, y as Numeric) {
@@ -206,4 +201,8 @@ function drawOutline(
   dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
 
   dc.drawRectangle(x0, y0, width, height);
+}
+
+function min(a as Numeric, b as Numeric) {
+  return a < b ? a : b;
 }

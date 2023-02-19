@@ -39,11 +39,16 @@ module AvalancheUi {
     private var _width as Numeric?;
     private var _height as Numeric?;
 
+    private var _lengthPerFullElem as Numeric?;
+
+    private var _dangerLevelFont = Gfx.FONT_GLANCE;
+
     public function setSettings(settings as ForecastTimelineSettings) {
       _locX = settings[:locX];
       _locY = settings[:locY];
       _width = settings[:width];
       _height = settings[:height];
+      _lengthPerFullElem = (_width - _numGaps * _gap) / _daysToShow;
     }
 
     private function setEarlyCutoffTime() {
@@ -74,74 +79,84 @@ module AvalancheUi {
 
       drawTitle(dc, _locX, _locY);
 
-      var lengthPerFullElem = (_width - _numGaps * _gap) / _daysToShow;
-
       var currXOffset = _locX;
 
       for (var i = 0; i < _numWarnings; i++) {
         var warning = _forecast.warnings[i];
 
-        var validFrom = warning.validFrom;
-        var validTo = warning.validTo;
+        var lengthDrawn = drawWarning(dc, currXOffset, warning);
 
-        if (validTo.lessThan(_earlyCutoffTime)) {
-          // Forecast is earlier than we will render.
-          continue;
-        }
-
-        var lengthThisElem = lengthPerFullElem;
-        var spaceLeft = _width - currXOffset;
-
-        if (lengthThisElem > spaceLeft) {
-          lengthThisElem = spaceLeft;
-
-          if (lengthThisElem <= 0) {
-            // no room for this element
-            continue;
-          }
-        }
-
-        if (validFrom.lessThan(_earlyCutoffTime)) {
-          // First element will be shorter
-
-          var durationToShow = validTo.compare(_earlyCutoffTime);
-          var percentToShow = durationToShow / _oneDayValue;
-          lengthThisElem = lengthThisElem * percentToShow;
-        }
-
-        var dangerLevel = warning.dangerLevel;
-        var color = colorize(dangerLevel);
-
-        var lineStart = currXOffset;
-        var lineEnd = currXOffset + lengthThisElem;
-
-        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-
-        dc.fillRectangle(
-          lineStart,
-          _locY + (_height / 2 - _lineHeight / 2),
-          lineEnd - lineStart,
-          _lineHeight
-        );
-
-        var dangerLevelString = dangerLevel.toString();
-        var font = Graphics.FONT_GLANCE;
-        var textWidth = dc.getTextWidthInPixels(dangerLevelString, font);
-        if (currXOffset > _locX && textWidth < lengthThisElem) {
-          dc.setColor(color, Graphics.COLOR_TRANSPARENT);
-          dc.drawText(
-            currXOffset,
-            _locY + (_height - dc.getFontHeight(font)),
-            font,
-            dangerLevel.toString(),
-            Graphics.TEXT_JUSTIFY_LEFT
-          );
-        }
-
-        currXOffset += lengthThisElem + _gap;
+        currXOffset += lengthDrawn + _gap;
       }
 
       drawMarker(dc, _locX, _locY, _width, _height);
+    }
+
+    private function drawWarning(
+      dc as Gfx.Dc,
+      x0 as Numeric,
+      warning as SimpleAvalancheWarning
+    ) as Numeric {
+      var validFrom = warning.validFrom;
+      var validTo = warning.validTo;
+      var dangerLevel = warning.dangerLevel;
+
+      if (validTo.lessThan(_earlyCutoffTime)) {
+        // Forecast is earlier than we will render.
+        return 0;
+      }
+
+      var lengthThisElem = _lengthPerFullElem;
+      var spaceLeft = _width - x0;
+
+      if (lengthThisElem > spaceLeft) {
+        lengthThisElem = spaceLeft;
+
+        if (lengthThisElem <= 0) {
+          // no room for this element
+          return 0;
+        }
+      }
+
+      if (validFrom.lessThan(_earlyCutoffTime)) {
+        // First element will be shorter
+
+        var durationToShow = validTo.compare(_earlyCutoffTime);
+        var percentToShow = durationToShow / _oneDayValue;
+        lengthThisElem = lengthThisElem * percentToShow;
+      }
+
+      var color = colorize(dangerLevel);
+
+      var lineStart = x0;
+      var lineEnd = x0 + lengthThisElem;
+
+      dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+
+      dc.fillRectangle(
+        lineStart,
+        _locY + (_height / 2 - _lineHeight / 2),
+        lineEnd - lineStart,
+        _lineHeight
+      );
+
+      var dangerLevelString = dangerLevel.toString();
+      var textWidth = dc.getTextWidthInPixels(
+        dangerLevelString,
+        _dangerLevelFont
+      );
+      if (x0 > _locX && textWidth < lengthThisElem) {
+        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        dc.drawText(
+          x0,
+          _locY + (_height - dc.getFontHeight(_dangerLevelFont)),
+          _dangerLevelFont,
+          dangerLevelString,
+          Graphics.TEXT_JUSTIFY_LEFT
+        );
+      }
+
+      return lengthThisElem;
     }
 
     private function drawTitle(dc as Gfx.Dc, x0 as Number, y0 as Number) {

@@ -25,6 +25,10 @@ public class ForecastView extends Ui.View {
   private var _viewPages as ForecastViewPages?;
   private var _currentPage as Number = 0;
 
+  private var _loadingText as Ui.Resource?;
+  private var _todayText as Ui.Resource?;
+  private var _levelText as Ui.Resource?;
+
   public function initialize(
     skredvarselApi as SkredvarselApi,
     regionId as String
@@ -38,14 +42,17 @@ public class ForecastView extends Ui.View {
   }
 
   public function onShow() {
+    _todayText = Ui.loadResource($.Rez.Strings.Today);
+    _levelText = Ui.loadResource($.Rez.Strings.Level);
+
     getWarningFromCache();
     if (
       _warning == null ||
       Time.now().compare(_warningFetchedTime) > TIME_TO_SHOW_LOADING
     ) {
       // Har ikke warning. Vis loading.
-      var loadingText = Ui.loadResource($.Rez.Strings.Loading);
-      _progressBar = new Ui.ProgressBar(loadingText, null);
+      _loadingText = Ui.loadResource($.Rez.Strings.Loading);
+      _progressBar = new Ui.ProgressBar(_loadingText, null);
       Ui.pushView(_progressBar, new ProgressDelegate(), Ui.SLIDE_BLINK);
 
       _skredvarselApi.loadDetailedWarningForRegion(
@@ -88,7 +95,7 @@ public class ForecastView extends Ui.View {
       drawCircle(dc);
 
       var titleAreaY0 = 0;
-      var titleAreaHeight = _height * 0.15; // 15% of screen
+      var titleAreaHeight = _height * 0.18; // 15% of screen
 
       drawSingleLineTextArea(
         dc,
@@ -98,7 +105,7 @@ public class ForecastView extends Ui.View {
       );
 
       var headerAndDangerLevelY0 = titleAreaY0 + titleAreaHeight;
-      var headerAndDangerLevelHeight = _height * 0.2; // 20% of screen
+      var headerAndDangerLevelHeight = _height * 0.17; // 20% of screen
 
       drawHeaderAndDangerLevel(
         dc,
@@ -107,16 +114,21 @@ public class ForecastView extends Ui.View {
       );
 
       var mainContentY0 = headerAndDangerLevelY0 + headerAndDangerLevelHeight;
-      var mainContentHeight = _height * 0.5; // Half screen
+      var mainContentHeight = _height * 0.48; // Half screen
 
       drawMainContent(dc, mainContentY0, mainContentHeight);
 
       var footerY0 = mainContentY0 + mainContentHeight;
-      var footerHeight = _height * 0.15; // 15% of screen
+      var footerHeight = _height * 0.17; // 15% of screen
 
-      var text = Ui.loadResource($.Rez.Strings.Today);
-      drawSingleLineTextArea(dc, footerY0, footerHeight, text);
+      drawSingleLineTextArea(dc, footerY0, footerHeight, _todayText);
     }
+  }
+
+  public function onHide() {
+    _loadingText = null;
+    _todayText = null;
+    _levelText = null;
   }
 
   private function drawCircle(dc as Gfx.Dc) {
@@ -174,9 +186,7 @@ public class ForecastView extends Ui.View {
     var iconWidth = icon.getWidth();
     var iconHeight = icon.getHeight();
 
-    var levelText = Ui.loadResource($.Rez.Strings.Level);
-
-    var text = levelText + " " + _warning.dangerLevel.toString();
+    var text = _levelText + " " + _warning.dangerLevel.toString();
 
     var textWidth = dc.getTextWidthInPixels(text, font);
     var contentWidth = iconWidth + paddingBetween + textWidth;

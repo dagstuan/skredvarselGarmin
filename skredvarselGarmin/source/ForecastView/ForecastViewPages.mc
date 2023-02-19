@@ -6,6 +6,11 @@ using Toybox.Graphics as Gfx;
 using AvalancheUi;
 
 public class ForecastViewPages extends Ui.Drawable {
+  private enum ArrowDirection {
+    LEFT = 0,
+    RIGHT = 1,
+  }
+
   private var _warning as DetailedAvalancheWarning;
 
   private var _y0 as Numeric;
@@ -48,7 +53,20 @@ public class ForecastViewPages extends Ui.Drawable {
       -(currentPage * fullWidth) - (animationTime / 1000.0) * fullWidth;
 
     // First page, main text
-    drawFirstPage(dc, xOffset + x0, y0, areaWidth, areaHeight);
+    drawFirstPage(dc, x0 + xOffset, y0, areaWidth, areaHeight);
+
+    var arrowHeight = areaHeight * 0.1;
+    var arrowWidth = areaWidth * 0.02;
+
+    // Draw next arrow for first page
+    drawArrow(
+      dc,
+      x0 + xOffset + areaWidth + arrowWidth,
+      y0 + (areaHeight / 2 - arrowHeight / 2),
+      arrowWidth,
+      arrowHeight,
+      RIGHT
+    );
 
     xOffset += fullWidth;
 
@@ -67,6 +85,29 @@ public class ForecastViewPages extends Ui.Drawable {
         :height => areaHeight,
       });
       avalancheProblemUi.draw(dc);
+
+      // Arrows
+      // Left
+      drawArrow(
+        dc,
+        x0 + xOffset - arrowWidth * 2,
+        y0 + (areaHeight / 2 - arrowHeight / 2),
+        arrowWidth,
+        arrowHeight,
+        LEFT
+      );
+
+      if (i != numProblems - 1) {
+        // Right
+        drawArrow(
+          dc,
+          x0 + xOffset + areaWidth + arrowWidth,
+          y0 + (areaHeight / 2 - arrowHeight / 2),
+          arrowWidth,
+          arrowHeight,
+          RIGHT
+        );
+      }
 
       xOffset += fullWidth;
     }
@@ -92,5 +133,25 @@ public class ForecastViewPages extends Ui.Drawable {
       fitText,
       Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
     );
+  }
+
+  private function drawArrow(
+    dc as Gfx.Dc,
+    x0 as Numeric,
+    y0 as Numeric,
+    width as Numeric,
+    height as Numeric,
+    direction as ArrowDirection
+  ) {
+    dc.setPenWidth(1);
+    dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
+
+    if (direction == RIGHT) {
+      dc.drawLine(x0, y0, x0 + width, y0 + height / 2);
+      dc.drawLine(x0 + width, y0 + height / 2, x0, y0 + height);
+    } else {
+      dc.drawLine(x0 + width, y0, x0, y0 + height / 2);
+      dc.drawLine(x0, y0 + height / 2, x0 + width, y0 + height);
+    }
   }
 }

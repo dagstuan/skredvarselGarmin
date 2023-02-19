@@ -14,7 +14,7 @@ class skredvarselGarminApp extends Application.AppBase {
     _skredvarselStorage
   );
 
-  var REFRESH_INTERVAL_MINUTES = 120;
+  var REFRESH_INTERVAL_MINUTES = 60;
 
   function initialize() {
     AppBase.initialize();
@@ -84,6 +84,8 @@ class skredvarselGarminApp extends Application.AppBase {
   }
 
   public function onBackgroundData(fetchedData as Boolean?) as Void {
+    $.logMessage("Exited background job.");
+
     if (fetchedData) {
       Ui.requestUpdate();
     }

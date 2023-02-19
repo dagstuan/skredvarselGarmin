@@ -56,7 +56,6 @@ class ServiceDelegate extends System.ServiceDelegate {
     var reloadedNextRegion = reloadNextRegion();
 
     if (reloadedNextRegion == false) {
-      $.logMessage("Done reloaded regions.");
       Background.exit(true);
     }
   }

@@ -12,6 +12,8 @@ public class IntermediateBaseView extends Ui.View {
   private var _width as Number?;
   private var _height as Number?;
 
+  private var _hitBackToExitText as Ui.Resource?;
+
   public function initialize(
     mainView as Ui.View,
     mainViewDelegate as Ui.Menu2InputDelegate
@@ -28,6 +30,8 @@ public class IntermediateBaseView extends Ui.View {
       Ui.pushView(_mainView, _mainViewDelegate, Ui.SLIDE_IMMEDIATE);
       _firstShow = false;
     }
+
+    _hitBackToExitText = Ui.loadResource($.Rez.Strings.HitBackToExit);
   }
 
   function onLayout(dc as Gfx.Dc) {
@@ -40,14 +44,16 @@ public class IntermediateBaseView extends Ui.View {
     dc.clear();
     dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
 
-    var hitBackToExitText = Ui.loadResource($.Rez.Strings.HitBackToExit);
-
     dc.drawText(
       _width / 2,
       _height / 2,
       Gfx.FONT_SMALL,
-      hitBackToExitText,
+      _hitBackToExitText,
       Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
     );
+  }
+
+  public function onHide() {
+    _hitBackToExitText = null;
   }
 }

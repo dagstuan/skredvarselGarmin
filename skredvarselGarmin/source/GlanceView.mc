@@ -19,6 +19,9 @@ class GlanceView extends Ui.GlanceView {
   private var _width as Number?;
   private var _height as Number?;
 
+  private var _appNameText as Ui.Resource?;
+  private var _loadingText as Ui.Resource?;
+
   function initialize(
     skredvarselApi as SkredvarselApi,
     skredvarselStorage as SkredvarselStorage
@@ -38,6 +41,9 @@ class GlanceView extends Ui.GlanceView {
         method(:onReceive)
       );
     }
+
+    _appNameText = Ui.loadResource($.Rez.Strings.AppName);
+    _loadingText = Ui.loadResource($.Rez.Strings.Loading);
   }
 
   function onLayout(dc as Gfx.Dc) {
@@ -57,13 +63,11 @@ class GlanceView extends Ui.GlanceView {
     if (_regionId == null) {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
-      var appNameText = Ui.loadResource($.Rez.Strings.AppName) as String;
-
       dc.drawText(
         0,
         _height / 2,
         Graphics.FONT_GLANCE,
-        appNameText,
+        _appNameText,
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
     } else {
@@ -77,17 +81,20 @@ class GlanceView extends Ui.GlanceView {
       } else {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
-        var loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
-
         dc.drawText(
           0,
           dc.getHeight() / 2,
           Graphics.FONT_GLANCE,
-          loadingText,
+          _loadingText,
           Graphics.TEXT_JUSTIFY_LEFT
         );
       }
     }
+  }
+
+  function onHide() {
+    _appNameText = null;
+    _loadingText = null;
   }
 
   private function setForecastDataFromStorage() as Void {
