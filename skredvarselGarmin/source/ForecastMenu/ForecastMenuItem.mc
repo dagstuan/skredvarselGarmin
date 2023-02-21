@@ -8,32 +8,36 @@ using AvalancheUi;
 
 public class ForecastMenuItem extends Ui.CustomMenuItem {
   private var _regionId as String;
-  private var _skredvarselApi as SkredvarselApi;
+  private var _forecast as SimpleAvalancheForecast?;
+  private var _simpleForecastApi as SimpleForecastApi;
 
-  private var _hasForecast as Boolean = false;
-  private var _forecastTimeline as AvalancheUi.ForecastTimeline?;
+  private var _redrawForecast as Boolean = false;
 
   private var _screenWidth as Number;
 
   private var _loadingText as Ui.Resource;
 
+  private var _bufferedBitmap as Gfx.BufferedBitmap?;
+
+  private var _width as Numeric?;
+  private var _height as Numeric?;
+
   public function initialize(
-    skredvarselApi as SkredvarselApi,
+    simpleForecastApi as SimpleForecastApi,
     regionId as String
   ) {
     CustomMenuItem.initialize(regionId, {});
 
-    _skredvarselApi = skredvarselApi;
+    _simpleForecastApi = simpleForecastApi;
     _regionId = regionId;
-    _forecastTimeline = new AvalancheUi.ForecastTimeline();
 
     _screenWidth = $.getDeviceScreenWidth();
 
     _loadingText = Ui.loadResource($.Rez.Strings.Loading);
 
     getForecastFromCache();
-    if (!_hasForecast) {
-      _skredvarselApi.loadSimpleForecastForRegion(
+    if (_forecast == null) {
+      _simpleForecastApi.loadSimpleForecastForRegion(
         _regionId,
         method(:onReceive)
       );
@@ -43,25 +47,35 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   //! Draw the item string at the center of the item.
   //! @param dc Device context
   public function draw(dc as Gfx.Dc) as Void {
-    if (!_hasForecast) {
-      getForecastFromCache();
+    if (_width == null || _height == null) {
+      _width = dc.getWidth();
+      _height = dc.getHeight();
     }
 
-    var width = dc.getWidth();
-    var height = dc.getHeight();
+    if (_forecast != null) {
+      if (_bufferedBitmap == null) {
+        var marginLeft = _width == _screenWidth ? 10 : 0;
+        var marginRight = _width == _screenWidth ? 10 : 25;
 
-    if (_hasForecast) {
-      var marginLeft = width == _screenWidth ? 10 : 0;
-      var marginRight = width == _screenWidth ? 10 : 25;
+        _bufferedBitmap = $.newBufferedBitmap({
+          :width => _width,
+          :height => _height,
+        });
+        var bufferedDc = _bufferedBitmap.getDc();
 
-      _forecastTimeline.setSettings({
-        :locX => marginLeft,
-        :locY => 0,
-        :width => width - marginRight,
-        :height => height,
-      });
+        var forecastTimeline = new AvalancheUi.ForecastTimeline({
+          :locX => marginLeft,
+          :locY => 0,
+          :width => _width - marginRight,
+          :height => _height,
+          :regionId => _regionId,
+          :forecast => _forecast,
+        });
 
-      _forecastTimeline.draw(dc);
+        forecastTimeline.draw(bufferedDc);
+      }
+
+      dc.drawBitmap(0, 0, _bufferedBitmap);
     } else {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
@@ -76,14 +90,13 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   }
 
   private function getForecastFromCache() as Void {
-    var forecastData = _skredvarselApi.getSimpleForecastForRegion(_regionId);
+    var forecastArray =
+      _simpleForecastApi.getSimpleForecastForRegion(_regionId);
 
-    if (forecastData != null) {
-      _forecastTimeline.setData(
-        _regionId,
-        new SimpleAvalancheForecast(_regionId, forecastData[0])
-      );
-      _hasForecast = true;
+    if (forecastArray != null) {
+      // Reset buffered bitmap when receiving new data
+      _bufferedBitmap = null;
+      _forecast = forecastArray[0];
     }
   }
 

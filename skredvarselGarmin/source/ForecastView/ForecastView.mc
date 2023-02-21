@@ -6,11 +6,12 @@ using Toybox.Time as Time;
 using Toybox.Time.Gregorian;
 
 public class ForecastView extends Ui.View {
-  private const TIME_TO_CONSIDER_STALE = Gregorian.SECONDS_PER_HOUR * 2;
+  // private const TIME_TO_CONSIDER_STALE = Gregorian.SECONDS_PER_HOUR * 2;
+  private const TIME_TO_CONSIDER_STALE = 2;
   private const TIME_TO_SHOW_LOADING = Gregorian.SECONDS_PER_DAY;
   private const ANIMATION_TIME_SECONDS = 0.3;
 
-  private var _skredvarselApi as SkredvarselApi;
+  private var _detailedForecastApi as DetailedForecastApi;
   private var _regionId as String;
   private var _warning as DetailedAvalancheWarning?;
   private var _warningFetchedTime as Time.Moment?;
@@ -30,12 +31,12 @@ public class ForecastView extends Ui.View {
   private var _levelText as Ui.Resource?;
 
   public function initialize(
-    skredvarselApi as SkredvarselApi,
+    simpleForecastApi as DetailedForecastApi,
     regionId as String
   ) {
     View.initialize();
 
-    _skredvarselApi = skredvarselApi;
+    _detailedForecastApi = simpleForecastApi;
     _regionId = regionId;
 
     _deviceScreenWidth = $.getDeviceScreenWidth();
@@ -55,7 +56,7 @@ public class ForecastView extends Ui.View {
       _progressBar = new Ui.ProgressBar(_loadingText, null);
       Ui.pushView(_progressBar, new ProgressDelegate(), Ui.SLIDE_BLINK);
 
-      _skredvarselApi.loadDetailedWarningForRegion(
+      _detailedForecastApi.loadDetailedWarningForRegion(
         _regionId,
         method(:onReceive)
       );
@@ -64,7 +65,7 @@ public class ForecastView extends Ui.View {
     ) {
       $.logMessage("Stale forecast, try to reload in background");
 
-      _skredvarselApi.loadDetailedWarningForRegion(
+      _detailedForecastApi.loadDetailedWarningForRegion(
         _regionId,
         method(:onReceive)
       );
@@ -74,7 +75,7 @@ public class ForecastView extends Ui.View {
   }
 
   private function getWarningFromCache() as Void {
-    var data = _skredvarselApi.getDetailedWarningForRegion(_regionId);
+    var data = _detailedForecastApi.getDetailedWarningForRegion(_regionId);
 
     if (data != null) {
       _warning = new DetailedAvalancheWarning(data[0]);
@@ -101,7 +102,7 @@ public class ForecastView extends Ui.View {
         dc,
         titleAreaY0,
         titleAreaHeight,
-        $.Regions[_regionId]
+        $.getRegions()[_regionId]
       );
 
       var headerAndDangerLevelY0 = titleAreaY0 + titleAreaHeight;

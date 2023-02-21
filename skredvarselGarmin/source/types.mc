@@ -1,7 +1,14 @@
 import Toybox.Lang;
 
-typedef SimpleAvalancheWarningData as Dictionary<String, String>;
+using Toybox.Time;
 
-typedef SimpleAvalancheForecastData as Array<SimpleAvalancheWarningData>?;
+typedef SimpleAvalancheWarning as {
+  :dangerLevel as Number,
+  :validFrom as String,
+  :validTo as String,
+  :validity as Array,
+};
+
+typedef SimpleAvalancheForecast as Array<SimpleAvalancheWarning>;
 
 typedef DetailedAvalancheWarningData as Dictionary<String, String>?;

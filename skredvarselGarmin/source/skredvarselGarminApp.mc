@@ -8,12 +8,6 @@ using Toybox.Application.Storage;
 
 (:background)
 class skredvarselGarminApp extends Application.AppBase {
-  private var _skredvarselStorage as SkredvarselStorage =
-    new SkredvarselStorage();
-  private var _skredvarselApi as SkredvarselApi = new SkredvarselApi(
-    _skredvarselStorage
-  );
-
   var REFRESH_INTERVAL_MINUTES = 60;
 
   function initialize() {
@@ -45,10 +39,15 @@ class skredvarselGarminApp extends Application.AppBase {
   function getInitialView() as Array<Ui.Views or Ui.InputDelegates>? {
     registerTemporalEvent();
 
-    var mainView = new ForecastMenu(_skredvarselApi, _skredvarselStorage);
+    var queue = new CommandExecutor();
+    var skredvarselStorage = new SkredvarselStorage();
+    var simpleForecastApi = new SimpleForecastApi(queue);
+    var detailedForecastApi = new DetailedForecastApi(queue);
+
+    var mainView = new ForecastMenu(simpleForecastApi);
     var mainViewDelegate = new ForecastMenuInputDelegate(
-      _skredvarselApi,
-      _skredvarselStorage
+      detailedForecastApi,
+      skredvarselStorage
     );
 
     var deviceSettings = System.getDeviceSettings();
@@ -68,19 +67,39 @@ class skredvarselGarminApp extends Application.AppBase {
     }
 
     return [
-      new WidgetView(_skredvarselApi, _skredvarselStorage),
+      new WidgetView(simpleForecastApi),
       new WidgetViewDelegate(mainView, mainViewDelegate),
     ];
   }
 
   (:glance)
   function getGlanceView() {
+    var queue = new CommandExecutor();
+    var simpleForecastApi = new SimpleForecastApi(queue);
+
     registerTemporalEvent();
-    return [new GlanceView(_skredvarselApi, _skredvarselStorage)];
+
+    var favoriteRegionId = $.getFavoriteRegionId();
+
+    if (favoriteRegionId == null) {
+      return null;
+    }
+
+    return [
+      new GlanceView({
+        :simpleForecastApi => simpleForecastApi,
+        :regionId => favoriteRegionId,
+        :useBufferedBitmap => true, // TODO: set this based on device.
+      }),
+    ];
   }
 
   function getServiceDelegate() as Array<System.ServiceDelegate> {
-    return [new ServiceDelegate(_skredvarselApi, _skredvarselStorage)];
+    var queue = new CommandExecutor();
+    var simpleForecastApi = new SimpleForecastApi(queue);
+    var detailedForecastApi = new DetailedForecastApi(queue);
+
+    return [new ServiceDelegate(simpleForecastApi, detailedForecastApi)];
   }
 
   public function onBackgroundData(fetchedData as Boolean?) as Void {

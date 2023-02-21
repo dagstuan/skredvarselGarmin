@@ -3,20 +3,20 @@ import Toybox.System;
 
 (:background)
 class ServiceDelegate extends System.ServiceDelegate {
-  private var _skredvarselApi as SkredvarselApi;
-  private var _skredvarselStorage as SkredvarselStorage;
+  private var _simpleForecastApi as SimpleForecastApi;
+  private var _detailedForecastApi as DetailedForecastApi;
 
   private var _simpleRegionsToReload as Array<String> = [];
   private var _detailedRegionsToReload as Array<String> = [];
 
   public function initialize(
-    skredvarselApi as SkredvarselApi,
-    skredvarselStorage as SkredvarselStorage
+    simpleForecastApi as SimpleForecastApi,
+    detailedForecastApi as DetailedForecastApi
   ) {
     ServiceDelegate.initialize();
 
-    _skredvarselApi = skredvarselApi;
-    _skredvarselStorage = skredvarselStorage;
+    _simpleForecastApi = simpleForecastApi;
+    _detailedForecastApi = detailedForecastApi;
   }
 
   public function onTemporalEvent() as Void {
@@ -45,7 +45,7 @@ class ServiceDelegate extends System.ServiceDelegate {
       return;
     }
 
-    var selectedRegionIds = _skredvarselStorage.getSelectedRegionIds();
+    var selectedRegionIds = $.getSelectedRegionIds();
     _simpleRegionsToReload = selectedRegionIds;
     _detailedRegionsToReload = selectedRegionIds.slice(0, 2);
 
@@ -65,7 +65,7 @@ class ServiceDelegate extends System.ServiceDelegate {
       var nextRegion = _simpleRegionsToReload[0];
       _simpleRegionsToReload = _simpleRegionsToReload.slice(1, null);
 
-      _skredvarselApi.loadSimpleForecastForRegion(
+      _simpleForecastApi.loadSimpleForecastForRegion(
         nextRegion,
         method(:onReloadedRegion)
       );
@@ -75,7 +75,7 @@ class ServiceDelegate extends System.ServiceDelegate {
       var nextRegion = _detailedRegionsToReload[0];
       _detailedRegionsToReload = _detailedRegionsToReload.slice(1, null);
 
-      _skredvarselApi.loadDetailedWarningForRegion(
+      _detailedForecastApi.loadDetailedWarningForRegion(
         nextRegion,
         method(:onReloadedRegion)
       );

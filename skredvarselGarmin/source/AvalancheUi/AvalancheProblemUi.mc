@@ -7,6 +7,7 @@ module AvalancheUi {
   public enum TextElementsAlignment {
     TOP = 0,
     BOTTOM = 1,
+    CENTER = 2,
   }
 
   typedef AvalancheProblemSettings as {
@@ -171,8 +172,7 @@ module AvalancheUi {
           TOP,
           _problem.exposedHeight1 + "m"
         );
-      }
-      if (_problem.exposedHeightFill == 2) {
+      } else if (_problem.exposedHeightFill == 2) {
         drawHeightText(
           dc,
           x0,
@@ -183,9 +183,40 @@ module AvalancheUi {
           _problem.exposedHeight1 + "m"
         );
         drawHeightArrow(dc, x0, bottomY0, halfHeight, width, TOP, DOWN);
-      }
+      } else if (_problem.exposedHeightFill == 3) {
+        // TODO
+      } else if (_problem.exposedHeightFill == 4) {
+        var font = Gfx.FONT_XTINY;
+        var fontHeight = Gfx.getFontHeight(font);
 
-      // TODO: Exposedheightfill3 og 4
+        drawHeightArrow(
+          dc,
+          x0,
+          y0 + height / 2 - fontHeight - fontHeight / 2,
+          fontHeight,
+          width,
+          BOTTOM,
+          DOWN
+        );
+        drawHeightText(
+          dc,
+          x0,
+          y0 + height / 2 - fontHeight / 2,
+          fontHeight,
+          width,
+          CENTER,
+          _problem.exposedHeight2 + "-" + _problem.exposedHeight1 + "m"
+        );
+        drawHeightArrow(
+          dc,
+          x0,
+          y0 + height / 2 + fontHeight / 2,
+          fontHeight,
+          width,
+          TOP,
+          UP
+        );
+      }
     }
 
     private function drawHeightText(
@@ -197,13 +228,22 @@ module AvalancheUi {
       alignment as TextElementsAlignment,
       text as String
     ) {
+      $.drawOutline(dc, x0, y0, width, height);
+
       var font = Gfx.FONT_XTINY;
       var fontHeight = Gfx.getFontHeight(font);
       var textWidth = dc.getTextWidthInPixels(text, font);
 
       var textX0 = x0 + width / 2;
-      var textY0 =
-        alignment == TOP ? y0 + fontHeight / 2 : y0 + height - fontHeight / 2;
+
+      var textY0 = 0;
+      if (alignment == TOP) {
+        textY0 = y0 + fontHeight / 2;
+      } else if (alignment == CENTER) {
+        textY0 = y0 + height / 2;
+      } else if (alignment == BOTTOM) {
+        textY0 = y0 + height - fontHeight / 2;
+      }
 
       dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
       dc.drawText(
@@ -224,6 +264,8 @@ module AvalancheUi {
       alignment as TextElementsAlignment,
       direction as AvalancheUi.ArrowDirection
     ) {
+      $.drawOutline(dc, x0, y0, width, height);
+
       var font = Gfx.FONT_XTINY;
       var fontHeight = Gfx.getFontHeight(font);
 
@@ -243,20 +285,6 @@ module AvalancheUi {
       });
 
       arrow.draw(dc);
-    }
-
-    private function drawDivider(dc as Gfx.Dc) {
-      dc.setColor(Gfx.COLOR_DK_GRAY, Gfx.COLOR_TRANSPARENT);
-      dc.setPenWidth(1);
-
-      var offsetTopBottom = _height * 0.2;
-
-      dc.drawLine(
-        _locX + _halfWidth,
-        _locY + offsetTopBottom,
-        _locX + _halfWidth,
-        _locY + _height - offsetTopBottom
-      );
     }
 
     private function drawProblemText(

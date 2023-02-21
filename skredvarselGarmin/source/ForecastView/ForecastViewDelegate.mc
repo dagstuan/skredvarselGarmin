@@ -22,8 +22,8 @@ class ForecastViewDelegate extends Ui.BehaviorDelegate {
   public function onMenu() {
     var menu = new ForecastViewMenu();
 
-    var selectedRegionIds = _skredvarselStorage.getSelectedRegionIds();
-    var favoriteRegionId = _skredvarselStorage.getFavoriteRegionId();
+    var selectedRegionIds = $.getSelectedRegionIds();
+    var favoriteRegionId = $.getFavoriteRegionId();
 
     var setAsFavoriteMenuItemText = favoriteRegionId.equals(_regionId)
       ? $.Rez.Strings.RemoveAsFavorite

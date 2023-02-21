@@ -3,17 +3,17 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 
 public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
-  private var _skredvarselApi as SkredvarselApi;
+  private var _detailedForecastApi as DetailedForecastApi;
   private var _skredvarselStorage as SkredvarselStorage;
 
   //! Constructor
   public function initialize(
-    skredvarselApi as SkredvarselApi,
+    skredvarselApi as DetailedForecastApi,
     skredvarselStorage as SkredvarselStorage
   ) {
     Menu2InputDelegate.initialize();
 
-    _skredvarselApi = skredvarselApi;
+    _detailedForecastApi = skredvarselApi;
     _skredvarselStorage = skredvarselStorage;
   }
 
@@ -24,14 +24,14 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
 
     if (id.equals("edit")) {
       WatchUi.pushView(
-        new EditMenu(_skredvarselStorage),
+        new EditMenu(),
         new EditMenuDelegate(_skredvarselStorage),
         WatchUi.SLIDE_LEFT
       );
     } else {
       var regionId = (item as ForecastMenuItem).getRegionId();
 
-      var view = new ForecastView(_skredvarselApi, regionId);
+      var view = new ForecastView(_detailedForecastApi, regionId);
 
       WatchUi.pushView(
         view,

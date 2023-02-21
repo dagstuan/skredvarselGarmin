@@ -3,26 +3,29 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 using Toybox.Application.Storage;
 using Toybox.Graphics as Gfx;
+using Toybox.Math;
 
 public class ForecastMenu extends Ui.CustomMenu {
   private const _editItemId = "edit";
 
-  private var _skredvarselApi as SkredvarselApi;
-  private var _skredvarselStorage as SkredvarselStorage;
+  private var _simpleForecastApi as SimpleForecastApi;
 
   private var _existingRegionIds as Array<String> = new [0];
 
-  public function initialize(
-    skredvarselApi as SkredvarselApi,
-    skredvarselStorage as SkredvarselStorage
-  ) {
-    CustomMenu.initialize(60, Gfx.COLOR_BLACK, {});
-    _skredvarselApi = skredvarselApi;
-    _skredvarselStorage = skredvarselStorage;
+  public function initialize(simpleForecastApi as SimpleForecastApi) {
+    var screenHeight = $.getDeviceScreenHeight();
+
+    var menuElementsHeight = 60;
+    if (screenHeight > 260) {
+      menuElementsHeight += ((screenHeight - 260) * 0.2).toNumber();
+    }
+
+    CustomMenu.initialize(menuElementsHeight, Gfx.COLOR_BLACK, {});
+    _simpleForecastApi = simpleForecastApi;
   }
 
   function onShow() {
-    var regionIds = _skredvarselStorage.getSelectedRegionIds();
+    var regionIds = $.getSelectedRegionIds();
 
     var regionsChanged = false;
     if (regionIds.size() != _existingRegionIds) {
@@ -40,7 +43,7 @@ public class ForecastMenu extends Ui.CustomMenu {
 
       for (var i = 0; i < regionIds.size(); i++) {
         var regionId = regionIds[i];
-        addItem(new ForecastMenuItem(_skredvarselApi, regionId));
+        addItem(new ForecastMenuItem(_simpleForecastApi, regionId));
       }
 
       addItem(new ForecastMenuEditMenuItem(_editItemId));
@@ -84,27 +87,22 @@ public class ForecastMenu extends Ui.CustomMenu {
   }
 
   private function getIconResourceToDraw() as Symbol {
-    var favoriteRegionId = _skredvarselStorage.getFavoriteRegionId();
+    var favoriteRegionId = $.getFavoriteRegionId();
 
     if (favoriteRegionId != null) {
-      var forecastData =
-        _skredvarselApi.getSimpleForecastForRegion(favoriteRegionId);
+      var forecast =
+        _simpleForecastApi.getSimpleForecastForRegion(favoriteRegionId);
 
-      if (forecastData != null) {
-        var forecast = new SimpleAvalancheForecast(
-          favoriteRegionId,
-          forecastData[0]
-        );
-
-        var dangerLevelToday = forecast.getDangerLevelToday();
+      if (forecast != null) {
+        var dangerLevelToday = $.getDangerLevelToday(forecast[0]);
 
         return $.getIconResourceForDangerLevel(dangerLevelToday);
       }
 
-      return $.Rez.Drawables.LauncherIcon;
+      return $.Rez.Drawables.Level2;
     }
 
-    return $.Rez.Drawables.LauncherIcon;
+    return $.Rez.Drawables.Level2;
   }
 
   function deleteAllItems() {

@@ -10,12 +10,14 @@ module AvalancheUi {
     :locY as Numeric,
     :width as Numeric,
     :height as Numeric,
+    :regionId as String,
+    :forecast as SimpleAvalancheForecast,
   };
 
   (:glance)
   class ForecastTimeline {
-    private var _regionId as String?;
-    private var _forecast as SimpleAvalancheForecast?;
+    private var _regionId as String;
+    private var _forecast as SimpleAvalancheForecast;
 
     private var _numWarnings;
 
@@ -43,15 +45,21 @@ module AvalancheUi {
 
     private var _dangerLevelFont = Gfx.FONT_GLANCE;
 
-    public function setSettings(settings as ForecastTimelineSettings) {
+    private var _regionName as String?;
+
+    public function initialize(settings as ForecastTimelineSettings) {
       _locX = settings[:locX];
       _locY = settings[:locY];
       _width = settings[:width];
       _height = settings[:height];
       _lengthPerFullElem = (_width - _numGaps * _gap) / _daysToShow;
-    }
 
-    private function setEarlyCutoffTime() {
+      _regionId = settings[:regionId];
+      _regionName = $.getRegions()[_regionId];
+      _forecast = settings[:forecast];
+
+      _numWarnings = _forecast.size();
+
       var now = Time.getCurrentTime({
         :currentTimeType => Time.CURRENT_TIME_DEFAULT,
       });
@@ -60,33 +68,19 @@ module AvalancheUi {
       );
     }
 
-    public function setData(
-      regionId as String,
-      forecast as SimpleAvalancheForecast
-    ) {
-      _regionId = regionId;
-      _forecast = forecast;
-
-      _numWarnings = _forecast.warnings.size();
-
-      setEarlyCutoffTime();
-    }
-
     public function draw(dc as Gfx.Dc) {
-      if (_forecast == null) {
-        return;
-      }
-
       drawTitle(dc, _locX, _locY);
 
       var currXOffset = _locX;
 
       for (var i = 0; i < _numWarnings; i++) {
-        var warning = _forecast.warnings[i];
+        var warning = _forecast[i];
 
         var lengthDrawn = drawWarning(dc, currXOffset, warning);
 
-        currXOffset += lengthDrawn + _gap;
+        if (lengthDrawn > 0) {
+          currXOffset += lengthDrawn + _gap;
+        }
       }
 
       drawMarker(dc, _locX, _locY, _width, _height);
@@ -97,9 +91,10 @@ module AvalancheUi {
       x0 as Numeric,
       warning as SimpleAvalancheWarning
     ) as Numeric {
-      var validFrom = warning.validFrom;
-      var validTo = warning.validTo;
-      var dangerLevel = warning.dangerLevel;
+      var validity = warning["validity"] as Array;
+      var validFrom = validity[0];
+      var validTo = validity[1];
+      var dangerLevel = warning["dangerLevel"];
 
       if (validTo.lessThan(_earlyCutoffTime)) {
         // Forecast is earlier than we will render.
@@ -160,13 +155,13 @@ module AvalancheUi {
     }
 
     private function drawTitle(dc as Gfx.Dc, x0 as Number, y0 as Number) {
-      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
 
       dc.drawText(
         x0,
         y0,
         Graphics.FONT_GLANCE,
-        $.Regions[_regionId],
+        _regionName,
         Graphics.TEXT_JUSTIFY_LEFT
       );
     }

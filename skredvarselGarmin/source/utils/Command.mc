@@ -3,38 +3,16 @@ import Toybox.Lang;
 using Toybox.Communications;
 
 (:background)
-class Command {
-  var _next;
-  var _queue;
-
-  function initialize() {
-    _next = null;
-    _queue = null;
-  }
-
-  function start() {}
-
-  function finish() {
-    var queue = _queue;
-    _queue = null;
-
-    if (queue != null) {
-      queue.finishCommand();
-    }
-  }
-}
-
-(:background)
 class CommandExecutor {
-  hidden var _head;
-  hidden var _tail;
+  private var _head as WebRequestCommand?;
+  private var _tail as WebRequestCommand?;
 
   function initialize() {
     _head = null;
     _tail = null;
   }
 
-  function addCommand(command) {
+  function addCommand(command as WebRequestCommand) {
     command._queue = self;
 
     if (_head == null) {
@@ -65,14 +43,15 @@ class CommandExecutor {
 }
 
 (:background)
-class WebRequestCommand extends Command {
+class WebRequestCommand {
+  var _next;
+  var _queue;
   hidden var _url;
   hidden var _params;
   hidden var _options;
   hidden var _callback;
 
   function initialize(url, params, options, callback) {
-    Command.initialize();
     _url = url;
     _params = params;
     _options = options;
@@ -98,6 +77,15 @@ class WebRequestCommand extends Command {
     _callback = null;
 
     // remove self from the queue, start the next request
-    Command.finish();
+    finish();
+  }
+
+  function finish() {
+    var queue = _queue;
+    _queue = null;
+
+    if (queue != null) {
+      queue.finishCommand();
+    }
   }
 }

@@ -1,6 +1,7 @@
 import Toybox.Lang;
 
-using Toybox.Graphics as Gfx;
+using Toybox.WatchUi as Ui;
+using Toybox.Graphics;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.System;
@@ -9,32 +10,34 @@ using Toybox.Math;
 const DrawOutlines = false;
 
 (:background)
-const Regions = {
-  "3006" => "Finnmarkskysten",
-  "3032" => "Hallingdal",
-  "3034" => "Hardanger",
-  "3037" => "Heiane",
-  "3018" => "Helgeland",
-  "3027" => "Indre Fjordane",
-  "3029" => "Indre Sogn",
-  "3013" => "Indre Troms",
-  "3028" => "Jotunheimen",
-  "3014" => "Lofoten og Vesterålen",
-  "3010" => "Lyngen",
-  "3009" => "Nord-Troms",
-  "3003" => "Nordenskiöld Land",
-  "3015" => "Ofoten",
-  "3023" => "Romsdal",
-  "3016" => "Salten",
-  "3024" => "Sunnmøre",
-  "3017" => "Svartisen",
-  "3012" => "Sør-Troms",
-  "3022" => "Trollheimen",
-  "3011" => "Tromsø",
-  "3007" => "Vest-Finnmark",
-  "3035" => "Vest-Telemark",
-  "3031" => "Voss",
-};
+function getRegions() as Dictionary<String, String> {
+  return {
+    "3006" => "Finnmarkskysten",
+    "3032" => "Hallingdal",
+    "3034" => "Hardanger",
+    "3037" => "Heiane",
+    "3018" => "Helgeland",
+    "3027" => "Indre Fjordane",
+    "3029" => "Indre Sogn",
+    "3013" => "Indre Troms",
+    "3028" => "Jotunheimen",
+    "3014" => "Lofoten og Vesterålen",
+    "3010" => "Lyngen",
+    "3009" => "Nord-Troms",
+    "3003" => "Nordenskiöld Land",
+    "3015" => "Ofoten",
+    "3023" => "Romsdal",
+    "3016" => "Salten",
+    "3024" => "Sunnmøre",
+    "3017" => "Svartisen",
+    "3012" => "Sør-Troms",
+    "3022" => "Trollheimen",
+    "3011" => "Tromsø",
+    "3007" => "Vest-Finnmark",
+    "3035" => "Vest-Telemark",
+    "3031" => "Voss",
+  };
+}
 
 (:background)
 function canMakeWebRequest() as Boolean {
@@ -60,21 +63,35 @@ function getDeviceScreenWidth() as Number {
   return deviceSettings.screenWidth;
 }
 
+function getDeviceScreenHeight() as Number {
+  var deviceSettings = System.getDeviceSettings();
+  return deviceSettings.screenHeight;
+}
+
+(:background)
+function getAppColorPalette() as Array {
+  return [
+    // First five indices correspond to danger levels.
+    0xaaaaaa,
+    0x00ff00,
+    0xffff55,
+    0xffaa00,
+    0xff0000,
+    0x550000,
+    Graphics.COLOR_WHITE,
+    Graphics.COLOR_BLACK,
+    Graphics.COLOR_TRANSPARENT,
+  ];
+}
+
 (:glance)
-function colorize(dangerLevel as Number) as Gfx.ColorType {
-  if (dangerLevel == 1) {
-    return 0x00ff00;
-  } else if (dangerLevel == 2) {
-    return 0xffff55;
-  } else if (dangerLevel == 3) {
-    return 0xffaa00;
-  } else if (dangerLevel == 4) {
-    return 0xff0000;
-  } else if (dangerLevel == 5) {
-    return 0x550000;
-  } else {
-    return 0xaaaaaa;
+function colorize(dangerLevel as Number) as Graphics.ColorType {
+  var colorPalette = $.getAppColorPalette();
+  if (dangerLevel < 0 || dangerLevel > 5) {
+    return colorPalette[0];
   }
+
+  return colorPalette[dangerLevel];
 }
 
 (:background)
@@ -187,7 +204,7 @@ function getScreenWidthAtPoint(deviceScreenWidth as Numeric, y as Numeric) {
 }
 
 function drawOutline(
-  dc as Gfx.Dc,
+  dc as Graphics.Dc,
   x0 as Numeric,
   y0 as Numeric,
   width as Numeric,
@@ -198,11 +215,46 @@ function drawOutline(
   }
 
   dc.setPenWidth(1);
-  dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+  dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
 
   dc.drawRectangle(x0, y0, width, height);
 }
 
 function min(a as Numeric, b as Numeric) {
   return a < b ? a : b;
+}
+
+(:glance)
+public function getDangerLevelToday(
+  forecast as SimpleAvalancheForecast
+) as Number {
+  var now = Time.now();
+  for (var i = 0; i < forecast.size(); i++) {
+    var warning = forecast[i];
+    var validity = warning["validity"] as Array;
+    if (now.compare(validity[0]) > 0 && now.compare(validity[1]) <= 0) {
+      return warning["dangerLevel"];
+    }
+  }
+
+  return 0;
+}
+
+(:glance)
+public function newBufferedBitmap(
+  options as
+    {
+      :width as Number,
+      :height as Number,
+      :palette as Array<Graphics.ColorType>,
+      :colorDepth as Number,
+      :bitmapResource as Ui.BitmapResource,
+      :alphaBlending as Graphics.AlphaBlending,
+    }
+) {
+  if (Graphics has :createBufferedBitmap) {
+    return Graphics.createBufferedBitmap(options).get();
+  }
+
+  return new Graphics.BufferedBitmap(options);
 }

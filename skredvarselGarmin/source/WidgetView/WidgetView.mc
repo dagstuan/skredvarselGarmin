@@ -7,12 +7,11 @@ using AvalancheUi;
 
 public class WidgetView extends Ui.View {
   private var _regionId as String?;
-  private var _forecastData as SimpleAvalancheForecast?;
+  private var _forecast as SimpleAvalancheForecast?;
 
-  private var _skredvarselApi as SkredvarselApi;
-  private var _skredvarselStorage as SkredvarselStorage;
+  private var _simpleForecastApi as SimpleForecastApi;
 
-  private var _forecastTimeline as AvalancheUi.ForecastTimeline?;
+  private var _bufferedBitmap as Gfx.BufferedBitmap?;
 
   private var _width as Number?;
   private var _height as Number?;
@@ -20,16 +19,12 @@ public class WidgetView extends Ui.View {
   private var _appNameText as Ui.Resource?;
   private var _loadingText as Ui.Resource?;
 
-  public function initialize(
-    skredvarselApi as SkredvarselApi,
-    skredvarselStorage as SkredvarselStorage
-  ) {
+  public function initialize(simpleForecastApi as SimpleForecastApi) {
     View.initialize();
 
-    _skredvarselApi = skredvarselApi;
-    _skredvarselStorage = skredvarselStorage;
+    _simpleForecastApi = simpleForecastApi;
 
-    _regionId = skredvarselStorage.getFavoriteRegionId();
+    _regionId = $.getFavoriteRegionId();
     setForecastDataFromStorage();
   }
 
@@ -37,8 +32,8 @@ public class WidgetView extends Ui.View {
     _appNameText = Ui.loadResource($.Rez.Strings.AppName) as String;
     _loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
 
-    if (_regionId != null && _forecastData == null) {
-      _skredvarselApi.loadSimpleForecastForRegion(
+    if (_regionId != null && _forecast == null) {
+      _simpleForecastApi.loadSimpleForecastForRegion(
         _regionId,
         method(:onReceive)
       );
@@ -48,25 +43,8 @@ public class WidgetView extends Ui.View {
   function onLayout(dc as Gfx.Dc) {
     _width = dc.getWidth();
     _height = dc.getHeight();
-
-    var margin = 10;
-
-    var forecastWidth = _width - margin;
-    var forecastHeight = 80;
-    var x0 = margin;
-    var y0 = (_height * 0.55 - forecastHeight / 2).toNumber();
-
-    _forecastTimeline = new AvalancheUi.ForecastTimeline();
-    _forecastTimeline.setSettings({
-      :locX => x0,
-      :locY => y0,
-      :width => forecastWidth,
-      :height => forecastHeight,
-    });
   }
 
-  //! Update the view
-  //! @param dc Device context
   public function onUpdate(dc as Gfx.Dc) as Void {
     dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
     dc.clear();
@@ -84,13 +62,32 @@ public class WidgetView extends Ui.View {
         Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
       );
     } else {
-      if (_forecastData == null) {
-        setForecastDataFromStorage();
-      }
+      if (_forecast != null) {
+        if (_bufferedBitmap == null) {
+          _bufferedBitmap = $.newBufferedBitmap({
+            :width => _width,
+            :height => _height,
+          });
+          var bufferedDc = _bufferedBitmap.getDc();
+          var margin = 10;
 
-      if (_forecastData != null) {
-        _forecastTimeline.setData(_regionId, _forecastData);
-        _forecastTimeline.draw(dc);
+          var forecastWidth = _width - margin;
+          var forecastHeight = 80;
+          var x0 = margin;
+          var y0 = (_height * 0.55 - forecastHeight / 2).toNumber();
+
+          var forecastTimeline = new AvalancheUi.ForecastTimeline({
+            :locX => x0,
+            :locY => y0,
+            :width => forecastWidth,
+            :height => forecastHeight,
+            :regionId => _regionId,
+            :forecast => _forecast,
+          });
+          forecastTimeline.draw(bufferedDc);
+        }
+
+        dc.drawBitmap(0, 0, _bufferedBitmap);
       } else {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
@@ -111,10 +108,10 @@ public class WidgetView extends Ui.View {
   }
 
   private function setForecastDataFromStorage() as Void {
-    var data = _skredvarselApi.getSimpleForecastForRegion(_regionId);
+    var data = _simpleForecastApi.getSimpleForecastForRegion(_regionId);
 
     if (data != null) {
-      _forecastData = new SimpleAvalancheForecast(_regionId, data[0]);
+      _forecast = data[0];
     }
   }
 
@@ -149,26 +146,21 @@ public class WidgetView extends Ui.View {
   }
 
   private function getIconResourceToDraw() as Symbol {
-    var favoriteRegionId = _skredvarselStorage.getFavoriteRegionId();
+    var favoriteRegionId = $.getFavoriteRegionId();
 
     if (favoriteRegionId != null) {
       var dataForFavoriteRegion =
-        _skredvarselApi.getSimpleForecastForRegion(favoriteRegionId);
+        _simpleForecastApi.getSimpleForecastForRegion(favoriteRegionId);
 
       if (dataForFavoriteRegion != null) {
-        var forecast = new SimpleAvalancheForecast(
-          favoriteRegionId,
-          dataForFavoriteRegion[0]
-        );
-
-        var dangerLevelToday = forecast.getDangerLevelToday();
+        var dangerLevelToday = $.getDangerLevelToday(dataForFavoriteRegion[0]);
 
         return $.getIconResourceForDangerLevel(dangerLevelToday);
       }
 
-      return $.Rez.Drawables.LauncherIcon;
+      return $.Rez.Drawables.Level2;
     }
 
-    return $.Rez.Drawables.LauncherIcon;
+    return $.Rez.Drawables.Level2;
   }
 }

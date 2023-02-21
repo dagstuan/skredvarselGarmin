@@ -7,14 +7,20 @@ using Toybox.Time.Gregorian;
 
 using AvalancheUi;
 
+typedef GlanceViewSettings as {
+  :simpleForecastApi as SimpleForecastApi,
+  :regionId as String,
+  :useBufferedBitmap as Boolean,
+};
+
 (:glance)
 class GlanceView extends Ui.GlanceView {
-  private var _skredvarselApi as SkredvarselApi;
-  private var _regionId as String?;
+  private var _simpleForecastApi as SimpleForecastApi;
+  private var _regionId as String;
+  private var _useBufferedBitmap as Boolean;
 
-  private var _forecastData as SimpleAvalancheForecast?;
-
-  private var _forecastTimeline as AvalancheUi.ForecastTimeline?;
+  private var _forecast as SimpleAvalancheForecast?;
+  private var _bufferedBitmap as Gfx.BufferedBitmap?;
 
   private var _width as Number?;
   private var _height as Number?;
@@ -22,26 +28,14 @@ class GlanceView extends Ui.GlanceView {
   private var _appNameText as Ui.Resource?;
   private var _loadingText as Ui.Resource?;
 
-  function initialize(
-    skredvarselApi as SkredvarselApi,
-    skredvarselStorage as SkredvarselStorage
-  ) {
+  function initialize(settings as GlanceViewSettings) {
     GlanceView.initialize();
-    _skredvarselApi = skredvarselApi;
-
-    _regionId = skredvarselStorage.getFavoriteRegionId();
-
-    setForecastDataFromStorage();
+    _simpleForecastApi = settings[:simpleForecastApi];
+    _regionId = settings[:regionId];
+    _useBufferedBitmap = settings[:useBufferedBitmap];
   }
 
   function onShow() {
-    if (_regionId != null && _forecastData == null) {
-      _skredvarselApi.loadSimpleForecastForRegion(
-        _regionId,
-        method(:onReceive)
-      );
-    }
-
     _appNameText = Ui.loadResource($.Rez.Strings.AppName);
     _loadingText = Ui.loadResource($.Rez.Strings.Loading);
   }
@@ -50,46 +44,60 @@ class GlanceView extends Ui.GlanceView {
     _width = dc.getWidth();
     _height = dc.getHeight();
 
-    _forecastTimeline = new AvalancheUi.ForecastTimeline();
-    _forecastTimeline.setSettings({
-      :locX => 0,
-      :locY => 0,
-      :width => _width,
-      :height => _height,
-    });
+    setForecastDataFromStorage();
+    if (_forecast == null) {
+      _simpleForecastApi.loadSimpleForecastForRegion(
+        _regionId,
+        method(:onReceive)
+      );
+    }
   }
 
   function onUpdate(dc as Gfx.Dc) {
-    if (_regionId == null) {
+    if (_forecast != null) {
+      if (_useBufferedBitmap) {
+        drawTimelineBuffered(dc);
+      } else {
+        drawTimeline(dc);
+      }
+    } else {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
       dc.drawText(
         0,
-        _height / 2,
+        dc.getHeight() / 2,
         Graphics.FONT_GLANCE,
-        _appNameText,
-        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+        _loadingText,
+        Graphics.TEXT_JUSTIFY_LEFT
       );
-    } else {
-      if (_forecastData == null) {
-        setForecastDataFromStorage();
-      }
-
-      if (_forecastData != null) {
-        _forecastTimeline.setData(_regionId, _forecastData);
-        _forecastTimeline.draw(dc);
-      } else {
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-
-        dc.drawText(
-          0,
-          dc.getHeight() / 2,
-          Graphics.FONT_GLANCE,
-          _loadingText,
-          Graphics.TEXT_JUSTIFY_LEFT
-        );
-      }
     }
+  }
+
+  function drawTimelineBuffered(dc as Gfx.Dc) {
+    if (_bufferedBitmap == null) {
+      _bufferedBitmap = $.newBufferedBitmap({
+        :width => _width,
+        :height => _height,
+      });
+      var bufferedDc = _bufferedBitmap.getDc();
+
+      drawTimeline(bufferedDc);
+    }
+
+    dc.drawBitmap(0, 0, _bufferedBitmap);
+  }
+
+  function drawTimeline(dc as Gfx.Dc) {
+    var forecastTimeline = new AvalancheUi.ForecastTimeline({
+      :locX => 0,
+      :locY => 0,
+      :width => _width,
+      :height => _height,
+      :regionId => _regionId,
+      :forecast => _forecast,
+    });
+
+    forecastTimeline.draw(dc);
   }
 
   function onHide() {
@@ -98,10 +106,11 @@ class GlanceView extends Ui.GlanceView {
   }
 
   private function setForecastDataFromStorage() as Void {
-    var data = _skredvarselApi.getSimpleForecastForRegion(_regionId);
+    var data = _simpleForecastApi.getSimpleForecastForRegion(_regionId);
 
     if (data != null) {
-      _forecastData = new SimpleAvalancheForecast(_regionId, data[0]);
+      _bufferedBitmap = null;
+      _forecast = data[0];
     }
   }
 
