@@ -40,6 +40,7 @@ module AvalancheUi {
 
     public function draw(dc as Gfx.Dc) {
       dc.setPenWidth(_radius);
+      dc.setAntiAlias(true);
 
       var anglePerChar = 360 / 8;
       var originalStartAngle = 90 + Math.ceil(anglePerChar / 2);

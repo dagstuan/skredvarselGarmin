@@ -114,7 +114,7 @@ class GlanceView extends Ui.GlanceView {
     }
   }
 
-  function onReceive(data) as Void {
+  function onReceive(data as WebRequestCallbackData) as Void {
     setForecastDataFromStorage();
     Ui.requestUpdate();
   }

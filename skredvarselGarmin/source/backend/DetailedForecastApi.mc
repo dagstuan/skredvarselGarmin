@@ -23,7 +23,7 @@ public class DetailedForecastApi {
 
   public function loadDetailedWarningForRegion(
     regionId as String?,
-    callback as (Method(data) as Void)
+    callback as WebRequestDelegateCallback
   ) {
     if ($.canMakeWebRequest() == false) {
       $.logMessage("No connection available. Skipping loading forecast.");

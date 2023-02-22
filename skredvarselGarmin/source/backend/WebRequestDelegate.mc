@@ -7,19 +7,25 @@ using Toybox.Application.Storage;
 
 const BaseApiUrl = "https://skredvarsel.app/api";
 
+typedef WebRequestCallbackData as Dictionary<String, Object?> or String or Null;
+
+typedef WebRequestDelegateCallback as (Method
+  (data as WebRequestCallbackData) as Void
+);
+
 (:background)
 class WebRequestDelegate {
   private var _queue;
   private var _path as String;
   private var _storageKey as String?;
-  private var _callback as (Method(data) as Void);
+  private var _callback as WebRequestDelegateCallback;
 
   // Set up the callback to the view
   function initialize(
     queue as CommandExecutor,
     path as String,
     storageKey as String?,
-    callback as (Method(data) as Void)
+    callback as WebRequestDelegateCallback
   ) {
     _queue = queue;
     _path = path;

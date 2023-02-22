@@ -6,8 +6,7 @@ using Toybox.Time as Time;
 using Toybox.Time.Gregorian;
 
 public class ForecastView extends Ui.View {
-  // private const TIME_TO_CONSIDER_STALE = Gregorian.SECONDS_PER_HOUR * 2;
-  private const TIME_TO_CONSIDER_STALE = 2;
+  private const TIME_TO_CONSIDER_STALE = Gregorian.SECONDS_PER_HOUR * 2;
   private const TIME_TO_SHOW_LOADING = Gregorian.SECONDS_PER_DAY;
   private const ANIMATION_TIME_SECONDS = 0.3;
 
@@ -139,6 +138,7 @@ public class ForecastView extends Ui.View {
 
     dc.setColor(color, color);
     dc.setPenWidth(circleWidth);
+    dc.setAntiAlias(true);
     dc.drawCircle(
       _width / 2 - 1,
       _height / 2 - 1,
@@ -222,12 +222,15 @@ public class ForecastView extends Ui.View {
     _viewPages.draw(dc);
   }
 
-  public function onReceive(data) as Void {
+  public function onReceive(data as WebRequestCallbackData) as Void {
     if (_progressBar != null) {
       Ui.popView(Ui.SLIDE_BLINK);
     }
-    _warning = new DetailedAvalancheWarning(data);
-    Ui.requestUpdate();
+
+    if (data != null) {
+      getWarningFromCache();
+      Ui.requestUpdate();
+    }
   }
 
   public function updateIndex() {

@@ -45,7 +45,7 @@ public class SimpleForecastApi {
 
   public function loadSimpleForecastForRegion(
     regionId as String?,
-    callback as (Method(data) as Void)
+    callback as WebRequestDelegateCallback
   ) {
     if ($.canMakeWebRequest() == false) {
       $.logMessage("No connection available. Skipping loading forecast.");

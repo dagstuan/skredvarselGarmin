@@ -100,7 +100,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     }
   }
 
-  public function onReceive(data) as Void {
+  public function onReceive(data as WebRequestCallbackData) as Void {
     getForecastFromCache();
     Ui.requestUpdate();
   }

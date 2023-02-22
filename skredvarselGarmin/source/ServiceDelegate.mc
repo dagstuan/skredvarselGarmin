@@ -52,7 +52,7 @@ class ServiceDelegate extends System.ServiceDelegate {
     reloadNextRegion();
   }
 
-  public function onReloadedRegion(data) as Void {
+  public function onReloadedRegion(data as WebRequestCallbackData) as Void {
     var reloadedNextRegion = reloadNextRegion();
 
     if (reloadedNextRegion == false) {

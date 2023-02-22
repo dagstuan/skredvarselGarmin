@@ -200,6 +200,7 @@ module AvalancheUi {
     public function draw(dc as Gfx.Dc) {
       dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
       dc.setPenWidth(1);
+      dc.setAntiAlias(true);
 
       if (_exposedHeightFill == 1) {
         drawPoly(dc, _topHalfPoints, _dangerFillColor);
