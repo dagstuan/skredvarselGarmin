@@ -48,7 +48,12 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
           method(:onReceive)
         );
       } else {
-        pushDetailedForecastView(_regionId, 2, data[0], data[1]);
+        var warnings = data[0];
+        var fetchedTime = data[1];
+
+        var dataAge = Time.now().compare(new Time.Moment(fetchedTime));
+
+        pushDetailedForecastView(_regionId, 2, data[0], dataAge);
       }
     }
 
@@ -79,10 +84,12 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
       _detailedForecastApi,
       regionId,
       index,
+      data.size(),
       data[index],
       dataAge
     );
     var delegate = new DetailedForecastViewDelegate({
+      :detailedForecastApi => _detailedForecastApi,
       :index => index,
       :view => view,
       :detailedWarnings => data,

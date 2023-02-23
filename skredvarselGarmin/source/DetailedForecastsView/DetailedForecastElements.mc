@@ -18,7 +18,7 @@ public class DetailedForecastElements extends Ui.Drawable {
 
   public var currentPage = 0;
   public var animationTime = 0;
-  public var numPages as Number;
+  public var numElements as Number;
 
   private var _bufferedPages as Array<Gfx.BufferedBitmap>;
 
@@ -33,9 +33,9 @@ public class DetailedForecastElements extends Ui.Drawable {
     _height = height;
 
     _warning = warning;
-    numPages = (warning["avalancheProblems"] as Array).size() + 1;
+    numElements = (warning["avalancheProblems"] as Array).size() + 1;
 
-    _bufferedPages = new [numPages];
+    _bufferedPages = new [numElements];
   }
 
   public function draw(dc as Gfx.Dc) {
@@ -58,34 +58,18 @@ public class DetailedForecastElements extends Ui.Drawable {
 
     var avalancheProblems = _warning["avalancheProblems"] as Array;
 
-    for (var i = 0; i < numPages; i++) {
-      var arrowHeight = Math.floor(areaHeight * 0.1);
-      var arrowWidth = Math.floor(areaWidth * 0.02);
-
-      var spaceLeft = arrowWidth * 2 + 1;
-      var spaceRight = arrowWidth * 2 + 1;
-
+    for (var i = 0; i < numElements; i++) {
       if (_bufferedPages[i] == null) {
         // Never rendered, render the page offscreen;
         var bufferedBitmap = $.newBufferedBitmap({
-          :width => spaceLeft + areaWidth + spaceRight,
+          :width => areaWidth,
           :height => areaHeight.toNumber(),
         });
         _bufferedPages[i] = bufferedBitmap;
         var bufferedDc = bufferedBitmap.getDc();
 
         if (i == 0) {
-          drawFirstPage(bufferedDc, spaceLeft, 0, areaWidth, areaHeight);
-
-          // Draw next arrow for first page
-          drawArrow(
-            bufferedDc,
-            spaceLeft + areaWidth + arrowWidth,
-            areaHeight / 2 - arrowHeight / 2,
-            arrowWidth,
-            arrowHeight,
-            RIGHT
-          );
+          drawFirstPage(bufferedDc, 0, 0, areaWidth, areaHeight);
         } else {
           // Other pages, map avalancheproblems
           // Minus one since we start rendering avalanche problems on page 2
@@ -93,39 +77,16 @@ public class DetailedForecastElements extends Ui.Drawable {
 
           var avalancheProblemUi = new AvalancheUi.AvalancheProblemUi({
             :problem => problemToRender,
-            :locX => spaceLeft,
+            :locX => 0,
             :locY => 0,
             :width => areaWidth,
             :height => areaHeight,
           });
           avalancheProblemUi.draw(bufferedDc);
-
-          // Arrows
-          // Left
-          drawArrow(
-            bufferedDc,
-            0,
-            areaHeight / 2 - arrowHeight / 2,
-            arrowWidth,
-            arrowHeight,
-            LEFT
-          );
-
-          if (i != numPages - 1) {
-            // Right
-            drawArrow(
-              bufferedDc,
-              spaceLeft + areaWidth + arrowWidth,
-              areaHeight / 2 - arrowHeight / 2,
-              arrowWidth,
-              arrowHeight,
-              RIGHT
-            );
-          }
         }
       }
 
-      dc.drawBitmap(x0 + xOffset - spaceLeft, y0, _bufferedPages[i]);
+      dc.drawBitmap(x0 + xOffset, y0, _bufferedPages[i]);
 
       xOffset += fullWidth;
     }
@@ -152,25 +113,5 @@ public class DetailedForecastElements extends Ui.Drawable {
       fitText,
       Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
     );
-  }
-
-  private function drawArrow(
-    dc as Gfx.Dc,
-    x0 as Numeric,
-    y0 as Numeric,
-    width as Numeric,
-    height as Numeric,
-    direction as ArrowDirection
-  ) {
-    dc.setPenWidth(1);
-    dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
-
-    if (direction == RIGHT) {
-      dc.drawLine(x0, y0, x0 + width, y0 + height / 2);
-      dc.drawLine(x0 + width, y0 + height / 2, x0, y0 + height);
-    } else {
-      dc.drawLine(x0 + width, y0, x0, y0 + height / 2);
-      dc.drawLine(x0, y0 + height / 2, x0 + width, y0 + height);
-    }
   }
 }

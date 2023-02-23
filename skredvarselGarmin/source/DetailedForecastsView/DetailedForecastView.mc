@@ -3,13 +3,16 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
 using Toybox.Time.Gregorian;
+using Toybox.Timer;
+
+using AvalancheUi;
 
 class DetailedForecastView extends Ui.View {
   private const ANIMATION_TIME_SECONDS = 0.3;
   private const TIME_TO_CONSIDER_STALE = Gregorian.SECONDS_PER_HOUR * 2;
 
   private var _regionId as String;
-  private var _warning as DetailedAvalancheWarning;
+  private var _warning as DetailedAvalancheWarning?;
   private var _warningAge as Number;
   private var _index as Number;
 
@@ -21,12 +24,20 @@ class DetailedForecastView extends Ui.View {
   private var _levelText as Ui.Resource?;
 
   private var _elements as DetailedForecastElements?;
-  private var _currentPage as Number = 0;
+  private var _currentElement as Number = 0;
+  private var _numElements as Number?;
+
+  private var _pageIndicator as AvalancheUi.PageIndicator;
+  private var _animatePageIndicatorTimer as Timer.Timer?;
+
+  private var _forecastElementsIndicator as
+  AvalancheUi.ForecastElementsIndicator?;
 
   public function initialize(
     detailedForecastApi as DetailedForecastApi,
     regionId as String,
     index as Number,
+    numWarnings as Number,
     warning as DetailedAvalancheWarning,
     warningAge as Number
   ) {
@@ -34,8 +45,9 @@ class DetailedForecastView extends Ui.View {
 
     _regionId = regionId;
     _index = index;
-    _warning = warning;
     _warningAge = warningAge;
+
+    setWarning(warning);
 
     if (_warningAge > TIME_TO_CONSIDER_STALE) {
       $.logMessage("Stale forecast, try to reload in background");
@@ -46,12 +58,22 @@ class DetailedForecastView extends Ui.View {
       );
     }
 
+    _pageIndicator = new AvalancheUi.PageIndicator(numWarnings);
+
     _deviceScreenWidth = $.getDeviceScreenWidth();
+  }
+
+  function setWarning(warning as DetailedAvalancheWarning) {
+    _warning = warning;
+    _numElements = (warning["avalancheProblems"] as Array).size() + 1;
+    _forecastElementsIndicator = new AvalancheUi.ForecastElementsIndicator(
+      _numElements
+    );
   }
 
   public function onReceive(data as WebRequestCallbackData) as Void {
     if (data != null) {
-      _warning = (data as Array)[_index] as DetailedAvalancheWarning;
+      setWarning((data as Array)[_index] as DetailedAvalancheWarning);
       _warningAge = 0;
       Ui.requestUpdate();
     }
@@ -60,6 +82,27 @@ class DetailedForecastView extends Ui.View {
   public function onLayout(dc as Gfx.Dc) {
     _width = dc.getWidth();
     _height = dc.getHeight();
+
+    _animatePageIndicatorTimer = new Timer.Timer();
+    _animatePageIndicatorTimer.start(
+      method(:animatePageIndicatorTimerCallback),
+      2500,
+      true
+    );
+  }
+
+  function animatePageIndicatorTimerCallback() as Void {
+    Ui.animate(
+      _pageIndicator,
+      :visibilityPercent,
+      Ui.ANIM_TYPE_EASE_OUT,
+      100,
+      0,
+      1,
+      null
+    );
+    _animatePageIndicatorTimer.stop();
+    _animatePageIndicatorTimer = null;
   }
 
   public function onShow() {
@@ -71,66 +114,54 @@ class DetailedForecastView extends Ui.View {
     dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
     dc.clear();
 
-    if (_warning != null) {
-      drawCircle(dc);
+    var titleAreaY0 = 0;
+    var titleAreaHeight = _height * 0.18; // 15% of screen
 
-      var titleAreaY0 = 0;
-      var titleAreaHeight = _height * 0.18; // 15% of screen
+    drawSingleLineTextArea(
+      dc,
+      titleAreaY0,
+      titleAreaHeight,
+      $.getRegions()[_regionId]
+    );
 
-      drawSingleLineTextArea(
-        dc,
-        titleAreaY0,
-        titleAreaHeight,
-        $.getRegions()[_regionId]
-      );
+    var headerAndDangerLevelY0 = titleAreaY0 + titleAreaHeight;
+    var headerAndDangerLevelHeight = _height * 0.17; // 20% of screen
 
-      var headerAndDangerLevelY0 = titleAreaY0 + titleAreaHeight;
-      var headerAndDangerLevelHeight = _height * 0.17; // 20% of screen
+    drawHeaderAndDangerLevel(
+      dc,
+      headerAndDangerLevelY0,
+      headerAndDangerLevelHeight
+    );
 
-      drawHeaderAndDangerLevel(
-        dc,
-        headerAndDangerLevelY0,
-        headerAndDangerLevelHeight
-      );
+    var mainContentY0 = headerAndDangerLevelY0 + headerAndDangerLevelHeight;
+    var mainContentHeight = _height * 0.48; // Half screen
 
-      var mainContentY0 = headerAndDangerLevelY0 + headerAndDangerLevelHeight;
-      var mainContentHeight = _height * 0.48; // Half screen
+    drawMainContent(dc, mainContentY0, mainContentHeight);
 
-      drawMainContent(dc, mainContentY0, mainContentHeight);
+    var footerY0 = mainContentY0 + mainContentHeight;
+    var footerHeight = _height * 0.17; // 15% of screen
 
-      var footerY0 = mainContentY0 + mainContentHeight;
-      var footerHeight = _height * 0.17; // 15% of screen
+    var startValidity = (_warning["validity"] as Array)[0];
+    var validityDate = $.parseDate(startValidity);
+    var validityInfo = Gregorian.info(validityDate, Time.FORMAT_MEDIUM);
 
-      var startValidity = (_warning["validity"] as Array)[0];
-      var validityDate = $.parseDate(startValidity);
-      var validityInfo = Gregorian.info(validityDate, Time.FORMAT_MEDIUM);
+    var formattedTime = $.isToday(validityDate)
+      ? _todayText
+      : Lang.format("$1$ $2$", [validityInfo.day, validityInfo.month]);
 
-      var formattedTime = $.isToday(validityDate)
-        ? _todayText
-        : Lang.format("$1$ $2$", [validityInfo.day, validityInfo.month]);
+    drawSingleLineTextArea(dc, footerY0, footerHeight, formattedTime);
 
-      drawSingleLineTextArea(dc, footerY0, footerHeight, formattedTime);
-    }
+    _pageIndicator.draw(dc, _index);
+    _forecastElementsIndicator.draw(dc, _currentElement);
   }
 
   public function onHide() {
+    if (_animatePageIndicatorTimer != null) {
+      _animatePageIndicatorTimer.stop();
+      _animatePageIndicatorTimer = null;
+    }
     _todayText = null;
     _levelText = null;
-  }
-
-  private function drawCircle(dc as Gfx.Dc) {
-    var circleWidth = 3;
-    var paddingFromEdge = 4;
-    var color = colorize(_warning["dangerLevel"]);
-
-    dc.setColor(color, color);
-    dc.setPenWidth(circleWidth);
-    dc.setAntiAlias(true);
-    dc.drawCircle(
-      _width / 2 - 1,
-      _height / 2 - 1,
-      _width / 2 - paddingFromEdge
-    );
   }
 
   private function drawSingleLineTextArea(
@@ -183,6 +214,8 @@ class DetailedForecastView extends Ui.View {
     var x0 = _width / 2 - contentWidth / 2;
     var centerY0 = y0 + height / 2;
 
+    var color = colorize(_warning["dangerLevel"]);
+    dc.setColor(color, Gfx.COLOR_TRANSPARENT);
     dc.drawText(
       x0,
       centerY0,
@@ -206,7 +239,7 @@ class DetailedForecastView extends Ui.View {
       _elements = new DetailedForecastElements(_warning, y0, height);
     }
 
-    _elements.currentPage = _currentPage;
+    _elements.currentPage = _currentElement;
     _elements.draw(dc);
   }
 
@@ -215,8 +248,8 @@ class DetailedForecastView extends Ui.View {
       return;
     }
 
-    var offset = _currentPage == _elements.numPages - 1 ? 1 : -1;
-    _currentPage = (_currentPage + 1) % _elements.numPages;
+    var offset = _currentElement == _elements.numElements - 1 ? 1 : -1;
+    _currentElement = (_currentElement + 1) % _elements.numElements;
     _elements.animationTime = 1000 * offset;
     Ui.animate(
       _elements,
@@ -225,11 +258,11 @@ class DetailedForecastView extends Ui.View {
       _elements.animationTime,
       0,
       ANIMATION_TIME_SECONDS,
-      method(:animateComplete)
+      method(:pageAnimateComplete)
     );
   }
 
-  function animateComplete() as Void {
+  function pageAnimateComplete() as Void {
     _elements.animationTime = 0;
 
     Ui.requestUpdate();

@@ -60,12 +60,6 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
     return true;
   }
 
-  public function onSelect() as Boolean {
-    // $.logMessage("Select!");
-    _view.updateIndex();
-    return true;
-  }
-
   //! Handle a physical button being pressed and released
   //! @param evt The key event that occurred
   //! @return true if handled, false otherwise
@@ -75,6 +69,21 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
       onNxtPage();
       return true;
     } else if (Ui.KEY_UP == key) {
+      onPrevPage();
+      return true;
+    } else if (Ui.KEY_ENTER == key) {
+      _view.updateIndex();
+      return true;
+    }
+    return false;
+  }
+
+  public function onSwipe(evt as Ui.SwipeEvent) as Boolean {
+    var direction = evt.getDirection();
+    if (direction == Ui.SWIPE_UP) {
+      onNxtPage();
+      return true;
+    } else if (direction == Ui.SWIPE_DOWN) {
       onPrevPage();
       return true;
     }
@@ -104,6 +113,7 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
       _detailedForecastApi,
       _regionId,
       _index,
+      _detailedWarnings.size(),
       _detailedWarnings[_index],
       _dataAge
     );
@@ -111,6 +121,7 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
 
   private function getDelegate(newView as DetailedForecastView) {
     return new DetailedForecastViewDelegate({
+      :detailedForecastApi => _detailedForecastApi,
       :index => _index,
       :view => newView,
       :detailedWarnings => _detailedWarnings,
