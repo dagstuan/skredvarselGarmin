@@ -8,10 +8,21 @@ using Toybox.Application.Storage;
 
 (:background)
 class skredvarselGarminApp extends Application.AppBase {
-  var REFRESH_INTERVAL_MINUTES = 60;
+  const REFRESH_INTERVAL_MINUTES = 60;
+  const STORAGE_VERSION = 1;
 
   function initialize() {
     AppBase.initialize();
+  }
+
+  function onStart(state) {
+    var storageVersion = Storage.getValue("storageVersion") as Number?;
+
+    if (storageVersion == null || storageVersion != STORAGE_VERSION) {
+      $.logMessage("Wrong storage version detected. Resetting cache");
+      $.resetStorageCache();
+      Storage.setValue("storageVersion", STORAGE_VERSION);
+    }
   }
 
   private function registerTemporalEvent() {
@@ -40,15 +51,11 @@ class skredvarselGarminApp extends Application.AppBase {
     registerTemporalEvent();
 
     var queue = new CommandExecutor();
-    var skredvarselStorage = new SkredvarselStorage();
     var simpleForecastApi = new SimpleForecastApi(queue);
     var detailedForecastApi = new DetailedForecastApi(queue);
 
     var mainView = new ForecastMenu(simpleForecastApi);
-    var mainViewDelegate = new ForecastMenuInputDelegate(
-      detailedForecastApi,
-      skredvarselStorage
-    );
+    var mainViewDelegate = new ForecastMenuInputDelegate(detailedForecastApi);
 
     var deviceSettings = System.getDeviceSettings();
     if (

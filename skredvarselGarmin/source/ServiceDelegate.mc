@@ -75,7 +75,7 @@ class ServiceDelegate extends System.ServiceDelegate {
       var nextRegion = _detailedRegionsToReload[0];
       _detailedRegionsToReload = _detailedRegionsToReload.slice(1, null);
 
-      _detailedForecastApi.loadDetailedWarningForRegion(
+      _detailedForecastApi.loadDetailedWarningsForRegion(
         nextRegion,
         method(:onReloadedRegion)
       );

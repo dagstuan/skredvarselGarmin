@@ -4,11 +4,19 @@ using Toybox.Time;
 
 typedef SimpleAvalancheWarning as {
   :dangerLevel as Number,
-  :validFrom as String,
-  :validTo as String,
   :validity as Array,
 };
 
 typedef SimpleAvalancheForecast as Array<SimpleAvalancheWarning>;
 
-typedef DetailedAvalancheWarningData as Dictionary<String, String>?;
+typedef AvalancheProblem as {
+  :typeName as String,
+  :exposedHeights as Array<Number>,
+  :validExpositions as String,
+};
+typedef DetailedAvalancheWarning as {
+  :dangerLevel as Number,
+  :validity as Array,
+  :mainText as String,
+  :avalancheProblems as Array<AvalancheProblem>,
+};

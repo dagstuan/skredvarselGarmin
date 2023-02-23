@@ -5,7 +5,7 @@ using Toybox.Graphics as Gfx;
 
 using AvalancheUi;
 
-public class ForecastViewPages extends Ui.Drawable {
+public class DetailedForecastElements extends Ui.Drawable {
   private enum ArrowDirection {
     LEFT = 0,
     RIGHT = 1,
@@ -33,7 +33,7 @@ public class ForecastViewPages extends Ui.Drawable {
     _height = height;
 
     _warning = warning;
-    numPages = warning.avalancheProblems.size() + 1;
+    numPages = (warning["avalancheProblems"] as Array).size() + 1;
 
     _bufferedPages = new [numPages];
   }
@@ -55,6 +55,8 @@ public class ForecastViewPages extends Ui.Drawable {
       -(currentPage * fullWidth) - (animationTime / 1000.0) * fullWidth;
 
     $.drawOutline(dc, x0, y0 + areaHeight / 2, areaWidth, y0 + areaHeight / 2);
+
+    var avalancheProblems = _warning["avalancheProblems"] as Array;
 
     for (var i = 0; i < numPages; i++) {
       var arrowHeight = Math.floor(areaHeight * 0.1);
@@ -87,7 +89,7 @@ public class ForecastViewPages extends Ui.Drawable {
         } else {
           // Other pages, map avalancheproblems
           // Minus one since we start rendering avalanche problems on page 2
-          var problemToRender = _warning.avalancheProblems[i - 1];
+          var problemToRender = avalancheProblems[i - 1];
 
           var avalancheProblemUi = new AvalancheUi.AvalancheProblemUi({
             :problem => problemToRender,
@@ -136,7 +138,7 @@ public class ForecastViewPages extends Ui.Drawable {
     width as Numeric,
     height as Numeric
   ) {
-    var text = _warning.mainText;
+    var text = _warning["mainText"];
 
     var font = Gfx.FONT_XTINY;
 

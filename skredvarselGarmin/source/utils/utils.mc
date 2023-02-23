@@ -117,6 +117,17 @@ function parseDate(dateString as String) as Time.Moment {
   });
 }
 
+function isToday(moment as Time.Moment) {
+  var info = Gregorian.info(moment, Time.FORMAT_SHORT);
+  var today = Gregorian.info(Time.today(), Time.FORMAT_SHORT);
+
+  return (
+    info.day == today.day &&
+    info.month == today.month &&
+    info.year == today.year
+  );
+}
+
 function arrayContainsString(arr as Array<String>, str as String) {
   for (var i = 0; i < arr.size(); i++) {
     if (arr[i].equals(str)) {
@@ -257,4 +268,20 @@ public function newBufferedBitmap(
   }
 
   return new Graphics.BufferedBitmap(options);
+}
+
+(:glance)
+public function useBufferedBitmaps() {
+  var deviceSettings = System.getDeviceSettings();
+  var partNumber = deviceSettings.partNumber;
+  // Low mem for F6
+  if (
+    partNumber.equals("006-B3290-00") ||
+    partNumber.equals("006-B3289-00") ||
+    partNumber.equals("006-B3287-00")
+  ) {
+    return false;
+  }
+
+  return true;
 }

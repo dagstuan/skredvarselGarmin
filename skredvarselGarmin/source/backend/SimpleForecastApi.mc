@@ -28,15 +28,14 @@ public class SimpleForecastApi {
       for (var i = 0; i < forecast.size(); i++) {
         var warning = forecast[i];
 
+        var validity = warning["validity"] as Array;
+
         warning["validity"] = [
-          $.parseDate(warning["validFrom"]),
-          $.parseDate(warning["validTo"]),
+          $.parseDate(validity[0]),
+          $.parseDate(validity[1]),
         ];
-        warning.remove("validFrom");
-        warning.remove("validTo");
       }
 
-      // TODO CLEAN!
       return valueFromStorage;
     }
 

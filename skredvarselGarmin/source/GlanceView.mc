@@ -10,7 +10,6 @@ using AvalancheUi;
 typedef GlanceViewSettings as {
   :simpleForecastApi as SimpleForecastApi,
   :regionId as String,
-  :useBufferedBitmap as Boolean,
 };
 
 (:glance)
@@ -32,7 +31,7 @@ class GlanceView extends Ui.GlanceView {
     GlanceView.initialize();
     _simpleForecastApi = settings[:simpleForecastApi];
     _regionId = settings[:regionId];
-    _useBufferedBitmap = settings[:useBufferedBitmap];
+    _useBufferedBitmap = $.useBufferedBitmaps();
   }
 
   function onShow() {

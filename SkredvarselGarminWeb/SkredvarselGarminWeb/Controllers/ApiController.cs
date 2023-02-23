@@ -24,16 +24,18 @@ public class ApiController
         return warnings.Select(w => new SimpleAvalancheWarning
         {
             DangerLevel = w.DangerLevel,
-            ValidFrom = w.ValidFrom,
-            ValidTo = w.ValidTo
+            Validity = new DateTime[] {
+                w.ValidFrom,
+                w.ValidTo
+            }
         });
     }
 
-    [HttpGet("detailedWarningByRegion/{regionId}/{langKey}/{date}")]
-    public async Task<DetailedAvalancheWarning?> GetDetailedAvalancheWarningByRegion(string regionId, string langKey, DateOnly date)
+    [HttpGet("detailedWarningsByRegion/{regionId}/{langKey}/{from}/{to}")]
+    public async Task<IEnumerable<DetailedAvalancheWarning>> GetDetailedAvalancheWarningByRegion(string regionId, string langKey, DateOnly from, DateOnly to)
     {
-        var warning = await _varsomApi.GetDetailedWarningByRegion(regionId, langKey, date);
+        var warnings = await _varsomApi.GetDetailedWarningsByRegion(regionId, langKey, from, to);
 
-        return warning?.ToDetailedAvalancheWarning();
+        return warnings.Select(w => w.ToDetailedAvalancheWarning());
     }
 }

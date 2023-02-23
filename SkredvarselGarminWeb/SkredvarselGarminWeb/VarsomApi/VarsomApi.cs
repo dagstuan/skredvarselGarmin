@@ -16,46 +16,46 @@ public class VarsomApi : IVarsomApi
         _logger = logger;
     }
 
-    public async Task<VarsomSimpleAvalancheWarning[]> GetWarningsByRegion(string regionId, string langKey, DateOnly from, DateOnly to)
+    public async Task<IEnumerable<VarsomSimpleAvalancheWarning>> GetWarningsByRegion(string regionId, string langKey, DateOnly from, DateOnly to)
     {
         using var client = _httpClientFactory.CreateClient();
 
         try
         {
             var url = $"{BaseUrl}/avalancheWarningByRegion/Simple/{regionId}/{langKey}/{from:yyyy-MM-dd}/{to:yyyy-MM-dd}";
-            var warnings = await client.GetFromJsonAsync<VarsomSimpleAvalancheWarning[]>(
+            var warnings = await client.GetFromJsonAsync<IEnumerable<VarsomSimpleAvalancheWarning>>(
                 url,
                 new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
-            return warnings ?? Array.Empty<VarsomSimpleAvalancheWarning>();
+            return warnings ?? new List<VarsomSimpleAvalancheWarning>();
         }
         catch (Exception ex)
         {
             _logger.LogError("Error getting warnings by region: {Error}", ex);
         }
 
-        return Array.Empty<VarsomSimpleAvalancheWarning>();
+        return new List<VarsomSimpleAvalancheWarning>();
     }
 
-    public async Task<VarsomDetailedAvalancheWarning?> GetDetailedWarningByRegion(string regionId, string langKey, DateOnly date)
+    public async Task<IEnumerable<VarsomDetailedAvalancheWarning>> GetDetailedWarningsByRegion(string regionId, string langKey, DateOnly from, DateOnly to)
     {
         using var client = _httpClientFactory.CreateClient();
         client.Timeout = TimeSpan.FromSeconds(30);
 
         try
         {
-            var url = $"{BaseUrl}/avalancheWarningByRegion/Detail/{regionId}/{langKey}/{date:yyyy-MM-dd}/{date:yyyy-MM-dd}";
-            var warnings = await client.GetFromJsonAsync<VarsomDetailedAvalancheWarning[]>(
+            var url = $"{BaseUrl}/avalancheWarningByRegion/Detail/{regionId}/{langKey}/{from:yyyy-MM-dd}/{to:yyyy-MM-dd}";
+            var warnings = await client.GetFromJsonAsync<IEnumerable<VarsomDetailedAvalancheWarning>>(
                 url,
                 new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
-            return warnings?[0] ?? null;
+            return warnings ?? new List<VarsomDetailedAvalancheWarning>();
         }
         catch (Exception ex)
         {
             _logger.LogError("Error getting warnings by region: {Error}", ex);
         }
 
-        return null;
+        return new List<VarsomDetailedAvalancheWarning>();
     }
 }

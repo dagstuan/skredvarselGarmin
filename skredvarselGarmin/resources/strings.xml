@@ -4,7 +4,7 @@
 	<string id="Edit">Edit</string>
 	<string id="Remove">Remove</string>
 	<string id="HitBackToExit">Hit back to exit.</string>
-	<string id="RemoveAsFavorite">Remove as favorite</string>
+	<string id="RemoveAsFavorite">Unfavorite</string>
 	<string id="SetAsFavorite">Set as favorite</string>
 	<string id="AddRegions">Add regions</string>
 	<string id="PickRegions">Pick regions</string>

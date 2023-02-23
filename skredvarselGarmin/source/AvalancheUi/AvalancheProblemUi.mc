@@ -107,7 +107,7 @@ module AvalancheUi {
       var minSize = $.min(width, height);
 
       var validExpositions = new AvalancheUi.ValidExpositions({
-        :validExpositions => _problem.validExpositions,
+        :validExpositions => _problem["validExpositions"],
         :dangerFillColor => _dangerFillColor,
         :nonDangerFillColor => _nonDangerFillColor,
         :locX => x0 + width / 2,
@@ -132,10 +132,12 @@ module AvalancheUi {
       var sizeModifier = 0.9;
       var exposedWidth = minSize * sizeModifier;
 
+      var exposedHeights = _problem["exposedHeights"] as Array;
+
       var exposedHeightUi = new AvalancheUi.ExposedHeight({
-        :exposedHeight1 => _problem.exposedHeight1,
-        :exposedHeight2 => _problem.exposedHeight2,
-        :exposedHeightFill => _problem.exposedHeightFill,
+        :exposedHeight1 => exposedHeights[0],
+        :exposedHeight2 => exposedHeights[1],
+        :exposedHeightFill => exposedHeights[2],
         :dangerFillColor => _dangerFillColor,
         :nonDangerFillColor => _nonDangerFillColor,
         :locX => x0 + (width / 2 - exposedWidth / 2),
@@ -161,7 +163,12 @@ module AvalancheUi {
 
       $.drawOutline(dc, x0, bottomY0, width, halfHeight);
 
-      if (_problem.exposedHeightFill == 1) {
+      var exposedHeights = _problem["exposedHeights"] as Array;
+      var exposedHeight1 = exposedHeights[0];
+      var exposedHeight2 = exposedHeights[1];
+      var exposedHeightFill = exposedHeights[2];
+
+      if (exposedHeightFill == 1) {
         drawHeightArrow(dc, x0, y0, halfHeight, width, BOTTOM, UP);
         drawHeightText(
           dc,
@@ -170,9 +177,9 @@ module AvalancheUi {
           halfHeight,
           width,
           TOP,
-          _problem.exposedHeight1 + "m"
+          exposedHeight1 + "m"
         );
-      } else if (_problem.exposedHeightFill == 2) {
+      } else if (exposedHeightFill == 2) {
         drawHeightText(
           dc,
           x0,
@@ -180,12 +187,12 @@ module AvalancheUi {
           halfHeight,
           width,
           BOTTOM,
-          _problem.exposedHeight1 + "m"
+          exposedHeight1 + "m"
         );
         drawHeightArrow(dc, x0, bottomY0, halfHeight, width, TOP, DOWN);
-      } else if (_problem.exposedHeightFill == 3) {
+      } else if (exposedHeightFill == 3) {
         // TODO
-      } else if (_problem.exposedHeightFill == 4) {
+      } else if (exposedHeightFill == 4) {
         var font = Gfx.FONT_XTINY;
         var fontHeight = Gfx.getFontHeight(font);
 
@@ -205,7 +212,7 @@ module AvalancheUi {
           fontHeight,
           width,
           CENTER,
-          _problem.exposedHeight2 + "-" + _problem.exposedHeight1 + "m"
+          exposedHeight2 + "-" + exposedHeight1 + "m"
         );
         drawHeightArrow(
           dc,
@@ -295,7 +302,7 @@ module AvalancheUi {
       height as Numeric
     ) {
       dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
-      var text = _problem.avalancheProblemTypeName;
+      var text = _problem["typeName"];
       var font = Gfx.FONT_XTINY;
       var fontHeight = Gfx.getFontHeight(font);
 

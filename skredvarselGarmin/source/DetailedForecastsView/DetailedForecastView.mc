@@ -2,89 +2,69 @@ import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
-using Toybox.Time as Time;
 using Toybox.Time.Gregorian;
 
-public class ForecastView extends Ui.View {
-  private const TIME_TO_CONSIDER_STALE = Gregorian.SECONDS_PER_HOUR * 2;
-  private const TIME_TO_SHOW_LOADING = Gregorian.SECONDS_PER_DAY;
+class DetailedForecastView extends Ui.View {
   private const ANIMATION_TIME_SECONDS = 0.3;
+  private const TIME_TO_CONSIDER_STALE = Gregorian.SECONDS_PER_HOUR * 2;
 
-  private var _detailedForecastApi as DetailedForecastApi;
   private var _regionId as String;
-  private var _warning as DetailedAvalancheWarning?;
-  private var _warningFetchedTime as Time.Moment?;
+  private var _warning as DetailedAvalancheWarning;
+  private var _warningAge as Number;
+  private var _index as Number;
 
   private var _width as Numeric?;
   private var _height as Numeric?;
-
   private var _deviceScreenWidth as Numeric;
 
-  private var _progressBar as Ui.ProgressBar?;
-
-  private var _viewPages as ForecastViewPages?;
-  private var _currentPage as Number = 0;
-
-  private var _loadingText as Ui.Resource?;
   private var _todayText as Ui.Resource?;
   private var _levelText as Ui.Resource?;
 
+  private var _elements as DetailedForecastElements?;
+  private var _currentPage as Number = 0;
+
   public function initialize(
-    simpleForecastApi as DetailedForecastApi,
-    regionId as String
+    detailedForecastApi as DetailedForecastApi,
+    regionId as String,
+    index as Number,
+    warning as DetailedAvalancheWarning,
+    warningAge as Number
   ) {
     View.initialize();
 
-    _detailedForecastApi = simpleForecastApi;
     _regionId = regionId;
+    _index = index;
+    _warning = warning;
+    _warningAge = warningAge;
+
+    if (_warningAge > TIME_TO_CONSIDER_STALE) {
+      $.logMessage("Stale forecast, try to reload in background");
+
+      detailedForecastApi.loadDetailedWarningsForRegion(
+        regionId,
+        method(:onReceive)
+      );
+    }
 
     _deviceScreenWidth = $.getDeviceScreenWidth();
   }
 
-  public function onShow() {
-    _todayText = Ui.loadResource($.Rez.Strings.Today);
-    _levelText = Ui.loadResource($.Rez.Strings.Level);
-
-    getWarningFromCache();
-    if (
-      _warning == null ||
-      Time.now().compare(_warningFetchedTime) > TIME_TO_SHOW_LOADING
-    ) {
-      // Har ikke warning. Vis loading.
-      _loadingText = Ui.loadResource($.Rez.Strings.Loading);
-      _progressBar = new Ui.ProgressBar(_loadingText, null);
-      Ui.pushView(_progressBar, new ProgressDelegate(), Ui.SLIDE_BLINK);
-
-      _detailedForecastApi.loadDetailedWarningForRegion(
-        _regionId,
-        method(:onReceive)
-      );
-    } else if (
-      Time.now().compare(_warningFetchedTime) > TIME_TO_CONSIDER_STALE
-    ) {
-      $.logMessage("Stale forecast, try to reload in background");
-
-      _detailedForecastApi.loadDetailedWarningForRegion(
-        _regionId,
-        method(:onReceive)
-      );
-
-      // Har warning, men den er stale. Vis bildet og last i bakgrunnen.
-    }
-  }
-
-  private function getWarningFromCache() as Void {
-    var data = _detailedForecastApi.getDetailedWarningForRegion(_regionId);
-
+  public function onReceive(data as WebRequestCallbackData) as Void {
     if (data != null) {
-      _warning = new DetailedAvalancheWarning(data[0]);
-      _warningFetchedTime = new Time.Moment(data[1]);
+      _warning = (data as Array)[_index] as DetailedAvalancheWarning;
+      _warningAge = 0;
+      Ui.requestUpdate();
     }
   }
 
   public function onLayout(dc as Gfx.Dc) {
     _width = dc.getWidth();
     _height = dc.getHeight();
+  }
+
+  public function onShow() {
+    _todayText = Ui.loadResource($.Rez.Strings.Today);
+    _levelText = Ui.loadResource($.Rez.Strings.Level);
   }
 
   public function onUpdate(dc as Gfx.Dc) as Void {
@@ -121,12 +101,19 @@ public class ForecastView extends Ui.View {
       var footerY0 = mainContentY0 + mainContentHeight;
       var footerHeight = _height * 0.17; // 15% of screen
 
-      drawSingleLineTextArea(dc, footerY0, footerHeight, _todayText);
+      var startValidity = (_warning["validity"] as Array)[0];
+      var validityDate = $.parseDate(startValidity);
+      var validityInfo = Gregorian.info(validityDate, Time.FORMAT_MEDIUM);
+
+      var formattedTime = $.isToday(validityDate)
+        ? _todayText
+        : Lang.format("$1$ $2$", [validityInfo.day, validityInfo.month]);
+
+      drawSingleLineTextArea(dc, footerY0, footerHeight, formattedTime);
     }
   }
 
   public function onHide() {
-    _loadingText = null;
     _todayText = null;
     _levelText = null;
   }
@@ -134,7 +121,7 @@ public class ForecastView extends Ui.View {
   private function drawCircle(dc as Gfx.Dc) {
     var circleWidth = 3;
     var paddingFromEdge = 4;
-    var color = colorize(_warning.dangerLevel);
+    var color = colorize(_warning["dangerLevel"]);
 
     dc.setColor(color, color);
     dc.setPenWidth(circleWidth);
@@ -180,14 +167,15 @@ public class ForecastView extends Ui.View {
   ) {
     $.drawOutline(dc, 0, y0, _width, height);
 
+    var dangerLevel = _warning["dangerLevel"];
     var font = Gfx.FONT_MEDIUM;
     var paddingBetween = _width * 0.02;
-    var iconResource = $.getIconResourceForDangerLevel(_warning.dangerLevel);
+    var iconResource = $.getIconResourceForDangerLevel(dangerLevel);
     var icon = WatchUi.loadResource(iconResource);
     var iconWidth = icon.getWidth();
     var iconHeight = icon.getHeight();
 
-    var text = _levelText + " " + _warning.dangerLevel.toString();
+    var text = _levelText + " " + dangerLevel.toString();
 
     var textWidth = dc.getTextWidthInPixels(text, font);
     var contentWidth = iconWidth + paddingBetween + textWidth;
@@ -214,38 +202,27 @@ public class ForecastView extends Ui.View {
     y0 as Numeric,
     height as Numeric
   ) {
-    if (_viewPages == null) {
-      _viewPages = new ForecastViewPages(_warning, y0, height);
+    if (_elements == null) {
+      _elements = new DetailedForecastElements(_warning, y0, height);
     }
 
-    _viewPages.currentPage = _currentPage;
-    _viewPages.draw(dc);
-  }
-
-  public function onReceive(data as WebRequestCallbackData) as Void {
-    if (_progressBar != null) {
-      Ui.popView(Ui.SLIDE_BLINK);
-    }
-
-    if (data != null) {
-      getWarningFromCache();
-      Ui.requestUpdate();
-    }
+    _elements.currentPage = _currentPage;
+    _elements.draw(dc);
   }
 
   public function updateIndex() {
-    if (_viewPages == null) {
+    if (_elements == null) {
       return;
     }
 
-    var offset = _currentPage == _viewPages.numPages - 1 ? 1 : -1;
-    _currentPage = (_currentPage + 1) % _viewPages.numPages;
-    _viewPages.animationTime = 1000 * offset;
+    var offset = _currentPage == _elements.numPages - 1 ? 1 : -1;
+    _currentPage = (_currentPage + 1) % _elements.numPages;
+    _elements.animationTime = 1000 * offset;
     Ui.animate(
-      _viewPages,
+      _elements,
       :animationTime,
       Ui.ANIM_TYPE_EASE_IN_OUT,
-      _viewPages.animationTime,
+      _elements.animationTime,
       0,
       ANIMATION_TIME_SECONDS,
       method(:animateComplete)
@@ -253,7 +230,7 @@ public class ForecastView extends Ui.View {
   }
 
   function animateComplete() as Void {
-    _viewPages.animationTime = 0;
+    _elements.animationTime = 0;
 
     Ui.requestUpdate();
   }

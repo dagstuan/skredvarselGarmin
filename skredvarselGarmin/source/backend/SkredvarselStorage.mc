@@ -12,8 +12,8 @@ function getSimpleForecastCacheKeyForRegion(regionId as String) {
 }
 
 (:background)
-function getDetailedWarningCacheKeyForRegion(regionId as String) {
-  return "WebRequestCache_detailed_warning_for_region_" + regionId;
+function getDetailedWarningsCacheKeyForRegion(regionId as String) {
+  return "WebRequestCache_detailed_warnings_for_region_" + regionId;
 }
 
 (:background)
@@ -34,6 +34,7 @@ function getFavoriteRegionId() as String? {
   return null;
 }
 
+(:background)
 function resetStorageCache() {
   var selectedRegionIds = $.getSelectedRegionIds();
   Storage.clearValues();
@@ -45,60 +46,58 @@ function setSelectedRegionIdsInStorage(regionIds as Array<String>) {
   Storage.setValue(SelectedRegionIdsStorageKey, regionIds);
 }
 
-public class SkredvarselStorage {
-  public function toggleFavoriteRegion(regionId as String) as Void {
-    var selectedRegionIds = self.getSelectedRegionIds();
+public function toggleFavoriteRegion(regionId as String) as Void {
+  var selectedRegionIds = self.getSelectedRegionIds();
 
-    if (selectedRegionIds != null) {
-      // Remove from favorites.
-      var regionIdsSize = selectedRegionIds.size();
+  if (selectedRegionIds != null) {
+    // Remove from favorites.
+    var regionIdsSize = selectedRegionIds.size();
 
-      if (regionId.equals(selectedRegionIds[0])) {
-        selectedRegionIds[0] = selectedRegionIds[1];
-        selectedRegionIds[1] = regionId;
-      } else {
-        // Set as favorite.
-        // Move element to beginning, shifting other elements.
-        var index = -1;
-        for (var i = 0; i < regionIdsSize; i++) {
-          if (selectedRegionIds[i].equals(regionId)) {
-            index = i;
-            break;
-          }
+    if (regionId.equals(selectedRegionIds[0])) {
+      selectedRegionIds[0] = selectedRegionIds[1];
+      selectedRegionIds[1] = regionId;
+    } else {
+      // Set as favorite.
+      // Move element to beginning, shifting other elements.
+      var index = -1;
+      for (var i = 0; i < regionIdsSize; i++) {
+        if (selectedRegionIds[i].equals(regionId)) {
+          index = i;
+          break;
         }
-
-        for (var i = index; i > 0; i--) {
-          selectedRegionIds[i] = selectedRegionIds[i - 1];
-        }
-
-        selectedRegionIds[0] = regionId;
       }
 
-      setSelectedRegionIdsInStorage(selectedRegionIds);
+      for (var i = index; i > 0; i--) {
+        selectedRegionIds[i] = selectedRegionIds[i - 1];
+      }
+
+      selectedRegionIds[0] = regionId;
     }
+
+    setSelectedRegionIdsInStorage(selectedRegionIds);
   }
+}
 
-  public function addSelectedRegion(regionId as String) {
-    var selectedRegionIds = getSelectedRegionIds();
+public function removeSelectedRegion(regionId as String) {
+  var selectedRegionIds = getSelectedRegionIds();
 
-    if (!arrayContainsString(selectedRegionIds, regionId)) {
-      var newRegionIds = addToArray(selectedRegionIds, regionId);
-      setSelectedRegionIdsInStorage(newRegionIds);
-    }
+  if (arrayContainsString(selectedRegionIds, regionId)) {
+    var newRegionIds = removeStringFromArray(selectedRegionIds, regionId);
+    setSelectedRegionIdsInStorage(newRegionIds);
+    removeForecastDataForRegion(regionId);
   }
+}
 
-  public function removeSelectedRegion(regionId as String) {
-    var selectedRegionIds = getSelectedRegionIds();
+public function addSelectedRegion(regionId as String) {
+  var selectedRegionIds = getSelectedRegionIds();
 
-    if (arrayContainsString(selectedRegionIds, regionId)) {
-      var newRegionIds = removeStringFromArray(selectedRegionIds, regionId);
-      setSelectedRegionIdsInStorage(newRegionIds);
-      removeForecastDataForRegion(regionId);
-    }
+  if (!arrayContainsString(selectedRegionIds, regionId)) {
+    var newRegionIds = addToArray(selectedRegionIds, regionId);
+    setSelectedRegionIdsInStorage(newRegionIds);
   }
+}
 
-  private function removeForecastDataForRegion(regionId as String) {
-    Storage.deleteValue(getSimpleForecastCacheKeyForRegion(regionId));
-    Storage.deleteValue(getDetailedWarningCacheKeyForRegion(regionId));
-  }
+function removeForecastDataForRegion(regionId as String) {
+  Storage.deleteValue(getSimpleForecastCacheKeyForRegion(regionId));
+  Storage.deleteValue(getDetailedWarningsCacheKeyForRegion(regionId));
 }

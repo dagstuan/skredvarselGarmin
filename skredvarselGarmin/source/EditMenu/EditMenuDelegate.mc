@@ -1,12 +1,8 @@
 using Toybox.WatchUi as Ui;
 
 public class EditMenuDelegate extends Ui.Menu2InputDelegate {
-  private var _skredvarselStorage as SkredvarselStorage;
-
-  public function initialize(skredvarselStorage as SkredvarselStorage) {
+  public function initialize() {
     Menu2InputDelegate.initialize();
-
-    _skredvarselStorage = skredvarselStorage;
   }
 
   //! Handle an item being selected
@@ -15,9 +11,9 @@ public class EditMenuDelegate extends Ui.Menu2InputDelegate {
     var regionId = item.getId();
     var isEnabled = item.isEnabled();
     if (isEnabled) {
-      _skredvarselStorage.addSelectedRegion(regionId);
+      $.addSelectedRegion(regionId);
     } else {
-      _skredvarselStorage.removeSelectedRegion(regionId);
+      $.removeSelectedRegion(regionId);
     }
   }
 
