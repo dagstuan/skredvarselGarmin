@@ -8,12 +8,12 @@ const SelectedRegionIdsStorageKey = "selectedRegionIds";
 
 (:background)
 function getSimpleForecastCacheKeyForRegion(regionId as String) {
-  return "WebRequestCache_warning_for_region_" + regionId;
+  return "simple_" + regionId;
 }
 
 (:background)
 function getDetailedWarningsCacheKeyForRegion(regionId as String) {
-  return "WebRequestCache_detailed_warnings_for_region_" + regionId;
+  return "detailed_" + regionId;
 }
 
 (:background)

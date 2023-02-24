@@ -307,15 +307,30 @@ module AvalancheUi {
       var fontHeight = Gfx.getFontHeight(font);
 
       $.drawOutline(dc, x0, y0, width, height);
-      var fitText = Gfx.fitTextToArea(text, font, width, height, true);
 
-      dc.drawText(
-        x0 + width / 2,
-        y0 + (height / 2 - fontHeight / 2),
-        font,
-        fitText,
-        Gfx.TEXT_JUSTIFY_CENTER
-      );
+      var textWidth = dc.getTextWidthInPixels(text, font);
+
+      dc.setClip(x0, y0, width, height);
+
+      if (textWidth < width) {
+        dc.drawText(
+          x0 + width / 2,
+          y0 + (height / 2 - fontHeight / 2),
+          font,
+          text,
+          Gfx.TEXT_JUSTIFY_CENTER
+        );
+      } else {
+        dc.drawText(
+          x0,
+          y0 + (height / 2 - fontHeight / 2),
+          font,
+          text,
+          Gfx.TEXT_JUSTIFY_LEFT
+        );
+      }
+
+      dc.clearClip();
     }
   }
 }

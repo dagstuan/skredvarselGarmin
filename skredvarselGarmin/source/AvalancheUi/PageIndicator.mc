@@ -9,7 +9,7 @@ module AvalancheUi {
     private var _numPages as Number;
 
     private var _indicatorSize = 8;
-    private var _paddingFromEdge = 15;
+    private var _paddingFromEdge = 6;
 
     private var _centerAngle = 270;
     private var _anglePerPage = 6;

@@ -34,14 +34,14 @@ module AvalancheUi {
       .value()
       .toFloat();
 
-    private var _earlyCutoffTime as Time.Moment?;
+    private var _earlyCutoffTime as Time.Moment;
 
-    private var _locX as Numeric?;
-    private var _locY as Numeric?;
-    private var _width as Numeric?;
-    private var _height as Numeric?;
+    private var _locX as Numeric;
+    private var _locY as Numeric;
+    private var _width as Numeric;
+    private var _height as Numeric;
 
-    private var _lengthPerFullElem as Numeric?;
+    private var _lengthPerFullElem as Numeric;
 
     private var _dangerLevelFont = Gfx.FONT_GLANCE;
 
@@ -92,8 +92,8 @@ module AvalancheUi {
       warning as SimpleAvalancheWarning
     ) as Numeric {
       var validity = warning["validity"] as Array;
-      var validFrom = validity[0];
-      var validTo = validity[1];
+      var validFrom = $.parseDate(validity[0]);
+      var validTo = $.parseDate(validity[1]);
       var dangerLevel = warning["dangerLevel"];
 
       if (validTo.lessThan(_earlyCutoffTime)) {

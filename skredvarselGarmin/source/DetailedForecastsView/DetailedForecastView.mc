@@ -22,6 +22,7 @@ class DetailedForecastView extends Ui.View {
 
   private var _todayText as Ui.Resource?;
   private var _levelText as Ui.Resource?;
+  private var _seeFullForecastText as Ui.Resource?;
 
   private var _elements as DetailedForecastElements?;
   private var _currentElement as Number = 0;
@@ -34,7 +35,6 @@ class DetailedForecastView extends Ui.View {
   AvalancheUi.ForecastElementsIndicator?;
 
   public function initialize(
-    detailedForecastApi as DetailedForecastApi,
     regionId as String,
     index as Number,
     numWarnings as Number,
@@ -52,10 +52,7 @@ class DetailedForecastView extends Ui.View {
     if (_warningAge > TIME_TO_CONSIDER_STALE) {
       $.logMessage("Stale forecast, try to reload in background");
 
-      detailedForecastApi.loadDetailedWarningsForRegion(
-        regionId,
-        method(:onReceive)
-      );
+      $.loadDetailedWarningsForRegion(regionId, method(:onReceive));
     }
 
     _pageIndicator = new AvalancheUi.PageIndicator(numWarnings);
@@ -87,7 +84,7 @@ class DetailedForecastView extends Ui.View {
     _animatePageIndicatorTimer.start(
       method(:animatePageIndicatorTimerCallback),
       2500,
-      true
+      false
     );
   }
 
@@ -101,13 +98,13 @@ class DetailedForecastView extends Ui.View {
       1,
       null
     );
-    _animatePageIndicatorTimer.stop();
     _animatePageIndicatorTimer = null;
   }
 
   public function onShow() {
     _todayText = Ui.loadResource($.Rez.Strings.Today);
     _levelText = Ui.loadResource($.Rez.Strings.Level);
+    _seeFullForecastText = Ui.loadResource($.Rez.Strings.SeeFullForecast);
   }
 
   public function onUpdate(dc as Gfx.Dc) as Void {
@@ -158,10 +155,15 @@ class DetailedForecastView extends Ui.View {
   public function onHide() {
     if (_animatePageIndicatorTimer != null) {
       _animatePageIndicatorTimer.stop();
-      _animatePageIndicatorTimer = null;
     }
+    if (_elements != null) {
+      _elements.onHide();
+      _elements = null;
+    }
+    _animatePageIndicatorTimer = null;
     _todayText = null;
     _levelText = null;
+    _seeFullForecastText = null;
   }
 
   private function drawSingleLineTextArea(
@@ -236,7 +238,12 @@ class DetailedForecastView extends Ui.View {
     height as Numeric
   ) {
     if (_elements == null) {
-      _elements = new DetailedForecastElements(_warning, y0, height);
+      _elements = new DetailedForecastElements(
+        _warning,
+        y0,
+        height,
+        _seeFullForecastText
+      );
     }
 
     _elements.currentPage = _currentElement;

@@ -8,18 +8,16 @@ using Toybox.Time.Gregorian;
 using AvalancheUi;
 
 typedef GlanceViewSettings as {
-  :simpleForecastApi as SimpleForecastApi,
   :regionId as String,
 };
 
 (:glance)
 class GlanceView extends Ui.GlanceView {
-  private var _simpleForecastApi as SimpleForecastApi;
   private var _regionId as String;
-  private var _useBufferedBitmap as Boolean;
 
   private var _forecast as SimpleAvalancheForecast?;
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
+  private var _useBufferedBitmap as Boolean;
 
   private var _width as Number?;
   private var _height as Number?;
@@ -29,7 +27,6 @@ class GlanceView extends Ui.GlanceView {
 
   function initialize(settings as GlanceViewSettings) {
     GlanceView.initialize();
-    _simpleForecastApi = settings[:simpleForecastApi];
     _regionId = settings[:regionId];
     _useBufferedBitmap = $.useBufferedBitmaps();
   }
@@ -45,10 +42,7 @@ class GlanceView extends Ui.GlanceView {
 
     setForecastDataFromStorage();
     if (_forecast == null) {
-      _simpleForecastApi.loadSimpleForecastForRegion(
-        _regionId,
-        method(:onReceive)
-      );
+      $.loadSimpleForecastForRegion(_regionId, method(:onReceive));
     }
   }
 
@@ -105,7 +99,7 @@ class GlanceView extends Ui.GlanceView {
   }
 
   private function setForecastDataFromStorage() as Void {
-    var data = _simpleForecastApi.getSimpleForecastForRegion(_regionId);
+    var data = $.getSimpleForecastForRegion(_regionId);
 
     if (data != null) {
       _bufferedBitmap = null;

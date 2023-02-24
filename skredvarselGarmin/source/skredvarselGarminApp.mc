@@ -9,7 +9,7 @@ using Toybox.Application.Storage;
 (:background)
 class skredvarselGarminApp extends Application.AppBase {
   const REFRESH_INTERVAL_MINUTES = 60;
-  const STORAGE_VERSION = 1;
+  const STORAGE_VERSION = 2;
 
   function initialize() {
     AppBase.initialize();
@@ -50,12 +50,8 @@ class skredvarselGarminApp extends Application.AppBase {
   function getInitialView() as Array<Ui.Views or Ui.InputDelegates>? {
     registerTemporalEvent();
 
-    var queue = new CommandExecutor();
-    var simpleForecastApi = new SimpleForecastApi(queue);
-    var detailedForecastApi = new DetailedForecastApi(queue);
-
-    var mainView = new ForecastMenu(simpleForecastApi);
-    var mainViewDelegate = new ForecastMenuInputDelegate(detailedForecastApi);
+    var mainView = new ForecastMenu();
+    var mainViewDelegate = new ForecastMenuInputDelegate();
 
     var deviceSettings = System.getDeviceSettings();
     if (
@@ -74,16 +70,13 @@ class skredvarselGarminApp extends Application.AppBase {
     }
 
     return [
-      new WidgetView(simpleForecastApi),
+      new WidgetView(),
       new WidgetViewDelegate(mainView, mainViewDelegate),
     ];
   }
 
   (:glance)
   function getGlanceView() {
-    var queue = new CommandExecutor();
-    var simpleForecastApi = new SimpleForecastApi(queue);
-
     registerTemporalEvent();
 
     var favoriteRegionId = $.getFavoriteRegionId();
@@ -94,7 +87,6 @@ class skredvarselGarminApp extends Application.AppBase {
 
     return [
       new GlanceView({
-        :simpleForecastApi => simpleForecastApi,
         :regionId => favoriteRegionId,
         :useBufferedBitmap => true, // TODO: set this based on device.
       }),
@@ -102,11 +94,7 @@ class skredvarselGarminApp extends Application.AppBase {
   }
 
   function getServiceDelegate() as Array<System.ServiceDelegate> {
-    var queue = new CommandExecutor();
-    var simpleForecastApi = new SimpleForecastApi(queue);
-    var detailedForecastApi = new DetailedForecastApi(queue);
-
-    return [new ServiceDelegate(simpleForecastApi, detailedForecastApi)];
+    return [new ServiceDelegate()];
   }
 
   public function onBackgroundData(fetchedData as Boolean?) as Void {

@@ -8,11 +8,11 @@ using Toybox.Math;
 public class ForecastMenu extends Ui.CustomMenu {
   private const _editItemId = "edit";
 
-  private var _simpleForecastApi as SimpleForecastApi;
-
   private var _existingRegionIds as Array<String> = new [0];
 
-  public function initialize(simpleForecastApi as SimpleForecastApi) {
+  private var _icon as Ui.Resource?;
+
+  public function initialize() {
     var screenHeight = $.getDeviceScreenHeight();
 
     var menuElementsHeight = 60;
@@ -21,7 +21,6 @@ public class ForecastMenu extends Ui.CustomMenu {
     }
 
     CustomMenu.initialize(menuElementsHeight, Gfx.COLOR_BLACK, {});
-    _simpleForecastApi = simpleForecastApi;
   }
 
   function onShow() {
@@ -43,7 +42,7 @@ public class ForecastMenu extends Ui.CustomMenu {
 
       for (var i = 0; i < regionIds.size(); i++) {
         var regionId = regionIds[i];
-        addItem(new ForecastMenuItem(_simpleForecastApi, regionId));
+        addItem(new ForecastMenuItem(regionId));
       }
 
       addItem(new ForecastMenuEditMenuItem(_editItemId));
@@ -59,10 +58,13 @@ public class ForecastMenu extends Ui.CustomMenu {
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
     dc.clear();
 
-    var iconResource = getIconResourceToDraw();
-    var icon = Ui.loadResource(iconResource);
+    if (_icon == null) {
+      var iconResource = getIconResourceToDraw();
+      _icon = Ui.loadResource(iconResource);
+    }
+
     var iconX = width / 2 - $.halfWidthDangerLevelIcon;
-    dc.drawBitmap(iconX, 10, icon);
+    dc.drawBitmap(iconX, 10, _icon);
 
     var text = Ui.loadResource($.Rez.Strings.AppName);
     dc.drawText(
@@ -90,8 +92,7 @@ public class ForecastMenu extends Ui.CustomMenu {
     var favoriteRegionId = $.getFavoriteRegionId();
 
     if (favoriteRegionId != null) {
-      var forecast =
-        _simpleForecastApi.getSimpleForecastForRegion(favoriteRegionId);
+      var forecast = $.getSimpleForecastForRegion(favoriteRegionId);
 
       if (forecast != null) {
         var dangerLevelToday = $.getDangerLevelToday(forecast[0]);

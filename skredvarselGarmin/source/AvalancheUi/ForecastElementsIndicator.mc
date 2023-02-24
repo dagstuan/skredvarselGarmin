@@ -7,9 +7,10 @@ module AvalancheUi {
   class ForecastElementsIndicator {
     private var _numElements as Number;
 
-    private var _indicatorSize = 4;
-    private var _paddingFromEdge = _indicatorSize;
+    private var _indicatorWidth = 4;
+    private var _paddingFromEdge = _indicatorWidth;
 
+    private var _degreesPerElement = 3;
     private var _degreesPaddingBetweenElements = 2;
 
     public function initialize(numElements as Number) {
@@ -22,7 +23,7 @@ module AvalancheUi {
       }
 
       dc.setAntiAlias(true);
-      dc.setPenWidth(_indicatorSize);
+      dc.setPenWidth(_indicatorWidth);
       var width = dc.getWidth();
       var height = dc.getHeight();
 
@@ -31,12 +32,11 @@ module AvalancheUi {
       var rad = width / 2 - _paddingFromEdge; // Assume circular screen
 
       var centerAngle = 30;
-      var totalLengthDegrees = 15.0;
 
       var degreesPadding = _degreesPaddingBetweenElements * (_numElements - 1);
-      var degreesPerElement =
-        (totalLengthDegrees - degreesPadding) / _numElements;
 
+      var totalLengthDegrees =
+        _numElements * _degreesPerElement + degreesPadding;
       var angle = centerAngle + totalLengthDegrees / 2;
 
       for (var i = 0; i < _numElements; i++) {
@@ -52,10 +52,10 @@ module AvalancheUi {
           rad,
           Gfx.ARC_CLOCKWISE,
           angle,
-          angle - degreesPerElement
+          angle - _degreesPerElement
         );
 
-        angle = angle - degreesPerElement - _degreesPaddingBetweenElements;
+        angle = angle - _degreesPerElement - _degreesPaddingBetweenElements;
       }
     }
   }

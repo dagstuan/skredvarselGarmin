@@ -12,7 +12,9 @@ class CommandExecutor {
     _tail = null;
   }
 
-  function addCommand(command as WebRequestCommand) {
+  function addCommand(url, callback) {
+    var command = new WebRequestCommand(url, callback);
+
     command._queue = self;
 
     if (_head == null) {
@@ -30,8 +32,7 @@ class CommandExecutor {
     // remove the front item in the queue
     var head = _head;
     _head = head._next;
-    head._next = null;
-    head._queue = null;
+    head = null;
 
     // now _head is null or references the next command
     if (_head == null) {
@@ -46,15 +47,11 @@ class CommandExecutor {
 class WebRequestCommand {
   var _next;
   var _queue;
-  hidden var _url;
-  hidden var _params;
-  hidden var _options;
-  hidden var _callback;
+  private var _url;
+  private var _callback;
 
-  function initialize(url, params, options, callback) {
+  function initialize(url, callback) {
     _url = url;
-    _params = params;
-    _options = options;
     _callback = callback;
   }
 
@@ -62,8 +59,11 @@ class WebRequestCommand {
     $.logMessage("Fetching: " + _url);
     Communications.makeWebRequest(
       _url,
-      _params,
-      _options,
+      null,
+      {
+        :method => Communications.HTTP_REQUEST_METHOD_GET,
+        :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON,
+      },
       method(:handleResponse)
     );
   }

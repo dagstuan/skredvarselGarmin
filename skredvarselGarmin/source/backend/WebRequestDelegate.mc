@@ -14,37 +14,27 @@ typedef WebRequestDelegateCallback as (Method
 );
 
 (:background)
+const commandQueue = new CommandExecutor();
+
+(:background)
 class WebRequestDelegate {
-  private var _queue;
   private var _path as String;
-  private var _storageKey as String?;
-  private var _callback as WebRequestDelegateCallback;
+  private var _storageKey as String;
+  private var _callback as WebRequestDelegateCallback?;
 
   // Set up the callback to the view
   function initialize(
-    queue as CommandExecutor,
     path as String,
     storageKey as String?,
     callback as WebRequestDelegateCallback
   ) {
-    _queue = queue;
     _path = path;
     _storageKey = storageKey;
     _callback = callback;
   }
 
   function makeRequest() {
-    _queue.addCommand(
-      new WebRequestCommand(
-        $.BaseApiUrl + _path,
-        null,
-        {
-          :method => Comm.HTTP_REQUEST_METHOD_GET,
-          :responseType => Comm.HTTP_RESPONSE_CONTENT_TYPE_JSON,
-        },
-        method(:onReceive)
-      )
-    );
+    $.commandQueue.addCommand($.BaseApiUrl + _path, method(:onReceive));
   }
 
   // Receive the data from the web request

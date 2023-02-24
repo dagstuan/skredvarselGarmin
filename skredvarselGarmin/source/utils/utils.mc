@@ -243,7 +243,10 @@ public function getDangerLevelToday(
   for (var i = 0; i < forecast.size(); i++) {
     var warning = forecast[i];
     var validity = warning["validity"] as Array;
-    if (now.compare(validity[0]) > 0 && now.compare(validity[1]) <= 0) {
+    if (
+      now.compare($.parseDate(validity[0])) > 0 &&
+      now.compare($.parseDate(validity[1])) <= 0
+    ) {
       return warning["dangerLevel"];
     }
   }
@@ -276,9 +279,17 @@ public function useBufferedBitmaps() {
   var partNumber = deviceSettings.partNumber;
   // Low mem for F6
   if (
-    partNumber.equals("006-B3290-00") ||
-    partNumber.equals("006-B3289-00") ||
-    partNumber.equals("006-B3287-00")
+    partNumber.equals("006-B3289-00") || // F6
+    partNumber.equals("006-B3287-00") || // F6S
+    partNumber.equals("006-B3290-00") || // F6 Pro
+    partNumber.equals("006-B3288-00") || // F6S Pro
+    partNumber.equals("006-B3291-00") || // F6X Pro
+    partNumber.equals("006-B3113-00") || // FR945
+    partNumber.equals("006-B3589-00") || // FR945
+    partNumber.equals("006-B3652-00") || // FR945 LTE
+    partNumber.equals("006-B3077-00") || // FR245 Music
+    partNumber.equals("006-B3624-00") || // Marq Adventurer
+    partNumber.equals("006-B3251-00") // Marq Adventurer
   ) {
     return false;
   }

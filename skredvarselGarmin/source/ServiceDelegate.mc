@@ -3,20 +3,11 @@ import Toybox.System;
 
 (:background)
 class ServiceDelegate extends System.ServiceDelegate {
-  private var _simpleForecastApi as SimpleForecastApi;
-  private var _detailedForecastApi as DetailedForecastApi;
-
   private var _simpleRegionsToReload as Array<String> = [];
   private var _detailedRegionsToReload as Array<String> = [];
 
-  public function initialize(
-    simpleForecastApi as SimpleForecastApi,
-    detailedForecastApi as DetailedForecastApi
-  ) {
+  public function initialize() {
     ServiceDelegate.initialize();
-
-    _simpleForecastApi = simpleForecastApi;
-    _detailedForecastApi = detailedForecastApi;
   }
 
   public function onTemporalEvent() as Void {
@@ -65,20 +56,14 @@ class ServiceDelegate extends System.ServiceDelegate {
       var nextRegion = _simpleRegionsToReload[0];
       _simpleRegionsToReload = _simpleRegionsToReload.slice(1, null);
 
-      _simpleForecastApi.loadSimpleForecastForRegion(
-        nextRegion,
-        method(:onReloadedRegion)
-      );
+      $.loadSimpleForecastForRegion(nextRegion, method(:onReloadedRegion));
 
       return true;
     } else if (_detailedRegionsToReload.size() > 0) {
       var nextRegion = _detailedRegionsToReload[0];
       _detailedRegionsToReload = _detailedRegionsToReload.slice(1, null);
 
-      _detailedForecastApi.loadDetailedWarningsForRegion(
-        nextRegion,
-        method(:onReloadedRegion)
-      );
+      $.loadDetailedWarningsForRegion(nextRegion, method(:onReloadedRegion));
 
       return true;
     }

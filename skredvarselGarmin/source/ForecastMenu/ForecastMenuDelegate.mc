@@ -5,7 +5,6 @@ using Toybox.Time.Gregorian;
 
 public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
   private const TIME_TO_SHOW_LOADING = Gregorian.SECONDS_PER_DAY;
-  private var _detailedForecastApi as DetailedForecastApi;
 
   private var _regionId as String?;
 
@@ -13,10 +12,8 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
   private var _loadingText as Ui.Resource?;
 
   //! Constructor
-  public function initialize(detailedForecastApi as DetailedForecastApi) {
+  public function initialize() {
     Menu2InputDelegate.initialize();
-
-    _detailedForecastApi = detailedForecastApi;
   }
 
   //! Handle an item being selected
@@ -33,7 +30,7 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
     } else {
       _regionId = (item as ForecastMenuItem).getRegionId();
 
-      var data = _detailedForecastApi.getDetailedWarningsForRegion(_regionId);
+      var data = $.getDetailedWarningsForRegion(_regionId);
       if (
         data == null ||
         Time.now().compare(new Time.Moment(data[1])) > TIME_TO_SHOW_LOADING
@@ -43,10 +40,7 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
         _progressBar = new Ui.ProgressBar(_loadingText, null);
         Ui.pushView(_progressBar, new ProgressDelegate(), Ui.SLIDE_BLINK);
 
-        _detailedForecastApi.loadDetailedWarningsForRegion(
-          _regionId,
-          method(:onReceive)
-        );
+        $.loadDetailedWarningsForRegion(_regionId, method(:onReceive));
       } else {
         var warnings = data[0];
         var fetchedTime = data[1];
@@ -81,7 +75,6 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
     dataAge as Number
   ) {
     var view = new DetailedForecastView(
-      _detailedForecastApi,
       regionId,
       index,
       data.size(),
@@ -89,7 +82,6 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
       dataAge
     );
     var delegate = new DetailedForecastViewDelegate({
-      :detailedForecastApi => _detailedForecastApi,
       :index => index,
       :view => view,
       :detailedWarnings => data,

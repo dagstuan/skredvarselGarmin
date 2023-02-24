@@ -3,7 +3,6 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 
 typedef DetailedWarningsViewDelegateSettings as {
-  :detailedForecastApi as DetailedForecastApi,
   :index as Number,
   :view as DetailedForecastView,
   :regionId as String,
@@ -14,7 +13,6 @@ typedef DetailedWarningsViewDelegateSettings as {
 class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
   private var _index as Number;
 
-  private var _detailedForecastApi as DetailedForecastApi;
   private var _view as DetailedForecastView;
   private var _regionId as String;
   private var _detailedWarnings as Array<DetailedAvalancheWarning>;
@@ -25,7 +23,6 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
   public function initialize(settings as DetailedWarningsViewDelegateSettings) {
     BehaviorDelegate.initialize();
 
-    _detailedForecastApi = settings[:detailedForecastApi];
     _index = settings[:index];
     _detailedWarnings = settings[:detailedWarnings];
     _view = settings[:view];
@@ -110,7 +107,6 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
 
   private function getView() as DetailedForecastView {
     return new DetailedForecastView(
-      _detailedForecastApi,
       _regionId,
       _index,
       _detailedWarnings.size(),
@@ -121,7 +117,6 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
 
   private function getDelegate(newView as DetailedForecastView) {
     return new DetailedForecastViewDelegate({
-      :detailedForecastApi => _detailedForecastApi,
       :index => _index,
       :view => newView,
       :detailedWarnings => _detailedWarnings,

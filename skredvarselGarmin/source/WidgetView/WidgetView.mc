@@ -9,8 +9,6 @@ public class WidgetView extends Ui.View {
   private var _regionId as String?;
   private var _forecast as SimpleAvalancheForecast?;
 
-  private var _simpleForecastApi as SimpleForecastApi;
-
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
 
   private var _width as Number?;
@@ -19,10 +17,8 @@ public class WidgetView extends Ui.View {
   private var _appNameText as Ui.Resource?;
   private var _loadingText as Ui.Resource?;
 
-  public function initialize(simpleForecastApi as SimpleForecastApi) {
+  public function initialize() {
     View.initialize();
-
-    _simpleForecastApi = simpleForecastApi;
 
     _regionId = $.getFavoriteRegionId();
     setForecastDataFromStorage();
@@ -33,10 +29,7 @@ public class WidgetView extends Ui.View {
     _loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
 
     if (_regionId != null && _forecast == null) {
-      _simpleForecastApi.loadSimpleForecastForRegion(
-        _regionId,
-        method(:onReceive)
-      );
+      $.loadSimpleForecastForRegion(_regionId, method(:onReceive));
     }
   }
 
@@ -63,22 +56,20 @@ public class WidgetView extends Ui.View {
       );
     } else {
       if (_forecast != null) {
+        var margin = 10;
+        var forecastHeight = 80;
         if (_bufferedBitmap == null) {
+          var forecastWidth = _width - margin * 2;
+
           _bufferedBitmap = $.newBufferedBitmap({
-            :width => _width,
-            :height => _height,
+            :width => forecastWidth,
+            :height => forecastHeight,
           });
           var bufferedDc = _bufferedBitmap.getDc();
-          var margin = 10;
-
-          var forecastWidth = _width - margin;
-          var forecastHeight = 80;
-          var x0 = margin;
-          var y0 = (_height * 0.55 - forecastHeight / 2).toNumber();
 
           var forecastTimeline = new AvalancheUi.ForecastTimeline({
-            :locX => x0,
-            :locY => y0,
+            :locX => 0,
+            :locY => 0,
             :width => forecastWidth,
             :height => forecastHeight,
             :regionId => _regionId,
@@ -87,7 +78,10 @@ public class WidgetView extends Ui.View {
           forecastTimeline.draw(bufferedDc);
         }
 
-        dc.drawBitmap(0, 0, _bufferedBitmap);
+        var x0 = margin;
+        var y0 = (_height * 0.55 - forecastHeight / 2).toNumber();
+
+        dc.drawBitmap(x0, y0, _bufferedBitmap);
       } else {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
@@ -108,7 +102,7 @@ public class WidgetView extends Ui.View {
   }
 
   private function setForecastDataFromStorage() as Void {
-    var data = _simpleForecastApi.getSimpleForecastForRegion(_regionId);
+    var data = $.getSimpleForecastForRegion(_regionId);
 
     if (data != null) {
       _forecast = data[0];
@@ -150,7 +144,7 @@ public class WidgetView extends Ui.View {
 
     if (favoriteRegionId != null) {
       var dataForFavoriteRegion =
-        _simpleForecastApi.getSimpleForecastForRegion(favoriteRegionId);
+        $.getSimpleForecastForRegion(favoriteRegionId);
 
       if (dataForFavoriteRegion != null) {
         var dangerLevelToday = $.getDangerLevelToday(dataForFavoriteRegion[0]);
