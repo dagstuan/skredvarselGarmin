@@ -15,31 +15,39 @@ function getDetailedWarningsForRegion(regionId as String) as Array? {
 }
 
 (:background)
-function loadDetailedWarningsForRegion(
-  regionId as String?,
-  callback as WebRequestDelegateCallback
-) {
-  if ($.canMakeWebRequest() == false) {
-    $.logMessage("No connection available. Skipping loading forecast.");
-    return;
-  }
-
+function getDetailedWarningsPathForRegion(regionId as String) as String {
   var now = Time.now();
 
   var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
   var start = now.subtract(twoDays);
   var end = now.add(twoDays);
 
-  var path =
+  return (
     "/detailedWarningsByRegion/" +
     regionId +
     "/1/" +
     getFormattedDate(start) +
     "/" +
-    getFormattedDate(end);
+    getFormattedDate(end)
+  );
+}
 
+function loadDetailedWarningsForRegion(
+  regionId as String?,
+  callback as WebRequestDelegateCallback
+) {
+  $.logMessage("Loading detailed forecast for " + regionId);
+
+  if ($.canMakeWebRequest() == false) {
+    $.logMessage("No connection available. Skipping loading forecast.");
+    return;
+  }
+
+  var path = $.getDetailedWarningsPathForRegion(regionId);
   var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);
 
-  var delegate = new WebRequestDelegate(path, storageKey, callback);
-  delegate.makeRequest();
+  if ($.commandQueue == null) {
+    $.commandQueue = new CommandExecutor();
+  }
+  $.commandQueue.addCommand(path, storageKey, callback);
 }

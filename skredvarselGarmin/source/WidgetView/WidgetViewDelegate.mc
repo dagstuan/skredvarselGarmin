@@ -3,21 +3,16 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 
 public class WidgetViewDelegate extends Ui.BehaviorDelegate {
-  private var _mainView as Ui.View;
-  private var _mainViewDelegate as Ui.Menu2InputDelegate;
-
-  public function initialize(
-    mainView as Ui.View,
-    mainViewDelegate as Ui.Menu2InputDelegate
-  ) {
+  public function initialize() {
     BehaviorDelegate.initialize();
-
-    _mainView = mainView;
-    _mainViewDelegate = mainViewDelegate;
   }
 
   public function onSelect() as Boolean {
-    Ui.pushView(_mainView, _mainViewDelegate, Ui.SLIDE_LEFT);
+    Ui.pushView(
+      new ForecastMenu(),
+      new ForecastMenuInputDelegate(),
+      Ui.SLIDE_LEFT
+    );
     return true;
   }
 

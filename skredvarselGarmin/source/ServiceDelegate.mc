@@ -43,7 +43,10 @@ class ServiceDelegate extends System.ServiceDelegate {
     reloadNextRegion();
   }
 
-  public function onReloadedRegion(data as WebRequestCallbackData) as Void {
+  public function onReloadedRegion(
+    responseCode as Number,
+    data as WebRequestCallbackData
+  ) as Void {
     var reloadedNextRegion = reloadNextRegion();
 
     if (reloadedNextRegion == false) {
@@ -56,14 +59,28 @@ class ServiceDelegate extends System.ServiceDelegate {
       var nextRegion = _simpleRegionsToReload[0];
       _simpleRegionsToReload = _simpleRegionsToReload.slice(1, null);
 
-      $.loadSimpleForecastForRegion(nextRegion, method(:onReloadedRegion));
+      var path = $.getSimpleWarningsPathForRegion(nextRegion);
+      var storageKey = $.getSimpleForecastCacheKeyForRegion(nextRegion);
+      var delegate = new WebRequestDelegate(
+        path,
+        storageKey,
+        method(:onReloadedRegion)
+      );
+      delegate.makeRequest();
 
       return true;
     } else if (_detailedRegionsToReload.size() > 0) {
       var nextRegion = _detailedRegionsToReload[0];
       _detailedRegionsToReload = _detailedRegionsToReload.slice(1, null);
 
-      $.loadDetailedWarningsForRegion(nextRegion, method(:onReloadedRegion));
+      var path = $.getDetailedWarningsPathForRegion(nextRegion);
+      var storageKey = $.getDetailedWarningsCacheKeyForRegion(nextRegion);
+      var delegate = new WebRequestDelegate(
+        path,
+        storageKey,
+        method(:onReloadedRegion)
+      );
+      delegate.makeRequest();
 
       return true;
     }

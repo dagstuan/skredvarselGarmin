@@ -54,8 +54,11 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
     WatchUi.requestUpdate();
   }
 
-  public function onReceive(data as WebRequestCallbackData) as Void {
-    if (data != null) {
+  public function onReceive(
+    responseCode as Number,
+    data as WebRequestCallbackData
+  ) as Void {
+    if (responseCode == 200 && data != null) {
       pushDetailedForecastView(
         _regionId,
         2,
@@ -63,6 +66,7 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
         0
       );
     } else if (_progressBar != null) {
+      // TODO: Show fetch error
       Ui.popView(Ui.SLIDE_BLINK);
       _progressBar = null;
     }

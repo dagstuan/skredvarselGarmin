@@ -1,8 +1,12 @@
 import Toybox.Lang;
 
 using Toybox.Communications;
+using Toybox.System;
 
-(:background)
+(:glance)
+var commandQueue as CommandExecutor? = null;
+
+(:glance)
 class CommandExecutor {
   private var _head as WebRequestCommand?;
   private var _tail as WebRequestCommand?;
@@ -12,8 +16,8 @@ class CommandExecutor {
     _tail = null;
   }
 
-  function addCommand(url, callback) {
-    var command = new WebRequestCommand(url, callback);
+  function addCommand(path, storageKey, callback) {
+    var command = new WebRequestCommand(path, storageKey, callback);
 
     command._queue = self;
 
@@ -43,36 +47,33 @@ class CommandExecutor {
   }
 }
 
-(:background)
+(:glance)
 class WebRequestCommand {
   var _next;
   var _queue;
-  private var _url;
+  private var _path;
+  private var _storageKey;
   private var _callback;
 
-  function initialize(url, callback) {
-    _url = url;
+  function initialize(path as String, storageKey as String, callback) {
+    _path = path;
+    _storageKey = storageKey;
     _callback = callback;
   }
 
   function start() {
-    $.logMessage("Fetching: " + _url);
-    Communications.makeWebRequest(
-      _url,
-      null,
-      {
-        :method => Communications.HTTP_REQUEST_METHOD_GET,
-        :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON,
-      },
+    var delegate = new WebRequestDelegate(
+      _path,
+      _storageKey,
       method(:handleResponse)
     );
+    delegate.makeRequest();
   }
 
   function handleResponse(
     responseCode as Number,
     data as Null or Dictionary or String
   ) as Void {
-    $.logMessage("Response: " + responseCode);
     _callback.invoke(responseCode, data);
     _callback = null;
 

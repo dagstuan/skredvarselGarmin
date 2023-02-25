@@ -68,8 +68,11 @@ class DetailedForecastView extends Ui.View {
     );
   }
 
-  public function onReceive(data as WebRequestCallbackData) as Void {
-    if (data != null) {
+  public function onReceive(
+    responseCode as Number,
+    data as WebRequestCallbackData
+  ) as Void {
+    if (responseCode == 200 && data != null) {
       setWarning((data as Array)[_index] as DetailedAvalancheWarning);
       _warningAge = 0;
       Ui.requestUpdate();

@@ -50,9 +50,6 @@ class skredvarselGarminApp extends Application.AppBase {
   function getInitialView() as Array<Ui.Views or Ui.InputDelegates>? {
     registerTemporalEvent();
 
-    var mainView = new ForecastMenu();
-    var mainViewDelegate = new ForecastMenuInputDelegate();
-
     var deviceSettings = System.getDeviceSettings();
     if (
       deviceSettings has :isGlanceModeEnabled &&
@@ -63,16 +60,13 @@ class skredvarselGarminApp extends Application.AppBase {
       if (monkeyVersion[0] < 4) {
         // CIQ less than 4 does not support having a menu as
         // a main view. Need to use an intermediate view.
-        return [new IntermediateBaseView(mainView, mainViewDelegate)];
+        return [new IntermediateBaseView()];
       }
 
-      return [mainView, mainViewDelegate];
+      return [new ForecastMenu(), new ForecastMenuInputDelegate()];
     }
 
-    return [
-      new WidgetView(),
-      new WidgetViewDelegate(mainView, mainViewDelegate),
-    ];
+    return [new WidgetView(), new WidgetViewDelegate()];
   }
 
   (:glance)

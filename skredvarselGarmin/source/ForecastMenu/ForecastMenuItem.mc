@@ -53,8 +53,9 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     ) {
       _width = dc.getWidth();
       _height = dc.getHeight();
-      _marginLeft = _width == _screenWidth ? 10 : 0;
-      _marginRight = _width == _screenWidth ? 10 : 25;
+      _marginLeft = _width == _screenWidth ? _screenWidth * 0.05 : 0;
+      _marginRight =
+        _width == _screenWidth ? _screenWidth * 0.05 : _screenWidth * 0.1;
     }
 
     if (_forecast != null) {
@@ -101,9 +102,9 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
   function drawTimeline(dc as Gfx.Dc) {
     var forecastTimeline = new AvalancheUi.ForecastTimeline({
-      :locX => 0,
+      :locX => _marginLeft,
       :locY => 0,
-      :width => _width,
+      :width => _width - _marginRight,
       :height => _height,
       :regionId => _regionId,
       :forecast => _forecast,
@@ -122,9 +123,14 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     }
   }
 
-  public function onReceive(data as WebRequestCallbackData) as Void {
-    getForecastFromCache();
-    Ui.requestUpdate();
+  public function onReceive(
+    responseCode as Number,
+    data as WebRequestCallbackData
+  ) as Void {
+    if (responseCode == 200) {
+      getForecastFromCache();
+      Ui.requestUpdate();
+    }
   }
 
   public function getRegionId() as String {

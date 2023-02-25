@@ -6,28 +6,24 @@ using Toybox.Graphics as Gfx;
 public class IntermediateBaseView extends Ui.View {
   private var _firstShow;
 
-  private var _mainView as Ui.View;
-  private var _mainViewDelegate as Ui.Menu2InputDelegate;
-
   private var _width as Number?;
   private var _height as Number?;
 
   private var _hitBackToExitText as Ui.Resource?;
 
-  public function initialize(
-    mainView as Ui.View,
-    mainViewDelegate as Ui.Menu2InputDelegate
-  ) {
+  public function initialize() {
     View.initialize();
 
     _firstShow = true;
-    _mainView = mainView;
-    _mainViewDelegate = mainViewDelegate;
   }
 
   public function onShow() {
     if (_firstShow) {
-      Ui.pushView(_mainView, _mainViewDelegate, Ui.SLIDE_IMMEDIATE);
+      Ui.pushView(
+        new ForecastMenu(),
+        new ForecastMenuInputDelegate(),
+        Ui.SLIDE_IMMEDIATE
+      );
       _firstShow = false;
     }
 

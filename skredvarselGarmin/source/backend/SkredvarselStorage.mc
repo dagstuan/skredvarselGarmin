@@ -23,7 +23,7 @@ function getSelectedRegionIds() as Array<String> {
   return valueFromStorage != null ? valueFromStorage : new [0];
 }
 
-(:background)
+(:glance)
 function getFavoriteRegionId() as String? {
   var favoriteRegions = $.getSelectedRegionIds();
 

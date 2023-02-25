@@ -7,14 +7,11 @@ using Toybox.Application.Storage;
 
 const BaseApiUrl = "https://skredvarsel.app/api";
 
-typedef WebRequestCallbackData as Dictionary<String, Object?> or String or Null;
+typedef WebRequestCallbackData as Null or Dictionary or String;
 
 typedef WebRequestDelegateCallback as (Method
-  (data as WebRequestCallbackData) as Void
+  (responseCode as Number, data as WebRequestCallbackData) as Void
 );
-
-(:background)
-const commandQueue = new CommandExecutor();
 
 (:background)
 class WebRequestDelegate {
@@ -34,7 +31,16 @@ class WebRequestDelegate {
   }
 
   function makeRequest() {
-    $.commandQueue.addCommand($.BaseApiUrl + _path, method(:onReceive));
+    $.logMessage("Fetching: " + _path);
+    Communications.makeWebRequest(
+      $.BaseApiUrl + _path,
+      null,
+      {
+        :method => Communications.HTTP_REQUEST_METHOD_GET,
+        :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON,
+      },
+      method(:onReceive)
+    );
   }
 
   // Receive the data from the web request
@@ -44,13 +50,13 @@ class WebRequestDelegate {
   ) as Void {
     if (responseCode == 200) {
       if (_storageKey != null) {
-        $.logMessage("Storing in storage with key: " + _storageKey);
+        $.logMessage("200 OK. Storing in storage with key: " + _storageKey);
         Storage.setValue(_storageKey, [data, Time.now().value()]);
       }
     } else {
       $.logMessage("Failed request. Response code: " + responseCode);
     }
 
-    _callback.invoke(data);
+    _callback.invoke(responseCode, data);
   }
 }

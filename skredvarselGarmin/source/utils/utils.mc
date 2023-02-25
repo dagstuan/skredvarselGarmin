@@ -68,7 +68,7 @@ function getDeviceScreenHeight() as Number {
   return deviceSettings.screenHeight;
 }
 
-(:background)
+(:glance)
 function getAppColorPalette() as Array {
   return [
     // First five indices correspond to danger levels.
