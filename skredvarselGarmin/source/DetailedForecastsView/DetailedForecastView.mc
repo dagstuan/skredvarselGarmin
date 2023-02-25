@@ -3,6 +3,7 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
 using Toybox.Time.Gregorian;
+using Toybox.Time;
 using Toybox.Timer;
 
 using AvalancheUi;
@@ -21,6 +22,8 @@ class DetailedForecastView extends Ui.View {
   private var _deviceScreenWidth as Numeric;
 
   private var _todayText as Ui.Resource?;
+  private var _yesterdayText as Ui.Resource?;
+  private var _tomorrowText as Ui.Resource?;
   private var _levelText as Ui.Resource?;
   private var _seeFullForecastText as Ui.Resource?;
 
@@ -106,6 +109,8 @@ class DetailedForecastView extends Ui.View {
 
   public function onShow() {
     _todayText = Ui.loadResource($.Rez.Strings.Today);
+    _yesterdayText = Ui.loadResource($.Rez.Strings.Yesterday);
+    _tomorrowText = Ui.loadResource($.Rez.Strings.Tomorrow);
     _levelText = Ui.loadResource($.Rez.Strings.Level);
     _seeFullForecastText = Ui.loadResource($.Rez.Strings.SeeFullForecast);
   }
@@ -143,16 +148,32 @@ class DetailedForecastView extends Ui.View {
 
     var startValidity = (_warning["validity"] as Array)[0];
     var validityDate = $.parseDate(startValidity);
-    var validityInfo = Gregorian.info(validityDate, Time.FORMAT_MEDIUM);
 
-    var formattedTime = $.isToday(validityDate)
-      ? _todayText
-      : Lang.format("$1$ $2$", [validityInfo.day, validityInfo.month]);
-
-    drawSingleLineTextArea(dc, footerY0, footerHeight, formattedTime);
+    drawSingleLineTextArea(
+      dc,
+      footerY0,
+      footerHeight,
+      getDateText(validityDate)
+    );
 
     _pageIndicator.draw(dc, _index);
     _forecastElementsIndicator.draw(dc, _currentElement);
+  }
+
+  function getDateText(date as Time.Moment) {
+    var info = Gregorian.info(date, Time.FORMAT_SHORT);
+
+    if ($.isToday(info)) {
+      return _todayText;
+    } else if ($.isYesterday(info)) {
+      return _yesterdayText;
+    } else if ($.isTomorrow(info)) {
+      return _tomorrowText;
+    } else {
+      var validityInfo = Gregorian.info(date, Time.FORMAT_MEDIUM);
+
+      return Lang.format("$1$ $2$", [validityInfo.day, validityInfo.month]);
+    }
   }
 
   public function onHide() {
@@ -165,6 +186,8 @@ class DetailedForecastView extends Ui.View {
     }
     _animatePageIndicatorTimer = null;
     _todayText = null;
+    _yesterdayText = null;
+    _tomorrowText = null;
     _levelText = null;
     _seeFullForecastText = null;
   }

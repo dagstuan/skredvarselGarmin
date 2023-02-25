@@ -117,14 +117,39 @@ function parseDate(dateString as String) as Time.Moment {
   });
 }
 
-function isToday(moment as Time.Moment) {
-  var info = Gregorian.info(moment, Time.FORMAT_SHORT);
+function isToday(shortInfo as Gregorian.Info) {
   var today = Gregorian.info(Time.today(), Time.FORMAT_SHORT);
 
   return (
-    info.day == today.day &&
-    info.month == today.month &&
-    info.year == today.year
+    shortInfo.day == today.day &&
+    shortInfo.month == today.month &&
+    shortInfo.year == today.year
+  );
+}
+
+function isYesterday(shortInfo as Gregorian.Info) {
+  var yesterday = Gregorian.info(
+    Time.today().subtract(new Time.Duration(Gregorian.SECONDS_PER_DAY)),
+    Time.FORMAT_SHORT
+  );
+
+  return (
+    shortInfo.day == yesterday.day &&
+    shortInfo.month == yesterday.month &&
+    shortInfo.year == yesterday.year
+  );
+}
+
+function isTomorrow(shortInfo as Gregorian.Info) {
+  var tomorrow = Gregorian.info(
+    Time.today().add(new Time.Duration(Gregorian.SECONDS_PER_DAY)),
+    Time.FORMAT_SHORT
+  );
+
+  return (
+    shortInfo.day == tomorrow.day &&
+    shortInfo.month == tomorrow.month &&
+    shortInfo.year == tomorrow.year
   );
 }
 

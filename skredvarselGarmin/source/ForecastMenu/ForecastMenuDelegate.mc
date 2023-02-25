@@ -1,6 +1,7 @@
 import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
+using Toybox.Time;
 using Toybox.Time.Gregorian;
 
 public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
@@ -47,7 +48,7 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
 
         var dataAge = Time.now().compare(new Time.Moment(fetchedTime));
 
-        pushDetailedForecastView(_regionId, 2, data[0], dataAge);
+        pushDetailedForecastView(_regionId, data[0], dataAge);
       }
     }
 
@@ -61,7 +62,6 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
     if (responseCode == 200 && data != null) {
       pushDetailedForecastView(
         _regionId,
-        2,
         data as Array<DetailedAvalancheWarning>,
         0
       );
@@ -74,19 +74,26 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
 
   private function pushDetailedForecastView(
     regionId as String,
-    index as Number,
     data as Array<DetailedAvalancheWarning>,
     dataAge as Number
   ) {
+    // TODO: Make this cleaner.
+    var startIndex = 2;
+
+    var now = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+    if (now.hour >= 17) {
+      startIndex = 3;
+    }
+
     var view = new DetailedForecastView(
       regionId,
-      index,
+      startIndex,
       data.size(),
-      data[index],
+      data[startIndex],
       dataAge
     );
     var delegate = new DetailedForecastViewDelegate({
-      :index => index,
+      :index => startIndex,
       :view => view,
       :detailedWarnings => data,
       :regionId => regionId,

@@ -11,6 +11,8 @@
 	<string id="EditForecast">Edit forecast</string>
 	<string id="Level">Faregrad</string>
 	<string id="Today">I dag</string>
+	<string id="Yesterday">I går</string>
+	<string id="Tomorrow">I morgen</string>
 	<string id="NoProblems">No avalanche problems.</string>
 	<string id="SeeFullForecast">Se komplett varsel på varsom.no</string>
 </strings>
