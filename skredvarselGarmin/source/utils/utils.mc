@@ -277,7 +277,6 @@ public function newBufferedBitmap(
 public function useBufferedBitmaps() {
   var deviceSettings = System.getDeviceSettings();
   var partNumber = deviceSettings.partNumber;
-  // Low mem for F6
   if (
     partNumber.equals("006-B3289-00") || // F6
     partNumber.equals("006-B3287-00") || // F6S

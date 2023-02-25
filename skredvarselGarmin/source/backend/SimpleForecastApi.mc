@@ -41,7 +41,8 @@ function getSimpleWarningsPathForRegion(regionId as String) as String {
 (:glance)
 public function loadSimpleForecastForRegion(
   regionId as String?,
-  callback as WebRequestDelegateCallback
+  callback as WebRequestDelegateCallback,
+  useQueue as Boolean
 ) {
   $.logMessage("Loading simple forecast for " + regionId);
 
@@ -53,8 +54,5 @@ public function loadSimpleForecastForRegion(
   var path = $.getSimpleWarningsPathForRegion(regionId);
   var storageKey = $.getSimpleForecastCacheKeyForRegion(regionId);
 
-  if ($.commandQueue == null) {
-    $.commandQueue = new CommandExecutor();
-  }
-  $.commandQueue.addCommand(path, storageKey, callback);
+  $.makeApiRequest(path, storageKey, callback, useQueue);
 }

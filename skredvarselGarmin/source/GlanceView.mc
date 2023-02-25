@@ -42,7 +42,7 @@ class GlanceView extends Ui.GlanceView {
 
     setForecastDataFromStorage();
     if (_forecast == null) {
-      $.loadSimpleForecastForRegion(_regionId, method(:onReceive));
+      $.loadSimpleForecastForRegion(_regionId, method(:onReceive), false);
     }
   }
 

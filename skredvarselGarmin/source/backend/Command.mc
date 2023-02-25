@@ -3,10 +3,8 @@ import Toybox.Lang;
 using Toybox.Communications;
 using Toybox.System;
 
-(:glance)
 var commandQueue as CommandExecutor? = null;
 
-(:glance)
 class CommandExecutor {
   private var _head as WebRequestCommand?;
   private var _tail as WebRequestCommand?;
@@ -47,7 +45,6 @@ class CommandExecutor {
   }
 }
 
-(:glance)
 class WebRequestCommand {
   var _next;
   var _queue;

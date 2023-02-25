@@ -38,7 +38,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
     getForecastFromCache();
     if (_forecast == null) {
-      $.loadSimpleForecastForRegion(_regionId, method(:onReceive));
+      $.loadSimpleForecastForRegion(_regionId, method(:onReceive), true);
     }
   }
 

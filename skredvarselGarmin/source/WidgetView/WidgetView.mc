@@ -29,7 +29,7 @@ public class WidgetView extends Ui.View {
     _loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
 
     if (_regionId != null && _forecast == null) {
-      $.loadSimpleForecastForRegion(_regionId, method(:onReceive));
+      $.loadSimpleForecastForRegion(_regionId, method(:onReceive), false);
     }
   }
 

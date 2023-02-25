@@ -46,8 +46,5 @@ function loadDetailedWarningsForRegion(
   var path = $.getDetailedWarningsPathForRegion(regionId);
   var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);
 
-  if ($.commandQueue == null) {
-    $.commandQueue = new CommandExecutor();
-  }
-  $.commandQueue.addCommand(path, storageKey, callback);
+  $.makeApiRequest(path, storageKey, callback, true);
 }

@@ -13,6 +13,23 @@ typedef WebRequestDelegateCallback as (Method
   (responseCode as Number, data as WebRequestCallbackData) as Void
 );
 
+function makeApiRequest(
+  path as String,
+  storageKey as String,
+  callback as WebRequestDelegateCallback,
+  useQueue as Boolean
+) {
+  if (useQueue) {
+    if ($.commandQueue == null) {
+      $.commandQueue = new CommandExecutor();
+    }
+    $.commandQueue.addCommand(path, storageKey, callback);
+  } else {
+    var delegate = new WebRequestDelegate(path, storageKey, callback);
+    delegate.makeRequest();
+  }
+}
+
 (:background)
 class WebRequestDelegate {
   private var _path as String;
