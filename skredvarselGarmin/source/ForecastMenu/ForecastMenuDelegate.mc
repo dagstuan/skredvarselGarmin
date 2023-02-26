@@ -32,6 +32,7 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
       _regionId = (item as ForecastMenuItem).getRegionId();
 
       var data = $.getDetailedWarningsForRegion(_regionId);
+
       if (
         data == null ||
         Time.now().compare(new Time.Moment(data[1])) > TIME_TO_SHOW_LOADING

@@ -39,13 +39,14 @@ public class ForecastMenu extends Ui.CustomMenu {
 
     if (regionsChanged) {
       deleteAllItems();
-
       for (var i = 0; i < regionIds.size(); i++) {
         var regionId = regionIds[i];
         addItem(new ForecastMenuItem(regionId));
       }
 
       addItem(new ForecastMenuEditMenuItem(_editItemId));
+
+      setFocus(0);
 
       _existingRegionIds = regionIds;
     }
