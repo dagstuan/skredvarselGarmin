@@ -68,8 +68,14 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
         0
       );
     } else if (_progressBar != null) {
-      // TODO: Show fetch error
-      Ui.popView(Ui.SLIDE_BLINK);
+      Ui.switchToView(
+        new TextAreaView(
+          "Failed to fetch the forecast. Please try again later."
+        ),
+        new TextAreaViewDelegate(),
+        Ui.SLIDE_BLINK
+      );
+
       _progressBar = null;
     }
   }
