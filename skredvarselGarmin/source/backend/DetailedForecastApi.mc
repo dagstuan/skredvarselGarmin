@@ -38,11 +38,6 @@ function loadDetailedWarningsForRegion(
 ) {
   $.logMessage("Loading detailed forecast for " + regionId);
 
-  if ($.canMakeWebRequest() == false) {
-    $.logMessage("No connection available. Skipping loading forecast.");
-    return;
-  }
-
   var path = $.getDetailedWarningsPathForRegion(regionId);
   var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);
 

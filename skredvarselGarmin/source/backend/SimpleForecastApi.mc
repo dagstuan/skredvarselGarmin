@@ -46,11 +46,6 @@ public function loadSimpleForecastForRegion(
 ) {
   $.logMessage("Loading simple forecast for " + regionId);
 
-  if ($.canMakeWebRequest() == false) {
-    $.logMessage("No connection available. Skipping loading forecast.");
-    return;
-  }
-
   var path = $.getSimpleWarningsPathForRegion(regionId);
   var storageKey = $.getSimpleForecastCacheKeyForRegion(regionId);
 

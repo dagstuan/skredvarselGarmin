@@ -21,7 +21,7 @@ public class IntermediateBaseView extends Ui.View {
     if (_firstShow) {
       Ui.pushView(
         new ForecastMenu(),
-        new ForecastMenuInputDelegate(),
+        new ForecastMenuDelegate(),
         Ui.SLIDE_IMMEDIATE
       );
       _firstShow = false;

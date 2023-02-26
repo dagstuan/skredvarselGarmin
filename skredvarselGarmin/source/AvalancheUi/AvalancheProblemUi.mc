@@ -30,15 +30,6 @@ module AvalancheUi {
     private var _dangerFillColor as Gfx.ColorType;
     private var _nonDangerFillColor as Gfx.ColorType;
 
-    private var _padding = 0;
-    private var _halfWidth as Number;
-    private var _quarterWidth as Number;
-    private var _halfHeight as Number;
-    private var _quarterHeight as Number;
-
-    private var _textPaddingTop = 10;
-    private var _textPaddingBottom = 12;
-
     public function initialize(settings as AvalancheProblemSettings) {
       _problem = settings[:problem];
       _locX = settings[:locX];
@@ -48,11 +39,6 @@ module AvalancheUi {
 
       _dangerFillColor = Gfx.COLOR_RED;
       _nonDangerFillColor = Gfx.COLOR_LT_GRAY;
-
-      _halfWidth = _width / 2;
-      _quarterWidth = _width / 4;
-      _halfHeight = _height / 2;
-      _quarterHeight = _height / 4;
     }
 
     public function draw(dc as Gfx.Dc) {
@@ -239,7 +225,6 @@ module AvalancheUi {
 
       var font = Gfx.FONT_XTINY;
       var fontHeight = Gfx.getFontHeight(font);
-      var textWidth = dc.getTextWidthInPixels(text, font);
 
       var textX0 = x0 + width / 2;
 
@@ -276,7 +261,6 @@ module AvalancheUi {
       var font = Gfx.FONT_XTINY;
       var fontHeight = Gfx.getFontHeight(font);
 
-      var heightModifier = 0.7;
       var arrowHeight = fontHeight;
       var arrowWidth = fontHeight * 0.66;
 

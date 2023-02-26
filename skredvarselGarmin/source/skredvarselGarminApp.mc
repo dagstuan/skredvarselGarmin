@@ -63,7 +63,7 @@ class skredvarselGarminApp extends Application.AppBase {
         return [new IntermediateBaseView()];
       }
 
-      return [new ForecastMenu(), new ForecastMenuInputDelegate()];
+      return [new ForecastMenu(), new ForecastMenuDelegate()];
     }
 
     return [new WidgetView(), new WidgetViewDelegate()];

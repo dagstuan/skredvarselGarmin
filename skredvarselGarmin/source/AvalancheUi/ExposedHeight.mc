@@ -172,29 +172,21 @@ module AvalancheUi {
       [5.9922, 27.7842],
     ];
 
-    private var _exposedHeight1 as Number;
-    private var _exposedHeight2 as Number;
     private var _exposedHeightFill as Number;
     private var _locX as Numeric;
     private var _locY as Numeric;
     private var _size as Numeric;
 
-    private var _halfSize as Numeric;
-
     private var _dangerFillColor as Gfx.ColorType;
     private var _nonDangerFillColor as Gfx.ColorType;
 
     public function initialize(settings as ExposedHeightSettings) {
-      _exposedHeight1 = settings[:exposedHeight1];
-      _exposedHeight2 = settings[:exposedHeight2];
       _exposedHeightFill = settings[:exposedHeightFill];
       _locX = settings[:locX];
       _locY = settings[:locY];
       _size = settings[:size];
       _dangerFillColor = settings[:dangerFillColor];
       _nonDangerFillColor = settings[:nonDangerFillColor];
-
-      _halfSize = _size / 2;
     }
 
     public function draw(dc as Gfx.Dc) {

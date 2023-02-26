@@ -10,8 +10,6 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   private var _regionId as String;
   private var _forecast as SimpleAvalancheForecast?;
 
-  private var _redrawForecast as Boolean = false;
-
   private var _screenWidth as Number;
 
   private var _loadingText as Ui.Resource;

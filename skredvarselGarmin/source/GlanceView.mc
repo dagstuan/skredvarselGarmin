@@ -22,7 +22,6 @@ class GlanceView extends Ui.GlanceView {
   private var _width as Number?;
   private var _height as Number?;
 
-  private var _appNameText as Ui.Resource?;
   private var _loadingText as Ui.Resource?;
 
   function initialize(settings as GlanceViewSettings) {
@@ -32,7 +31,6 @@ class GlanceView extends Ui.GlanceView {
   }
 
   function onShow() {
-    _appNameText = Ui.loadResource($.Rez.Strings.AppName);
     _loadingText = Ui.loadResource($.Rez.Strings.Loading);
   }
 
@@ -94,7 +92,6 @@ class GlanceView extends Ui.GlanceView {
   }
 
   function onHide() {
-    _appNameText = null;
     _loadingText = null;
   }
 

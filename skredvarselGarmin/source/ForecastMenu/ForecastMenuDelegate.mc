@@ -3,8 +3,9 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
+using Toybox.Timer;
 
-public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
+public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
   private const TIME_TO_SHOW_LOADING = Gregorian.SECONDS_PER_DAY;
 
   private var _regionId as String?;
@@ -49,7 +50,7 @@ public class ForecastMenuInputDelegate extends Ui.Menu2InputDelegate {
 
         var dataAge = Time.now().compare(new Time.Moment(fetchedTime));
 
-        pushDetailedForecastView(_regionId, data[0], dataAge);
+        pushDetailedForecastView(_regionId, warnings, dataAge);
       }
     }
 

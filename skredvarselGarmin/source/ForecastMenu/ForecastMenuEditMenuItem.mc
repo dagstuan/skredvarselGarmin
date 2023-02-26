@@ -28,8 +28,6 @@ public class ForecastMenuEditMenuItem extends Ui.CustomMenuItem {
     var text = Ui.loadResource($.Rez.Strings.Edit);
     var font = Graphics.FONT_MEDIUM;
 
-    var textWidth = dc.getTextWidthInPixels(text, font);
-
     dc.drawText(
       paddingLeft + contentWidth / 2,
       height / 2,

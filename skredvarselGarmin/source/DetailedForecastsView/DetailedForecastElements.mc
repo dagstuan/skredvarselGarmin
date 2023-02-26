@@ -6,11 +6,6 @@ using Toybox.Graphics as Gfx;
 using AvalancheUi;
 
 public class DetailedForecastElements extends Ui.Drawable {
-  private enum ArrowDirection {
-    LEFT = 0,
-    RIGHT = 1,
-  }
-
   private var _warning as DetailedAvalancheWarning;
 
   private var _y0 as Numeric;

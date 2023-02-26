@@ -8,11 +8,7 @@ public class WidgetViewDelegate extends Ui.BehaviorDelegate {
   }
 
   public function onSelect() as Boolean {
-    Ui.pushView(
-      new ForecastMenu(),
-      new ForecastMenuInputDelegate(),
-      Ui.SLIDE_LEFT
-    );
+    Ui.pushView(new ForecastMenu(), new ForecastMenuDelegate(), Ui.SLIDE_LEFT);
     return true;
   }
 
