@@ -2,18 +2,24 @@ import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
+using Toybox.Math;
 
 using AvalancheUi;
 
 public class DetailedForecastElements extends Ui.Drawable {
+  private const ANIMATION_TIME_SECONDS = 0.3;
+  private const ANIMATION_STEPS = ANIMATION_TIME_SECONDS * 60; // 60 FPS
+
   private var _warning as DetailedAvalancheWarning;
 
   private var _y0 as Numeric;
   private var _height as Numeric;
 
-  public var currentPage = 0;
   public var animationTime = 0;
-  public var numElements as Number;
+  private var _animating = false;
+  private var _currentPage = 0;
+  private var _previousPage = -1;
+  private var _numElements as Number;
 
   private var _mainText as AvalancheUi.MainText?;
   private var _bufferedPages as Array<Gfx.BufferedBitmap?>;
@@ -32,11 +38,11 @@ public class DetailedForecastElements extends Ui.Drawable {
     _height = height;
 
     _warning = warning;
-    numElements = (warning["avalancheProblems"] as Array).size() + 1;
+    _numElements = (warning["avalancheProblems"] as Array).size() + 1;
 
     _seeFullForecastText = seeFullForecastText;
 
-    _bufferedPages = new [numElements];
+    _bufferedPages = new [_numElements];
   }
 
   public function onHide() {
@@ -45,6 +51,31 @@ public class DetailedForecastElements extends Ui.Drawable {
     for (var i = 0; i < _bufferedPages.size(); i++) {
       _bufferedPages[i] = null;
     }
+  }
+
+  public function changePage() as Number {
+    var prevPage = _currentPage;
+    _currentPage = (_currentPage + 1) % _numElements;
+    _previousPage = prevPage;
+    _animating = true;
+
+    Ui.animate(
+      self,
+      :animationTime,
+      Ui.ANIM_TYPE_EASE_IN_OUT,
+      0,
+      ANIMATION_STEPS,
+      ANIMATION_TIME_SECONDS,
+      method(:pageAnimateComplete)
+    );
+
+    return _currentPage;
+  }
+
+  function pageAnimateComplete() as Void {
+    _animating = false;
+    animationTime = 0;
+    Ui.requestUpdate();
   }
 
   public function draw(dc as Gfx.Dc) {
@@ -59,9 +90,20 @@ public class DetailedForecastElements extends Ui.Drawable {
 
     $.drawOutline(dc, x0, y0, areaWidth, areaHeight);
 
-    // TODO: This needs to be fixed if there is more than two pages.
-    var xOffset =
-      -(currentPage * fullWidth) - (animationTime / 1000.0) * fullWidth;
+    var xOffset = -(_currentPage * fullWidth);
+
+    if (_animating) {
+      var direction = _currentPage > _previousPage ? 1 : -1;
+      var diff = ((_currentPage - _previousPage) * fullWidth).abs();
+
+      if (direction > 0) {
+        xOffset =
+          -_previousPage * fullWidth - (animationTime / ANIMATION_STEPS) * diff;
+      } else {
+        xOffset =
+          -_previousPage * fullWidth + (animationTime / ANIMATION_STEPS) * diff;
+      }
+    }
 
     $.drawOutline(dc, x0, y0 + areaHeight / 2, areaWidth, y0 + areaHeight / 2);
 
@@ -70,7 +112,7 @@ public class DetailedForecastElements extends Ui.Drawable {
     drawFirstPage(dc, x0 + xOffset, y0, areaWidth, areaHeight);
     xOffset += fullWidth;
 
-    for (var i = 0; i < numElements - 1; i++) {
+    for (var i = 0; i < _numElements - 1; i++) {
       if (_bufferedPages[i] == null) {
         // Never rendered, render the page offscreen;
         var bufferedBitmap = $.newBufferedBitmap({

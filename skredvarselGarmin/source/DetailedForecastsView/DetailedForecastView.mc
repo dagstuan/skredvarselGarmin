@@ -9,7 +9,6 @@ using Toybox.Timer;
 using AvalancheUi;
 
 class DetailedForecastView extends Ui.View {
-  private const ANIMATION_TIME_SECONDS = 0.3;
   private const TIME_TO_CONSIDER_STALE = Gregorian.SECONDS_PER_HOUR * 2;
 
   private var _regionId as String;
@@ -31,7 +30,7 @@ class DetailedForecastView extends Ui.View {
   private var _currentElement as Number = 0;
   private var _numElements as Number?;
 
-  private var _pageIndicator as AvalancheUi.PageIndicator;
+  private var _pageIndicator as AvalancheUi.PageIndicator?;
   private var _animatePageIndicatorTimer as Timer.Timer?;
 
   private var _forecastElementsIndicator as
@@ -42,7 +41,8 @@ class DetailedForecastView extends Ui.View {
     index as Number,
     numWarnings as Number,
     warning as DetailedAvalancheWarning,
-    warningAge as Number
+    warningAge as Number,
+    showPageIndicator as Boolean
   ) {
     View.initialize();
 
@@ -58,7 +58,9 @@ class DetailedForecastView extends Ui.View {
       $.loadDetailedWarningsForRegion(regionId, method(:onReceive));
     }
 
-    _pageIndicator = new AvalancheUi.PageIndicator(numWarnings);
+    if (showPageIndicator) {
+      _pageIndicator = new AvalancheUi.PageIndicator(numWarnings);
+    }
 
     _deviceScreenWidth = $.getDeviceScreenWidth();
   }
@@ -86,12 +88,14 @@ class DetailedForecastView extends Ui.View {
     _width = dc.getWidth();
     _height = dc.getHeight();
 
-    _animatePageIndicatorTimer = new Timer.Timer();
-    _animatePageIndicatorTimer.start(
-      method(:animatePageIndicatorTimerCallback),
-      2500,
-      false
-    );
+    if (_pageIndicator != null) {
+      _animatePageIndicatorTimer = new Timer.Timer();
+      _animatePageIndicatorTimer.start(
+        method(:animatePageIndicatorTimerCallback),
+        2500,
+        false
+      );
+    }
   }
 
   function animatePageIndicatorTimerCallback() as Void {
@@ -156,7 +160,10 @@ class DetailedForecastView extends Ui.View {
       getDateText(validityDate)
     );
 
-    _pageIndicator.draw(dc, _index);
+    if (_pageIndicator != null) {
+      _pageIndicator.draw(dc, _index);
+    }
+
     _forecastElementsIndicator.draw(dc, _currentElement);
   }
 
@@ -272,7 +279,6 @@ class DetailedForecastView extends Ui.View {
       );
     }
 
-    _elements.currentPage = _currentElement;
     _elements.draw(dc);
   }
 
@@ -281,23 +287,6 @@ class DetailedForecastView extends Ui.View {
       return;
     }
 
-    var offset = _currentElement == _elements.numElements - 1 ? 1 : -1;
-    _currentElement = (_currentElement + 1) % _elements.numElements;
-    _elements.animationTime = 1000 * offset;
-    Ui.animate(
-      _elements,
-      :animationTime,
-      Ui.ANIM_TYPE_EASE_IN_OUT,
-      _elements.animationTime,
-      0,
-      ANIMATION_TIME_SECONDS,
-      method(:pageAnimateComplete)
-    );
-  }
-
-  function pageAnimateComplete() as Void {
-    _elements.animationTime = 0;
-
-    Ui.requestUpdate();
+    _currentElement = _elements.changePage();
   }
 }

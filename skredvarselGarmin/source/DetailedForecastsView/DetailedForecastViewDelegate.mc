@@ -3,33 +3,19 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 
 typedef DetailedWarningsViewDelegateSettings as {
-  :index as Number,
   :view as DetailedForecastView,
   :regionId as String,
-  :detailedWarnings as Array<DetailedAvalancheWarning>,
-  :dataAge as Number,
 };
 
 class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
-  private var _index as Number;
-
-  private var _view as DetailedForecastView;
-  private var _regionId as String;
-  private var _detailedWarnings as Array<DetailedAvalancheWarning>;
-  private var _dataAge as Number;
-
-  private var _numPages as Numeric;
+  hidden var _view as DetailedForecastView;
+  hidden var _regionId as String;
 
   public function initialize(settings as DetailedWarningsViewDelegateSettings) {
     BehaviorDelegate.initialize();
 
-    _index = settings[:index];
-    _detailedWarnings = settings[:detailedWarnings];
     _view = settings[:view];
     _regionId = settings[:regionId];
-    _dataAge = settings[:dataAge];
-
-    _numPages = _detailedWarnings.size();
   }
 
   public function onMenu() {
@@ -62,66 +48,10 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
   //! @return true if handled, false otherwise
   public function onKey(evt as Ui.KeyEvent) as Boolean {
     var key = evt.getKey();
-    if (Ui.KEY_DOWN == key) {
-      onNxtPage();
-      return true;
-    } else if (Ui.KEY_UP == key) {
-      onPrevPage();
-      return true;
-    } else if (Ui.KEY_ENTER == key) {
+    if (Ui.KEY_ENTER == key) {
       _view.updateIndex();
       return true;
     }
     return false;
-  }
-
-  public function onSwipe(evt as Ui.SwipeEvent) as Boolean {
-    var direction = evt.getDirection();
-    if (direction == Ui.SWIPE_UP) {
-      onNxtPage();
-      return true;
-    } else if (direction == Ui.SWIPE_DOWN) {
-      onPrevPage();
-      return true;
-    }
-    return false;
-  }
-
-  //! Go to the next page
-  private function onNxtPage() as Void {
-    _index = (_index + 1) % _numPages;
-    var newView = getView();
-    Ui.switchToView(newView, getDelegate(newView), Ui.SLIDE_UP);
-  }
-
-  //! Go to the previous page
-  private function onPrevPage() as Void {
-    _index -= 1;
-    if (_index < 0) {
-      _index = _numPages - 1;
-    }
-    _index = _index % _numPages;
-    var newView = getView();
-    Ui.switchToView(newView, getDelegate(newView), Ui.SLIDE_DOWN);
-  }
-
-  private function getView() as DetailedForecastView {
-    return new DetailedForecastView(
-      _regionId,
-      _index,
-      _detailedWarnings.size(),
-      _detailedWarnings[_index],
-      _dataAge
-    );
-  }
-
-  private function getDelegate(newView as DetailedForecastView) {
-    return new DetailedForecastViewDelegate({
-      :index => _index,
-      :view => newView,
-      :detailedWarnings => _detailedWarnings,
-      :regionId => _regionId,
-      :dataAge => _dataAge,
-    });
   }
 }

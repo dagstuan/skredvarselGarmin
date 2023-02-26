@@ -93,20 +93,33 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
       startIndex = 3;
     }
 
-    var view = new DetailedForecastView(
-      regionId,
-      startIndex,
-      data.size(),
-      data[startIndex],
-      dataAge
-    );
-    var delegate = new DetailedForecastViewDelegate({
-      :index => startIndex,
-      :view => view,
-      :detailedWarnings => data,
-      :regionId => regionId,
-      :dataAge => dataAge,
-    });
+    var view = null;
+    var delegate = null;
+    if (Ui has :ViewLoop) {
+      var factory = new DetailedForecastsViewLoopFactory(
+        regionId,
+        data,
+        dataAge
+      );
+      view = new DetailedForecastsViewLoop(factory, startIndex);
+      delegate = new DetailedForecastsViewLoopDelegate(view);
+    } else {
+      view = new DetailedForecastView(
+        regionId,
+        startIndex,
+        data.size(),
+        data[startIndex],
+        dataAge,
+        true
+      );
+      delegate = new DetailedForecastViewPageLoopDelegate({
+        :index => startIndex,
+        :view => view,
+        :detailedWarnings => data,
+        :regionId => regionId,
+        :dataAge => dataAge,
+      });
+    }
 
     if (_progressBar != null) {
       Ui.switchToView(view, delegate, Ui.SLIDE_LEFT);
