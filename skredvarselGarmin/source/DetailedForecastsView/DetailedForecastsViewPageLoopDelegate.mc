@@ -37,8 +37,6 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
   //! @param evt The key event that occurred
   //! @return true if handled, false otherwise
   public function onKey(evt as Ui.KeyEvent) as Boolean {
-    DetailedForecastViewDelegate.onKey(evt);
-
     var key = evt.getKey();
     if (Ui.KEY_DOWN == key) {
       onNxtPage();
@@ -47,7 +45,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
       onPrevPage();
       return true;
     }
-    return false;
+    return DetailedForecastViewDelegate.onKey(evt);
   }
 
   public function onSwipe(evt as Ui.SwipeEvent) as Boolean {
@@ -59,7 +57,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
       onPrevPage();
       return true;
     }
-    return false;
+    return DetailedForecastViewDelegate.onSwipe(evt);
   }
 
   //! Go to the next page

@@ -43,13 +43,25 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
     return true;
   }
 
+  public function onSwipe(evt as Ui.SwipeEvent) as Boolean {
+    var direction = evt.getDirection();
+    if (direction == Ui.SWIPE_RIGHT) {
+      _view.goToPreviousVisibleElement();
+      return true;
+    } else if (direction == Ui.SWIPE_LEFT) {
+      _view.goToNextVisibleElement();
+      return true;
+    }
+    return false;
+  }
+
   //! Handle a physical button being pressed and released
   //! @param evt The key event that occurred
   //! @return true if handled, false otherwise
   public function onKey(evt as Ui.KeyEvent) as Boolean {
     var key = evt.getKey();
     if (Ui.KEY_ENTER == key) {
-      _view.updateIndex();
+      _view.toggleVisibleElement();
       return true;
     }
     return false;

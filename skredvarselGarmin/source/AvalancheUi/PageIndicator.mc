@@ -29,7 +29,7 @@ module AvalancheUi {
       var cY = height / 2;
 
       var radModifier = 1 - visibilityPercent / 100;
-      var mod = _paddingFromEdge * 2 * radModifier;
+      var mod = _paddingFromEdge * 2.5 * radModifier;
       var rad = width / 2 - _paddingFromEdge + mod; // Assume circular screen
 
       var angle =

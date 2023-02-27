@@ -53,10 +53,39 @@ public class DetailedForecastElements extends Ui.Drawable {
     }
   }
 
-  public function changePage() as Number {
+  public function goToNextElement() as Number {
+    if (_currentPage == _numElements - 1) {
+      return _currentPage;
+    }
+
+    setPage(_currentPage + 1);
+    animateToVisibleElement();
+    return _currentPage;
+  }
+
+  public function goToPreviousElement() as Number {
+    if (_currentPage == 0) {
+      return _currentPage;
+    }
+
+    setPage(_currentPage - 1);
+    animateToVisibleElement();
+    return _currentPage;
+  }
+
+  public function toggleVisibleElement() as Number {
+    setPage((_currentPage + 1) % _numElements);
+    animateToVisibleElement();
+    return _currentPage;
+  }
+
+  private function setPage(newPage as Number) {
     var prevPage = _currentPage;
-    _currentPage = (_currentPage + 1) % _numElements;
+    _currentPage = newPage;
     _previousPage = prevPage;
+  }
+
+  private function animateToVisibleElement() as Void {
     _animating = true;
 
     Ui.animate(
@@ -68,8 +97,6 @@ public class DetailedForecastElements extends Ui.Drawable {
       ANIMATION_TIME_SECONDS,
       method(:pageAnimateComplete)
     );
-
-    return _currentPage;
   }
 
   function pageAnimateComplete() as Void {
