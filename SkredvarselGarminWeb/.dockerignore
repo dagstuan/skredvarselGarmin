@@ -37,3 +37,12 @@
 # Visual Studio 2015
 **/.vs
 fly.toml
+
+**/bin
+**/obj
+**/out
+**/.vscode
+**/.vs
+**/node_modules
+.dotnet
+.Microsoft.DotNet.ImageBuilder
