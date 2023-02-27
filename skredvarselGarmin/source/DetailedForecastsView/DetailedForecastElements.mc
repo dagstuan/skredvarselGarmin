@@ -108,14 +108,18 @@ public class DetailedForecastElements extends Ui.Drawable {
   public function draw(dc as Gfx.Dc) {
     var fullWidth = dc.getWidth();
 
-    $.drawOutline(dc, 0, _y0, fullWidth, _height);
+    if ($.DrawOutlines) {
+      $.drawOutline(dc, 0, _y0, fullWidth, _height);
+    }
 
     var areaWidth = Math.ceil(fullWidth * 0.75);
     var areaHeight = _height * 0.9;
     var x0 = fullWidth / 2 - areaWidth / 2;
     var y0 = _y0 + (_height / 2 - areaHeight / 2);
 
-    $.drawOutline(dc, x0, y0, areaWidth, areaHeight);
+    if ($.DrawOutlines) {
+      $.drawOutline(dc, x0, y0, areaWidth, areaHeight);
+    }
 
     var xOffset = -(_currentPage * fullWidth);
 
@@ -132,7 +136,15 @@ public class DetailedForecastElements extends Ui.Drawable {
       }
     }
 
-    $.drawOutline(dc, x0, y0 + areaHeight / 2, areaWidth, y0 + areaHeight / 2);
+    if ($.DrawOutlines) {
+      $.drawOutline(
+        dc,
+        x0,
+        y0 + areaHeight / 2,
+        areaWidth,
+        y0 + areaHeight / 2
+      );
+    }
 
     var avalancheProblems = _warning["avalancheProblems"] as Array;
 

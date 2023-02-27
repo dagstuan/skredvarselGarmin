@@ -8,11 +8,11 @@ public class EditMenu extends Ui.Menu2 {
 
     var selectedRegionIds = $.getSelectedRegionIds() as Array<String>;
 
-    var regions = $.getRegions();
-    var regionIds = regions.keys();
-    for (var i = 0; i < regionIds.size(); i++) {
-      var regionId = regionIds[i] as String;
-      var regionName = regions[regionId];
+    var regions = $.getSortedRegionIds();
+    var regionsDict = $.getRegions();
+    for (var i = 0; i < regions.size(); i++) {
+      var regionId = regions[i];
+      var regionName = regionsDict[regionId];
 
       var isSelected = arrayContainsString(selectedRegionIds, regionId);
       addItem(new EditMenuItem(regionName, regionId, isSelected));

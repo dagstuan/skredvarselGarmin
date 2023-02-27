@@ -7,35 +7,65 @@ using Toybox.Time.Gregorian;
 using Toybox.System;
 using Toybox.Math;
 
+const Debug = false;
 const DrawOutlines = false;
 
-(:background)
+function getSortedRegionIds() as Array<String> {
+  return [
+    "3003",
+    "3006",
+    "3007",
+    "3009",
+    "3010",
+    "3011",
+    "3012",
+    "3013",
+    "3014",
+    "3015",
+    "3016",
+    "3017",
+    "3018",
+    "3022",
+    "3023",
+    "3024",
+    "3027",
+    "3028",
+    "3029",
+    "3031",
+    "3032",
+    "3034",
+    "3035",
+    "3037",
+  ];
+}
+
+(:glance)
 function getRegions() as Dictionary<String, String> {
   return {
+    "3003" => "Nordenskiöld Land",
     "3006" => "Finnmarkskysten",
+    "3007" => "Vest-Finnmark",
+    "3009" => "Nord-Troms",
+    "3010" => "Lyngen",
+    "3011" => "Tromsø",
+    "3012" => "Sør-Troms",
+    "3013" => "Indre Troms",
+    "3014" => "Lofoten og Vesterålen",
+    "3015" => "Ofoten",
+    "3016" => "Salten",
+    "3017" => "Svartisen",
+    "3018" => "Helgeland",
+    "3022" => "Trollheimen",
+    "3023" => "Romsdal",
+    "3024" => "Sunnmøre",
+    "3027" => "Indre Fjordane",
+    "3028" => "Jotunheimen",
+    "3029" => "Indre Sogn",
+    "3031" => "Voss",
     "3032" => "Hallingdal",
     "3034" => "Hardanger",
-    "3037" => "Heiane",
-    "3018" => "Helgeland",
-    "3027" => "Indre Fjordane",
-    "3029" => "Indre Sogn",
-    "3013" => "Indre Troms",
-    "3028" => "Jotunheimen",
-    "3014" => "Lofoten og Vesterålen",
-    "3010" => "Lyngen",
-    "3009" => "Nord-Troms",
-    "3003" => "Nordenskiöld Land",
-    "3015" => "Ofoten",
-    "3023" => "Romsdal",
-    "3016" => "Salten",
-    "3024" => "Sunnmøre",
-    "3017" => "Svartisen",
-    "3012" => "Sør-Troms",
-    "3022" => "Trollheimen",
-    "3011" => "Tromsø",
-    "3007" => "Vest-Finnmark",
     "3035" => "Vest-Telemark",
-    "3031" => "Voss",
+    "3037" => "Heiane",
   };
 }
 
@@ -246,10 +276,6 @@ function drawOutline(
   width as Numeric,
   height as Numeric
 ) {
-  if (!$.DrawOutlines) {
-    return;
-  }
-
   dc.setPenWidth(1);
   dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
 

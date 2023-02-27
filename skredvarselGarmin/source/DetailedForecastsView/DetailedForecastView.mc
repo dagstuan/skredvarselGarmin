@@ -210,7 +210,9 @@ class DetailedForecastView extends Ui.View {
     var font = Gfx.FONT_XTINY;
     var fontHeight = Gfx.getFontHeight(font);
 
-    $.drawOutline(dc, 0, y0, _width, height);
+    if ($.DrawOutlines) {
+      $.drawOutline(dc, 0, y0, _width, height);
+    }
 
     var textY0 = y0 + height / 2;
     var width = $.getScreenWidthAtPoint(_deviceScreenWidth, textY0);
@@ -231,7 +233,9 @@ class DetailedForecastView extends Ui.View {
     y0 as Numeric,
     height as Numeric
   ) {
-    $.drawOutline(dc, 0, y0, _width, height);
+    if ($.DrawOutlines) {
+      $.drawOutline(dc, 0, y0, _width, height);
+    }
 
     var dangerLevel = _warning["dangerLevel"];
     var font = Gfx.FONT_MEDIUM;

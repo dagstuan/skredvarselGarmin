@@ -71,13 +71,11 @@ module AvalancheUi {
     }
 
     private function drawOutlines(dc as Gfx.Dc) {
-      if (!$.DrawOutlines) {
-        return;
+      if ($.DrawOutlines) {
+        dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
+        dc.setPenWidth(1);
+        $.drawOutline(dc, _locX, _locY, _width, _height);
       }
-
-      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
-      dc.setPenWidth(1);
-      $.drawOutline(dc, _locX, _locY, _width, _height);
     }
 
     private function drawExpositions(
@@ -88,7 +86,9 @@ module AvalancheUi {
       height as Numeric
     ) {
       var sizeModifier = 1;
-      $.drawOutline(dc, x0, y0, width, height);
+      if ($.DrawOutlines) {
+        $.drawOutline(dc, x0, y0, width, height);
+      }
 
       var minSize = $.min(width, height);
 
@@ -111,7 +111,9 @@ module AvalancheUi {
       width as Numeric,
       height as Numeric
     ) {
-      $.drawOutline(dc, x0, y0, width, height);
+      if ($.DrawOutlines) {
+        $.drawOutline(dc, x0, y0, width, height);
+      }
 
       var minSize = $.min(width, height);
 
@@ -143,11 +145,15 @@ module AvalancheUi {
     ) {
       var halfHeight = height / 2;
 
-      $.drawOutline(dc, x0, y0, width, halfHeight);
+      if ($.DrawOutlines) {
+        $.drawOutline(dc, x0, y0, width, halfHeight);
+      }
 
       var bottomY0 = y0 + halfHeight;
 
-      $.drawOutline(dc, x0, bottomY0, width, halfHeight);
+      if ($.DrawOutlines) {
+        $.drawOutline(dc, x0, bottomY0, width, halfHeight);
+      }
 
       var exposedHeights = _problem["exposedHeights"] as Array;
       var exposedHeight1 = exposedHeights[0];
@@ -221,7 +227,9 @@ module AvalancheUi {
       alignment as TextElementsAlignment,
       text as String
     ) {
-      $.drawOutline(dc, x0, y0, width, height);
+      if ($.DrawOutlines) {
+        $.drawOutline(dc, x0, y0, width, height);
+      }
 
       var font = Gfx.FONT_XTINY;
       var fontHeight = Gfx.getFontHeight(font);
@@ -256,7 +264,9 @@ module AvalancheUi {
       alignment as TextElementsAlignment,
       direction as AvalancheUi.ArrowDirection
     ) {
-      $.drawOutline(dc, x0, y0, width, height);
+      if ($.DrawOutlines) {
+        $.drawOutline(dc, x0, y0, width, height);
+      }
 
       var font = Gfx.FONT_XTINY;
       var fontHeight = Gfx.getFontHeight(font);
@@ -290,7 +300,9 @@ module AvalancheUi {
       var font = Gfx.FONT_XTINY;
       var fontHeight = Gfx.getFontHeight(font);
 
-      $.drawOutline(dc, x0, y0, width, height);
+      if ($.DrawOutlines) {
+        $.drawOutline(dc, x0, y0, width, height);
+      }
 
       var textWidth = dc.getTextWidthInPixels(text, font);
 

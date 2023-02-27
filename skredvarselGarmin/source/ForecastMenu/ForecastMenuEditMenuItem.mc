@@ -21,7 +21,9 @@ public class ForecastMenuEditMenuItem extends Ui.CustomMenuItem {
 
     var contentWidth = width - paddingLeft - paddingRight;
 
-    $.drawOutline(dc, paddingLeft, 0, contentWidth, height);
+    if ($.DrawOutlines) {
+      $.drawOutline(dc, paddingLeft, 0, contentWidth, height);
+    }
 
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
