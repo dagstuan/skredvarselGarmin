@@ -25,6 +25,8 @@ module AvalancheUi {
     private var _ticksAtTop = 0;
     private var _ticksAtBottom = 0;
 
+    private var _bufferedBitmapText as Gfx.BufferedBitmap?;
+
     private var _updateTimer;
 
     public function initialize(settings as MainTextSettings) {
@@ -41,36 +43,58 @@ module AvalancheUi {
     }
 
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
-      var font = Gfx.FONT_SYSTEM_XTINY;
+      if (_bufferedBitmapText == null) {
+        var font = Gfx.FONT_SYSTEM_XTINY;
 
-      var fitText = Gfx.fitTextToArea(_text, font, _width, _height * 5, false);
+        var fitText = Gfx.fitTextToArea(
+          _text,
+          font,
+          _width,
+          _height * 5,
+          false
+        );
 
-      if (_textHeight == null) {
         var fitTextDimensions = dc.getTextDimensions(fitText, font);
-
         _textHeight = fitTextDimensions[1];
+
+        _bufferedBitmapText = $.newBufferedBitmap({
+          :width => _width,
+          :height => _textHeight,
+        });
+
+        var bufferedDc = _bufferedBitmapText.getDc();
+
+        bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+
+        if (_textHeight < _height) {
+          bufferedDc.drawText(
+            _width / 2,
+            _textHeight / 2,
+            font,
+            fitText,
+            Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
+          );
+        } else {
+          bufferedDc.drawText(
+            _width / 2,
+            0,
+            font,
+            fitText,
+            Gfx.TEXT_JUSTIFY_CENTER
+          );
+        }
       }
 
       dc.setClip(x0, y0, _width, _height);
 
-      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
-
       if (_textHeight < _height) {
-        dc.drawText(
-          x0 + _width / 2,
-          y0 + _height / 2,
-          font,
-          fitText,
-          Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
+        dc.drawBitmap(
+          x0,
+          y0 + _height / 2 - _textHeight / 2,
+          _bufferedBitmapText
         );
       } else {
-        dc.drawText(
-          x0 + _width / 2,
-          y0 + _textOffset,
-          font,
-          fitText,
-          Gfx.TEXT_JUSTIFY_CENTER
-        );
+        dc.drawBitmap(x0, y0 + _textOffset, _bufferedBitmapText);
 
         if (_updateTimer == null) {
           _updateTimer = new Timer.Timer();
