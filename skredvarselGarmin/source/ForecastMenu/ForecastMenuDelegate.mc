@@ -95,7 +95,8 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
 
     var view = null;
     var delegate = null;
-    if (Ui has :ViewLoop) {
+    var useViewLoop = false;
+    if (useViewLoop && Ui has :ViewLoop) {
       var factory = new DetailedForecastsViewLoopFactory(
         regionId,
         data,

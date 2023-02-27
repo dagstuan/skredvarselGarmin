@@ -10,6 +10,7 @@ public class WidgetView extends Ui.View {
   private var _forecast as SimpleAvalancheForecast?;
 
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
+  private var _useBufferedBitmap as Boolean;
 
   private var _width as Number?;
   private var _height as Number?;
@@ -17,10 +18,14 @@ public class WidgetView extends Ui.View {
   private var _appNameText as Ui.Resource?;
   private var _loadingText as Ui.Resource?;
 
+  private const _margin = 10;
+  private const _forecastHeight = 80;
+
   public function initialize() {
     View.initialize();
 
     _regionId = $.getFavoriteRegionId();
+    _useBufferedBitmap = $.useBufferedBitmaps();
     setForecastDataFromStorage();
   }
 
@@ -56,32 +61,11 @@ public class WidgetView extends Ui.View {
       );
     } else {
       if (_forecast != null) {
-        var margin = 10;
-        var forecastHeight = 80;
-        if (_bufferedBitmap == null) {
-          var forecastWidth = _width - margin * 2;
-
-          _bufferedBitmap = $.newBufferedBitmap({
-            :width => forecastWidth,
-            :height => forecastHeight,
-          });
-          var bufferedDc = _bufferedBitmap.getDc();
-
-          var forecastTimeline = new AvalancheUi.ForecastTimeline({
-            :locX => 0,
-            :locY => 0,
-            :width => forecastWidth,
-            :height => forecastHeight,
-            :regionId => _regionId,
-            :forecast => _forecast,
-          });
-          forecastTimeline.draw(bufferedDc);
+        if (_useBufferedBitmap) {
+          drawTimelineBuffered(dc);
+        } else {
+          drawTimeline(dc);
         }
-
-        var x0 = margin;
-        var y0 = (_height * 0.55 - forecastHeight / 2).toNumber();
-
-        dc.drawBitmap(x0, y0, _bufferedBitmap);
       } else {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
@@ -94,6 +78,46 @@ public class WidgetView extends Ui.View {
         );
       }
     }
+  }
+
+  function drawTimelineBuffered(dc as Gfx.Dc) {
+    if (_bufferedBitmap == null) {
+      var forecastWidth = _width - _margin * 2;
+
+      _bufferedBitmap = $.newBufferedBitmap({
+        :width => forecastWidth,
+        :height => _forecastHeight,
+      });
+      var bufferedDc = _bufferedBitmap.getDc();
+
+      var forecastTimeline = new AvalancheUi.ForecastTimeline({
+        :locX => 0,
+        :locY => 0,
+        :width => forecastWidth,
+        :height => _forecastHeight,
+        :regionId => _regionId,
+        :forecast => _forecast,
+      });
+      forecastTimeline.draw(bufferedDc);
+    }
+
+    var x0 = _margin;
+    var y0 = (_height * 0.55 - _forecastHeight / 2).toNumber();
+
+    dc.drawBitmap(x0, y0, _bufferedBitmap);
+  }
+
+  function drawTimeline(dc as Gfx.Dc) {
+    var forecastTimeline = new AvalancheUi.ForecastTimeline({
+      :locX => _margin,
+      :locY => _height / 2 - _forecastHeight / 2,
+      :width => _width - _margin,
+      :height => _forecastHeight,
+      :regionId => _regionId,
+      :forecast => _forecast,
+    });
+
+    forecastTimeline.draw(dc);
   }
 
   public function onHide() {
