@@ -39,6 +39,16 @@ module AvalancheUi {
     }
 
     public function draw(dc as Gfx.Dc) {
+      if ($.DrawOutlines) {
+        $.drawOutline(
+          dc,
+          _locX - _radius,
+          _locY - _radius,
+          _radius * 2,
+          _radius * 2
+        );
+      }
+
       dc.setPenWidth(_radius);
       dc.setAntiAlias(true);
 
@@ -84,6 +94,18 @@ module AvalancheUi {
         dc.drawLine(start[0], start[1], end[0], end[1]);
         startAngle = (startAngle + 45) % 360;
       }
+
+      var font = WatchUi.loadResource($.Rez.Fonts.roboto);
+      var fontHeight = Gfx.getFontHeight(font);
+
+      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+      dc.drawText(
+        _locX,
+        _locY - _radius - fontHeight / 2,
+        font,
+        "N",
+        Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
+      );
     }
   }
 

@@ -7,7 +7,7 @@ using Toybox.Time.Gregorian;
 using Toybox.System;
 using Toybox.Math;
 
-const Debug = false;
+const Debug = true;
 const DrawOutlines = false;
 
 function getSortedRegionIds() as Array<String> {
