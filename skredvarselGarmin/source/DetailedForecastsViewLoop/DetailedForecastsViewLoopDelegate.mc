@@ -1,7 +1,7 @@
-using Toybox.WatchUi as Ui;
+// using Toybox.WatchUi as Ui;
 
-class DetailedForecastsViewLoopDelegate extends Ui.ViewLoopDelegate {
-  public function initialize(viewLoop as DetailedForecastsViewLoop) {
-    ViewLoopDelegate.initialize(viewLoop);
-  }
-}
+// class DetailedForecastsViewLoopDelegate extends Ui.ViewLoopDelegate {
+//   public function initialize(viewLoop as DetailedForecastsViewLoop) {
+//     ViewLoopDelegate.initialize(viewLoop);
+//   }
+// }

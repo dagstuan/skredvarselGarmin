@@ -97,13 +97,13 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
     var delegate = null;
     var useViewLoop = false;
     if (useViewLoop && Ui has :ViewLoop) {
-      var factory = new DetailedForecastsViewLoopFactory(
-        regionId,
-        data,
-        dataAge
-      );
-      view = new DetailedForecastsViewLoop(factory, startIndex);
-      delegate = new DetailedForecastsViewLoopDelegate(view);
+      // var factory = new DetailedForecastsViewLoopFactory(
+      //   regionId,
+      //   data,
+      //   dataAge
+      // );
+      // view = new DetailedForecastsViewLoop(factory, startIndex);
+      // delegate = new DetailedForecastsViewLoopDelegate(view);
     } else {
       view = new DetailedForecastView(
         regionId,
