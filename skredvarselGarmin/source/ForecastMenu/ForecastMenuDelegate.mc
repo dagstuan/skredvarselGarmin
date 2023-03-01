@@ -20,7 +20,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
 
   //! Handle an item being selected
   //! @param item The selected menu item
-  public function onSelect(item as Ui.CustomMenuItem) as Void {
+  public function onSelect(item as Ui.MenuItem) as Void {
     var id = item.getId();
 
     if (id.equals("edit")) {
@@ -93,34 +93,20 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
       startIndex = 3;
     }
 
-    var view = null;
-    var delegate = null;
-    var useViewLoop = false;
-    if (useViewLoop && Ui has :ViewLoop) {
-      // var factory = new DetailedForecastsViewLoopFactory(
-      //   regionId,
-      //   data,
-      //   dataAge
-      // );
-      // view = new DetailedForecastsViewLoop(factory, startIndex);
-      // delegate = new DetailedForecastsViewLoopDelegate(view);
-    } else {
-      view = new DetailedForecastView(
-        regionId,
-        startIndex,
-        data.size(),
-        data[startIndex],
-        dataAge,
-        true
-      );
-      delegate = new DetailedForecastViewPageLoopDelegate({
-        :index => startIndex,
-        :view => view,
-        :detailedWarnings => data,
-        :regionId => regionId,
-        :dataAge => dataAge,
-      });
-    }
+    var view = new DetailedForecastView(
+      regionId,
+      startIndex,
+      data.size(),
+      data[startIndex],
+      true
+    );
+    var delegate = new DetailedForecastViewPageLoopDelegate({
+      :index => startIndex,
+      :view => view,
+      :detailedWarnings => data,
+      :regionId => regionId,
+      :dataAge => dataAge,
+    });
 
     if (_progressBar != null) {
       Ui.switchToView(view, delegate, Ui.SLIDE_LEFT);

@@ -1,6 +1,7 @@
 import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
+using Toybox.Time.Gregorian;
 
 typedef DetailedWarningsViewPageLoopDelegateSettings as {
   :index as Number,
@@ -11,6 +12,8 @@ typedef DetailedWarningsViewPageLoopDelegateSettings as {
 };
 
 class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate {
+  private const TIME_TO_CONSIDER_STALE = Gregorian.SECONDS_PER_HOUR * 2;
+
   private var _index as Number;
 
   private var _detailedWarnings as Array<DetailedAvalancheWarning>;
@@ -31,6 +34,26 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     _dataAge = settings[:dataAge];
 
     _numPages = _detailedWarnings.size();
+
+    if (_dataAge > TIME_TO_CONSIDER_STALE) {
+      $.logMessage("Stale forecast, try to reload in background");
+
+      $.loadDetailedWarningsForRegion(settings[:regionId], method(:onReceive));
+    }
+  }
+
+  public function onReceive(
+    responseCode as Number,
+    data as WebRequestCallbackData
+  ) as Void {
+    if (responseCode == 200 && data != null) {
+      _detailedWarnings = data as Array;
+      _dataAge = 0;
+
+      _view.warning = _detailedWarnings[_index];
+
+      Ui.requestUpdate();
+    }
   }
 
   //! Handle a physical button being pressed and released
@@ -84,7 +107,6 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
       _index,
       _detailedWarnings.size(),
       _detailedWarnings[_index],
-      _dataAge,
       true
     );
   }

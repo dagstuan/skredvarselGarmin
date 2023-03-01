@@ -9,11 +9,9 @@ using Toybox.Timer;
 using AvalancheUi;
 
 class DetailedForecastView extends Ui.View {
-  private const TIME_TO_CONSIDER_STALE = Gregorian.SECONDS_PER_HOUR * 2;
+  public var warning as DetailedAvalancheWarning?;
 
   private var _regionId as String;
-  private var _warning as DetailedAvalancheWarning?;
-  private var _warningAge as Number;
   private var _index as Number;
 
   private var _width as Numeric?;
@@ -41,47 +39,23 @@ class DetailedForecastView extends Ui.View {
     index as Number,
     numWarnings as Number,
     warning as DetailedAvalancheWarning,
-    warningAge as Number,
     showPageIndicator as Boolean
   ) {
     View.initialize();
 
     _regionId = regionId;
     _index = index;
-    _warningAge = warningAge;
-
-    setWarning(warning);
-
-    if (_warningAge > TIME_TO_CONSIDER_STALE) {
-      $.logMessage("Stale forecast, try to reload in background");
-
-      $.loadDetailedWarningsForRegion(regionId, method(:onReceive));
-    }
+    self.warning = warning;
+    _numElements = (warning["avalancheProblems"] as Array).size() + 1;
+    _forecastElementsIndicator = new AvalancheUi.ForecastElementsIndicator(
+      _numElements
+    );
 
     if (showPageIndicator) {
       _pageIndicator = new AvalancheUi.PageIndicator(numWarnings);
     }
 
     _deviceScreenWidth = $.getDeviceScreenWidth();
-  }
-
-  function setWarning(warning as DetailedAvalancheWarning) {
-    _warning = warning;
-    _numElements = (warning["avalancheProblems"] as Array).size() + 1;
-    _forecastElementsIndicator = new AvalancheUi.ForecastElementsIndicator(
-      _numElements
-    );
-  }
-
-  public function onReceive(
-    responseCode as Number,
-    data as WebRequestCallbackData
-  ) as Void {
-    if (responseCode == 200 && data != null) {
-      setWarning((data as Array)[_index] as DetailedAvalancheWarning);
-      _warningAge = 0;
-      Ui.requestUpdate();
-    }
   }
 
   public function onLayout(dc as Gfx.Dc) {
@@ -150,7 +124,7 @@ class DetailedForecastView extends Ui.View {
     var footerY0 = mainContentY0 + mainContentHeight;
     var footerHeight = _height * 0.17; // 15% of screen
 
-    var startValidity = (_warning["validity"] as Array)[0];
+    var startValidity = (warning["validity"] as Array)[0];
     var validityDate = $.parseDate(startValidity);
 
     drawSingleLineTextArea(
@@ -237,7 +211,7 @@ class DetailedForecastView extends Ui.View {
       $.drawOutline(dc, 0, y0, _width, height);
     }
 
-    var dangerLevel = _warning["dangerLevel"];
+    var dangerLevel = warning["dangerLevel"];
     var font = Gfx.FONT_MEDIUM;
     var paddingBetween = _width * 0.02;
     var iconResource = $.getIconResourceForDangerLevel(dangerLevel);
@@ -253,7 +227,7 @@ class DetailedForecastView extends Ui.View {
     var x0 = _width / 2 - contentWidth / 2;
     var centerY0 = y0 + height / 2;
 
-    var color = colorize(_warning["dangerLevel"]);
+    var color = colorize(warning["dangerLevel"]);
     dc.setColor(color, Gfx.COLOR_TRANSPARENT);
     dc.drawText(
       x0,
@@ -276,7 +250,7 @@ class DetailedForecastView extends Ui.View {
   ) {
     if (_elements == null) {
       _elements = new DetailedForecastElements(
-        _warning,
+        warning,
         y0,
         height,
         _seeFullForecastText

@@ -7,9 +7,11 @@ public class EditMenuDelegate extends Ui.Menu2InputDelegate {
 
   //! Handle an item being selected
   //! @param item The selected menu item
-  public function onSelect(item as EditMenuItem) as Void {
-    var regionId = item.getId();
-    var isEnabled = item.isEnabled();
+  public function onSelect(item as Ui.MenuItem) as Void {
+    var editMenuItem = item as EditMenuItem;
+
+    var regionId = editMenuItem.getId();
+    var isEnabled = editMenuItem.isEnabled();
     if (isEnabled) {
       $.addSelectedRegion(regionId);
     } else {

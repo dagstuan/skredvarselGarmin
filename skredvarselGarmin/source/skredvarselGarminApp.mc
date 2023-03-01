@@ -91,7 +91,9 @@ class skredvarselGarminApp extends Application.AppBase {
     return [new ServiceDelegate()];
   }
 
-  public function onBackgroundData(fetchedData as Boolean?) as Void {
+  public function onBackgroundData(
+    fetchedData as Application.PersistableType
+  ) as Void {
     $.logMessage("Exited background job.");
 
     if (fetchedData) {
