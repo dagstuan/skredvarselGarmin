@@ -27,7 +27,7 @@ public class ForecastMenu extends Ui.CustomMenu {
     var regionIds = $.getSelectedRegionIds();
 
     var regionsChanged = false;
-    if (regionIds.size() != _existingRegionIds) {
+    if (regionIds.size() != _existingRegionIds.size()) {
       regionsChanged = true;
     } else {
       for (var i = 0; i < regionIds.size(); i++) {
