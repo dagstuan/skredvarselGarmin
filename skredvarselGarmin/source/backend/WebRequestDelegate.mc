@@ -13,6 +13,7 @@ typedef WebRequestDelegateCallback as (Method
   (responseCode as Number, data as WebRequestCallbackData) as Void
 );
 
+(:glance)
 function makeApiRequest(
   path as String,
   storageKey as String,

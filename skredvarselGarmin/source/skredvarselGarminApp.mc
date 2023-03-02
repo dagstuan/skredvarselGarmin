@@ -76,6 +76,9 @@ class skredvarselGarminApp extends Application.AppBase {
     var favoriteRegionId = $.getFavoriteRegionId();
 
     if (favoriteRegionId == null) {
+      if ($.Debug) {
+        $.logMessage("No favorite region selected. Not returning a glance.");
+      }
       return null;
     }
 

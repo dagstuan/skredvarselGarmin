@@ -10,6 +10,8 @@ using Toybox.Math;
 const Debug = true;
 const DrawOutlines = false;
 
+const TIME_TO_CONSIDER_DATA_STALE = Gregorian.SECONDS_PER_HOUR * 0.5;
+
 function getSortedRegionIds() as Array<String> {
   return [
     "3003",
@@ -345,4 +347,9 @@ public function useBufferedBitmaps() {
   }
 
   return true;
+}
+
+(:glance)
+public function getStorageDataAge(data as Array) {
+  return Time.now().compare(new Time.Moment(data[1]));
 }

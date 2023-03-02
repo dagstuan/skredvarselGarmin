@@ -12,8 +12,6 @@ typedef DetailedWarningsViewPageLoopDelegateSettings as {
 };
 
 class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate {
-  private const TIME_TO_CONSIDER_STALE = Gregorian.SECONDS_PER_HOUR * 2;
-
   private var _index as Number;
 
   private var _detailedWarnings as Array<DetailedAvalancheWarning>;
@@ -35,7 +33,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
 
     _numPages = _detailedWarnings.size();
 
-    if (_dataAge > TIME_TO_CONSIDER_STALE) {
+    if (_dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
       $.logMessage("Stale forecast, try to reload in background");
 
       $.loadDetailedWarningsForRegion(settings[:regionId], method(:onReceive));

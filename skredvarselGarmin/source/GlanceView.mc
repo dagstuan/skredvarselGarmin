@@ -3,6 +3,7 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
 using Toybox.System as Sys;
+using Toybox.Time;
 using Toybox.Time.Gregorian;
 
 using AvalancheUi;
@@ -16,6 +17,8 @@ class GlanceView extends Ui.GlanceView {
   private var _regionId as String;
 
   private var _forecast as SimpleAvalancheForecast?;
+  private var _dataAge as Number?;
+
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
   private var _useBufferedBitmap as Boolean;
 
@@ -39,7 +42,13 @@ class GlanceView extends Ui.GlanceView {
     _height = dc.getHeight();
 
     setForecastDataFromStorage();
-    if (_forecast == null) {
+    if (_forecast == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
+      if ($.Debug) {
+        $.logMessage(
+          "Null or stale simple forecast for glance, try to reload in background"
+        );
+      }
+
       $.loadSimpleForecastForRegion(_regionId, method(:onReceive), false);
     }
   }
@@ -101,6 +110,7 @@ class GlanceView extends Ui.GlanceView {
     if (data != null) {
       _bufferedBitmap = null;
       _forecast = data[0];
+      _dataAge = $.getStorageDataAge(data);
     }
   }
 

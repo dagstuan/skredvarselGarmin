@@ -3,12 +3,15 @@ import Toybox.Lang;
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
 using Toybox.System as System;
+using Toybox.Time;
+using Toybox.Time.Gregorian;
 
 using AvalancheUi;
 
 public class ForecastMenuItem extends Ui.CustomMenuItem {
   private var _regionId as String;
   private var _forecast as SimpleAvalancheForecast?;
+  private var _dataAge as Number?;
 
   private var _screenWidth as Number;
 
@@ -27,15 +30,18 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     CustomMenuItem.initialize(regionId, {});
 
     _regionId = regionId;
-
     _screenWidth = $.getDeviceScreenWidth();
-
     _loadingText = Ui.loadResource($.Rez.Strings.Loading);
-
     _useBufferedBitmaps = $.useBufferedBitmaps();
 
     getForecastFromCache();
-    if (_forecast == null) {
+    if (_forecast == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
+      if ($.Debug) {
+        $.logMessage(
+          "Null or stale simple forecast for menu item, try to reload in background"
+        );
+      }
+
       $.loadSimpleForecastForRegion(_regionId, method(:onReceive), true);
     }
   }
@@ -112,12 +118,13 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   }
 
   private function getForecastFromCache() as Void {
-    var forecastArray = $.getSimpleForecastForRegion(_regionId);
+    var data = $.getSimpleForecastForRegion(_regionId);
 
-    if (forecastArray != null) {
+    if (data != null) {
       // Reset buffered bitmap when receiving new data
       _bufferedBitmap = null;
-      _forecast = forecastArray[0];
+      _forecast = data[0];
+      _dataAge = $.getStorageDataAge(data);
     }
   }
 
