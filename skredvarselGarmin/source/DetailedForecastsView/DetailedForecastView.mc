@@ -100,11 +100,13 @@ class DetailedForecastView extends Ui.View {
     var titleAreaY0 = 0;
     var titleAreaHeight = _height * 0.18; // 15% of screen
 
+    var startValidity = (warning["validity"] as Array)[0];
+    var validityDate = $.parseDate(startValidity);
     drawSingleLineTextArea(
       dc,
       titleAreaY0,
       titleAreaHeight,
-      $.getRegions()[_regionId]
+      getDateText(validityDate)
     );
 
     var headerAndDangerLevelY0 = titleAreaY0 + titleAreaHeight;
@@ -124,14 +126,11 @@ class DetailedForecastView extends Ui.View {
     var footerY0 = mainContentY0 + mainContentHeight;
     var footerHeight = _height * 0.17; // 15% of screen
 
-    var startValidity = (warning["validity"] as Array)[0];
-    var validityDate = $.parseDate(startValidity);
-
     drawSingleLineTextArea(
       dc,
       footerY0,
       footerHeight,
-      getDateText(validityDate)
+      $.getRegions()[_regionId]
     );
 
     if (_pageIndicator != null) {
