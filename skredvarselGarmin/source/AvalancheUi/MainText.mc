@@ -3,6 +3,7 @@ import Toybox.Lang;
 using Toybox.Graphics as Gfx;
 using Toybox.Math;
 using Toybox.WatchUi as Ui;
+using Toybox.Timer;
 
 module AvalancheUi {
   typedef MainTextSettings as {
@@ -27,7 +28,7 @@ module AvalancheUi {
 
     private var _bufferedBitmapText as Gfx.BufferedBitmap?;
 
-    private var _updateTimer;
+    private var _updateTimer as Timer.Timer?;
 
     public function initialize(settings as MainTextSettings) {
       _text = settings[:text];
@@ -35,7 +36,21 @@ module AvalancheUi {
       _height = settings[:height];
     }
 
-    public function onHide() {
+    public function onShow() as Void {
+      if (_textHeight > _height) {
+        if (_updateTimer == null) {
+          _updateTimer = new Timer.Timer();
+        }
+
+        _updateTimer.start(
+          method(:triggerUpdate),
+          TICK_DURATION /* ms */,
+          false
+        );
+      }
+    }
+
+    public function onHide() as Void {
       if (_updateTimer != null) {
         _updateTimer.stop();
         _updateTimer = null;
@@ -66,7 +81,7 @@ module AvalancheUi {
 
         bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
 
-        if (_textHeight < _height) {
+        if (_textHeight <= _height) {
           bufferedDc.drawText(
             _width / 2,
             _textHeight / 2,
@@ -87,7 +102,7 @@ module AvalancheUi {
 
       dc.setClip(x0, y0, _width, _height);
 
-      if (_textHeight < _height) {
+      if (_textHeight <= _height) {
         dc.drawBitmap(
           x0,
           y0 + _height / 2 - _textHeight / 2,
@@ -95,15 +110,6 @@ module AvalancheUi {
         );
       } else {
         dc.drawBitmap(x0, y0 + _textOffset, _bufferedBitmapText);
-
-        if (_updateTimer == null) {
-          _updateTimer = new Timer.Timer();
-          _updateTimer.start(
-            method(:triggerUpdate),
-            TICK_DURATION /* ms */,
-            false
-          );
-        }
       }
 
       dc.clearClip();

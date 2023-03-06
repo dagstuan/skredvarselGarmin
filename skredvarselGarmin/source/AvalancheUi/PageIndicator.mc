@@ -20,6 +20,10 @@ module AvalancheUi {
     }
 
     public function draw(dc as Gfx.Dc, selectedIndex as Number) as Void {
+      if (visibilityPercent == 0) {
+        return;
+      }
+
       dc.setAntiAlias(false);
       dc.setPenWidth(1);
       var width = dc.getWidth();

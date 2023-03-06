@@ -6,14 +6,33 @@ using Toybox.Math;
 
 using AvalancheUi;
 
-public class DetailedForecastElements extends Ui.Drawable {
+typedef AvalancheForecastElement as interface {
+  function onShow() as Void;
+  function onHide() as Void;
+  function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void;
+};
+
+typedef DetailedForecastElementsSettings as {
+  :warning as DetailedAvalancheWarning,
+  :locY as Numeric,
+  :height as Numeric,
+  :fullWidth as Numeric,
+};
+
+public class DetailedForecastElements {
   private const ANIMATION_TIME_SECONDS = 0.3;
   private const ANIMATION_STEPS = ANIMATION_TIME_SECONDS * 60; // 60 FPS
 
   private var _warning as DetailedAvalancheWarning;
 
-  private var _y0 as Numeric;
+  private var _locY as Numeric;
   private var _height as Numeric;
+  private var _fullWidth as Numeric;
+
+  private var _areaWidth as Numeric;
+  private var _areaHeight as Numeric;
+  private var _x0 as Numeric;
+  private var _y0 as Numeric;
 
   public var animationTime = 0;
   private var _animating = false;
@@ -21,35 +40,34 @@ public class DetailedForecastElements extends Ui.Drawable {
   private var _previousPage = -1;
   private var _numElements as Number;
 
-  private var _mainText as AvalancheUi.MainText?;
-  private var _bufferedPages as Array<Gfx.BufferedBitmap?>;
+  private var _elements as Array<AvalancheForecastElement?>;
 
   private var _seeFullForecastText as Ui.Resource?;
 
-  public function initialize(
-    warning as DetailedAvalancheWarning,
-    y0 as Numeric,
-    height as Numeric,
-    seeFullForecastText as Ui.Resource
-  ) {
-    Drawable.initialize({});
+  public function initialize(settings as DetailedForecastElementsSettings) {
+    _warning = settings[:warning];
+    _locY = settings[:locY];
+    _height = settings[:height];
+    _fullWidth = settings[:fullWidth];
 
-    _y0 = y0;
-    _height = height;
+    _areaWidth = Math.ceil(_fullWidth * 0.75);
+    _areaHeight = _height * 0.9;
+    _x0 = _fullWidth / 2 - _areaWidth / 2;
+    _y0 = _locY + (_height / 2 - _areaHeight / 2);
 
-    _warning = warning;
-    _numElements = (warning["avalancheProblems"] as Array).size() + 1;
+    _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
 
-    _seeFullForecastText = seeFullForecastText;
+    _seeFullForecastText = Ui.loadResource($.Rez.Strings.SeeFullForecast);
 
-    _bufferedPages = new [_numElements];
+    _elements = new [_numElements];
   }
 
   public function onHide() {
-    _mainText.onHide();
-    _mainText = null;
-    for (var i = 0; i < _bufferedPages.size(); i++) {
-      _bufferedPages[i] = null;
+    for (var i = 0; i < _elements.size(); i++) {
+      if (_elements[i] != null) {
+        _elements[i].onHide();
+        _elements[i] = null;
+      }
     }
   }
 
@@ -83,6 +101,16 @@ public class DetailedForecastElements extends Ui.Drawable {
     var prevPage = _currentPage;
     _currentPage = newPage;
     _previousPage = prevPage;
+
+    var prevElement = _elements[_previousPage];
+    if (prevElement != null) {
+      prevElement.onHide();
+    }
+
+    var currElement = _elements[_currentPage];
+    if (currElement != null) {
+      currElement.onShow();
+    }
   }
 
   private function animateToVisibleElement() as Void {
@@ -106,96 +134,62 @@ public class DetailedForecastElements extends Ui.Drawable {
   }
 
   public function draw(dc as Gfx.Dc) {
-    var fullWidth = dc.getWidth();
-
     if ($.DrawOutlines) {
-      $.drawOutline(dc, 0, _y0, fullWidth, _height);
+      $.drawOutline(dc, 0, _locY, _fullWidth, _height);
+
+      $.drawOutline(dc, _x0, _y0, _areaWidth, _areaHeight);
+
+      $.drawOutline(
+        dc,
+        _x0,
+        _y0 + _areaHeight / 2,
+        _areaWidth,
+        _y0 + _areaHeight / 2
+      );
     }
 
-    var areaWidth = Math.ceil(fullWidth * 0.75);
-    var areaHeight = _height * 0.9;
-    var x0 = fullWidth / 2 - areaWidth / 2;
-    var y0 = _y0 + (_height / 2 - areaHeight / 2);
-
-    if ($.DrawOutlines) {
-      $.drawOutline(dc, x0, y0, areaWidth, areaHeight);
-    }
-
-    var xOffset = -(_currentPage * fullWidth);
+    var xOffset = -(_currentPage * _fullWidth);
 
     if (_animating) {
       var direction = _currentPage > _previousPage ? 1 : -1;
-      var diff = ((_currentPage - _previousPage) * fullWidth).abs();
+      var diff = ((_currentPage - _previousPage) * _fullWidth).abs();
 
       if (direction > 0) {
         xOffset =
-          -_previousPage * fullWidth - (animationTime / ANIMATION_STEPS) * diff;
+          -_previousPage * _fullWidth -
+          (animationTime / ANIMATION_STEPS) * diff;
       } else {
         xOffset =
-          -_previousPage * fullWidth + (animationTime / ANIMATION_STEPS) * diff;
+          -_previousPage * _fullWidth +
+          (animationTime / ANIMATION_STEPS) * diff;
       }
-    }
-
-    if ($.DrawOutlines) {
-      $.drawOutline(
-        dc,
-        x0,
-        y0 + areaHeight / 2,
-        areaWidth,
-        y0 + areaHeight / 2
-      );
     }
 
     var avalancheProblems = _warning["avalancheProblems"] as Array;
 
-    drawFirstPage(dc, x0 + xOffset, y0, areaWidth, areaHeight);
-    xOffset += fullWidth;
-
-    for (var i = 0; i < _numElements - 1; i++) {
-      if (_bufferedPages[i] == null) {
-        // Never rendered, render the page offscreen;
-        var bufferedBitmap = $.newBufferedBitmap({
-          :width => areaWidth,
-          :height => areaHeight.toNumber(),
-        });
-        _bufferedPages[i] = bufferedBitmap;
-        var bufferedDc = bufferedBitmap.getDc();
-
-        // Other pages, map avalancheproblems
-        // Minus one since we start rendering avalanche problems on page 2
-        var problemToRender = avalancheProblems[i];
-
-        var avalancheProblemUi = new AvalancheUi.AvalancheProblemUi({
-          :problem => problemToRender,
-          :locX => 0,
-          :locY => 0,
-          :width => areaWidth,
-          :height => areaHeight,
-        });
-        avalancheProblemUi.draw(bufferedDc);
+    for (var i = 0; i < _elements.size(); i++) {
+      var wasNull = _elements[i] == null;
+      if (wasNull) {
+        if (i == 0) {
+          _elements[i] = new AvalancheUi.MainText({
+            :text => _warning["mainText"] + " " + _seeFullForecastText,
+            :width => _areaWidth,
+            :height => _areaHeight,
+          });
+        } else {
+          _elements[i] = new AvalancheUi.AvalancheProblemUi({
+            :problem => avalancheProblems[i - 1],
+            :width => _areaWidth,
+            :height => _areaHeight,
+          });
+        }
       }
 
-      dc.drawBitmap(x0 + xOffset, y0, _bufferedPages[i]);
-
-      xOffset += fullWidth;
+      _elements[i].draw(dc, _x0 + xOffset, _y0);
+      if (wasNull && _currentPage == i) {
+        _elements[i].onShow();
+      }
+      xOffset += _fullWidth;
     }
-  }
-
-  private function drawFirstPage(
-    dc as Gfx.Dc,
-    x0 as Numeric,
-    y0 as Numeric,
-    width as Numeric,
-    height as Numeric
-  ) {
-    if (_mainText == null) {
-      _mainText = new AvalancheUi.MainText({
-        :text => _warning["mainText"] + " " + _seeFullForecastText,
-        :width => width,
-        :height => height,
-      });
-    }
-
-    _mainText.draw(dc, x0, y0);
   }
 }

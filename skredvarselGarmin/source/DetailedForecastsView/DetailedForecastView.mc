@@ -8,6 +8,7 @@ using Toybox.Timer;
 
 using AvalancheUi;
 
+// TODO: Draw header and footer with buffered bitmaps.
 class DetailedForecastView extends Ui.View {
   public var warning as DetailedAvalancheWarning?;
 
@@ -22,7 +23,6 @@ class DetailedForecastView extends Ui.View {
   private var _yesterdayText as Ui.Resource?;
   private var _tomorrowText as Ui.Resource?;
   private var _levelText as Ui.Resource?;
-  private var _seeFullForecastText as Ui.Resource?;
 
   private var _elements as DetailedForecastElements?;
   private var _currentElement as Number = 0;
@@ -33,6 +33,9 @@ class DetailedForecastView extends Ui.View {
 
   private var _forecastElementsIndicator as
   AvalancheUi.ForecastElementsIndicator?;
+
+  private var _dangerLevelBitmap as Gfx.BufferedBitmap?;
+  private var _dangerLevelBitmapWidth as Numeric?;
 
   public function initialize(
     regionId as String,
@@ -90,7 +93,6 @@ class DetailedForecastView extends Ui.View {
     _yesterdayText = Ui.loadResource($.Rez.Strings.Yesterday);
     _tomorrowText = Ui.loadResource($.Rez.Strings.Tomorrow);
     _levelText = Ui.loadResource($.Rez.Strings.Level);
-    _seeFullForecastText = Ui.loadResource($.Rez.Strings.SeeFullForecast);
   }
 
   public function onUpdate(dc as Gfx.Dc) as Void {
@@ -109,16 +111,12 @@ class DetailedForecastView extends Ui.View {
       getDateText(validityDate)
     );
 
-    var headerAndDangerLevelY0 = titleAreaY0 + titleAreaHeight;
-    var headerAndDangerLevelHeight = _height * 0.17; // 20% of screen
+    var dangerLevelY0 = titleAreaY0 + titleAreaHeight;
+    var dangerLevelHeight = _height * 0.17; // 20% of screen
 
-    drawHeaderAndDangerLevel(
-      dc,
-      headerAndDangerLevelY0,
-      headerAndDangerLevelHeight
-    );
+    drawDangerLevel(dc, dangerLevelY0, dangerLevelHeight);
 
-    var mainContentY0 = headerAndDangerLevelY0 + headerAndDangerLevelHeight;
+    var mainContentY0 = dangerLevelY0 + dangerLevelHeight;
     var mainContentHeight = _height * 0.48; // Half screen
 
     drawMainContent(dc, mainContentY0, mainContentHeight);
@@ -169,7 +167,8 @@ class DetailedForecastView extends Ui.View {
     _yesterdayText = null;
     _tomorrowText = null;
     _levelText = null;
-    _seeFullForecastText = null;
+
+    _dangerLevelBitmap = null;
   }
 
   private function drawSingleLineTextArea(
@@ -201,7 +200,7 @@ class DetailedForecastView extends Ui.View {
     );
   }
 
-  private function drawHeaderAndDangerLevel(
+  private function drawDangerLevel(
     dc as Gfx.Dc,
     y0 as Numeric,
     height as Numeric
@@ -210,35 +209,47 @@ class DetailedForecastView extends Ui.View {
       $.drawOutline(dc, 0, y0, _width, height);
     }
 
-    var dangerLevel = warning["dangerLevel"];
-    var font = Gfx.FONT_MEDIUM;
-    var paddingBetween = _width * 0.02;
-    var iconResource = $.getIconResourceForDangerLevel(dangerLevel);
-    var icon = WatchUi.loadResource(iconResource);
-    var iconWidth = icon.getWidth();
-    var iconHeight = icon.getHeight();
+    if (_dangerLevelBitmap == null) {
+      var dangerLevel = warning["dangerLevel"];
+      var font = Gfx.FONT_MEDIUM;
+      var paddingBetween = _width * 0.02;
+      var iconResource = $.getIconResourceForDangerLevel(dangerLevel);
+      var icon = WatchUi.loadResource(iconResource);
+      var iconWidth = icon.getWidth();
+      var iconHeight = icon.getHeight();
 
-    var text = _levelText + " " + dangerLevel.toString();
+      var text = _levelText + " " + dangerLevel.toString();
 
-    var textWidth = dc.getTextWidthInPixels(text, font);
-    var contentWidth = iconWidth + paddingBetween + textWidth;
+      var textWidth = dc.getTextWidthInPixels(text, font);
+      var centerY0 = height / 2;
 
-    var x0 = _width / 2 - contentWidth / 2;
-    var centerY0 = y0 + height / 2;
+      _dangerLevelBitmapWidth = iconWidth + paddingBetween + textWidth;
+      _dangerLevelBitmap = $.newBufferedBitmap({
+        :width => _dangerLevelBitmapWidth,
+        :height => height,
+      });
+      var bufferedDc = _dangerLevelBitmap.getDc();
 
-    var color = colorize(warning["dangerLevel"]);
-    dc.setColor(color, Gfx.COLOR_TRANSPARENT);
-    dc.drawText(
-      x0,
-      centerY0,
-      font,
-      text,
-      Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
-    );
+      var color = colorize(warning["dangerLevel"]);
+      bufferedDc.setColor(color, Gfx.COLOR_TRANSPARENT);
+      bufferedDc.drawText(
+        0,
+        centerY0,
+        font,
+        text,
+        Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
+      );
+      bufferedDc.drawBitmap(
+        textWidth + paddingBetween,
+        centerY0 - iconHeight / 2,
+        icon
+      );
+    }
+
     dc.drawBitmap(
-      x0 + textWidth + paddingBetween,
-      centerY0 - iconHeight / 2,
-      icon
+      _width / 2 - _dangerLevelBitmapWidth / 2,
+      y0,
+      _dangerLevelBitmap
     );
   }
 
@@ -248,12 +259,12 @@ class DetailedForecastView extends Ui.View {
     height as Numeric
   ) {
     if (_elements == null) {
-      _elements = new DetailedForecastElements(
-        warning,
-        y0,
-        height,
-        _seeFullForecastText
-      );
+      _elements = new DetailedForecastElements({
+        :warning => warning,
+        :locY => y0,
+        :height => height,
+        :fullWidth => _width,
+      });
     }
 
     _elements.draw(dc);

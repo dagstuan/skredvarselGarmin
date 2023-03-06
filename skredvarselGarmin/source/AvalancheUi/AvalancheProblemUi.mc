@@ -22,18 +22,18 @@ module AvalancheUi {
 
   public class AvalancheProblemUi {
     private var _problem as AvalancheProblem;
-    private var _locX as Numeric;
-    private var _locY as Numeric;
     private var _width as Numeric;
     private var _height as Numeric;
 
     private var _dangerFillColor as Gfx.ColorType;
     private var _nonDangerFillColor as Gfx.ColorType;
 
+    private var _bufferedBitmap as Gfx.BufferedBitmap?;
+
+    private var _problemText as AvalancheUi.ScrollingText?;
+
     public function initialize(settings as AvalancheProblemSettings) {
       _problem = settings[:problem];
-      _locX = settings[:locX];
-      _locY = settings[:locY];
       _width = settings[:width];
       _height = settings[:height];
 
@@ -41,40 +41,71 @@ module AvalancheUi {
       _nonDangerFillColor = Gfx.COLOR_LT_GRAY;
     }
 
-    public function draw(dc as Gfx.Dc) {
-      drawOutlines(dc);
+    public function onShow() as Void {
+      if (_problemText != null) {
+        _problemText.onShow();
+      }
+    }
+
+    public function onHide() as Void {
+      if (_problemText != null) {
+        _problemText.onHide();
+      }
+    }
+
+    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
+      if (_problemText == null) {
+        _problemText = new ScrollingText({
+          :text => _problem["typeName"],
+          :width => _width,
+          :height => _height * 0.25,
+        });
+      }
+
+      _problemText.draw(dc, x0, y0);
+
+      // Draw the rest on a single buffered bitmap.
+      if (_bufferedBitmap == null) {
+        createBufferedBitmap();
+      }
+
+      dc.drawBitmap(x0, y0, _bufferedBitmap);
+    }
+
+    private function createBufferedBitmap() {
+      _bufferedBitmap = $.newBufferedBitmap({
+        :width => _width,
+        :height => _height,
+      });
+
+      var bufferedDc = _bufferedBitmap.getDc();
+
+      drawOutlines(bufferedDc);
 
       var paddingLeftRight = _width * 0.1;
       var paddingBetween = _width * 0.05;
       var elemHeight = _height * 0.75;
       var elemWidth = (_width - paddingLeftRight * 2 - paddingBetween * 2) / 3;
 
-      var x0 = _locX + paddingLeftRight;
-      var y0 = _locY + _height - elemHeight;
+      var x0 = paddingLeftRight;
+      var y0 = _height - elemHeight;
       var width = elemWidth;
       var height = elemHeight;
 
-      drawExpositions(dc, x0, y0, width, height);
+      drawExpositions(bufferedDc, x0, y0, width, height);
 
       x0 += elemWidth + paddingBetween;
-      drawExposedHeights(dc, x0, y0, width, height);
+      drawExposedHeights(bufferedDc, x0, y0, width, height);
 
       x0 += elemWidth + paddingBetween;
-      drawHeightTextElements(dc, x0, y0, width, height);
-
-      x0 = _locX;
-      y0 = _locY;
-      width = _width;
-      height = _height * 0.25;
-
-      drawProblemText(dc, x0, y0, width, height);
+      drawHeightTextElements(bufferedDc, x0, y0, width, height);
     }
 
     private function drawOutlines(dc as Gfx.Dc) {
       if ($.DrawOutlines) {
         dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
         dc.setPenWidth(1);
-        $.drawOutline(dc, _locX, _locY, _width, _height);
+        $.drawOutline(dc, 0, 0, _width, _height);
       }
     }
 
@@ -286,47 +317,6 @@ module AvalancheUi {
       });
 
       arrow.draw(dc);
-    }
-
-    private function drawProblemText(
-      dc as Gfx.Dc,
-      x0 as Numeric,
-      y0 as Numeric,
-      width as Numeric,
-      height as Numeric
-    ) {
-      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
-      var text = _problem["typeName"];
-      var font = Gfx.FONT_XTINY;
-      var fontHeight = Gfx.getFontHeight(font);
-
-      if ($.DrawOutlines) {
-        $.drawOutline(dc, x0, y0, width, height);
-      }
-
-      var textWidth = dc.getTextWidthInPixels(text, font);
-
-      dc.setClip(x0, y0, width, height);
-
-      if (textWidth < width) {
-        dc.drawText(
-          x0 + width / 2,
-          y0 + (height / 2 - fontHeight / 2),
-          font,
-          text,
-          Gfx.TEXT_JUSTIFY_CENTER
-        );
-      } else {
-        dc.drawText(
-          x0,
-          y0 + (height / 2 - fontHeight / 2),
-          font,
-          text,
-          Gfx.TEXT_JUSTIFY_LEFT
-        );
-      }
-
-      dc.clearClip();
     }
   }
 }
