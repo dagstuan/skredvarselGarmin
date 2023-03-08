@@ -138,14 +138,6 @@ public class DetailedForecastElements {
       $.drawOutline(dc, 0, _locY, _fullWidth, _height);
 
       $.drawOutline(dc, _x0, _y0, _areaWidth, _areaHeight);
-
-      $.drawOutline(
-        dc,
-        _x0,
-        _y0 + _areaHeight / 2,
-        _areaWidth,
-        _y0 + _areaHeight / 2
-      );
     }
 
     var xOffset = -(_currentPage * _fullWidth);

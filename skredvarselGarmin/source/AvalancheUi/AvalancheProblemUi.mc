@@ -29,6 +29,8 @@ module AvalancheUi {
     private var _nonDangerFillColor as Gfx.ColorType;
 
     private var _bufferedBitmap as Gfx.BufferedBitmap?;
+    private var _bufferedBitmapX0 as Number?;
+    private var _bufferedBitmapY0 as Number?;
 
     private var _problemText as AvalancheUi.ScrollingText?;
 
@@ -69,44 +71,45 @@ module AvalancheUi {
         createBufferedBitmap();
       }
 
-      dc.drawBitmap(x0, y0, _bufferedBitmap);
+      dc.drawBitmap(
+        x0 + _bufferedBitmapX0,
+        y0 + _bufferedBitmapY0,
+        _bufferedBitmap
+      );
     }
 
     private function createBufferedBitmap() {
-      _bufferedBitmap = $.newBufferedBitmap({
-        :width => _width,
-        :height => _height,
-      });
-
-      var bufferedDc = _bufferedBitmap.getDc();
-
-      drawOutlines(bufferedDc);
-
       var paddingLeftRight = _width * 0.1;
       var paddingBetween = _width * 0.05;
       var elemHeight = _height * 0.75;
       var elemWidth = (_width - paddingLeftRight * 2 - paddingBetween * 2) / 3;
 
-      var x0 = paddingLeftRight;
-      var y0 = _height - elemHeight;
-      var width = elemWidth;
-      var height = elemHeight;
+      var bbWidth = (elemWidth * 3 + paddingBetween * 2).toNumber();
+      var bbHeight = elemHeight.toNumber();
 
-      drawExpositions(bufferedDc, x0, y0, width, height);
+      _bufferedBitmap = $.newBufferedBitmap({
+        :width => bbWidth,
+        :height => bbHeight,
+      });
+      _bufferedBitmapX0 = _width / 2 - bbWidth / 2;
+      _bufferedBitmapY0 = _height - bbHeight;
 
-      x0 += elemWidth + paddingBetween;
-      drawExposedHeights(bufferedDc, x0, y0, width, height);
+      var bufferedDc = _bufferedBitmap.getDc();
 
-      x0 += elemWidth + paddingBetween;
-      drawHeightTextElements(bufferedDc, x0, y0, width, height);
-    }
-
-    private function drawOutlines(dc as Gfx.Dc) {
       if ($.DrawOutlines) {
-        dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
-        dc.setPenWidth(1);
-        $.drawOutline(dc, 0, 0, _width, _height);
+        bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
+        bufferedDc.setPenWidth(1);
+        $.drawOutline(bufferedDc, 0, 0, bbWidth, bbHeight);
       }
+
+      var x0 = 0;
+      drawExpositions(bufferedDc, x0, 0, elemWidth, elemHeight);
+
+      x0 += elemWidth + paddingBetween;
+      drawExposedHeights(bufferedDc, x0, 0, elemWidth, elemHeight);
+
+      x0 += elemWidth + paddingBetween;
+      drawHeightTextElements(bufferedDc, x0, 0, elemWidth, elemHeight);
     }
 
     private function drawExpositions(

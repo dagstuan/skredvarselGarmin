@@ -100,8 +100,6 @@ module AvalancheUi {
         }
       }
 
-      dc.setClip(x0, y0, _width, _height);
-
       if (_textHeight <= _height) {
         dc.drawBitmap(
           x0,
@@ -109,10 +107,10 @@ module AvalancheUi {
           _bufferedBitmapText
         );
       } else {
+        dc.setClip(x0, y0, _width, _height);
         dc.drawBitmap(x0, y0 + _textOffset, _bufferedBitmapText);
+        dc.clearClip();
       }
-
-      dc.clearClip();
     }
 
     function triggerUpdate() as Void {
