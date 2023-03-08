@@ -2,23 +2,18 @@ import {
   Heading,
   Flex,
   Text,
-  Divider,
   Card,
   CardBody,
-  CardHeader,
-  useColorModeValue,
   Stack,
   Image,
-  Button,
-  CardFooter,
 } from "@chakra-ui/react";
 import { Feature } from "./Feature";
 
-import glanceImage from "./assets/glance.png";
-import timelinesImage from "./assets/timelines.png";
-import mainTextImage from "./assets/maintext.png";
-import problemsImage from "./assets/problems.png";
-import offlineImage from "./assets/offline.jpg";
+import glanceImage from "../assets/glance.png";
+import timelinesImage from "../assets/timelines.png";
+import mainTextImage from "../assets/maintext.png";
+import problemsImage from "../assets/problems.png";
+import offlineImage from "../assets/offline.jpg";
 
 export const Features = () => (
   <Flex
