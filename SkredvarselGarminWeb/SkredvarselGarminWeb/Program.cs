@@ -1,14 +1,13 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 using SkredvarselGarminWeb.Configuration;
 using SkredvarselGarminWeb.Database;
-using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.VarsomApi;
+using SkredvarselGarminWeb.VippsApi;
+using Refit;
+using SkredvarselGarminWeb.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,79 +15,40 @@ builder.Services.AddHttpClient();
 
 builder.Services.AddTransient<IVarsomApi, VarsomApi>();
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
 
-var connectionString = builder.Configuration.GetSection("Database").GetValue<string>("ConnectionString");
+var databaseOptions = builder.Configuration.GetSection("Database").Get<DatabaseOptions>()!;
+
+var connectionStringBuilder = new NpgsqlConnectionStringBuilder
+{
+    Host = databaseOptions.Host,
+    Port = databaseOptions.Port,
+    Username = databaseOptions.Username,
+    Password = databaseOptions.Password,
+    Database = databaseOptions.Database,
+    SslMode = SslMode.Prefer,
+    TrustServerCertificate = true
+};
+
 builder.Services.AddDbContext<SkredvarselDbContext>(options =>
-    options.UseNpgsql(connectionString)
+    options.UseNpgsql(connectionStringBuilder.ToString())
         .UseSnakeCaseNamingConvention());
 
-var oidcOptions = builder.Configuration.GetSection("Oidc").Get<OidcOptions>();
+var vippsOptionsSection = builder.Configuration.GetSection("Vipps");
+builder.Services.Configure<VippsOptions>(vippsOptionsSection);
+var vippsOptions = vippsOptionsSection.Get<VippsOptions>();
 
-builder.Services.AddAuthentication(options =>
+builder.Services.SetupAuthentication(builder.Configuration);
+
+builder.Services.AddSingleton<VippsAuthTokenStore>();
+builder.Services.AddTransient<VippsAuthenticatedHttpClientHandler>();
+
+builder.Services.AddRefitClient<IVippsApiClient>()
+    .ConfigureHttpClient(c =>
     {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+        c.BaseAddress = new Uri(vippsOptions!.BaseUrl);
     })
-    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-    {
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-        options.Cookie.SameSite = SameSiteMode.None;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    })
-    .AddOpenIdConnect(options =>
-    {
-        options.Authority = oidcOptions?.Authority;
-        options.ClientId = oidcOptions?.ClientId;
-        options.ClientSecret = oidcOptions?.ClientSecret;
-        options.ResponseType = "code";
-        options.CallbackPath = "/signin-oidc";
-
-        options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-
-        options.GetClaimsFromUserInfoEndpoint = true;
-
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            NameClaimType = "name",
-        };
-
-        options.Scope.Clear();
-        options.Scope.Add("openid");
-        options.Scope.Add("name");
-        options.Scope.Add("email");
-
-        options.Events.OnUserInformationReceived = (ctx) =>
-        {
-            if (ctx.Principal != null)
-            {
-                var rootElement = ctx.User.RootElement;
-                var sub = rootElement.GetString("sub");
-
-                if (sub != null)
-                {
-                    var dbContext = ctx.HttpContext.RequestServices.GetRequiredService<SkredvarselDbContext>();
-
-                    var user = dbContext.Users.Where(u => u.Id == sub).FirstOrDefault();
-                    if (user == null)
-                    {
-                        var userEntity = new User
-                        {
-                            Id = sub,
-                            Name = rootElement.GetString("name") ?? string.Empty,
-                            Email = rootElement.GetString("email") ?? string.Empty,
-                        };
-
-                        dbContext.Users.Add(userEntity);
-
-                        dbContext.SaveChanges();
-                    }
-                }
-            }
-
-            return Task.CompletedTask;
-        };
-    });
+    .AddHttpMessageHandler<VippsAuthenticatedHttpClientHandler>();
 
 var app = builder.Build();
 
@@ -114,11 +74,13 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapVippsEndpoints();
-
-app.MapControllers();
+app.MapVarsomApiEndpoints();
+app.MapSubscriptionEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
+    app.MapTestEndpoints();
+
     // Redirect all non-matched requests to SPA.
     app.Use(async (context, next) =>
     {

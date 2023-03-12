@@ -11,6 +11,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "/createSubscription": {
+        target: "https://localhost:8080",
+        changeOrigin: true,
+        secure: false,
+      },
       "^/api/.*": {
         target: "https://localhost:8080",
         changeOrigin: true,

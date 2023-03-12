@@ -1,4 +1,4 @@
-namespace SkredvarselGarminWeb.Models;
+namespace SkredvarselGarminWeb.Endpoints.Models;
 
 public class DetailedAvalancheWarning
 {

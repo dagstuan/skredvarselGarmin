@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SkredvarselGarminWeb.Database;
@@ -11,9 +12,11 @@ using SkredvarselGarminWeb.Database;
 namespace SkredvarselGarminWeb.Migrations
 {
     [DbContext(typeof(SkredvarselDbContext))]
-    partial class SkredvarselDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230312091415_AddPhoneNumber")]
+    partial class AddPhoneNumber
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,27 +24,6 @@ namespace SkredvarselGarminWeb.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("SkredvarselGarminWeb.Entities.Agreement", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text")
-                        .HasColumnName("id");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("pk_agreements");
-
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_agreements_user_id");
-
-                    b.ToTable("agreements", (string)null);
-                });
 
             modelBuilder.Entity("SkredvarselGarminWeb.Entities.User", b =>
                 {
@@ -72,24 +54,6 @@ namespace SkredvarselGarminWeb.Migrations
                         .HasName("pk_users");
 
                     b.ToTable("users", (string)null);
-                });
-
-            modelBuilder.Entity("SkredvarselGarminWeb.Entities.Agreement", b =>
-                {
-                    b.HasOne("SkredvarselGarminWeb.Entities.User", "User")
-                        .WithOne("Agreement")
-                        .HasForeignKey("SkredvarselGarminWeb.Entities.Agreement", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_agreements_users_user_id");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("SkredvarselGarminWeb.Entities.User", b =>
-                {
-                    b.Navigation("Agreement")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

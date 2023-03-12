@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Primitives;
+using SkredvarselGarminWeb.Database;
 
 namespace SkredvarselGarminWeb.Configuration;
 
@@ -29,7 +30,7 @@ public static class VippsLoginRouteBuilderExtensions
             ctx.Response.Redirect("/");
         }).AllowAnonymous();
 
-        app.MapGet("/vipps-user", async (HttpContext ctx) =>
+        app.MapGet("/vipps-user", async (HttpContext ctx, SkredvarselDbContext dbContext) =>
         {
             var result = await ctx.AuthenticateAsync();
 
@@ -39,11 +40,8 @@ public static class VippsLoginRouteBuilderExtensions
             }
             else
             {
-                return Results.Ok(new
-                {
-                    result.Principal.Identity!.Name
-                });
+                return Results.Ok(dbContext.GetUserOrThrow(ctx.User.Identity));
             }
-        });
+        }).AllowAnonymous();
     }
 }

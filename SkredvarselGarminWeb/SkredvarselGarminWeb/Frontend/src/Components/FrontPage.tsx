@@ -48,6 +48,8 @@ export const FrontPage = () => {
             </Stack>
             <Stack direction={"row"}>
               <Button
+                as="a"
+                href="/createSubscription"
                 bg={"blue.400"}
                 rounded={"full"}
                 color={"white"}
