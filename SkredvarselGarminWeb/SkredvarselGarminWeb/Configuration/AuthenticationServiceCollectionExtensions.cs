@@ -10,10 +10,8 @@ namespace SkredvarselGarminWeb.Configuration;
 
 public static class AuthenticationServiceCollectionExtensions
 {
-    public static void SetupAuthentication(this IServiceCollection serviceCollection, IConfiguration configuration)
+    public static void SetupAuthentication(this IServiceCollection serviceCollection, VippsOptions vippsOptions)
     {
-        var vippsOptions = configuration.GetSection("Vipps").Get<VippsOptions>();
-
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
         serviceCollection.AddAuthentication(options =>
             {

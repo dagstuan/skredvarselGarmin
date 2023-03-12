@@ -4,9 +4,6 @@ using Npgsql;
 using SkredvarselGarminWeb.Configuration;
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Options;
-using SkredvarselGarminWeb.VarsomApi;
-using SkredvarselGarminWeb.VippsApi;
-using Refit;
 using SkredvarselGarminWeb.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,27 +31,8 @@ var vippsOptionsSection = builder.Configuration.GetSection("Vipps");
 builder.Services.Configure<VippsOptions>(vippsOptionsSection);
 var vippsOptions = vippsOptionsSection.Get<VippsOptions>();
 
-builder.Services.SetupAuthentication(builder.Configuration);
-
-builder.Services.AddSingleton<VippsAuthTokenStore>();
-builder.Services.AddTransient<VippsAuthenticatedHttpClientHandler>();
-
-builder.Services.AddRefitClient<IVippsApiClient>()
-    .ConfigureHttpClient(c =>
-    {
-        c.BaseAddress = new Uri(vippsOptions!.BaseUrl);
-    })
-    .AddHttpMessageHandler<VippsAuthenticatedHttpClientHandler>();
-
-var varsomApiSettings = new RefitSettings
-{
-    UrlParameterFormatter = new DateOnlyUrlParameterFormatter()
-};
-builder.Services.AddRefitClient<IVarsomApi>(varsomApiSettings)
-    .ConfigureHttpClient(c =>
-    {
-        c.BaseAddress = new Uri("https://api01.nve.no/hydrology/forecast/avalanche/v6.2.1/api");
-    });
+builder.Services.SetupAuthentication(vippsOptions!);
+builder.Services.AddRefitClients(vippsOptions!);
 
 var app = builder.Build();
 

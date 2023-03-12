@@ -7,7 +7,11 @@ public class Agreement
     [Key]
     public string Id { get; set; } = string.Empty;
 
-    public AgreementStatus Status = AgreementStatus.PENDING;
+    public AgreementStatus Status { get; set; } = AgreementStatus.PENDING;
+
+    public string ConfirmationUrl { get; set; } = string.Empty;
+
+    public DateOnly Start { get; set; } = DateOnly.MinValue;
 
     [Required]
     public string? UserId { get; set; }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SkredvarselGarminWeb.Database;
@@ -11,9 +12,11 @@ using SkredvarselGarminWeb.Database;
 namespace SkredvarselGarminWeb.Migrations
 {
     [DbContext(typeof(SkredvarselDbContext))]
-    partial class SkredvarselDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230312210120_MoreAgreementFields")]
+    partial class MoreAgreementFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,10 +39,6 @@ namespace SkredvarselGarminWeb.Migrations
                     b.Property<DateOnly>("Start")
                         .HasColumnType("date")
                         .HasColumnName("start");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("integer")
-                        .HasColumnName("status");
 
                     b.Property<string>("UserId")
                         .IsRequired()

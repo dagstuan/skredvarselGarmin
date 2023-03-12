@@ -15,7 +15,9 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
             var agreementInDb = dbContext.Agreements.FirstOrDefault(a => a.UserId == user.Id);
             if (agreementInDb != null)
             {
-                throw new Exception("User already has a subscription");
+                // TODO: Redirect til minside.
+                ctx.Response.Redirect($"{ctx.Request.Scheme}://{ctx.Request.Host}");
+                return;
             }
 
             var baseUrl = "https://skredvarsel.app";
@@ -59,7 +61,9 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
             dbContext.Add(new Entities.Agreement
             {
                 Id = createdAgreement.AgreementId,
-                UserId = user.Id
+                UserId = user.Id,
+                ConfirmationUrl = createdAgreement.VippsConfirmationUrl,
+                Start = DateOnly.FromDateTime(DateTime.Now)
             });
             dbContext.SaveChanges();
 
