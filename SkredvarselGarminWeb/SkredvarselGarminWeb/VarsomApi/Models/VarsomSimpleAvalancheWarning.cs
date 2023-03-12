@@ -2,18 +2,18 @@ namespace SkredvarselGarminWeb.VarsomApi.Models;
 
 public class VarsomSimpleAvalancheWarning
 {
-    public int RegId { get; init; }
-    public int RegionId { get; init; }
-    public string RegionName { get; init; } = "Unknown";
-    public int RegionTypeId { get; init; }
-    public string RegionTypeName { get; init; } = "Unknown";
-    public int DangerLevel { get; init; } = 0;
-    public DateTime ValidFrom { get; init; }
-    public DateTime ValidTo { get; init; }
-    public DateTime NextWarningTime { get; init; }
-    public DateTime PublishTime { get; init; }
-    public DateTime? DangerIncreaseTime { get; init; }
-    public DateTime? DangerDecreaseTime { get; init; }
-    public string MainText { get; init; } = string.Empty;
-    public int LangKey { get; init; }
+    public required int RegId { get; init; }
+    public required int RegionId { get; init; }
+    public required string RegionName { get; init; }
+    public required int RegionTypeId { get; init; }
+    public required string RegionTypeName { get; init; }
+    public required string DangerLevel { get; init; }
+    public required DateTime ValidFrom { get; init; }
+    public required DateTime ValidTo { get; init; }
+    public required DateTime NextWarningTime { get; init; }
+    public required DateTime PublishTime { get; init; }
+    public required DateTime? DangerIncreaseTime { get; init; }
+    public required DateTime? DangerDecreaseTime { get; init; }
+    public required string MainText { get; init; }
+    public required int LangKey { get; init; }
 }

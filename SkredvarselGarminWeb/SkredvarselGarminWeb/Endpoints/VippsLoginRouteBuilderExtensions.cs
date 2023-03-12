@@ -2,34 +2,38 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Primitives;
+using SkredvarselGarminWeb.Database;
+using SkredvarselGarminWeb.Endpoints.Models;
 
-namespace SkredvarselGarminWeb.Configuration;
+namespace SkredvarselGarminWeb.Endpoints;
 
 public static class VippsLoginRouteBuilderExtensions
 {
     public static void MapVippsEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/vipps-login", async (ctx) =>
+        app.MapGet("/vipps-login", (HttpContext ctx) =>
         {
             if (ctx.User?.Identity == null || !ctx.User.Identity.IsAuthenticated)
             {
-                await ctx.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme);
-                return;
+                return Results.Challenge(
+                    authenticationSchemes: new[] {
+                        OpenIdConnectDefaults.AuthenticationScheme
+                    });
             }
 
             ctx.Request.Query.TryGetValue("returnUrl", out StringValues returnUrl);
 
-            ctx.Response.Redirect(returnUrl.FirstOrDefault() ?? "/");
+            return Results.Redirect(returnUrl.FirstOrDefault() ?? "/");
         }).AllowAnonymous();
 
-        app.MapGet("/vipps-logout", async (ctx) =>
+        app.MapGet("/vipps-logout", async (HttpContext ctx) =>
         {
             await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            ctx.Response.Redirect("/");
+            return Results.Redirect("/");
         }).AllowAnonymous();
 
-        app.MapGet("/vipps-user", async (HttpContext ctx) =>
+        app.MapGet("/api/vipps-user", async (HttpContext ctx, SkredvarselDbContext dbContext) =>
         {
             var result = await ctx.AuthenticateAsync();
 
@@ -39,11 +43,14 @@ public static class VippsLoginRouteBuilderExtensions
             }
             else
             {
-                return Results.Ok(new
+                var userInDb = dbContext.GetUserOrThrow(ctx.User.Identity);
+                return Results.Ok(new User
                 {
-                    result.Principal.Identity!.Name
+                    Name = userInDb.Name,
+                    Email = userInDb.Email,
+                    PhoneNumber = userInDb.PhoneNumber
                 });
             }
-        });
+        }).AllowAnonymous();
     }
 }

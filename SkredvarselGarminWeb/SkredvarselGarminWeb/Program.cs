@@ -1,94 +1,31 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using SkredvarselGarminWeb.Configuration;
 using SkredvarselGarminWeb.Database;
-using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Options;
-using SkredvarselGarminWeb.VarsomApi;
+using SkredvarselGarminWeb.Endpoints;
+using Hangfire;
+using SkredvarselGarminWeb.Hangfire;
+using SkredvarselGarminWeb.Helpers;
+using SkredvarselGarminWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient();
+builder.Services.AddProblemDetails();
 
-builder.Services.AddTransient<IVarsomApi, VarsomApi>();
-builder.Services.AddControllers();
+var databaseOptions = builder.Configuration.GetSection("Database").Get<DatabaseOptions>()!;
+builder.Services.ConfigureDatabase(databaseOptions);
+builder.Services.ConfigureHangfireServices(databaseOptions);
 
-var connectionString = builder.Configuration.GetSection("Database").GetValue<string>("ConnectionString");
-builder.Services.AddDbContext<SkredvarselDbContext>(options =>
-    options.UseNpgsql(connectionString)
-        .UseSnakeCaseNamingConvention());
+var vippsOptionsSection = builder.Configuration.GetSection("Vipps");
+builder.Services.Configure<VippsOptions>(vippsOptionsSection);
+var vippsOptions = vippsOptionsSection.Get<VippsOptions>();
 
-var oidcOptions = builder.Configuration.GetSection("Oidc").Get<OidcOptions>();
+builder.Services.AddTransient<IDateTimeNowProvider, DateTimeNowProvider>();
+builder.Services.AddTransient<ISubscriptionService, SubscriptionService>();
 
-builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-    })
-    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-    {
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-        options.Cookie.SameSite = SameSiteMode.None;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    })
-    .AddOpenIdConnect(options =>
-    {
-        options.Authority = oidcOptions?.Authority;
-        options.ClientId = oidcOptions?.ClientId;
-        options.ClientSecret = oidcOptions?.ClientSecret;
-        options.ResponseType = "code";
-        options.CallbackPath = "/signin-oidc";
-
-        options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-
-        options.GetClaimsFromUserInfoEndpoint = true;
-
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            NameClaimType = "name",
-        };
-
-        options.Scope.Clear();
-        options.Scope.Add("openid");
-        options.Scope.Add("name");
-        options.Scope.Add("email");
-
-        options.Events.OnUserInformationReceived = (ctx) =>
-        {
-            if (ctx.Principal != null)
-            {
-                var rootElement = ctx.User.RootElement;
-                var sub = rootElement.GetString("sub");
-
-                if (sub != null)
-                {
-                    var dbContext = ctx.HttpContext.RequestServices.GetRequiredService<SkredvarselDbContext>();
-
-                    var user = dbContext.Users.Where(u => u.Id == sub).FirstOrDefault();
-                    if (user == null)
-                    {
-                        var userEntity = new User
-                        {
-                            Id = sub,
-                            Name = rootElement.GetString("name") ?? string.Empty,
-                            Email = rootElement.GetString("email") ?? string.Empty,
-                        };
-
-                        dbContext.Users.Add(userEntity);
-
-                        dbContext.SaveChanges();
-                    }
-                }
-            }
-
-            return Task.CompletedTask;
-        };
-    });
+builder.Services.SetupAuthentication(vippsOptions!);
+builder.Services.AddRefitClients(vippsOptions!);
 
 var app = builder.Build();
 
@@ -114,11 +51,24 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapVippsEndpoints();
+app.MapVarsomApiEndpoints();
+app.MapSubscriptionEndpoints();
 
-app.MapControllers();
+app.UseHangfireDashboard();
+
+using (var scope = app.Services.CreateScope())
+{
+    var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+    recurringJobManager.RemoveIfExists("UpdateAgreements");
+    recurringJobManager.AddOrUpdate<HangfireService>("UpdatePendingAgreements", s => s.UpdatePendingAgreements(), "*/10 * * * *");
+    recurringJobManager.AddOrUpdate<HangfireService>("RemoveStalePendingAgreements", s => s.RemoveStalePendingAgreements(), "*/10 * * * *");
+    recurringJobManager.AddOrUpdate<HangfireService>("UpdateAgreementCharges", s => s.UpdateAgreementCharges(), Cron.Hourly);
+}
 
 if (app.Environment.IsDevelopment())
 {
+    app.MapTestEndpoints();
+
     // Redirect all non-matched requests to SPA.
     app.Use(async (context, next) =>
     {

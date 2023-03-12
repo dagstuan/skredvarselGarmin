@@ -25,7 +25,14 @@ export const Features = () => (
     <Heading as="h2" size="xl" m={10}>
       Funksjoner
     </Heading>
-    <Flex m={5} maxW={"5xl"} alignItems={"flex-start"} gap={10}>
+    <Flex
+      m={5}
+      maxW={"5xl"}
+      alignItems={"flex-start"}
+      justifyContent="center"
+      gap={10}
+      flexWrap="wrap"
+    >
       <Feature
         imgUrl={glanceImage}
         heading="Glance"

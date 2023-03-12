@@ -1,5 +1,6 @@
 import { useQuery } from "react-query";
 import { api } from "../api";
+import { User } from "../types";
 
 const config = {
   headers: {
@@ -8,7 +9,7 @@ const config = {
 };
 
 const fetchUser = async () =>
-  api.get("/vipps-user", config).then((res) => res.data);
+  api.get("/api/vipps-user", config).then((res) => res.data as User);
 
 export const useUser = () =>
   useQuery(["user"], async () => fetchUser(), {

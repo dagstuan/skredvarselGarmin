@@ -1,13 +1,13 @@
-using SkredvarselGarminWeb.Models;
+using SkredvarselGarminWeb.Endpoints.Models;
 using SkredvarselGarminWeb.VarsomApi.Models;
 
-namespace SkredvarselGarminWeb.Mappers;
+namespace SkredvarselGarminWeb.Endpoints.Mappers;
 
 public static class DetailedAvalancheWarningMapper
 {
     public static DetailedAvalancheWarning ToDetailedAvalancheWarning(this VarsomDetailedAvalancheWarning varsomWarning) => new()
     {
-        DangerLevel = varsomWarning.DangerLevel,
+        DangerLevel = int.Parse(varsomWarning.DangerLevel),
         Validity = new DateTime[] {
             varsomWarning.ValidFrom,
             varsomWarning.ValidTo,
