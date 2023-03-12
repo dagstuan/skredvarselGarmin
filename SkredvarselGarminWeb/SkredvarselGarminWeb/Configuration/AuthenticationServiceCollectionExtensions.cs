@@ -90,5 +90,7 @@ public static class AuthenticationServiceCollectionExtensions
                     return Task.CompletedTask;
                 };
             });
+
+        serviceCollection.AddAuthorization();
     }
 }

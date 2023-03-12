@@ -11,10 +11,6 @@ using SkredvarselGarminWeb.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient();
-
-builder.Services.AddTransient<IVarsomApi, VarsomApi>();
-builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 
 var databaseOptions = builder.Configuration.GetSection("Database").Get<DatabaseOptions>()!;
@@ -49,6 +45,16 @@ builder.Services.AddRefitClient<IVippsApiClient>()
         c.BaseAddress = new Uri(vippsOptions!.BaseUrl);
     })
     .AddHttpMessageHandler<VippsAuthenticatedHttpClientHandler>();
+
+var varsomApiSettings = new RefitSettings
+{
+    UrlParameterFormatter = new DateOnlyUrlParameterFormatter()
+};
+builder.Services.AddRefitClient<IVarsomApi>(varsomApiSettings)
+    .ConfigureHttpClient(c =>
+    {
+        c.BaseAddress = new Uri("https://api01.nve.no/hydrology/forecast/avalanche/v6.2.1/api");
+    });
 
 var app = builder.Build();
 

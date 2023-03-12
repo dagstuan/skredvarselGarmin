@@ -7,7 +7,7 @@ public static class DetailedAvalancheWarningMapper
 {
     public static DetailedAvalancheWarning ToDetailedAvalancheWarning(this VarsomDetailedAvalancheWarning varsomWarning) => new()
     {
-        DangerLevel = varsomWarning.DangerLevel,
+        DangerLevel = int.Parse(varsomWarning.DangerLevel),
         Validity = new DateTime[] {
             varsomWarning.ValidFrom,
             varsomWarning.ValidTo,

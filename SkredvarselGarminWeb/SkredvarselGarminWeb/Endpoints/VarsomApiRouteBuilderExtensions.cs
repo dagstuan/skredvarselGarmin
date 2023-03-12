@@ -14,7 +14,7 @@ public static class VarsomApiRouteBuilderExtensions
 
             return warnings.Select(w => new SimpleAvalancheWarning
             {
-                DangerLevel = w.DangerLevel,
+                DangerLevel = int.Parse(w.DangerLevel),
                 Validity = new DateTime[] {
                     w.ValidFrom,
                     w.ValidTo
