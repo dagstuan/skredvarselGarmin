@@ -35,13 +35,12 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
 
             var isNewCustomer = !existingAgreementsForUser.Any();
 
+            var baseUrl = $"{ctx.Request.Scheme}://{ctx.Request.Host}";
+
             if (existingAgreementsForUser.Any(x => x.Status == AgreementStatus.ACTIVE))
             {
-                // TODO: Redirect til minside.
-                return Results.Redirect($"{ctx.Request.Scheme}://{ctx.Request.Host}/minSide");
+                return Results.Redirect($"{baseUrl}/minSide");
             }
-
-            var baseUrl = "https://localhost:8080";
 
             var request = new DraftAgreementRequest
             {
