@@ -4,7 +4,7 @@ public class VarsomDetailedAvalancheWarning
 {
     public DateTime ValidFrom { get; init; }
     public DateTime ValidTo { get; init; }
-    public int DangerLevel { get; init; } = 0;
+    public string DangerLevel { get; init; } = "0";
     public string MainText { get; init; } = string.Empty;
     public IEnumerable<VarsomAvalancheProblem> AvalancheProblems { get; init; } = new List<VarsomAvalancheProblem>();
 }

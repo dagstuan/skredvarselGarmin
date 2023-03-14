@@ -9,6 +9,7 @@ import {
 import { Features } from "./Features";
 
 import bg from "../assets/bg.jpg";
+import { MyPage } from "./MyPage";
 
 export const FrontPage = () => {
   return (
@@ -35,8 +36,8 @@ export const FrontPage = () => {
               lineHeight={1.2}
               fontSize={useBreakpointValue({ base: "3xl", md: "4xl" })}
             >
-              Skredvarsel for Garmin-klokker. Oppdatert og tilgjengelig offline
-              mens du er på tur.
+              Skredvarsel for Garmin-klokker. Oppdatert og tilgjengelig mens du
+              er på tur.
             </Text>
             <Stack direction={"row"} align={"center"} justify={"center"}>
               <Text color={"white"} fontSize={"3xl"} fontWeight={800}>
@@ -48,6 +49,8 @@ export const FrontPage = () => {
             </Stack>
             <Stack direction={"row"}>
               <Button
+                as="a"
+                href="/createSubscription"
                 bg={"blue.400"}
                 rounded={"full"}
                 color={"white"}
@@ -60,6 +63,7 @@ export const FrontPage = () => {
         </VStack>
       </Flex>
       <Features />
+      <MyPage />
     </>
   );
 };
