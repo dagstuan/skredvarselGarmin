@@ -10,13 +10,16 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
     {
         app.MapGet("/createSubscription", async (HttpContext ctx, IVippsApiClient vippsApiClient, SkredvarselDbContext dbContext) =>
         {
-            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+            // var user = dbContext.GetUserOrThrow(ctx.User.Identity);
 
-            var agreementInDb = dbContext.Agreements.FirstOrDefault(a => a.UserId == user.Id);
+            var userId = "2eb44f8c-37b8-4463-914a-1b360e16d3aa";
+            var userPhoneNumber = "4798839590";
+
+            var agreementInDb = dbContext.Agreements.FirstOrDefault(a => a.UserId == userId);
             if (agreementInDb != null)
             {
                 // TODO: Redirect til minside.
-                ctx.Response.Redirect($"{ctx.Request.Scheme}://{ctx.Request.Host}");
+                ctx.Response.Redirect($"{ctx.Request.Scheme}://{ctx.Request.Host}/minSide");
                 return;
             }
 
@@ -24,7 +27,7 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
 
             var request = new DraftAgreementRequest
             {
-                CustomerPhoneNumber = user.PhoneNumber,
+                CustomerPhoneNumber = userPhoneNumber,
                 Pricing = new()
                 {
                     Amount = 3000,
@@ -61,14 +64,17 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
             dbContext.Add(new Entities.Agreement
             {
                 Id = createdAgreement.AgreementId,
-                UserId = user.Id,
+                UserId = userId,
                 ConfirmationUrl = createdAgreement.VippsConfirmationUrl,
-                Start = DateOnly.FromDateTime(DateTime.Now)
+                Start = DateOnly.FromDateTime(DateTime.Now),
+                NextChargeId = createdAgreement.ChargeId,
+                NextChargeDate = DateOnly.FromDateTime(DateTime.Now)
             });
             dbContext.SaveChanges();
 
             ctx.Response.Redirect(createdAgreement.VippsConfirmationUrl);
-        }).RequireAuthorization();
+            //}).RequireAuthorization();
+        });
 
         app.MapGet("/api/subscription", async (HttpContext ctx, IVippsApiClient vippsApiClient, SkredvarselDbContext dbContext) =>
         {
@@ -81,6 +87,25 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
                 var agreementInVipps = await vippsApiClient.GetAgreement(agreementInDb.Id);
 
                 return Results.Ok(agreementInVipps);
+            }
+
+            return Results.NoContent();
+        }).RequireAuthorization();
+
+        app.MapDelete("/api/subscription", async (HttpContext ctx, IVippsApiClient vippsApiClient, SkredvarselDbContext dbContext) =>
+        {
+            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+
+            var agreementInDb = dbContext.Agreements.FirstOrDefault(a => a.UserId == user.Id);
+
+            if (agreementInDb != null)
+            {
+                var result = await vippsApiClient.PatchAgreement(agreementInDb.Id, new PatchAgreementRequest
+                {
+                    Status = PatchAgreementStatus.Stopped
+                }, Guid.NewGuid());
+
+                return Results.Ok();
             }
 
             return Results.NoContent();

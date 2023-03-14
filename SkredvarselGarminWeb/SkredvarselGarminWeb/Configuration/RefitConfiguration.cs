@@ -5,7 +5,7 @@ using SkredvarselGarminWeb.VippsApi;
 
 namespace SkredvarselGarminWeb.Configuration;
 
-public static class RefitConfigurationServiceCollectionExtensions
+public static class RefitConfiguration
 {
     public static void AddRefitClients(this IServiceCollection serviceCollection, VippsOptions vippsOptions)
     {

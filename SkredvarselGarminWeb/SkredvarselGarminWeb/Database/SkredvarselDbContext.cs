@@ -9,8 +9,8 @@ public class SkredvarselDbContext : DbContext
     {
     }
 
-    public DbSet<User> Users => Set<User>();
-    public DbSet<Agreement> Agreements => Set<Agreement>();
+    public virtual DbSet<User> Users => Set<User>();
+    public virtual DbSet<Agreement> Agreements => Set<Agreement>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

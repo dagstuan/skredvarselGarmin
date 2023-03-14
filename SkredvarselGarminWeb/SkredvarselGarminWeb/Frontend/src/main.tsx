@@ -16,7 +16,11 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
+        element: <FrontPage />,
         index: true,
+      },
+      {
+        path: "minSide",
         element: <FrontPage />,
       },
       {

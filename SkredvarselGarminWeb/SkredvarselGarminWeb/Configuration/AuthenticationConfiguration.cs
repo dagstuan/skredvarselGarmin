@@ -8,7 +8,7 @@ using SkredvarselGarminWeb.Options;
 
 namespace SkredvarselGarminWeb.Configuration;
 
-public static class AuthenticationServiceCollectionExtensions
+public static class AuthenticationConfiguration
 {
     public static void SetupAuthentication(this IServiceCollection serviceCollection, VippsOptions vippsOptions)
     {

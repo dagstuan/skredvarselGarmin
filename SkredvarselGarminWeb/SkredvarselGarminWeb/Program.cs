@@ -1,31 +1,22 @@
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using SkredvarselGarminWeb.Configuration;
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.Endpoints;
+using Hangfire;
+using SkredvarselGarminWeb.Hangfire;
+using SkredvarselGarminWeb.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
 
+builder.Services.AddTransient<IDateTimeNowProvider, DateTimeNowProvider>();
+
 var databaseOptions = builder.Configuration.GetSection("Database").Get<DatabaseOptions>()!;
-
-var connectionStringBuilder = new NpgsqlConnectionStringBuilder
-{
-    Host = databaseOptions.Host,
-    Port = databaseOptions.Port,
-    Username = databaseOptions.Username,
-    Password = databaseOptions.Password,
-    Database = databaseOptions.Database,
-    SslMode = SslMode.Prefer,
-    TrustServerCertificate = true
-};
-
-builder.Services.AddDbContext<SkredvarselDbContext>(options =>
-    options.UseNpgsql(connectionStringBuilder.ToString())
-        .UseSnakeCaseNamingConvention());
+builder.Services.ConfigureDatabase(databaseOptions);
+builder.Services.ConfigureHangfireServices(databaseOptions);
 
 var vippsOptionsSection = builder.Configuration.GetSection("Vipps");
 builder.Services.Configure<VippsOptions>(vippsOptionsSection);
@@ -60,6 +51,15 @@ app.UseAuthorization();
 app.MapVippsEndpoints();
 app.MapVarsomApiEndpoints();
 app.MapSubscriptionEndpoints();
+
+app.UseHangfireDashboard();
+
+using (var scope = app.Services.CreateScope())
+{
+    var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+    recurringJobManager.AddOrUpdate<HangfireService>("UpdateAgreements", s => s.UpdateAgreements(), Cron.Hourly);
+    recurringJobManager.AddOrUpdate<HangfireService>("UpdateAgreementCharges", s => s.UpdateAgreementCharges(), Cron.Hourly);
+}
 
 if (app.Environment.IsDevelopment())
 {

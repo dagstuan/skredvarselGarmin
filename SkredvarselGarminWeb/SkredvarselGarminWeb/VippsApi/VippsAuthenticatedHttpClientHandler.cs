@@ -66,7 +66,7 @@ public class VippsAuthenticatedHttpClientHandler : DelegatingHandler
 
         catch (Exception ex)
         {
-            _logger.LogError($"Error getting vipps access token.", ex);
+            _logger.LogError(ex, $"Error getting vipps access token.");
             throw;
         }
 

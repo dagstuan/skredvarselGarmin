@@ -5,7 +5,7 @@ namespace SkredvarselGarminWeb.VippsApi.Models;
 public class Agreement
 {
     [JsonPropertyName("campaign")]
-    public AgreementCampaign Campaign { get; set; } = new AgreementCampaign();
+    public AgreementCampaign? Campaign { get; set; }
 
     [JsonPropertyName("currency")]
     public string Currency { get; set; } = string.Empty;
@@ -14,7 +14,7 @@ public class Agreement
     public string Id { get; set; } = string.Empty;
 
     [JsonPropertyName("interval")]
-    public AgreementInterval Interval { get; set; } = new AgreementInterval();
+    public Period Interval { get; set; } = new Period();
 
     [JsonPropertyName("pricing")]
     public Pricing Pricing { get; set; } = new Pricing();
@@ -32,7 +32,7 @@ public class Agreement
     public DateTime? Stop { get; set; } = null;
 
     [JsonPropertyName("status")]
-    public AgreementStatus? Status { get; set; }
+    public AgreementStatus Status { get; set; }
 
     [JsonPropertyName("merchantAgreementUrl")]
     public string MerchantAgreementUrl { get; set; } = string.Empty;

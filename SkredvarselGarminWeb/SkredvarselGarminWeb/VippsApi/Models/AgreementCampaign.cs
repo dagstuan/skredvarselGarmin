@@ -9,7 +9,7 @@ public class AgreementCampaign
     public CampaignType Type { get; set; } = CampaignType.PeriodCampaign;
 
     [JsonPropertyName("price")]
-    public decimal Price { get; set; } = 0;
+    public int Price { get; set; } = 0;
 
     [JsonPropertyName("end")]
     public DateTime? End { get; set; }

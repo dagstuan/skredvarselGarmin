@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Primitives;
 using SkredvarselGarminWeb.Database;
 
-namespace SkredvarselGarminWeb.Configuration;
+namespace SkredvarselGarminWeb.Endpoints;
 
 public static class VippsLoginRouteBuilderExtensions
 {

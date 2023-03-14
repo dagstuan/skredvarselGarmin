@@ -13,6 +13,9 @@ public class Agreement
 
     public DateOnly Start { get; set; } = DateOnly.MinValue;
 
+    public string NextChargeId { get; set; } = string.Empty;
+    public DateOnly NextChargeDate { get; set; }
+
     [Required]
     public string? UserId { get; set; }
     public User? User { get; set; }
