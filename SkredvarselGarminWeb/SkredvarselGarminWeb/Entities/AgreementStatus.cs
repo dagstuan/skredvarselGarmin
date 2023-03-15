@@ -6,5 +6,6 @@ namespace SkredvarselGarminWeb.Entities
         ACTIVE = 1,
         STOPPED = 2,
         EXPIRED = 3,
+        UNSUBSCRIBED = 4,
     }
 }

@@ -18,6 +18,8 @@ using VippsChargeStatus = SkredvarselGarminWeb.VippsApi.Models.ChargeStatus;
 using VippsCaptureChargeRequest = SkredvarselGarminWeb.VippsApi.Models.CaptureChargeRequest;
 using VippsCreateChargeRequest = SkredvarselGarminWeb.VippsApi.Models.CreateChargeRequest;
 using VippsCreateChargeResponse = SkredvarselGarminWeb.VippsApi.Models.CreateChargeResponse;
+using VippsPatchAgreementRequest = SkredvarselGarminWeb.VippsApi.Models.PatchAgreementRequest;
+using VippsPatchAgreementStatus = SkredvarselGarminWeb.VippsApi.Models.PatchAgreementStatus;
 using Refit;
 using System.Net;
 using SkredvarselGarminWeb.Helpers;
@@ -491,5 +493,36 @@ public class SubscriptionServiceTests
         var updatedAgreementInDb = _dbContext.Agreements.Single(a => a.Id == agreement.Id);
         updatedAgreementInDb.NextChargeId.Should().Be(expectedNewChargeId);
         updatedAgreementInDb.NextChargeDate.Should().Be(expectedNextChargeDate);
+    }
+
+    [Fact]
+    public async Task Should_stop_agreements_in_vipps_that_are_unsubscribed()
+    {
+        var nextChargeDate = new DateOnly(2023, 4, 13);
+
+        _dateTimeNowProvider.Now.Returns(nextChargeDate.ToDateTime(TimeOnly.MinValue));
+
+        var agreement = _fixture.Build<Agreement>()
+            .With(a => a.Status, AgreementStatus.UNSUBSCRIBED)
+            .With(a => a.NextChargeDate, nextChargeDate)
+            .Create();
+
+        _dbContext.Add(agreement);
+        _dbContext.SaveChanges();
+
+        var successResponse = Substitute.For<IApiResponse>();
+        successResponse.IsSuccessStatusCode.Returns(true);
+        _vippsApiClient.PatchAgreement(default!, default!, default!).ReturnsForAnyArgs(successResponse);
+
+        await _subscriptionService.UpdateAgreementCharges(agreement.Id);
+
+        await _vippsApiClient.Received(1).PatchAgreement(agreement.Id, Arg.Is<VippsPatchAgreementRequest>(r => r.Status == VippsPatchAgreementStatus.Stopped), Arg.Any<Guid>());
+        await _vippsApiClient.DidNotReceiveWithAnyArgs().CaptureCharge(default!, default!, default!, default!);
+        await _vippsApiClient.DidNotReceiveWithAnyArgs().CreateCharge(default!, default!, default!);
+
+        var updatedAgreementInDb = _dbContext.Agreements.Single(a => a.Id == agreement.Id);
+        updatedAgreementInDb.Status.Should().Be(AgreementStatus.STOPPED);
+        updatedAgreementInDb.NextChargeId.Should().BeNull();
+        updatedAgreementInDb.NextChargeDate.Should().BeNull();
     }
 }

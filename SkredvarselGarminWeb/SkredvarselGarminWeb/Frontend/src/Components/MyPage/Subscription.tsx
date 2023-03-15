@@ -1,6 +1,7 @@
 import { Spinner, Button, Text } from "@chakra-ui/react";
 import { format, parse } from "date-fns";
 import {
+  useReactivateSubscription,
   useStopSubscription,
   useSubscription,
 } from "../../hooks/useSubscription";
@@ -11,6 +12,7 @@ export const Subscription = () => {
     useSubscription();
 
   const stopSubscription = useStopSubscription();
+  const reactivateSubscription = useReactivateSubscription();
 
   if (isSubscriptionLoading) {
     return <Spinner />;
@@ -48,8 +50,30 @@ export const Subscription = () => {
 
   var nextChargeDate =
     subscription.nextChargeDate != null
-      ? parse(subscription.nextChargeDate, "yyyy-mm-dd", new Date())
+      ? format(
+          parse(subscription.nextChargeDate, "yyyy-mm-dd", new Date()),
+          "dd.mm.yyyy"
+        )
       : null;
+
+  if (subscription.status == "UNSUBSCRIBED") {
+    return (
+      <>
+        <Text mb={2}>
+          Du har sagt opp abonnementet ditt. Du har fortsatt tilgang frem til{" "}
+          {nextChargeDate}.
+        </Text>
+
+        <Button
+          colorScheme="green"
+          isDisabled={reactivateSubscription.isLoading}
+          onClick={() => reactivateSubscription.mutate()}
+        >
+          Re-aktiver abonnement
+        </Button>
+      </>
+    );
+  }
 
   return (
     <>
@@ -58,13 +82,14 @@ export const Subscription = () => {
           <Text mb={2}>
             Du har registrert et abonnement på appen. Tusen takk!{" "}
             {nextChargeDate &&
-              `Abonnementet fornyes automatisk ${format(
-                nextChargeDate,
-                "dd.mm.yyyy"
-              )}`}
+              `Abonnementet fornyes automatisk ${nextChargeDate}`}
           </Text>
 
-          <Button color="gray.500" onClick={() => stopSubscription.mutate()}>
+          <Button
+            color="gray.500"
+            isDisabled={stopSubscription.isLoading}
+            onClick={() => stopSubscription.mutate()}
+          >
             Avslutt abonnement
           </Button>
         </>

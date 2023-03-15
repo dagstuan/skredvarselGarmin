@@ -154,7 +154,7 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
                 {
                     var agreementInVipps = await vippsApiClient.GetAgreement(agreementInDb.Id);
 
-                    if (agreementInVipps.Status == VippsApi.Models.AgreementStatus.Active)
+                    if (agreementInVipps.Status == VippsAgreementStatus.Active)
                     {
                         agreementInDb.SetAsActive();
                         dbContext.SaveChanges();
@@ -174,7 +174,7 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
 
         app.MapDelete("/api/subscription", async (
             HttpContext ctx,
-            IVippsApiClient vippsApiClient,
+            ISubscriptionService subscriptionService,
             SkredvarselDbContext dbContext) =>
         {
             var user = dbContext.GetUserOrThrow(ctx.User.Identity);
@@ -183,24 +183,36 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
                 .Where(a => a.Status == AgreementStatus.ACTIVE)
                 .FirstOrDefault(a => a.UserId == user.Id);
 
-            if (agreementInDb != null)
+            if (agreementInDb == null)
             {
-                var result = await vippsApiClient.PatchAgreement(agreementInDb.Id, new PatchAgreementRequest
-                {
-                    Status = PatchAgreementStatus.Stopped
-                }, Guid.NewGuid());
-
-                if (result.IsSuccessStatusCode)
-                {
-                    agreementInDb.Status = AgreementStatus.STOPPED;
-                    dbContext.SaveChanges();
-                    return Results.Ok();
-                }
-
-                throw new Exception("Failed to disable subscription in Vipps");
+                return Results.BadRequest("No subscription found.");
             }
 
-            return Results.BadRequest("No subscription found.");
+            await subscriptionService.DeactivateAgreement(agreementInDb.Id);
+
+            return Results.Ok();
+
+        }).RequireAuthorization();
+
+        app.MapPut("/api/subscription/reactivate", async (
+            HttpContext ctx,
+            ISubscriptionService subscriptionService,
+            SkredvarselDbContext dbContext) =>
+        {
+            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+
+            var agreementInDb = dbContext.Agreements
+                .Where(a => a.Status == AgreementStatus.UNSUBSCRIBED)
+                .FirstOrDefault(a => a.UserId == user.Id);
+
+            if (agreementInDb == null)
+            {
+                return Results.BadRequest("No subscription found.");
+            }
+
+            await subscriptionService.ReactivateAgreement(agreementInDb.Id);
+
+            return Results.Ok();
         }).RequireAuthorization();
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Refit;
 using SkredvarselGarminWeb.Database;
+using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.VippsApi;
 using SkredvarselGarminWeb.VippsApi.Models;
 
@@ -75,8 +76,13 @@ public static class TestEndpointsRouteBuilderExtensions
             }
         }).RequireAuthorization();
 
-        app.MapGet("/api/test/agreements/{id}/cancel", async (IVippsApiClient vippsApiClient, string id) =>
+        app.MapGet("/api/test/agreements/{id}/cancel", async (
+            IVippsApiClient vippsApiClient,
+            SkredvarselDbContext dbContext,
+            string id) =>
         {
+            var agreementInDb = dbContext.Agreements.First(a => a.Id == id);
+
             var result = await vippsApiClient.PatchAgreement(id, new PatchAgreementRequest
             {
                 Status = PatchAgreementStatus.Stopped
@@ -84,6 +90,9 @@ public static class TestEndpointsRouteBuilderExtensions
 
             if (result.IsSuccessStatusCode)
             {
+                agreementInDb.SetAsStopped();
+                dbContext.SaveChanges();
+
                 return Results.Ok();
             }
 

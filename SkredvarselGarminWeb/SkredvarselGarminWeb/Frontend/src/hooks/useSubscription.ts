@@ -8,14 +8,25 @@ const fetchSubscription = async () =>
     .get("/api/subscription")
     .then((res) => (res.data ? (res.data as Subscription) : null));
 
-const stopSubscription = async () => api.delete("/api/subscription");
-
 export const useSubscription = () =>
   useQuery(["subscription"], async () => fetchSubscription());
+
+const stopSubscription = async () => api.delete("/api/subscription");
 
 export const useStopSubscription = () =>
   useMutation({
     mutationFn: stopSubscription,
+    onSuccess: () => {
+      queryClient.invalidateQueries("subscription");
+    },
+  });
+
+const reactivateSubscription = async () =>
+  api.put("/api/subscription/reactivate");
+
+export const useReactivateSubscription = () =>
+  useMutation({
+    mutationFn: reactivateSubscription,
     onSuccess: () => {
       queryClient.invalidateQueries("subscription");
     },
