@@ -2,19 +2,19 @@ namespace SkredvarselGarminWeb.VarsomApi.Models;
 
 public class VarsomDetailedAvalancheWarning
 {
-    public DateTime ValidFrom { get; init; }
-    public DateTime ValidTo { get; init; }
-    public int DangerLevel { get; init; } = 0;
-    public string MainText { get; init; } = string.Empty;
-    public IEnumerable<VarsomAvalancheProblem> AvalancheProblems { get; init; } = new List<VarsomAvalancheProblem>();
+    public required DateTime ValidFrom { get; init; }
+    public required DateTime ValidTo { get; init; }
+    public required string DangerLevel { get; init; }
+    public required string MainText { get; init; }
+    public required IEnumerable<VarsomAvalancheProblem> AvalancheProblems { get; init; }
 }
 
 public class VarsomAvalancheProblem
 {
-    public string AvalancheProblemTypeName { get; init; } = string.Empty;
-    public int AvalancheProblemTypeId { get; init; } = 0;
-    public int ExposedHeight1 { get; init; } = 0;
-    public int ExposedHeight2 { get; init; } = 0;
-    public int ExposedHeightFill { get; init; } = 0;
-    public string ValidExpositions { get; init; } = string.Empty;
+    public required string AvalancheProblemTypeName { get; init; }
+    public required int AvalancheProblemTypeId { get; init; }
+    public required int ExposedHeight1 { get; init; }
+    public required int ExposedHeight2 { get; init; }
+    public required int ExposedHeightFill { get; init; }
+    public required string ValidExpositions { get; init; }
 }

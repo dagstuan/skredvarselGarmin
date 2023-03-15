@@ -9,6 +9,8 @@ import ErrorPage from "./Components/ErrorPage";
 import { FrontPage } from "./Components/FrontPage";
 import { SalesConditions } from "./Components/SalesConditions";
 
+export const queryClient = new QueryClient();
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -16,7 +18,11 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     children: [
       {
+        element: <FrontPage />,
         index: true,
+      },
+      {
+        path: "minSide",
         element: <FrontPage />,
       },
       {
@@ -29,7 +35,7 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <QueryClientProvider client={new QueryClient()}>
+    <QueryClientProvider client={queryClient}>
       <ChakraProvider>
         <RouterProvider router={router} />
         <ReactQueryDevtools initialIsOpen={false} />

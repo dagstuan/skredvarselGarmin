@@ -1,4 +1,4 @@
-import { Box, Center, Heading, Text, VStack } from "@chakra-ui/react";
+import { Box, Center, Heading, Text } from "@chakra-ui/react";
 
 export const SalesConditions = () => {
   return (

@@ -6,6 +6,7 @@ import {
   Flex,
   Heading,
   Spinner,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 
@@ -27,8 +28,18 @@ export const Nav = () => {
         <Link style={{ textDecoration: "none" }} as={RouterLink} to="/">
           <Flex gap={3} alignItems={"center"}>
             <Image h={10} src={avalancheIcon} alt="Avalanche icon" />
-            <Heading as="h1" size="xl" noOfLines={1}>
-              Skredvarsel for Garmin
+            <Heading
+              as="h1"
+              size={useBreakpointValue({
+                base: "s",
+                md: "lg",
+              })}
+              noOfLines={1}
+            >
+              {useBreakpointValue({
+                base: "Skredvarsel",
+                sm: "Skredvarsel for Garmin",
+              })}
             </Heading>
           </Flex>
         </Link>
@@ -37,27 +48,29 @@ export const Nav = () => {
           {isLoading ? (
             <Spinner />
           ) : !user ? (
-            <Button
-              as="a"
-              href="/vipps-login?returnUrl=/"
-              bg={"blue.400"}
-              rounded={"full"}
-              color={"white"}
-              _hover={{ bg: "blue.500" }}
-            >
-              Logg inn og kjøp abonnement
-            </Button>
+            <>
+              <Button
+                as="a"
+                href="/vipps-login?returnUrl=/minSide"
+                bg={"blue.400"}
+                rounded={"full"}
+                color={"white"}
+                _hover={{ bg: "blue.500" }}
+              >
+                Logg inn
+              </Button>
+            </>
           ) : (
             <Button
-              as="a"
-              href="/vipps-logout"
+              as={RouterLink}
+              to="/minSide"
               isLoading={isLoading}
               bg={"blue.400"}
               rounded={"full"}
               color={"white"}
               _hover={{ bg: "blue.500" }}
             >
-              Logg ut
+              Min side
             </Button>
           )}
         </Box>

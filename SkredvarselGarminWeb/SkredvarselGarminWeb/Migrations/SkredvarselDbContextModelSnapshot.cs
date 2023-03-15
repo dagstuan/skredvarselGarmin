@@ -22,6 +22,50 @@ namespace SkredvarselGarminWeb.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("SkredvarselGarminWeb.Entities.Agreement", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text")
+                        .HasColumnName("id");
+
+                    b.Property<string>("ConfirmationUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("confirmation_url");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created");
+
+                    b.Property<DateOnly?>("NextChargeDate")
+                        .HasColumnType("date")
+                        .HasColumnName("next_charge_date");
+
+                    b.Property<string>("NextChargeId")
+                        .HasColumnType("text")
+                        .HasColumnName("next_charge_id");
+
+                    b.Property<DateOnly>("Start")
+                        .HasColumnType("date")
+                        .HasColumnName("start");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("Id")
+                        .HasName("pk_agreements");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("ix_agreements_user_id");
+
+                    b.ToTable("agreements", (string)null);
+                });
+
             modelBuilder.Entity("SkredvarselGarminWeb.Entities.User", b =>
                 {
                     b.Property<string>("Id")
@@ -42,10 +86,32 @@ namespace SkredvarselGarminWeb.Migrations
                         .HasColumnType("text")
                         .HasColumnName("name");
 
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("phone_number");
+
                     b.HasKey("Id")
                         .HasName("pk_users");
 
                     b.ToTable("users", (string)null);
+                });
+
+            modelBuilder.Entity("SkredvarselGarminWeb.Entities.Agreement", b =>
+                {
+                    b.HasOne("SkredvarselGarminWeb.Entities.User", "User")
+                        .WithMany("Agreement")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_agreements_users_user_id");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SkredvarselGarminWeb.Entities.User", b =>
+                {
+                    b.Navigation("Agreement");
                 });
 #pragma warning restore 612, 618
         }
