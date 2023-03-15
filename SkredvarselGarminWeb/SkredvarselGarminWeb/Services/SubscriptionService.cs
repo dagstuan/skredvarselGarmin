@@ -45,12 +45,15 @@ public class SubscriptionService : ISubscriptionService
             return;
         }
 
+        _logger.LogInformation("Updating charges for agreement {agreementId}", agreement.Id);
+
         var vippsAgreement = await _vippsApiClient.GetAgreement(agreement.Id);
 
         if (vippsAgreement.Status == VippsAgreementStatus.Active)
         {
             if (agreement.NextChargeId == null)
             {
+                _logger.LogInformation("Agreement did not have a NextChargeId set, creating new charge.");
                 await CreateAndStoreNewCharge(agreement, vippsAgreement);
             }
             else
@@ -64,6 +67,7 @@ public class SubscriptionService : ISubscriptionService
                 }
                 else if (nextCharge.Status == ChargeStatus.RESERVED)
                 {
+                    _logger.LogInformation("Capturing charge {chargeId} for agreement {agreementId} and creating new charge.", nextCharge.Id, agreement.Id);
                     var response = await _vippsApiClient.CaptureCharge(agreement.Id, nextCharge.Id, new CaptureChargeRequest
                     {
                         Amount = nextCharge.Amount,
@@ -77,7 +81,7 @@ public class SubscriptionService : ISubscriptionService
                     else
                     {
                         _logger.LogError(response.Error, response.Error?.Content);
-                        throw new Exception($"Failed to capture charge.");
+                        throw new Exception($"Failed to capture charge {nextCharge.Id}.");
                     }
                 }
                 else
@@ -110,6 +114,8 @@ public class SubscriptionService : ISubscriptionService
         var now = _dateTimeNowProvider.Now;
         var nowDateOnly = DateOnly.FromDateTime(now);
 
+        _logger.LogInformation("Calculating next charge for agreement {agreementId}", vippsAgreement.Id);
+
         if (vippsAgreement.Campaign != null)
         {
             var campaign = vippsAgreement.Campaign;
@@ -120,17 +126,24 @@ public class SubscriptionService : ISubscriptionService
 
                 if (nowDateOnly < periodEndDate)
                 {
-                    // Next charge should be full price at the end of the campaign.
-                    return (periodEndDate, vippsAgreement.Pricing.Amount);
+                    // Active period campaign. Next charge should be full price at the end of the campaign.
+                    var charge = (periodEndDate, vippsAgreement.Pricing.Amount);
+
+                    _logger.LogInformation("Agreement is in an active period campaign. Next charge date is {nextChargeDate} with price {price}", charge.periodEndDate, charge.Amount);
+                    return charge;
                 }
             }
             else if (campaign.Type == VippsCampaignType.PriceCampaign && now < campaign.End)
             {
-                // Next charge is still within campaign
-                return (
+                // Active price campaign, next charge should be campaign price at campaign interval.
+                var charge = (
                     GetNextChargeDate(nowDateOnly, vippsAgreement.Interval.Unit, vippsAgreement.Interval.Count),
                     campaign.Price
                 );
+
+                _logger.LogInformation("Agreement is in an active price campaign. Next charge date is {nextChargeDate} with price {price}", charge.Item1, charge.Price);
+
+                return charge;
             }
             else if (campaign.Type == VippsCampaignType.EventCampaign || campaign.Type == VippsCampaignType.FullFlexCampaign)
             {
@@ -139,6 +152,10 @@ public class SubscriptionService : ISubscriptionService
         }
 
         var nextChargeDate = GetNextChargeDate(nowDateOnly, vippsAgreement.Interval.Unit, vippsAgreement.Interval.Count);
+        var nextCharge = (nextChargeDate, vippsAgreement.Pricing.Amount);
+
+        _logger.LogInformation("Agreement is outside campaign. Next charge date is {nextChargeDate} with price {price}", nextCharge.nextChargeDate, nextCharge.Amount);
+
         return (nextChargeDate, vippsAgreement.Pricing.Amount);
     }
 

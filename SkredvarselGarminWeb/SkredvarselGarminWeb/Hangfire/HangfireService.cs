@@ -36,16 +36,15 @@ public class HangfireService
 
     public async Task UpdatePendingAgreements()
     {
-        var agreementsInDb = _dbContext.Agreements
-            .Where(a => a.Status == Entities.AgreementStatus.PENDING)
-            .ToList();
+        var pendingAgreementsInDb = _dbContext.GetPendingAgreements();
 
-        foreach (var agreement in agreementsInDb)
+        foreach (var agreement in pendingAgreementsInDb)
         {
             var vippsAgreement = await _vippsApiClient.GetAgreement(agreement.Id);
 
             if (vippsAgreement.Status == VippsAgreementStatus.Active)
             {
+                _logger.LogInformation("Setting pending agreement {agreementId} as active with hangfire", agreement.Id);
                 agreement.SetAsActive();
             }
         }
@@ -55,20 +54,17 @@ public class HangfireService
 
     public async Task RemoveStalePendingAgreements()
     {
-        var agreementsInDb = _dbContext.Agreements
+        var pendingAgreementsInDb = _dbContext.Agreements
             .Where(a => a.Status == Entities.AgreementStatus.PENDING)
             .Where(a => a.Created < DateTime.UtcNow.AddMinutes(-10))
             .ToList();
 
-        foreach (var agreement in agreementsInDb)
+        foreach (var agreement in pendingAgreementsInDb)
         {
             var vippsAgreement = await _vippsApiClient.GetAgreement(agreement.Id);
 
-            if (vippsAgreement.Status == VippsAgreementStatus.Active)
-            {
-                agreement.SetAsActive();
-            }
-            else
+            if (vippsAgreement.Status == VippsAgreementStatus.Expired ||
+                vippsAgreement.Status == VippsAgreementStatus.Stopped)
             {
                 _logger.LogInformation("Deleting stale agreement {agreementId} since it was expired in Vipps.", agreement.Id);
                 _dbContext.Remove(agreement);
