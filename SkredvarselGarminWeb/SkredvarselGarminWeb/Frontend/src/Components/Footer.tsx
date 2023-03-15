@@ -55,7 +55,7 @@ export const Footer = () => {
             <Box>
               <Box>Dag Stuan</Box>
             </Box>
-            <Text fontSize={"sm"}>© 2022. All rights reserved</Text>
+            <Text fontSize={"sm"}>© 2023. All rights reserved</Text>
           </Stack>
           <Stack align={"flex-start"}>
             <ListHeader>Om</ListHeader>
