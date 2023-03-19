@@ -83,4 +83,14 @@ public class HangfireService
             _backgroundJobClient.Enqueue(() => _subscriptionService.UpdateAgreementCharges(agreement.Id));
         }
     }
+
+    public void RemoveStaleWatchAddRequests()
+    {
+        var staleWatchAddRequests = _dbContext.WatchAddRequests
+            .Where(a => a.Created < DateTime.UtcNow.AddMinutes(-10))
+            .ToList();
+
+        _dbContext.RemoveRange(staleWatchAddRequests);
+        _dbContext.SaveChanges();
+    }
 }

@@ -6,6 +6,7 @@ public class Agreement
 {
     [Key]
     public required string Id { get; set; }
+
     public required DateTime Created { get; set; }
 
     public required AgreementStatus Status { get; set; }

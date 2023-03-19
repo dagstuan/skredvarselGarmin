@@ -41,4 +41,9 @@ public static class HangfireConfiguration
 
         serviceCollection.AddHangfireServer();
     }
+
+    public static void MapHangfireDashboard(this IEndpointRouteBuilder app)
+    {
+        app.MapHangfireDashboardWithAuthorizationPolicy("Admin");
+    }
 }

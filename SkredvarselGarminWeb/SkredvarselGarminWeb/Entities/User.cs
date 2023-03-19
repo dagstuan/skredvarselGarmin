@@ -20,5 +20,7 @@ public class User
     [Required]
     public DateOnly CreatedDate { get; init; } = DateOnly.FromDateTime(DateTime.Now);
 
-    public List<Agreement> Agreement { get; set; } = new List<Agreement>();
+    public List<Agreement> Agreements { get; set; } = null!;
+
+    public List<Watch> Watches { get; set; } = null!;
 }

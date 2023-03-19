@@ -9,3 +9,15 @@ export type User = {
   email: string;
   phoneNumber: string;
 };
+
+export type Watch = {
+  id: string;
+  name: string;
+};
+
+export type ProblemDetails = {
+  type: string;
+  title: string;
+  status: number;
+  detail: string;
+};

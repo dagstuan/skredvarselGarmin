@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -10,7 +11,7 @@ namespace SkredvarselGarminWeb.Configuration;
 
 public static class AuthenticationConfiguration
 {
-    public static void SetupAuthentication(this IServiceCollection serviceCollection, VippsOptions vippsOptions)
+    public static void SetupAuthentication(this IServiceCollection serviceCollection, VippsOptions vippsOptions, AuthOptions authOptions)
     {
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
         serviceCollection.AddAuthentication(options =>
@@ -45,6 +46,21 @@ public static class AuthenticationConfiguration
 
                 options.ClaimActions.MapJsonKey("phone_number", "phone_number");
                 options.ClaimActions.MapJsonKey("sub", "sub");
+
+                options.Events.OnRedirectToIdentityProvider = (ctx) =>
+                {
+                    if (ctx.Request.Path.StartsWithSegments("/api"))
+                    {
+                        if (ctx.Response.StatusCode == (int)HttpStatusCode.OK)
+                        {
+                            ctx.Response.StatusCode = 401;
+                        }
+
+                        ctx.HandleResponse();
+                    }
+
+                    return Task.CompletedTask;
+                };
 
                 options.Events.OnUserInformationReceived = (ctx) =>
                 {
@@ -89,6 +105,10 @@ public static class AuthenticationConfiguration
                 };
             });
 
-        serviceCollection.AddAuthorization();
+        serviceCollection.AddAuthorization(options =>
+        {
+            options.AddPolicy("Admin", policy =>
+                policy.RequireClaim("sub", authOptions.AdminSub));
+        });
     }
 }

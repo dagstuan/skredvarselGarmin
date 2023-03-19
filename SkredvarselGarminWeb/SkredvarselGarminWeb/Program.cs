@@ -24,7 +24,9 @@ var vippsOptions = vippsOptionsSection.Get<VippsOptions>();
 builder.Services.AddTransient<IDateTimeNowProvider, DateTimeNowProvider>();
 builder.Services.AddTransient<ISubscriptionService, SubscriptionService>();
 
-builder.Services.SetupAuthentication(vippsOptions!);
+var authOptions = builder.Configuration.GetSection("Auth").Get<AuthOptions>();
+
+builder.Services.SetupAuthentication(vippsOptions!, authOptions!);
 builder.Services.AddRefitClients(vippsOptions!);
 
 var app = builder.Build();
@@ -53,16 +55,17 @@ app.UseAuthorization();
 app.MapVippsEndpoints();
 app.MapVarsomApiEndpoints();
 app.MapSubscriptionEndpoints();
+app.MapWatchApiEndpoints();
 
-app.UseHangfireDashboard();
+app.MapHangfireDashboard();
 
 using (var scope = app.Services.CreateScope())
 {
     var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
-    recurringJobManager.RemoveIfExists("UpdateAgreements");
     recurringJobManager.AddOrUpdate<HangfireService>("UpdatePendingAgreements", s => s.UpdatePendingAgreements(), "*/10 * * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("RemoveStalePendingAgreements", s => s.RemoveStalePendingAgreements(), "*/10 * * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("UpdateAgreementCharges", s => s.UpdateAgreementCharges(), Cron.Hourly);
+    recurringJobManager.AddOrUpdate<HangfireService>("RemoveStaleWatchAddRequests", s => s.RemoveStaleWatchAddRequests(), "*/5 * * * *");
 }
 
 if (app.Environment.IsDevelopment())

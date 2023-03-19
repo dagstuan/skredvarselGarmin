@@ -6,18 +6,13 @@ import {
   DrawerCloseButton,
   DrawerContent,
   DrawerOverlay,
-  Flex,
-  FormControl,
-  FormHelperText,
-  FormLabel,
   Heading,
-  Input,
-  Text,
 } from "@chakra-ui/react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
 import { PersonalInfo } from "./PersonalInfo";
 import { Subscription } from "./Subscription";
+import { Watches } from "./Watches";
 
 export const MyPage = () => {
   const { data: user, isLoading } = useUser();
@@ -55,25 +50,7 @@ export const MyPage = () => {
           </Box>
 
           <Box mb={10}>
-            <Heading size="sm" mb={2}>
-              Klokker
-            </Heading>
-
-            <Text mb={4}>Du har ikke lagt til noen klokker.</Text>
-
-            <Box pt={4} pl={4} pb={4} pr={8} bg="gray.100">
-              <FormControl mb={2}>
-                <FormLabel>Legg til klokke</FormLabel>
-                <Flex gap={4}>
-                  <Input colorScheme="red" bg="white" />
-                  <Button colorScheme="blue">Legg til</Button>
-                </Flex>
-
-                <FormHelperText>
-                  Skriv inn koden som står på klokka.
-                </FormHelperText>
-              </FormControl>
-            </Box>
+            <Watches />
           </Box>
 
           <Box mb={10}>
@@ -89,7 +66,6 @@ export const MyPage = () => {
               as="a"
               href="/vipps-logout"
               bg={"blue.400"}
-              rounded={"full"}
               color={"white"}
               _hover={{ bg: "blue.500" }}
             >

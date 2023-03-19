@@ -1,7 +1,8 @@
 import { ChakraProvider } from "@chakra-ui/react";
+import { AxiosError } from "axios";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryCache, QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
