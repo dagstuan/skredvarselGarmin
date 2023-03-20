@@ -3,7 +3,6 @@ import {
   VStack,
   useBreakpointValue,
   Stack,
-  Button,
   Text,
 } from "@chakra-ui/react";
 import { Features } from "./Features";
@@ -11,6 +10,7 @@ import { Features } from "./Features";
 import bg from "../assets/bg.jpg";
 import { MyPage } from "./MyPage/MyPage";
 import { VippsButton } from "./VippsButton";
+import { CiqStoreButton } from "./CiqStoreButton";
 
 export const FrontPage = () => {
   return (
@@ -49,6 +49,7 @@ export const FrontPage = () => {
               </Text>
             </Stack>
             <Stack direction={"row"}>
+              <CiqStoreButton />
               <VippsButton />
             </Stack>
           </Stack>
