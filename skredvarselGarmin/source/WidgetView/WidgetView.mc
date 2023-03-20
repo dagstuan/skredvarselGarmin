@@ -17,6 +17,7 @@ public class WidgetView extends Ui.View {
   private var _height as Number?;
 
   private var _appNameText as Ui.Resource?;
+  private var _noRegionsSelectedText as Ui.Resource?;
   private var _loadingText as Ui.Resource?;
 
   private const _margin = 10;
@@ -25,18 +26,15 @@ public class WidgetView extends Ui.View {
   public function initialize() {
     View.initialize();
 
-    _regionId = $.getFavoriteRegionId();
     _useBufferedBitmap = $.useBufferedBitmaps();
   }
 
   function onShow() {
+    _regionId = $.getFavoriteRegionId();
     _appNameText = Ui.loadResource($.Rez.Strings.AppName) as String;
+    _noRegionsSelectedText =
+      Ui.loadResource($.Rez.Strings.NoRegionsSelected) as String;
     _loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
-  }
-
-  function onLayout(dc as Gfx.Dc) {
-    _width = dc.getWidth();
-    _height = dc.getHeight();
 
     setForecastDataFromStorage();
     if (
@@ -53,6 +51,11 @@ public class WidgetView extends Ui.View {
     }
   }
 
+  function onLayout(dc as Gfx.Dc) {
+    _width = dc.getWidth();
+    _height = dc.getHeight();
+  }
+
   public function onUpdate(dc as Gfx.Dc) as Void {
     dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
     dc.clear();
@@ -63,11 +66,11 @@ public class WidgetView extends Ui.View {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
       dc.drawText(
-        0,
+        dc.getWidth() / 2,
         dc.getHeight() / 2,
-        Graphics.FONT_MEDIUM,
-        _appNameText,
-        Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+        Graphics.FONT_SMALL,
+        _noRegionsSelectedText,
+        Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
       );
     } else {
       if (_forecast != null) {
@@ -132,7 +135,9 @@ public class WidgetView extends Ui.View {
 
   public function onHide() {
     _appNameText = null;
+    _noRegionsSelectedText = null;
     _loadingText = null;
+    _bufferedBitmap = null;
   }
 
   private function setForecastDataFromStorage() as Void {
