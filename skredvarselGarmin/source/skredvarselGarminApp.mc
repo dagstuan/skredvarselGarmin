@@ -6,23 +6,35 @@ using Toybox.WatchUi as Ui;
 using Toybox.Background;
 using Toybox.Application.Storage;
 
+function getInitialForecastView() as Array<Ui.Views or Ui.InputDelegates> {
+  var deviceSettings = System.getDeviceSettings();
+  if (
+    deviceSettings has :isGlanceModeEnabled &&
+    deviceSettings.isGlanceModeEnabled
+  ) {
+    var monkeyVersion = deviceSettings.monkeyVersion;
+
+    if (monkeyVersion[0] < 4) {
+      // CIQ less than 4 does not support having a menu as
+      // a main view. Need to use an intermediate view.
+      return [new IntermediateBaseView(), null];
+    }
+
+    return [new ForecastMenu(), new ForecastMenuDelegate()];
+  }
+
+  return [new WidgetView(), new WidgetViewDelegate()];
+}
+
 (:background)
 class skredvarselGarminApp extends Application.AppBase {
   const REFRESH_INTERVAL_MINUTES = 60;
-  const STORAGE_VERSION = 2;
-
   function initialize() {
     AppBase.initialize();
   }
 
   function onStart(state) {
-    var storageVersion = Storage.getValue("storageVersion") as Number?;
-
-    if (storageVersion == null || storageVersion != STORAGE_VERSION) {
-      $.logMessage("Wrong storage version detected. Resetting cache");
-      $.resetStorageCache();
-      Storage.setValue("storageVersion", STORAGE_VERSION);
-    }
+    $.resetStorageCacheIfRequired();
   }
 
   private function registerTemporalEvent() {
@@ -50,44 +62,21 @@ class skredvarselGarminApp extends Application.AppBase {
   function getInitialView() as Array<Ui.Views or Ui.InputDelegates>? {
     registerTemporalEvent();
 
-    var deviceSettings = System.getDeviceSettings();
-    if (
-      deviceSettings has :isGlanceModeEnabled &&
-      deviceSettings.isGlanceModeEnabled
-    ) {
-      var monkeyVersion = deviceSettings.monkeyVersion;
-
-      if (monkeyVersion[0] < 4) {
-        // CIQ less than 4 does not support having a menu as
-        // a main view. Need to use an intermediate view.
-        return [new IntermediateBaseView()];
+    if ($.getHasSubscription() == false) {
+      if ($.Debug) {
+        $.logMessage("No subscription detected.");
       }
-
-      return [new ForecastMenu(), new ForecastMenuDelegate()];
+      return [new SetupSubscriptionView(), new SetupSubscriptionViewDelegate()];
     }
 
-    return [new WidgetView(), new WidgetViewDelegate()];
+    return $.getInitialForecastView();
   }
 
   (:glance)
-  function getGlanceView() {
+  public function getGlanceView() as Lang.Array<Ui.GlanceView>? {
     registerTemporalEvent();
 
-    var favoriteRegionId = $.getFavoriteRegionId();
-
-    if (favoriteRegionId == null) {
-      if ($.Debug) {
-        $.logMessage("No favorite region selected. Not returning a glance.");
-      }
-      return null;
-    }
-
-    return [
-      new GlanceView({
-        :regionId => favoriteRegionId,
-        :useBufferedBitmap => true, // TODO: set this based on device.
-      }),
-    ];
+    return [new GlanceView()];
   }
 
   function getServiceDelegate() as Array<System.ServiceDelegate> {

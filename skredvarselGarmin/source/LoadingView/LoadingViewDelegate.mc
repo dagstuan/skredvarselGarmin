@@ -2,7 +2,7 @@ import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
 
-class ProgressDelegate extends Ui.BehaviorDelegate {
+class LoadingViewDelegate extends Ui.BehaviorDelegate {
   public function initialize() {
     BehaviorDelegate.initialize();
   }

@@ -1,7 +1,6 @@
 import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
-using Toybox.Application.Storage;
 using Toybox.Graphics as Gfx;
 using Toybox.Math;
 
@@ -25,9 +24,16 @@ public class ForecastMenu extends Ui.CustomMenu {
 
   function onShow() {
     var regionIds = $.getSelectedRegionIds();
+    var numRegions = regionIds.size();
+
+    if (numRegions == 0) {
+      deleteAllItems();
+      addItem(new ForecastMenuEditMenuItem(_editItemId));
+      return;
+    }
 
     var regionsChanged = false;
-    if (regionIds.size() != _existingRegionIds.size()) {
+    if (numRegions != _existingRegionIds.size()) {
       regionsChanged = true;
     } else {
       for (var i = 0; i < regionIds.size(); i++) {

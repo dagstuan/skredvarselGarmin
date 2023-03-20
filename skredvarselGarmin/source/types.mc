@@ -14,9 +14,15 @@ typedef AvalancheProblem as {
   :exposedHeights as Array<Number>,
   :validExpositions as String,
 };
+
 typedef DetailedAvalancheWarning as {
   :dangerLevel as Number,
   :validity as Array,
   :mainText as String,
   :avalancheProblems as Array<AvalancheProblem>,
+};
+
+typedef SetupSubscriptionResponse as {
+  :status as String,
+  :addWatchKey as String?,
 };

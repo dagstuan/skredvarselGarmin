@@ -6,12 +6,18 @@ using Toybox.System as Sys;
 using Toybox.Application.Storage;
 
 const BaseApiUrl = "https://skredvarsel.app/api";
+// const BaseApiUrl = "https://localhost:8080/api";
 
 typedef WebRequestCallbackData as Null or Dictionary or String;
 
 typedef WebRequestDelegateCallback as (Method
   (responseCode as Number, data as WebRequestCallbackData) as Void
 );
+
+(:background)
+function getAuthorizationHeader() {
+  return "Garmin " + $.getDeviceIdentifier();
+}
 
 (:glance)
 function makeApiRequest(
@@ -56,6 +62,9 @@ class WebRequestDelegate {
       {
         :method => Communications.HTTP_REQUEST_METHOD_GET,
         :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON,
+        :headers => {
+          "Authorization" => $.getAuthorizationHeader(),
+        },
       },
       method(:onReceive)
     );
@@ -71,6 +80,9 @@ class WebRequestDelegate {
         $.logMessage("200 OK. Storing in storage with key: " + _storageKey);
         Storage.setValue(_storageKey, [data, Time.now().value()]);
       }
+    } else if (responseCode == 401) {
+      $.logMessage("Api responded with 401. No subscription for user.");
+      $.setHasSubscription(false);
     } else {
       $.logMessage("Failed request. Response code: " + responseCode);
     }

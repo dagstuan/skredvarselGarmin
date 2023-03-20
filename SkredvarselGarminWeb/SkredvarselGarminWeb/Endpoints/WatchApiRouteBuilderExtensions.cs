@@ -12,9 +12,9 @@ public static class WatchApiRouteBuilderExtensions
 {
     public static void MapWatchApiEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/generateWatchAddKey", (
+        app.MapPost("/api/watch/setupSubscription", (
             HttpContext ctx,
-            GenerateWatchAddKeyRequest request,
+            SetupSubscriptionRequest request,
             SkredvarselDbContext dbContext,
             IDateTimeNowProvider dateTimeNowProvider) =>
         {
@@ -22,16 +22,24 @@ public static class WatchApiRouteBuilderExtensions
 
             if (existingWatch != null)
             {
-                return Results.NoContent();
+                var activeAgreementForUser = dbContext.GetActiveAgreementForUser(existingWatch.UserId);
+
+                return Results.Ok(new SetupSubscriptionResponse
+                {
+                    Status = activeAgreementForUser != null ?
+                        SetupSubscriptionStatus.SEEN_WATCH_ACTIVE_SUBSCRIPTION :
+                        SetupSubscriptionStatus.SEEN_WATCH_INACTIVE_SUBSCRIPTION,
+                });
             }
 
             var existingRequest = dbContext.WatchAddRequests.FirstOrDefault(r => r.WatchId == request.WatchId);
 
             if (existingRequest != null)
             {
-                return Results.Ok(new GenerateWatchAddKeyResponse
+                return Results.Ok(new SetupSubscriptionResponse
                 {
-                    Key = existingRequest.Key
+                    Status = SetupSubscriptionStatus.NEW_WATCH,
+                    AddWatchKey = existingRequest.Key
                 });
             }
 
@@ -45,11 +53,14 @@ public static class WatchApiRouteBuilderExtensions
             });
             dbContext.SaveChanges();
 
-            return Results.Ok(new GenerateWatchAddKeyResponse
+            return Results.Ok(new SetupSubscriptionResponse
             {
-                Key = key
+                Status = SetupSubscriptionStatus.NEW_WATCH,
+                AddWatchKey = key
             });
         });
+
+        app.MapGet("/api/watch/checkSubscription", () => Results.Ok()).RequireAuthorization("Garmin");
 
         app.MapGet("/api/watches", (HttpContext ctx, SkredvarselDbContext dbContext) =>
         {
@@ -99,11 +110,6 @@ public static class WatchApiRouteBuilderExtensions
 
             return Results.BadRequest();
         }).RequireAuthorization();
-
-        // app.MapGet("/api/watch/checkSubscription", (HttpContext ctx) =>
-        // {
-
-        // });
     }
 
     private static string GenerateKey()

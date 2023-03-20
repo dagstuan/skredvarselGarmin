@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SkredvarselGarminWeb.Endpoints.Models;
 
-public class GenerateWatchAddKeyRequest
+public class SetupSubscriptionRequest
 {
     public required string WatchId { get; init; }
 

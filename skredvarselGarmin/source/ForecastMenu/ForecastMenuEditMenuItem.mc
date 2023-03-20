@@ -5,11 +5,13 @@ using Toybox.Graphics as Gfx;
 
 public class ForecastMenuEditMenuItem extends Ui.CustomMenuItem {
   private var _screenWidth as Number;
+  private var _text as String;
 
   public function initialize(id as String) {
     CustomMenuItem.initialize(id, {});
 
     _screenWidth = $.getDeviceScreenWidth();
+    _text = Ui.loadResource($.Rez.Strings.PickRegions);
   }
 
   public function draw(dc as Gfx.Dc) {
@@ -27,14 +29,13 @@ public class ForecastMenuEditMenuItem extends Ui.CustomMenuItem {
 
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
-    var text = Ui.loadResource($.Rez.Strings.Edit);
     var font = Graphics.FONT_MEDIUM;
 
     dc.drawText(
       paddingLeft + contentWidth / 2,
       height / 2,
       font,
-      text,
+      _text,
       Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
     );
   }

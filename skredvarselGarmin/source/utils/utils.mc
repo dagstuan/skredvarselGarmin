@@ -90,6 +90,18 @@ function getMonkeyVersion() as Array<Number> {
   return deviceSettings.monkeyVersion;
 }
 
+(:background)
+var deviceIdentifier as String? = null;
+(:background)
+function getDeviceIdentifier() as String {
+  if (deviceIdentifier == null) {
+    var deviceSettings = System.getDeviceSettings();
+    deviceIdentifier = deviceSettings.uniqueIdentifier;
+  }
+
+  return deviceIdentifier;
+}
+
 function getDeviceScreenWidth() as Number {
   var deviceSettings = System.getDeviceSettings();
   return deviceSettings.screenWidth;
@@ -341,7 +353,7 @@ public function useBufferedBitmaps() {
     partNumber.equals("006-B3652-00") || // FR945 LTE
     partNumber.equals("006-B3077-00") || // FR245 Music
     partNumber.equals("006-B3624-00") || // Marq Adventurer
-    partNumber.equals("006-B3251-00") // Marq Adventurer
+    partNumber.equals("006-B3251-00") // Marq Athlete
   ) {
     return false;
   }

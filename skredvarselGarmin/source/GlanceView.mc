@@ -8,13 +8,10 @@ using Toybox.Time.Gregorian;
 
 using AvalancheUi;
 
-typedef GlanceViewSettings as {
-  :regionId as String,
-};
-
 (:glance)
 class GlanceView extends Ui.GlanceView {
-  private var _regionId as String;
+  private var _hasSubscription as Boolean?;
+  private var _favoriteRegionId as String?;
 
   private var _forecast as SimpleAvalancheForecast?;
   private var _dataAge as Number?;
@@ -25,35 +22,59 @@ class GlanceView extends Ui.GlanceView {
   private var _width as Number?;
   private var _height as Number?;
 
+  private var _appNameText as Ui.Resource?;
   private var _loadingText as Ui.Resource?;
 
-  function initialize(settings as GlanceViewSettings) {
+  function initialize() {
     GlanceView.initialize();
-    _regionId = settings[:regionId];
     _useBufferedBitmap = $.useBufferedBitmaps();
   }
 
   function onShow() {
+    _hasSubscription = $.getHasSubscription();
+    _favoriteRegionId = $.getFavoriteRegionId();
+    _appNameText = Ui.loadResource($.Rez.Strings.AppName);
     _loadingText = Ui.loadResource($.Rez.Strings.Loading);
+
+    if (_hasSubscription && _favoriteRegionId != null) {
+      setForecastDataFromStorage();
+      if (
+        _hasSubscription &&
+        (_forecast == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE)
+      ) {
+        if ($.Debug) {
+          $.logMessage(
+            "Null or stale simple forecast for glance, try to reload in background"
+          );
+        }
+
+        $.loadSimpleForecastForRegion(
+          _favoriteRegionId,
+          method(:onReceive),
+          false
+        );
+      }
+    }
   }
 
   function onLayout(dc as Gfx.Dc) {
     _width = dc.getWidth();
     _height = dc.getHeight();
-
-    setForecastDataFromStorage();
-    if (_forecast == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
-      if ($.Debug) {
-        $.logMessage(
-          "Null or stale simple forecast for glance, try to reload in background"
-        );
-      }
-
-      $.loadSimpleForecastForRegion(_regionId, method(:onReceive), false);
-    }
   }
 
   function onUpdate(dc as Gfx.Dc) {
+    if (!_hasSubscription || _favoriteRegionId == null) {
+      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+      dc.drawText(
+        0,
+        _height / 2,
+        Gfx.FONT_TINY,
+        _appNameText,
+        Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
+      );
+      return;
+    }
+
     if (_forecast != null) {
       if (_useBufferedBitmap) {
         drawTimelineBuffered(dc);
@@ -93,7 +114,7 @@ class GlanceView extends Ui.GlanceView {
       :locY => 0,
       :width => _width,
       :height => _height,
-      :regionId => _regionId,
+      :regionId => _favoriteRegionId,
       :forecast => _forecast,
     });
 
@@ -101,11 +122,13 @@ class GlanceView extends Ui.GlanceView {
   }
 
   function onHide() {
+    _appNameText = null;
     _loadingText = null;
+    _bufferedBitmap = null;
   }
 
   private function setForecastDataFromStorage() as Void {
-    var data = $.getSimpleForecastForRegion(_regionId);
+    var data = $.getSimpleForecastForRegion(_favoriteRegionId);
 
     if (data != null) {
       _bufferedBitmap = null;

@@ -1,18 +1,18 @@
 <strings>
-	<string id="AppName" scope="glance">Skredvarsel</string>
-	<string id="Loading" scope="glance">Loading...</string>
-	<string id="Edit">Edit</string>
-	<string id="Remove">Remove</string>
-	<string id="HitBackToExit">Hit back to exit.</string>
-	<string id="RemoveAsFavorite">Unfavorite</string>
-	<string id="SetAsFavorite">Set as favorite</string>
-	<string id="AddRegions">Add regions</string>
-	<string id="PickRegions">Pick regions</string>
-	<string id="EditForecast">Edit forecast</string>
-	<string id="Level">Faregrad</string>
+  <string id="AppName" scope="glance">Skredvarsel</string>
+	<string id="Loading" scope="glance">Laster...</string>
+	<string id="Edit">Rediger</string>
+	<string id="Remove">Fjern</string>
+	<string id="HitBackToExit">Trykk tilbake.</string>
+	<string id="RemoveAsFavorite">Fjern favoritt</string>
+	<string id="SetAsFavorite">Sett som favoritt</string>
+  <string id="AddRegions">Legg til regioner</string>
+	<string id="PickRegions">Velg regioner</string>
+	<string id="EditForecast">Rediger varsel</string>
+	<string id="NoProblems">Ingen skredproblemer.</string>
 	<string id="Today">I dag</string>
 	<string id="Yesterday">I går</string>
 	<string id="Tomorrow">I morgen</string>
-	<string id="NoProblems">No avalanche problems.</string>
+	<string id="Level">Faregrad</string>
 	<string id="SeeFullForecast">Se komplett varsel på varsom.no</string>
 </strings>

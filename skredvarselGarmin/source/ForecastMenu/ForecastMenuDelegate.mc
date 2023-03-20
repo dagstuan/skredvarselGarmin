@@ -10,16 +10,12 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
 
   private var _regionId as String?;
 
-  private var _progressBar as Ui.ProgressBar?;
-  private var _loadingText as Ui.Resource?;
+  private var _loadingView as LoadingView?;
 
-  //! Constructor
   public function initialize() {
     Menu2InputDelegate.initialize();
   }
 
-  //! Handle an item being selected
-  //! @param item The selected menu item
   public function onSelect(item as Ui.MenuItem) as Void {
     var id = item.getId();
 
@@ -39,9 +35,9 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
         Time.now().compare(new Time.Moment(data[1])) > TIME_TO_SHOW_LOADING
       ) {
         // Data is very stale or non-existent, show loading.
-        _loadingText = Ui.loadResource($.Rez.Strings.Loading);
-        _progressBar = new Ui.ProgressBar(_loadingText, null);
-        Ui.pushView(_progressBar, new ProgressDelegate(), Ui.SLIDE_BLINK);
+
+        _loadingView = new LoadingView();
+        Ui.pushView(_loadingView, new LoadingViewDelegate(), Ui.SLIDE_BLINK);
 
         $.loadDetailedWarningsForRegion(_regionId, method(:onReceive));
       } else {
@@ -67,7 +63,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
         data as Array<DetailedAvalancheWarning>,
         0
       );
-    } else if (_progressBar != null) {
+    } else if (_loadingView != null) {
       Ui.switchToView(
         new TextAreaView(
           "Failed to fetch the forecast. Please try again later."
@@ -76,7 +72,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
         Ui.SLIDE_BLINK
       );
 
-      _progressBar = null;
+      _loadingView = null;
     }
   }
 
@@ -108,9 +104,9 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
       :dataAge => dataAge,
     });
 
-    if (_progressBar != null) {
+    if (_loadingView != null) {
       Ui.switchToView(view, delegate, Ui.SLIDE_LEFT);
-      _progressBar = null;
+      _loadingView = null;
     } else {
       Ui.pushView(view, delegate, Ui.SLIDE_LEFT);
     }

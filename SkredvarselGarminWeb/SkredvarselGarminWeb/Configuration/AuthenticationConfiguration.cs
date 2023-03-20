@@ -103,12 +103,20 @@ public static class AuthenticationConfiguration
 
                     return Task.CompletedTask;
                 };
-            });
+            })
+            .AddScheme<GarminAuthenticationSchemeOptions, GarminAuthenticationHandler>("Garmin", options => { });
 
         serviceCollection.AddAuthorization(options =>
         {
             options.AddPolicy("Admin", policy =>
                 policy.RequireClaim("sub", authOptions.AdminSub));
+
+            options.AddPolicy("Garmin", policy =>
+            {
+                policy.AuthenticationSchemes.Clear();
+                policy.AuthenticationSchemes.Add("Garmin");
+                policy.RequireAuthenticatedUser();
+            });
         });
     }
 }

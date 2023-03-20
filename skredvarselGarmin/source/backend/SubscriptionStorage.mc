@@ -1,0 +1,15 @@
+import Toybox.Lang;
+
+using Toybox.Application.Storage;
+
+(:background)
+function getHasSubscription() as Boolean {
+  var storageValue = Storage.getValue("hasSubscription") as Boolean?;
+
+  return storageValue != null ? storageValue : false;
+}
+
+(:background)
+function setHasSubscription(hasSubscription as Boolean) as Void {
+  Storage.setValue("hasSubscription", hasSubscription);
+}

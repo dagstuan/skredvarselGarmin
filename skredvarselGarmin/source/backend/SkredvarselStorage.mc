@@ -35,10 +35,19 @@ function getFavoriteRegionId() as String? {
 }
 
 (:background)
-function resetStorageCache() {
-  var selectedRegionIds = $.getSelectedRegionIds();
-  Storage.clearValues();
-  setSelectedRegionIdsInStorage(selectedRegionIds);
+function resetStorageCacheIfRequired() {
+  var STORAGE_VERSION = 2;
+  var storageVersion = Storage.getValue("storageVersion") as Number?;
+
+  if (storageVersion == null || storageVersion != STORAGE_VERSION) {
+    $.logMessage("Wrong storage version detected. Resetting cache");
+    var hasSubscription = $.getHasSubscription();
+    var selectedRegionIds = $.getSelectedRegionIds();
+    Storage.clearValues();
+    setSelectedRegionIdsInStorage(selectedRegionIds);
+    $.setHasSubscription(hasSubscription);
+    Storage.setValue("storageVersion", STORAGE_VERSION);
+  }
 }
 
 (:background)
