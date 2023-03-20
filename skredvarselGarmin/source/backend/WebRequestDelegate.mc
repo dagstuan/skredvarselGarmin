@@ -55,7 +55,10 @@ class WebRequestDelegate {
   }
 
   function makeRequest() {
-    $.logMessage("Fetching: " + _path);
+    if ($.Debug) {
+      $.logMessage("Fetching: " + _path);
+    }
+
     Communications.makeWebRequest(
       $.BaseApiUrl + _path,
       null,
@@ -77,14 +80,20 @@ class WebRequestDelegate {
   ) as Void {
     if (responseCode == 200) {
       if (_storageKey != null) {
-        $.logMessage("200 OK. Storing in storage with key: " + _storageKey);
+        if ($.Debug) {
+          $.logMessage("200 OK. Storing in storage with key: " + _storageKey);
+        }
         Storage.setValue(_storageKey, [data, Time.now().value()]);
       }
     } else if (responseCode == 401) {
-      $.logMessage("Api responded with 401. No subscription for user.");
+      if ($.Debug) {
+        $.logMessage("Api responded with 401. No subscription for user.");
+      }
       $.setHasSubscription(false);
     } else {
-      $.logMessage("Failed request. Response code: " + responseCode);
+      if ($.Debug) {
+        $.logMessage("Failed request. Response code: " + responseCode);
+      }
     }
 
     _callback.invoke(responseCode, data);

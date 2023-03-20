@@ -11,10 +11,14 @@ class ServiceDelegate extends System.ServiceDelegate {
   }
 
   public function onTemporalEvent() as Void {
-    $.logMessage("Temporal event triggered. Reloading region data.");
+    if ($.Debug) {
+      $.logMessage("Temporal event triggered. Reloading region data.");
+    }
 
     if ($.canMakeWebRequest() == false) {
-      $.logMessage("No connection available. Skipping reload.");
+      if ($.Debug) {
+        $.logMessage("No connection available. Skipping reload.");
+      }
       Background.exit(false);
       return;
     }
@@ -24,15 +28,17 @@ class ServiceDelegate extends System.ServiceDelegate {
       monkeyVersion[0] < 4 &&
       !(monkeyVersion[0] >= 3 && monkeyVersion[1] >= 2)
     ) {
-      $.logMessage(
-        "Api version " +
-          monkeyVersion[0] +
-          "." +
-          monkeyVersion[1] +
-          "." +
-          monkeyVersion[2] +
-          ". No API support for modifying store in background. Not refreshing data."
-      );
+      if ($.Debug) {
+        $.logMessage(
+          "Api version " +
+            monkeyVersion[0] +
+            "." +
+            monkeyVersion[1] +
+            "." +
+            monkeyVersion[2] +
+            ". No API support for modifying store in background. Not refreshing data."
+        );
+      }
       return;
     }
 

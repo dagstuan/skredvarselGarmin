@@ -44,7 +44,9 @@ public function loadSimpleForecastForRegion(
   callback as WebRequestDelegateCallback,
   useQueue as Boolean
 ) {
-  $.logMessage("Loading simple forecast for " + regionId);
+  if ($.Debug) {
+    $.logMessage("Loading simple forecast for " + regionId);
+  }
 
   var path = $.getSimpleWarningsPathForRegion(regionId);
   var storageKey = $.getSimpleForecastCacheKeyForRegion(regionId);

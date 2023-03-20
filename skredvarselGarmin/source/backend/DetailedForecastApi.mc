@@ -36,7 +36,9 @@ function loadDetailedWarningsForRegion(
   regionId as String?,
   callback as WebRequestDelegateCallback
 ) {
-  $.logMessage("Loading detailed forecast for " + regionId);
+  if ($.Debug) {
+    $.logMessage("Loading detailed forecast for " + regionId);
+  }
 
   var path = $.getDetailedWarningsPathForRegion(regionId);
   var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);

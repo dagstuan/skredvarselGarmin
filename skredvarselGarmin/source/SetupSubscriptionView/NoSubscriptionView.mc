@@ -49,8 +49,6 @@ class NoSubscriptionView extends Ui.View {
   }
 
   function onTimerTrigged() as Void {
-    $.logMessage("On timer trigged");
-
     Comm.makeWebRequest(
       $.BaseApiUrl + "/watch/checkSubscription",
       null,

@@ -34,7 +34,9 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     _numPages = _detailedWarnings.size();
 
     if (_dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
-      $.logMessage("Stale forecast, try to reload in background");
+      if ($.Debug) {
+        $.logMessage("Stale forecast, try to reload in background");
+      }
 
       $.loadDetailedWarningsForRegion(settings[:regionId], method(:onReceive));
     }
