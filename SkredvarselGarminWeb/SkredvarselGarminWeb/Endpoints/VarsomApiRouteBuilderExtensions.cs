@@ -21,6 +21,7 @@ public static class VarsomApiRouteBuilderExtensions
                 }
             });
         });
+        //.RequireAuthorization("Garmin");
 
         app.MapGet("/api/detailedWarningsByRegion/{regionId}/{langKey}/{from}/{to}", async (string regionId, string langKey, DateOnly from, DateOnly to, IVarsomApi varsomApi) =>
         {
@@ -28,5 +29,6 @@ public static class VarsomApiRouteBuilderExtensions
 
             return warnings.Select(w => w.ToDetailedAvalancheWarning());
         });
+        //.RequireAuthorization("Garmin");
     }
 }

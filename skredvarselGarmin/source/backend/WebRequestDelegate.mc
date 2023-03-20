@@ -38,7 +38,6 @@ class WebRequestDelegate {
   private var _storageKey as String;
   private var _callback as WebRequestDelegateCallback?;
 
-  // Set up the callback to the view
   function initialize(
     path as String,
     storageKey as String?,
@@ -59,7 +58,6 @@ class WebRequestDelegate {
       null,
       {
         :method => Communications.HTTP_REQUEST_METHOD_GET,
-        :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON,
         :headers => {
           "Authorization" => "Garmin " + $.getDeviceIdentifier(),
         },
@@ -68,7 +66,6 @@ class WebRequestDelegate {
     );
   }
 
-  // Receive the data from the web request
   function onReceive(
     responseCode as Number,
     data as Dictionary<String, Object?> or String or Null
