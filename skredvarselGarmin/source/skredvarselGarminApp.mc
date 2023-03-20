@@ -14,7 +14,6 @@ class skredvarselGarminApp extends Application.AppBase {
   }
 
   function onStart(state) {
-    $.setHasSubscription(false);
     $.resetStorageCacheIfRequired();
   }
 
