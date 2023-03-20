@@ -3,10 +3,9 @@
 	<string id="Loading" scope="glance">Laster...</string>
 	<string id="Edit">Rediger</string>
 	<string id="Remove">Fjern</string>
-	<string id="HitBackToExit">Trykk tilbake.</string>
+	<string id="HitBackToExit">Trykk tilbake for å avslutte.</string>
 	<string id="RemoveAsFavorite">Fjern favoritt</string>
 	<string id="SetAsFavorite">Sett som favoritt</string>
-  <string id="AddRegions">Legg til regioner</string>
 	<string id="PickRegions">Velg regioner</string>
 	<string id="EditForecast">Rediger varsel</string>
 	<string id="NoRegionsSelected">Ingen regioner valgt.</string>
@@ -16,4 +15,6 @@
 	<string id="Tomorrow">I morgen</string>
 	<string id="Level">Faregrad</string>
 	<string id="SeeFullForecast">Se komplett varsel på varsom.no</string>
+	<string id="SeenWatchInactiveSubscription">Gå til skredvarsel.app på mobil for å tegne abonnement til appen.</string>
+	<string id="NewWatch">Logg inn på skredvarsel.app på mobilen, og legg til klokken med koden:</string>
 </strings>

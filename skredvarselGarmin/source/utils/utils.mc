@@ -7,9 +7,10 @@ using Toybox.Time.Gregorian;
 using Toybox.System;
 using Toybox.Math;
 
-const Debug = true;
+const Debug = false;
 const DrawOutlines = false;
 
+(:glance)
 const TIME_TO_CONSIDER_DATA_STALE = Gregorian.SECONDS_PER_HOUR * 0.5;
 
 function getSortedRegionIds() as Array<String> {
@@ -42,33 +43,58 @@ function getSortedRegionIds() as Array<String> {
 }
 
 (:glance)
-function getRegions() as Dictionary<String, String> {
-  return {
-    "3003" => "Nordenskiöld Land",
-    "3006" => "Finnmarkskysten",
-    "3007" => "Vest-Finnmark",
-    "3009" => "Nord-Troms",
-    "3010" => "Lyngen",
-    "3011" => "Tromsø",
-    "3012" => "Sør-Troms",
-    "3013" => "Indre Troms",
-    "3014" => "Lofoten og Vesterålen",
-    "3015" => "Ofoten",
-    "3016" => "Salten",
-    "3017" => "Svartisen",
-    "3018" => "Helgeland",
-    "3022" => "Trollheimen",
-    "3023" => "Romsdal",
-    "3024" => "Sunnmøre",
-    "3027" => "Indre Fjordane",
-    "3028" => "Jotunheimen",
-    "3029" => "Indre Sogn",
-    "3031" => "Voss",
-    "3032" => "Hallingdal",
-    "3034" => "Hardanger",
-    "3035" => "Vest-Telemark",
-    "3037" => "Heiane",
-  };
+function getRegionName(regionId as String) as String {
+  if (regionId.equals("3003")) {
+    return "Nordenskiöld Land";
+  } else if (regionId.equals("3006")) {
+    return "Finnmarkskysten";
+  } else if (regionId.equals("3007")) {
+    return "Vest-Finnmark";
+  } else if (regionId.equals("3009")) {
+    return "Nord-Troms";
+  } else if (regionId.equals("3010")) {
+    return "Lyngen";
+  } else if (regionId.equals("3011")) {
+    return "Tromsø";
+  } else if (regionId.equals("3012")) {
+    return "Sør-Troms";
+  } else if (regionId.equals("3013")) {
+    return "Indre Troms";
+  } else if (regionId.equals("3014")) {
+    return "Lofoten og Vesterålen";
+  } else if (regionId.equals("3015")) {
+    return "Ofoten";
+  } else if (regionId.equals("3016")) {
+    return "Salten";
+  } else if (regionId.equals("3017")) {
+    return "Svartisen";
+  } else if (regionId.equals("3018")) {
+    return "Helgeland";
+  } else if (regionId.equals("3022")) {
+    return "Trollheimen";
+  } else if (regionId.equals("3023")) {
+    return "Romsdal";
+  } else if (regionId.equals("3024")) {
+    return "Sunnmøre";
+  } else if (regionId.equals("3027")) {
+    return "Indre Fjordane";
+  } else if (regionId.equals("3028")) {
+    return "Jotunheimen";
+  } else if (regionId.equals("3029")) {
+    return "Indre Sogn";
+  } else if (regionId.equals("3031")) {
+    return "Voss";
+  } else if (regionId.equals("3032")) {
+    return "Hallingdal";
+  } else if (regionId.equals("3034")) {
+    return "Hardanger";
+  } else if (regionId.equals("3035")) {
+    return "Vest-Telemark";
+  } else if (regionId.equals("3037")) {
+    return "Heiane";
+  }
+
+  return "Ukjent region";
 }
 
 (:background)
@@ -91,15 +117,9 @@ function getMonkeyVersion() as Array<Number> {
 }
 
 (:background)
-var deviceIdentifier as String? = null;
-(:background)
 function getDeviceIdentifier() as String {
-  if (deviceIdentifier == null) {
-    var deviceSettings = System.getDeviceSettings();
-    deviceIdentifier = deviceSettings.uniqueIdentifier;
-  }
-
-  return deviceIdentifier;
+  var deviceSettings = System.getDeviceSettings();
+  return deviceSettings.uniqueIdentifier;
 }
 
 function getDeviceScreenWidth() as Number {
@@ -113,24 +133,10 @@ function getDeviceScreenHeight() as Number {
 }
 
 (:glance)
-function getAppColorPalette() as Array {
-  return [
-    // First five indices correspond to danger levels.
-    0xaaaaaa,
-    0x00ff00,
-    0xffff55,
-    0xffaa00,
-    0xff0000,
-    0x550000,
-    Graphics.COLOR_WHITE,
-    Graphics.COLOR_BLACK,
-    Graphics.COLOR_TRANSPARENT,
-  ];
-}
-
-(:glance)
 function colorize(dangerLevel as Number) as Graphics.ColorType {
-  var colorPalette = $.getAppColorPalette();
+  var colorPalette = [
+    0xaaaaaa, 0x00ff00, 0xffff55, 0xffaa00, 0xff0000, 0x550000,
+  ];
   if (dangerLevel < 0 || dangerLevel > 5) {
     return colorPalette[0];
   }
@@ -300,7 +306,6 @@ function min(a as Numeric, b as Numeric) {
   return a < b ? a : b;
 }
 
-(:glance)
 public function getDangerLevelToday(
   forecast as SimpleAvalancheForecast
 ) as Number {

@@ -61,12 +61,15 @@ class SetupSubscriptionView extends Ui.View {
 
       if (status.equals("SEEN_WATCH_ACTIVE_SUBSCRIPTION")) {
         $.setHasSubscription(true);
-        var initialView = $.getInitialForecastView();
-        Ui.switchToView(initialView[0], initialView[1], Ui.SLIDE_BLINK);
+        Ui.switchToView(
+          new ForecastMenu(),
+          new ForecastMenuDelegate(),
+          Ui.SLIDE_BLINK
+        );
       } else if (status.equals("SEEN_WATCH_INACTIVE_SUBSCRIPTION")) {
         Ui.switchToView(
           new NoSubscriptionView(
-            "Gå til skredvarsel.app på mobil for å tegne abonnement til appen."
+            Ui.loadResource($.Rez.Strings.SeenWatchInactiveSubscription)
           ),
           null,
           Ui.SLIDE_BLINK
@@ -74,7 +77,8 @@ class SetupSubscriptionView extends Ui.View {
       } else if (status.equals("NEW_WATCH")) {
         Ui.switchToView(
           new NoSubscriptionView(
-            "Logg inn på skredvarsel.app på mobilen, og legg til klokken med koden:\n\n" +
+            Ui.loadResource($.Rez.Strings.NewWatch) +
+              "\n\n" +
               response["addWatchKey"]
           ),
           null,

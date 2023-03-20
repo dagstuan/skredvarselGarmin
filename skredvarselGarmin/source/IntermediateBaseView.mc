@@ -4,10 +4,9 @@ using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
 
 public class IntermediateBaseView extends Ui.View {
-  private var _firstShow;
+  private var _firstShow as Boolean;
 
-  private var _width as Number?;
-  private var _height as Number?;
+  private var _textArea as Ui.TextArea?;
 
   private var _hitBackToExitText as Ui.Resource?;
 
@@ -30,26 +29,27 @@ public class IntermediateBaseView extends Ui.View {
     _hitBackToExitText = Ui.loadResource($.Rez.Strings.HitBackToExit);
   }
 
-  function onLayout(dc as Gfx.Dc) {
-    _width = dc.getWidth();
-    _height = dc.getHeight();
-  }
-
   public function onUpdate(dc as Gfx.Dc) {
     dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
     dc.clear();
-    dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
 
-    dc.drawText(
-      _width / 2,
-      _height / 2,
-      Gfx.FONT_SMALL,
-      _hitBackToExitText,
-      Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
-    );
+    if (_textArea == null) {
+      _textArea = new Ui.TextArea({
+        :text => _hitBackToExitText,
+        :color => Gfx.COLOR_WHITE,
+        :font => [Gfx.FONT_MEDIUM, Gfx.FONT_SMALL, Gfx.FONT_XTINY],
+        :locX => Ui.LAYOUT_HALIGN_CENTER,
+        :locY => Ui.LAYOUT_VALIGN_CENTER,
+        :justification => Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
+        :width => dc.getWidth() * 0.8,
+        :height => dc.getHeight() * 0.8,
+      });
+    }
+    _textArea.draw(dc);
   }
 
   public function onHide() {
     _hitBackToExitText = null;
+    _textArea = null;
   }
 }

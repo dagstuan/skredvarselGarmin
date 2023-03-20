@@ -89,12 +89,13 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
       });
       var bufferedDc = _bufferedBitmap.getDc();
 
+      var regionName = $.getRegionName(_regionId);
       var forecastTimeline = new AvalancheUi.ForecastTimeline({
         :locX => _marginLeft,
         :locY => 0,
         :width => _width - _marginRight,
         :height => _height,
-        :regionId => _regionId,
+        :regionName => regionName,
         :forecast => _forecast,
       });
 
@@ -105,12 +106,13 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   }
 
   function drawTimeline(dc as Gfx.Dc) {
+    var regionName = $.getRegionName(_regionId);
     var forecastTimeline = new AvalancheUi.ForecastTimeline({
       :locX => _marginLeft,
       :locY => 0,
       :width => _width - _marginRight,
       :height => _height,
-      :regionId => _regionId,
+      :regionName => regionName,
       :forecast => _forecast,
     });
 

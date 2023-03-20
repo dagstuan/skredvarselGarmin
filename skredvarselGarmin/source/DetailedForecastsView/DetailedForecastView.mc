@@ -128,7 +128,7 @@ class DetailedForecastView extends Ui.View {
       dc,
       footerY0,
       footerHeight,
-      $.getRegions()[_regionId]
+      $.getRegionName(_regionId)
     );
 
     if (_pageIndicator != null) {

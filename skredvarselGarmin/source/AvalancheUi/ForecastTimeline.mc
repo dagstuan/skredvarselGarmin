@@ -11,12 +11,12 @@ module AvalancheUi {
     :width as Numeric,
     :height as Numeric,
     :regionId as String,
+    :regionName as String,
     :forecast as SimpleAvalancheForecast,
   };
 
   (:glance)
   class ForecastTimeline {
-    private var _regionId as String;
     private var _forecast as SimpleAvalancheForecast;
 
     private var _numWarnings;
@@ -54,8 +54,7 @@ module AvalancheUi {
       _height = settings[:height];
       _lengthPerFullElem = (_width - _numGaps * _gap) / _daysToShow;
 
-      _regionId = settings[:regionId];
-      _regionName = $.getRegions()[_regionId];
+      _regionName = settings[:regionName];
       _forecast = settings[:forecast];
 
       _numWarnings = _forecast.size();

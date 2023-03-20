@@ -6,26 +6,6 @@ using Toybox.WatchUi as Ui;
 using Toybox.Background;
 using Toybox.Application.Storage;
 
-function getInitialForecastView() as Array<Ui.Views or Ui.InputDelegates> {
-  var deviceSettings = System.getDeviceSettings();
-  if (
-    deviceSettings has :isGlanceModeEnabled &&
-    deviceSettings.isGlanceModeEnabled
-  ) {
-    var monkeyVersion = deviceSettings.monkeyVersion;
-
-    if (monkeyVersion[0] < 4) {
-      // CIQ less than 4 does not support having a menu as
-      // a main view. Need to use an intermediate view.
-      return [new IntermediateBaseView(), null];
-    }
-
-    return [new ForecastMenu(), new ForecastMenuDelegate()];
-  }
-
-  return [new WidgetView(), new WidgetViewDelegate()];
-}
-
 (:background)
 class skredvarselGarminApp extends Application.AppBase {
   const REFRESH_INTERVAL_MINUTES = 60;
@@ -34,6 +14,7 @@ class skredvarselGarminApp extends Application.AppBase {
   }
 
   function onStart(state) {
+    $.setHasSubscription(false);
     $.resetStorageCacheIfRequired();
   }
 
@@ -75,13 +56,27 @@ class skredvarselGarminApp extends Application.AppBase {
       return [new SetupSubscriptionView(), new SetupSubscriptionViewDelegate()];
     }
 
-    return $.getInitialForecastView();
+    var deviceSettings = System.getDeviceSettings();
+    if (
+      deviceSettings has :isGlanceModeEnabled &&
+      deviceSettings.isGlanceModeEnabled
+    ) {
+      var monkeyVersion = deviceSettings.monkeyVersion;
+
+      if (monkeyVersion[0] < 4) {
+        // CIQ less than 4 does not support having a menu as
+        // a main view. Need to use an intermediate view.
+        return [new IntermediateBaseView()];
+      }
+
+      return [new ForecastMenu(), new ForecastMenuDelegate()];
+    }
+
+    return [new WidgetView(), new WidgetViewDelegate()];
   }
 
   (:glance)
   public function getGlanceView() as Lang.Array<Ui.GlanceView>? {
-    registerTemporalEvent();
-
     return [new GlanceView()];
   }
 

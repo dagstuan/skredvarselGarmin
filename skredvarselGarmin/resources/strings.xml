@@ -1,19 +1,20 @@
 <strings>
   <string id="AppName" scope="glance">Skredvarsel</string>
-	<string id="Loading" scope="glance">Laster...</string>
-	<string id="Edit">Rediger</string>
-	<string id="Remove">Fjern</string>
-	<string id="HitBackToExit">Trykk tilbake.</string>
-	<string id="RemoveAsFavorite">Fjern favoritt</string>
-	<string id="SetAsFavorite">Sett som favoritt</string>
-  <string id="AddRegions">Legg til regioner</string>
-	<string id="PickRegions">Velg regioner</string>
-	<string id="EditForecast">Rediger varsel</string>
-	<string id="NoRegionsSelected">Ingen regioner valgt.</string>
-	<string id="NoProblems">Ingen skredproblemer.</string>
-	<string id="Today">I dag</string>
-	<string id="Yesterday">I går</string>
-	<string id="Tomorrow">I morgen</string>
-	<string id="Level">Faregrad</string>
-	<string id="SeeFullForecast">Se komplett varsel på varsom.no</string>
+	<string id="Loading" scope="glance">Loading...</string>
+	<string id="Edit">Edit</string>
+	<string id="Remove">Remove</string>
+	<string id="HitBackToExit">Hit back to exit.</string>
+	<string id="RemoveAsFavorite">Unfavorite</string>
+	<string id="SetAsFavorite">Set as favorite</string>
+	<string id="PickRegions">Pick regions</string>
+	<string id="EditForecast">Edit forecast</string>
+	<string id="NoRegionsSelected">No regions selected.</string>
+	<string id="NoProblems">No avalanche problems.</string>
+	<string id="Today">Today</string>
+	<string id="Yesterday">Yesterday</string>
+	<string id="Tomorrow">Tomorrow</string>
+	<string id="Level">Level</string>
+	<string id="SeeFullForecast">See complete forecast at varsom.no</string>
+	<string id="SeenWatchInactiveSubscription">Go to skredvarsel.app on mobile to sign up for the app.</string>
+	<string id="NewWatch">Log in at skredvarsel.app on mobile, and add the watch with the code:</string>
 </strings>

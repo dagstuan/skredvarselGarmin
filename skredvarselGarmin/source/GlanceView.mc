@@ -109,12 +109,14 @@ class GlanceView extends Ui.GlanceView {
   }
 
   function drawTimeline(dc as Gfx.Dc) {
+    var regionName = $.getRegionName(_favoriteRegionId);
+
     var forecastTimeline = new AvalancheUi.ForecastTimeline({
       :locX => 0,
       :locY => 0,
       :width => _width,
       :height => _height,
-      :regionId => _favoriteRegionId,
+      :regionName => regionName,
       :forecast => _forecast,
     });
 

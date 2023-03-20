@@ -2,7 +2,7 @@ import Toybox.Lang;
 
 using Toybox.Application.Storage;
 
-(:background)
+(:glance)
 function getHasSubscription() as Boolean {
   var storageValue = Storage.getValue("hasSubscription") as Boolean?;
 

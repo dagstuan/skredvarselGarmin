@@ -14,11 +14,6 @@ typedef WebRequestDelegateCallback as (Method
   (responseCode as Number, data as WebRequestCallbackData) as Void
 );
 
-(:background)
-function getAuthorizationHeader() {
-  return "Garmin " + $.getDeviceIdentifier();
-}
-
 (:glance)
 function makeApiRequest(
   path as String,
@@ -66,7 +61,7 @@ class WebRequestDelegate {
         :method => Communications.HTTP_REQUEST_METHOD_GET,
         :responseType => Communications.HTTP_RESPONSE_CONTENT_TYPE_JSON,
         :headers => {
-          "Authorization" => $.getAuthorizationHeader(),
+          "Authorization" => "Garmin " + $.getDeviceIdentifier(),
         },
       },
       method(:onReceive)

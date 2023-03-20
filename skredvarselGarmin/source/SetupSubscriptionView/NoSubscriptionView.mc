@@ -55,7 +55,7 @@ class NoSubscriptionView extends Ui.View {
       {
         :method => Comm.HTTP_REQUEST_METHOD_GET,
         :headers => {
-          "Authorization" => $.getAuthorizationHeader(),
+          "Authorization" => "Garmin " + $.getDeviceIdentifier(),
         },
       },
       method(:onCheckSubscriptionResponse)
@@ -68,8 +68,11 @@ class NoSubscriptionView extends Ui.View {
   ) as Void {
     if (responseCode == 200) {
       $.setHasSubscription(true);
-      var initialView = $.getInitialForecastView();
-      Ui.switchToView(initialView[0], initialView[1], Ui.SLIDE_BLINK);
+      Ui.switchToView(
+        new ForecastMenu(),
+        new ForecastMenuDelegate(),
+        Ui.SLIDE_BLINK
+      );
     } else if (responseCode == 401) {
       startTimer();
     }

@@ -103,12 +103,13 @@ public class WidgetView extends Ui.View {
       });
       var bufferedDc = _bufferedBitmap.getDc();
 
+      var regionName = $.getRegionName(_regionId);
       var forecastTimeline = new AvalancheUi.ForecastTimeline({
         :locX => 0,
         :locY => 0,
         :width => forecastWidth,
         :height => _forecastHeight,
-        :regionId => _regionId,
+        :regionName => regionName,
         :forecast => _forecast,
       });
       forecastTimeline.draw(bufferedDc);
@@ -121,12 +122,13 @@ public class WidgetView extends Ui.View {
   }
 
   function drawTimeline(dc as Gfx.Dc) {
+    var regionName = $.getRegionName(_regionId);
     var forecastTimeline = new AvalancheUi.ForecastTimeline({
       :locX => _margin,
       :locY => _height / 2 - _forecastHeight / 2,
       :width => _width - _margin,
       :height => _forecastHeight,
-      :regionId => _regionId,
+      :regionName => regionName,
       :forecast => _forecast,
     });
 
