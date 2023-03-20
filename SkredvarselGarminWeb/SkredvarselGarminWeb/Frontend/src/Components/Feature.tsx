@@ -6,6 +6,7 @@ import {
   Stack,
   useColorModeValue,
   Image,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 
 type FeatureProps = {
@@ -18,7 +19,7 @@ export const Feature = ({ imgUrl, heading, text }: FeatureProps) => {
   return (
     <Center py={6}>
       <Box
-        maxW="3xs"
+        maxW={useBreakpointValue({ base: "100%", sm: "3xs" })}
         bg={useColorModeValue("white", "gray.900")}
         boxShadow={"2xl"}
         rounded={"md"}

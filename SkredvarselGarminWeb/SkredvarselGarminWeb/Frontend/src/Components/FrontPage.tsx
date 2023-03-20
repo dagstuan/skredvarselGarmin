@@ -4,6 +4,8 @@ import {
   useBreakpointValue,
   Stack,
   Text,
+  Wrap,
+  WrapItem,
 } from "@chakra-ui/react";
 import { Features } from "./Features";
 
@@ -28,9 +30,9 @@ export const FrontPage = () => {
           flex={"1 1 100%"}
           justify={"center"}
           px={useBreakpointValue({ base: 4, md: 8 })}
-          bgGradient={"linear(to-r, blackAlpha.600, transparent)"}
+          bgGradient={"linear(135deg, blackAlpha.700, transparent)"}
         >
-          <Stack maxW={"4xl"} align={"flex-start"} spacing={6}>
+          <Stack pb="42px" maxW={"4xl"} align={"flex-start"} spacing={6}>
             <Text
               color={"white"}
               fontWeight={700}
@@ -48,10 +50,14 @@ export const FrontPage = () => {
                 /år
               </Text>
             </Stack>
-            <Stack direction={"row"}>
-              <CiqStoreButton />
-              <VippsButton />
-            </Stack>
+            <Wrap spacing={2}>
+              <WrapItem>
+                <CiqStoreButton />
+              </WrapItem>
+              <WrapItem>
+                <VippsButton />
+              </WrapItem>
+            </Wrap>
           </Stack>
         </VStack>
       </Flex>

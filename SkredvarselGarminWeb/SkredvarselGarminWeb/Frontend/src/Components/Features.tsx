@@ -26,11 +26,10 @@ export const Features = () => (
       Funksjoner
     </Heading>
     <Flex
-      m={5}
-      maxW={"5xl"}
+      m={10}
+      gap={10}
       alignItems={"flex-start"}
       justifyContent="center"
-      gap={10}
       flexWrap="wrap"
     >
       <Feature
@@ -61,6 +60,7 @@ export const Features = () => (
       direction={{ base: "column", sm: "row" }}
       overflow="hidden"
       variant="outline"
+      boxShadow={"2xl"}
     >
       <Image
         objectFit="cover"

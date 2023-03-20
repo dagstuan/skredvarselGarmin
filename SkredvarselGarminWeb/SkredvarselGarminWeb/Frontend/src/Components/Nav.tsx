@@ -66,7 +66,6 @@ export const Nav = () => {
               to="/minSide"
               isLoading={isLoading}
               bg={"blue.400"}
-              rounded={"full"}
               color={"white"}
               _hover={{ bg: "blue.500" }}
             >
