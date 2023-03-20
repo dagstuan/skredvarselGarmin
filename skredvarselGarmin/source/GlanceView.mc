@@ -63,12 +63,12 @@ class GlanceView extends Ui.GlanceView {
   }
 
   function onUpdate(dc as Gfx.Dc) {
-    if (!_hasSubscription || _favoriteRegionId == null) {
+    if (_hasSubscription == false || _favoriteRegionId == null) {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
       dc.drawText(
         0,
         _height / 2,
-        Gfx.FONT_TINY,
+        Gfx.FONT_GLANCE,
         _appNameText,
         Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
       );

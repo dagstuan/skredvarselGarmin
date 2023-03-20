@@ -53,6 +53,7 @@ function resetStorageCacheIfRequired() {
   }
 }
 
+(:background)
 function setSelectedRegionIdsInStorage(regionIds as Array<String>) {
   Storage.setValue(SelectedRegionIdsStorageKey, regionIds);
 }
