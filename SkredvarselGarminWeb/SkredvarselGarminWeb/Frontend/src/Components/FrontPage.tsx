@@ -30,7 +30,7 @@ export const FrontPage = () => {
           flex={"1 1 100%"}
           justify={"center"}
           px={useBreakpointValue({ base: 4, md: 8 })}
-          bgGradient={"linear(135deg, blackAlpha.700, transparent)"}
+          bgGradient={"linear(to-r, blackAlpha.500, transparent)"}
         >
           <Stack pb="42px" maxW={"4xl"} align={"flex-start"} spacing={6}>
             <Text

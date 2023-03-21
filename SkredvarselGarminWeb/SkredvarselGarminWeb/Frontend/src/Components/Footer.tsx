@@ -42,6 +42,9 @@ export const Footer = () => {
           </Stack>
           <Stack align={"flex-start"}>
             <ListHeader>Om</ListHeader>
+            <Link as={RouterLink} to="personvern">
+              Personvern og informasjonskapsler
+            </Link>
             <Link as={RouterLink} to="salgsbetingelser">
               Salgsbetingelser
             </Link>

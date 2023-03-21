@@ -53,7 +53,6 @@ export const Nav = () => {
                 as="a"
                 href="/vipps-login?returnUrl=/minSide"
                 bg={"blue.400"}
-                rounded={"full"}
                 color={"white"}
                 _hover={{ bg: "blue.500" }}
               >

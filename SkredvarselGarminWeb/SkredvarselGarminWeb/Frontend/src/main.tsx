@@ -8,6 +8,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
 import ErrorPage from "./Components/ErrorPage";
 import { FrontPage } from "./Components/FrontPage";
+import { PrivacyPolicy } from "./Components/PrivacyPolicy";
 import { SalesConditions } from "./Components/SalesConditions";
 
 export const queryClient = new QueryClient();
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
       {
         path: "salgsbetingelser",
         element: <SalesConditions />,
+      },
+      {
+        path: "personvern",
+        element: <PrivacyPolicy />,
       },
     ],
   },

@@ -19,7 +19,7 @@ export const CiqStoreButton = () => {
         <img style={{ width: "auto", height: "100%" }} src={ciqLogo} />
         <Flex direction="column">
           <Text fontSize="xs">Last ned på</Text>
-          <Text>Connect IQ</Text>
+          <Text>Connect IQ Store</Text>
         </Flex>
       </Flex>
     </Button>

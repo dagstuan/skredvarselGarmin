@@ -71,7 +71,7 @@ export const Features = () => (
 
       <Stack>
         <CardBody>
-          <Heading size="md">Offline-modus</Heading>
+          <Heading size="md">Tilgjengelig uten tilkobling</Heading>
 
           <Text py="2">
             Appen synkroniserer skredvarselet for alle valgte regioner hver
