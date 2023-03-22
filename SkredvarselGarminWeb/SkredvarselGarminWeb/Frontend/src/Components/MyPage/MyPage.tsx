@@ -24,14 +24,11 @@ export const MyPage = () => {
 
   if (isOnMinSide && !isLoading && !user) {
     window.location.href = "/vipps-login?returnUrl=/minSide";
+    return null;
   }
 
   return (
-    <Drawer
-      isOpen={!isLoading && !!user && isOnMinSide}
-      onClose={() => navigate("/")}
-      size="md"
-    >
+    <Drawer isOpen={isOnMinSide} onClose={() => navigate("/")} size="md">
       <DrawerOverlay />
       <DrawerContent>
         <DrawerCloseButton />
