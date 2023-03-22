@@ -104,7 +104,7 @@ public function addSelectedRegion(regionId as String) {
   var selectedRegionIds = getSelectedRegionIds();
 
   if (!arrayContainsString(selectedRegionIds, regionId)) {
-    var newRegionIds = addToArray(selectedRegionIds, regionId);
+    var newRegionIds = selectedRegionIds.add(regionId);
     setSelectedRegionIdsInStorage(newRegionIds);
   }
 }

@@ -28,10 +28,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
 
       var data = $.getDetailedWarningsForRegion(_regionId);
 
-      if (
-        data == null ||
-        Time.now().compare(new Time.Moment(data[1])) > $.TIME_TO_SHOW_LOADING
-      ) {
+      if (data == null || $.getStorageDataAge(data) > $.TIME_TO_SHOW_LOADING) {
         // Data is very stale or non-existent, show loading.
 
         _loadingView = new LoadingView();
@@ -64,7 +61,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
     } else if (_loadingView != null) {
       Ui.switchToView(
         new TextAreaView(
-          "Failed to fetch the forecast. Please try again later."
+          Ui.loadResource($.Rez.Strings.FailedToFetchTheForecast)
         ),
         new TextAreaViewDelegate(),
         Ui.SLIDE_BLINK

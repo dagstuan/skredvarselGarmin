@@ -14,9 +14,6 @@ class TextAreaView extends Ui.View {
   }
 
   function onLayout(dc as Gfx.Dc) {
-    var width = dc.getWidth();
-    var height = dc.getHeight();
-
     _textArea = new Ui.TextArea({
       :text => _text,
       :color => Gfx.COLOR_WHITE,
@@ -24,8 +21,8 @@ class TextAreaView extends Ui.View {
       :locX => Ui.LAYOUT_HALIGN_CENTER,
       :locY => Ui.LAYOUT_VALIGN_CENTER,
       :justification => Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
-      :width => width * 0.8,
-      :height => height * 0.8,
+      :width => dc.getWidth() * 0.8,
+      :height => dc.getHeight() * 0.8,
     });
   }
 

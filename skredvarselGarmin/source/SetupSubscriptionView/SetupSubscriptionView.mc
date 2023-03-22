@@ -4,6 +4,7 @@ using Toybox.Graphics as Gfx;
 using Toybox.WatchUi as Ui;
 using Toybox.System as Sys;
 using Toybox.Communications as Comm;
+using Toybox.Timer;
 
 function setupSubscription(callback as WebRequestDelegateCallback) {
   if ($.Debug) {
@@ -20,7 +21,6 @@ function setupSubscription(callback as WebRequestDelegateCallback) {
     },
     {
       :method => Comm.HTTP_REQUEST_METHOD_POST,
-      :responseType => Comm.HTTP_RESPONSE_CONTENT_TYPE_JSON,
       :headers => {
         "Content-Type" => Comm.REQUEST_CONTENT_TYPE_JSON,
       },
@@ -30,15 +30,54 @@ function setupSubscription(callback as WebRequestDelegateCallback) {
 }
 
 class SetupSubscriptionView extends Ui.View {
+  private var _firstShow as Boolean = true;
   private var _loadingView as LoadingView?;
+  private var _requestFailed as Boolean;
+  private var _failedTextArea as Ui.TextArea?;
+  private var _retryTimer as Timer.Timer?;
 
   function initialize() {
     View.initialize();
+
+    _retryTimer = new Timer.Timer();
+    _requestFailed = false;
   }
 
   function onShow() {
-    _loadingView = new LoadingView();
-    Ui.pushView(_loadingView, new LoadingViewDelegate(), Ui.SLIDE_BLINK);
+    if (_firstShow) {
+      _firstShow = false;
+      _loadingView = new LoadingView();
+      Ui.pushView(_loadingView, new LoadingViewDelegate(), Ui.SLIDE_BLINK);
+      $.setupSubscription(method(:onReceive));
+    }
+  }
+
+  function onUpdate(dc as Gfx.Dc) {
+    dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
+    dc.clear();
+    if (_requestFailed) {
+      if (_failedTextArea == null) {
+        _failedTextArea = new Ui.TextArea({
+          :text => Ui.loadResource($.Rez.Strings.FailedToCheckForSubscription),
+          :color => Gfx.COLOR_WHITE,
+          :font => [Gfx.FONT_SMALL, Gfx.FONT_XTINY],
+          :locX => Ui.LAYOUT_HALIGN_CENTER,
+          :locY => Ui.LAYOUT_VALIGN_CENTER,
+          :justification => Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
+          :width => dc.getWidth() * 0.8,
+          :height => dc.getHeight() * 0.8,
+        });
+      }
+
+      _failedTextArea.draw(dc);
+    }
+  }
+
+  function startRetryTimer() {
+    _retryTimer.start(method(:onRetryTimerTrigged), 5000 /* ms */, false);
+  }
+
+  function onRetryTimerTrigged() as Void {
     $.setupSubscription(method(:onReceive));
   }
 
@@ -86,13 +125,9 @@ class SetupSubscriptionView extends Ui.View {
         );
       }
     } else {
-      Ui.switchToView(
-        new TextAreaView(
-          "Fikk ikke til å sjekke for abonnement. Prøv å koble til telefonen på nytt."
-        ),
-        new TextAreaViewDelegate(),
-        Ui.SLIDE_BLINK
-      );
+      _requestFailed = true;
+      startRetryTimer();
+      Ui.requestUpdate();
     }
   }
 }

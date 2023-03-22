@@ -217,7 +217,7 @@ module AvalancheUi {
         );
         drawHeightArrow(dc, x0, bottomY0, halfHeight, width, TOP, DOWN);
       } else if (exposedHeightFill == 3) {
-        // TODO
+        // TODO: Add support for exposedHeightFill 3
       } else if (exposedHeightFill == 4) {
         var font = Gfx.FONT_XTINY;
         var fontHeight = Gfx.getFontHeight(font);

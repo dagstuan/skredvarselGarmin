@@ -137,14 +137,19 @@ function getDeviceScreenHeight() as Number {
 
 (:glance)
 function colorize(dangerLevel as Number) as Graphics.ColorType {
-  var colorPalette = [
-    0xaaaaaa, 0x00ff00, 0xffff55, 0xffaa00, 0xff0000, 0x550000,
-  ];
-  if (dangerLevel < 0 || dangerLevel > 5) {
-    return colorPalette[0];
+  if (dangerLevel == 1) {
+    return 0x00ff00;
+  } else if (dangerLevel == 2) {
+    return 0xffff55;
+  } else if (dangerLevel == 3) {
+    return 0xffaa00;
+  } else if (dangerLevel == 4) {
+    return 0xff0000;
+  } else if (dangerLevel == 5) {
+    return 0x550000;
   }
 
-  return colorPalette[dangerLevel];
+  return 0xaaaaaa;
 }
 
 (:background)
@@ -214,16 +219,6 @@ function arrayContainsString(arr as Array<String>, str as String) {
   }
 
   return false;
-}
-
-function addToArray(curArray as Array, newValue) {
-  var curSize = curArray.size();
-  var newArray = new [curSize + 1];
-  for (var i = 0; i < curSize; i++) {
-    newArray[i] = curArray[i];
-  }
-  newArray[curSize] = newValue;
-  return newArray;
 }
 
 function removeStringFromArray(curArray as Array<String>, value as String) {
