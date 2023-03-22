@@ -53,8 +53,8 @@ module AvalancheUi {
     public function onHide() as Void {
       if (_updateTimer != null) {
         _updateTimer.stop();
-        _updateTimer = null;
       }
+      _updateTimer = null;
     }
 
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {

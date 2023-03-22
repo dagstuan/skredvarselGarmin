@@ -73,6 +73,14 @@ class SetupSubscriptionView extends Ui.View {
     }
   }
 
+  function onHide() {
+    if (_retryTimer != null) {
+      _retryTimer.stop();
+    }
+
+    _retryTimer = null;
+  }
+
   function startRetryTimer() {
     _retryTimer.start(method(:onRetryTimerTrigged), 5000 /* ms */, false);
   }

@@ -51,8 +51,9 @@ module AvalancheUi {
     public function onHide() as Void {
       if (_updateTimer != null) {
         _updateTimer.stop();
-        _updateTimer = null;
       }
+
+      _updateTimer = null;
     }
 
     function triggerUpdate() as Void {

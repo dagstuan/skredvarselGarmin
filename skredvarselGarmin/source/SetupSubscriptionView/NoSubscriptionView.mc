@@ -7,7 +7,7 @@ using Toybox.Communications as Comm;
 
 class NoSubscriptionView extends Ui.View {
   private var _textArea as Ui.TextArea?;
-  private var _checkSubscriptionTimer as Timer.Timer;
+  private var _checkSubscriptionTimer as Timer.Timer?;
   private var _text as String;
 
   function initialize(text as String) {
@@ -38,6 +38,14 @@ class NoSubscriptionView extends Ui.View {
     if (_textArea != null) {
       _textArea.draw(dc);
     }
+  }
+
+  function onHide() {
+    if (_checkSubscriptionTimer != null) {
+      _checkSubscriptionTimer.stop();
+    }
+
+    _checkSubscriptionTimer = null;
   }
 
   function startTimer() {
