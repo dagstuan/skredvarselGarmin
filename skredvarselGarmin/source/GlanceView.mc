@@ -75,7 +75,7 @@ class GlanceView extends Ui.GlanceView {
       return;
     }
 
-    if (_forecast != null) {
+    if (_forecast != null && _dataAge < $.TIME_TO_SHOW_LOADING) {
       if (_useBufferedBitmap) {
         drawTimelineBuffered(dc);
       } else {

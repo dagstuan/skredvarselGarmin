@@ -6,8 +6,6 @@ using Toybox.Time.Gregorian;
 using Toybox.Timer;
 
 public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
-  private const TIME_TO_SHOW_LOADING = Gregorian.SECONDS_PER_DAY;
-
   private var _regionId as String?;
 
   private var _loadingView as LoadingView?;
@@ -32,7 +30,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
 
       if (
         data == null ||
-        Time.now().compare(new Time.Moment(data[1])) > TIME_TO_SHOW_LOADING
+        Time.now().compare(new Time.Moment(data[1])) > $.TIME_TO_SHOW_LOADING
       ) {
         // Data is very stale or non-existent, show loading.
 

@@ -62,7 +62,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
         _width == _screenWidth ? _screenWidth * 0.05 : _screenWidth * 0.1;
     }
 
-    if (_forecast != null) {
+    if (_forecast != null && _dataAge < $.TIME_TO_SHOW_LOADING) {
       if (_useBufferedBitmaps) {
         drawTimelineBuffered(dc);
       } else {
