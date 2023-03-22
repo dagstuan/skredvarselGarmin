@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
-using SkredvarselGarminWeb.Database;
+using SkredvarselGarminWeb.Services;
 
 namespace SkredvarselGarminWeb.Configuration;
 
@@ -32,24 +32,12 @@ public partial class GarminAuthenticationHandler : AuthenticationHandler<GarminA
         {
             var watchId = tokenMatch.Groups["token"].Value;
 
-            var dbContext = Request.HttpContext.RequestServices.GetRequiredService<SkredvarselDbContext>();
-
-            var userForWatch = dbContext.GetUserForWatch(watchId);
-            if (userForWatch == null)
+            var garminAuthenticationService = Request.HttpContext.RequestServices.GetRequiredService<IGarminAuthenticationService>();
+            var activeAgreement = garminAuthenticationService.DoesWatchHaveActiveAgreement(watchId);
+            if (activeAgreement)
             {
-                return Task.FromResult(AuthenticateResult.Fail("Unknown watch."));
-            }
-
-            if (dbContext.DoesUserHaveActiveAgreement(userForWatch.Id))
-            {
-                var claims = new[] {
-                    new Claim(ClaimTypes.NameIdentifier, userForWatch.Id),
-                    new Claim(ClaimTypes.Email, userForWatch.Email),
-                    new Claim(ClaimTypes.Name, userForWatch.Name)
-                };
-
+                var claims = Array.Empty<Claim>();
                 var claimsIdentity = new ClaimsIdentity(claims, nameof(GarminAuthenticationHandler));
-
                 var ticket = new AuthenticationTicket(
                         new ClaimsPrincipal(claimsIdentity), Scheme.Name);
 
@@ -57,7 +45,7 @@ public partial class GarminAuthenticationHandler : AuthenticationHandler<GarminA
             }
         }
 
-        return Task.FromResult(AuthenticateResult.Fail("Model is Empty"));
+        return Task.FromResult(AuthenticateResult.Fail("Did not find active agreement for watch."));
     }
 
     [GeneratedRegex("Garmin (?<token>.*)")]

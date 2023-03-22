@@ -20,15 +20,13 @@ public static class VarsomApiRouteBuilderExtensions
                     w.ValidTo
                 }
             });
-        });
-        //.RequireAuthorization("Garmin");
+        }).RequireAuthorization("Garmin");
 
         app.MapGet("/api/detailedWarningsByRegion/{regionId}/{langKey}/{from}/{to}", async (string regionId, string langKey, DateOnly from, DateOnly to, IVarsomApi varsomApi) =>
         {
             var warnings = await varsomApi.GetDetailedWarningsByRegion(regionId, langKey, from, to);
 
             return warnings.Select(w => w.ToDetailedAvalancheWarning());
-        });
-        //.RequireAuthorization("Garmin");
+        }).RequireAuthorization("Garmin");
     }
 }

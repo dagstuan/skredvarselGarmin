@@ -12,6 +12,7 @@ using SkredvarselGarminWeb.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
+builder.Services.AddMemoryCache();
 
 var databaseOptions = builder.Configuration.GetSection("Database").Get<DatabaseOptions>()!;
 builder.Services.ConfigureDatabase(databaseOptions);
@@ -22,6 +23,7 @@ builder.Services.Configure<VippsOptions>(vippsOptionsSection);
 var vippsOptions = vippsOptionsSection.Get<VippsOptions>();
 
 builder.Services.AddTransient<IDateTimeNowProvider, DateTimeNowProvider>();
+builder.Services.AddTransient<IGarminAuthenticationService, GarminAuthenticationService>();
 builder.Services.AddTransient<ISubscriptionService, SubscriptionService>();
 
 var authOptions = builder.Configuration.GetSection("Auth").Get<AuthOptions>();

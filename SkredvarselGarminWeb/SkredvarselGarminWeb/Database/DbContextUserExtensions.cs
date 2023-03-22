@@ -19,7 +19,7 @@ public static class DbContextUserExtensions
         return dbContext.Users.First(u => u.Id == sub);
     }
 
-    public static User? GetUserForWatch(this SkredvarselDbContext dbContext, string watchId)
+    public static User? GetUserForWatchOrNull(this SkredvarselDbContext dbContext, string watchId)
     {
         return dbContext.Watches
             .Include(w => w.User)
