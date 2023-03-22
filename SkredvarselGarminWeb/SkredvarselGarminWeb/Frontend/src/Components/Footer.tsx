@@ -39,6 +39,12 @@ export const Footer = () => {
               Varsler fra Snøskredvarslingen i Norge og{" "}
               <Link href="https://www.varsom.no">www.varsom.no</Link>
             </Text>
+            <Text fontSize={"sm"}>
+              Ikoner fra{" "}
+              <Link href="https://www.avalanches.org/">
+                European Avalance Warning Services.
+              </Link>
+            </Text>
           </Stack>
           <Stack align={"flex-start"}>
             <ListHeader>Om</ListHeader>
