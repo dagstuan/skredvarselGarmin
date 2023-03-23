@@ -57,7 +57,11 @@ public class DetailedForecastElements {
 
     _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
 
-    _seeFullForecastText = Ui.loadResource($.Rez.Strings.SeeFullForecast);
+    var forecastLanguage = $.getForecastLanguage();
+    _seeFullForecastText =
+      forecastLanguage == 1
+        ? "Se komplett varsel på www.varsom.no"
+        : "See complete forecast at www.varsom.no";
 
     _elements = new [_numElements];
   }
@@ -164,7 +168,7 @@ public class DetailedForecastElements {
       if (wasNull) {
         if (i == 0) {
           _elements[i] = new AvalancheUi.MainText({
-            :text => _warning["mainText"] + " " + _seeFullForecastText,
+            :text => getMainText(),
             :width => _areaWidth,
             :height => _areaHeight,
           });
@@ -183,5 +187,30 @@ public class DetailedForecastElements {
       }
       xOffset += _fullWidth;
     }
+  }
+
+  function getMainText() {
+    var mainText = _warning["mainText"];
+
+    if (mainText == null) {
+      mainText = "";
+    }
+
+    // Remove all spaces from the end.
+    while (
+      mainText.substring(mainText.length() - 1, mainText.length()).equals(" ")
+    ) {
+      mainText = mainText.substring(0, mainText.length() - 1);
+    }
+
+    // Add a dot if it's not there in the main text.
+    if (
+      mainText.length() > 0 &&
+      !mainText.substring(mainText.length() - 1, mainText.length()).equals(".")
+    ) {
+      mainText += ".";
+    }
+
+    return mainText + " " + _seeFullForecastText;
   }
 }

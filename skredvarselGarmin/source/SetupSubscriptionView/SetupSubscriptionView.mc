@@ -58,7 +58,10 @@ class SetupSubscriptionView extends Ui.View {
     if (_requestFailed) {
       if (_failedTextArea == null) {
         _failedTextArea = new Ui.TextArea({
-          :text => Ui.loadResource($.Rez.Strings.FailedToCheckForSubscription),
+          :text => $.getOrLoadResourceString(
+            "Fikk ikke til å sjekke for abonnement. Prøv å koble til telefonen på nytt.",
+            :FailedToCheckForSubscription
+          ),
           :color => Gfx.COLOR_WHITE,
           :font => [Gfx.FONT_SMALL, Gfx.FONT_XTINY],
           :locX => Ui.LAYOUT_HALIGN_CENTER,
@@ -113,7 +116,10 @@ class SetupSubscriptionView extends Ui.View {
       } else if (status.equals("SEEN_WATCH_INACTIVE_SUBSCRIPTION")) {
         Ui.switchToView(
           new NoSubscriptionView(
-            Ui.loadResource($.Rez.Strings.SeenWatchInactiveSubscription)
+            $.getOrLoadResourceString(
+              "Gå til skredvarsel.app på mobil for å tegne abonnement til appen.",
+              :SeenWatchInactiveSubscription
+            )
           ),
           null,
           Ui.SLIDE_BLINK
@@ -121,7 +127,10 @@ class SetupSubscriptionView extends Ui.View {
       } else if (status.equals("NEW_WATCH")) {
         Ui.switchToView(
           new NoSubscriptionView(
-            Ui.loadResource($.Rez.Strings.NewWatch) +
+            $.getOrLoadResourceString(
+              "Logg inn på skredvarsel.app på mobilen, og legg til klokken med koden:",
+              :NewWatch
+            ) +
               "\n\n" +
               response["addWatchKey"]
           ),

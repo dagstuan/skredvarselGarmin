@@ -47,6 +47,7 @@ class skredvarselGarminApp extends Application.AppBase {
     $.resetStorageCacheIfRequired();
   }
 
+  (:glance)
   private function registerTemporalEvent() {
     var lastRunTime = Background.getLastTemporalEventTime();
 
@@ -90,6 +91,8 @@ class skredvarselGarminApp extends Application.AppBase {
 
   (:glance)
   public function getGlanceView() as Lang.Array<Ui.GlanceView>? {
+    registerTemporalEvent();
+
     return [new GlanceView()];
   }
 
@@ -101,10 +104,10 @@ class skredvarselGarminApp extends Application.AppBase {
     fetchedData as Application.PersistableType
   ) as Void {
     if ($.Debug) {
-      $.logMessage("Exited background job.");
+      $.logMessage("Exited background job. Fetched data: " + fetchedData);
     }
 
-    if (fetchedData) {
+    if (fetchedData == true) {
       Ui.requestUpdate();
     }
 

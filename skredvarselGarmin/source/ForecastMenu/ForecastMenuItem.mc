@@ -31,7 +31,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
     _regionId = regionId;
     _screenWidth = $.getDeviceScreenWidth();
-    _loadingText = Ui.loadResource($.Rez.Strings.Loading);
+    _loadingText = $.getOrLoadResourceString("Laster...", :Loading);
     _useBufferedBitmaps = $.useBufferedBitmaps();
 
     getForecastFromCache();

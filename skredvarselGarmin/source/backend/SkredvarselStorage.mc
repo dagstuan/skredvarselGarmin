@@ -38,10 +38,21 @@ function getFavoriteRegionId() as String? {
 function resetStorageCacheIfRequired() {
   var STORAGE_VERSION = 2;
   var storageVersion = Storage.getValue("storageVersion") as Number?;
+  var cachedForecastsLanguage =
+    Storage.getValue("cachedStorageLanguage") as Number?;
+  if (cachedForecastsLanguage == null) {
+    cachedForecastsLanguage = 1; // Assume Norwegian if no value in storage
+  }
 
-  if (storageVersion == null || storageVersion != STORAGE_VERSION) {
+  var forecastLanguageSetting = $.getForecastLanguage();
+
+  if (
+    storageVersion == null ||
+    storageVersion != STORAGE_VERSION ||
+    cachedForecastsLanguage != forecastLanguageSetting
+  ) {
     if ($.Debug) {
-      $.logMessage("Wrong storage version detected. Resetting cache");
+      $.logMessage("Resetting storage cache.");
     }
 
     var hasSubscription = $.getHasSubscription();
@@ -50,6 +61,7 @@ function resetStorageCacheIfRequired() {
     setSelectedRegionIdsInStorage(selectedRegionIds);
     $.setHasSubscription(hasSubscription);
     Storage.setValue("storageVersion", STORAGE_VERSION);
+    Storage.setValue("cachedStorageLanguage", forecastLanguageSetting);
   }
 }
 

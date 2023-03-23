@@ -73,7 +73,7 @@ public class ForecastMenu extends Ui.CustomMenu {
     var iconX = width / 2 - $.halfWidthDangerLevelIcon;
     dc.drawBitmap(iconX, 10, _icon);
 
-    var text = Ui.loadResource($.Rez.Strings.AppName);
+    var text = $.getOrLoadResourceString("Skredvarsel", :AppName);
     dc.drawText(
       width / 2,
       height / 2 + 15,

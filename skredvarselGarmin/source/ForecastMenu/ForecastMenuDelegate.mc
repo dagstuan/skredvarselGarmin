@@ -61,7 +61,10 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
     } else if (_loadingView != null) {
       Ui.switchToView(
         new TextAreaView(
-          Ui.loadResource($.Rez.Strings.FailedToFetchTheForecast)
+          $.getOrLoadResourceString(
+            "Fikk ikke til å hente varselet. Prøv å koble til telefonen på nytt.",
+            :FailedToFetchTheForecast
+          )
         ),
         new TextAreaViewDelegate(),
         Ui.SLIDE_BLINK
