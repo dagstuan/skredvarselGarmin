@@ -40,7 +40,13 @@ public class SubscriptionService : ISubscriptionService
             .Where(a =>
                 a.Status == EntityAgreementStatus.ACTIVE ||
                 a.Status == EntityAgreementStatus.UNSUBSCRIBED)
-            .First();
+            .FirstOrDefault();
+
+        if (agreement == null)
+        {
+            _logger.LogWarning("Job to update agreement charges for agreement was triggered on inactive agreement. Agreement ID: {agreementId}", agreementId);
+            return;
+        }
 
         var nowDate = DateOnly.FromDateTime(_dateTimeNowProvider.Now);
         if (nowDate < agreement.NextChargeDate)
