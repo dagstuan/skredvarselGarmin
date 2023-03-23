@@ -47,7 +47,9 @@ export const Watches = () => {
     }
   }, [addWatch.isSuccess]);
 
-  const handleAddClick = () => {
+  const handleAddSubmit = (evt: React.FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+
     if (!key) {
       setError("Du må skrive en kode.");
     } else {
@@ -85,29 +87,33 @@ export const Watches = () => {
       )}
 
       <Box pt={4} pl={4} pb={4} pr={8} bg="gray.100">
-        <FormControl mb={2} isInvalid={isError}>
-          <FormLabel>Legg til klokke</FormLabel>
-          <Flex gap={4}>
-            <Input
-              colorScheme="red"
-              bg="white"
-              value={key}
-              onChange={handleInputChange}
-            />
-            <Button
-              colorScheme="blue"
-              onClick={() => handleAddClick()}
-              isDisabled={addWatch.isLoading}
-            >
-              Legg til
-            </Button>
-          </Flex>
-          {!isError ? (
-            <FormHelperText>Skriv inn koden som står på klokka.</FormHelperText>
-          ) : (
-            <FormErrorMessage>{error}</FormErrorMessage>
-          )}
-        </FormControl>
+        <form onSubmit={handleAddSubmit}>
+          <FormControl mb={2} isInvalid={isError}>
+            <FormLabel>Legg til klokke</FormLabel>
+            <Flex gap={4}>
+              <Input
+                colorScheme="red"
+                bg="white"
+                value={key}
+                onChange={handleInputChange}
+              />
+              <Button
+                colorScheme="blue"
+                type="submit"
+                isDisabled={addWatch.isLoading}
+              >
+                Legg til
+              </Button>
+            </Flex>
+            {!isError ? (
+              <FormHelperText>
+                Skriv inn koden som står på klokka.
+              </FormHelperText>
+            ) : (
+              <FormErrorMessage>{error}</FormErrorMessage>
+            )}
+          </FormControl>
+        </form>
       </Box>
     </>
   );
