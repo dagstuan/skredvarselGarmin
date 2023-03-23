@@ -4,7 +4,9 @@ using Toybox.WatchUi as Ui;
 
 public class EditMenu extends Ui.Menu2 {
   public function initialize() {
-    Menu2.initialize({ :title => $.Rez.Strings.PickRegions });
+    Menu2.initialize({
+      :title => $.getOrLoadResourceString("Velg regioner", :PickRegions),
+    });
 
     var selectedRegionIds = $.getSelectedRegionIds() as Array<String>;
 

@@ -89,10 +89,10 @@ class DetailedForecastView extends Ui.View {
   }
 
   public function onShow() {
-    _todayText = Ui.loadResource($.Rez.Strings.Today);
-    _yesterdayText = Ui.loadResource($.Rez.Strings.Yesterday);
-    _tomorrowText = Ui.loadResource($.Rez.Strings.Tomorrow);
-    _levelText = Ui.loadResource($.Rez.Strings.Level);
+    _todayText = $.getOrLoadResourceString("I dag", :Today);
+    _yesterdayText = $.getOrLoadResourceString("I går", :Yesterday);
+    _tomorrowText = $.getOrLoadResourceString("I morgen", :Tomorrow);
+    _levelText = $.getOrLoadResourceString("Faregrad", :Level);
   }
 
   public function onUpdate(dc as Gfx.Dc) as Void {

@@ -15,8 +15,12 @@
 	<string id="Tomorrow">I morgen</string>
 	<string id="Level">Faregrad</string>
 	<string id="FailedToFetchTheForecast">Fikk ikke til å hente varselet. Prøv å koble til telefonen på nytt.</string>
-	<string id="SeeFullForecast">Se komplett varsel på varsom.no</string>
 	<string id="FailedToCheckForSubscription">Fikk ikke til å sjekke for abonnement. Prøv å koble til telefonen på nytt.</string>
 	<string id="SeenWatchInactiveSubscription">Gå til skredvarsel.app på mobil for å tegne abonnement til appen.</string>
 	<string id="NewWatch">Logg inn på skredvarsel.app på mobilen, og legg til klokken med koden:</string>
+	<string id="UseWatchLanguage">Bruk klokkespråk i brukergrensesnitt</string>
+	<string id="ForecastLanguage">Varselspråk</string>
+	<string id="AppVersionTitle">Appversjon</string>
+	<string id="Norwegian">Norsk</string>
+	<string id="English">Engelsk</string>
 </strings>

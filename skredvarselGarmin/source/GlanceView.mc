@@ -23,7 +23,6 @@ class GlanceView extends Ui.GlanceView {
   private var _height as Number?;
 
   private var _appNameText as Ui.Resource?;
-  private var _loadingText as Ui.Resource?;
 
   function initialize() {
     GlanceView.initialize();
@@ -33,28 +32,7 @@ class GlanceView extends Ui.GlanceView {
   function onShow() {
     _hasSubscription = $.getHasSubscription();
     _favoriteRegionId = $.getFavoriteRegionId();
-    _appNameText = Ui.loadResource($.Rez.Strings.AppName);
-    _loadingText = Ui.loadResource($.Rez.Strings.Loading);
-
-    if (_hasSubscription && _favoriteRegionId != null) {
-      setForecastDataFromStorage();
-      if (
-        _hasSubscription &&
-        (_forecast == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE)
-      ) {
-        if ($.Debug) {
-          $.logMessage(
-            "Null or stale simple forecast for glance, try to reload in background"
-          );
-        }
-
-        $.loadSimpleForecastForRegion(
-          _favoriteRegionId,
-          method(:onReceive),
-          false
-        );
-      }
-    }
+    _appNameText = $.getOrLoadResourceString("Skredvarsel", :AppName);
   }
 
   function onLayout(dc as Gfx.Dc) {
@@ -63,7 +41,16 @@ class GlanceView extends Ui.GlanceView {
   }
 
   function onUpdate(dc as Gfx.Dc) {
-    if (_hasSubscription == false || _favoriteRegionId == null) {
+    if (_hasSubscription && _favoriteRegionId != null && _forecast == null) {
+      setForecastDataFromStorage();
+    }
+
+    if (
+      _hasSubscription == false ||
+      _favoriteRegionId == null ||
+      _forecast == null ||
+      _dataAge > $.TIME_TO_SHOW_LOADING
+    ) {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
       dc.drawText(
         0,
@@ -75,22 +62,10 @@ class GlanceView extends Ui.GlanceView {
       return;
     }
 
-    if (_forecast != null && _dataAge < $.TIME_TO_SHOW_LOADING) {
-      if (_useBufferedBitmap) {
-        drawTimelineBuffered(dc);
-      } else {
-        drawTimeline(dc);
-      }
+    if (_useBufferedBitmap) {
+      drawTimelineBuffered(dc);
     } else {
-      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-
-      dc.drawText(
-        0,
-        dc.getHeight() / 2,
-        Graphics.FONT_GLANCE,
-        _loadingText,
-        Graphics.TEXT_JUSTIFY_LEFT
-      );
+      drawTimeline(dc);
     }
   }
 
@@ -125,7 +100,6 @@ class GlanceView extends Ui.GlanceView {
 
   function onHide() {
     _appNameText = null;
-    _loadingText = null;
     _bufferedBitmap = null;
   }
 
@@ -136,16 +110,6 @@ class GlanceView extends Ui.GlanceView {
       _bufferedBitmap = null;
       _forecast = data[0];
       _dataAge = $.getStorageDataAge(data);
-    }
-  }
-
-  function onReceive(
-    responseCode as Number,
-    data as WebRequestCallbackData
-  ) as Void {
-    if (responseCode == 200) {
-      setForecastDataFromStorage();
-      Ui.requestUpdate();
     }
   }
 }

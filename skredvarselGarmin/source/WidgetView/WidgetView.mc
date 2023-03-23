@@ -31,10 +31,12 @@ public class WidgetView extends Ui.View {
 
   function onShow() {
     _regionId = $.getFavoriteRegionId();
-    _appNameText = Ui.loadResource($.Rez.Strings.AppName) as String;
-    _noRegionsSelectedText =
-      Ui.loadResource($.Rez.Strings.NoRegionsSelected) as String;
-    _loadingText = Ui.loadResource($.Rez.Strings.Loading) as String;
+    _appNameText = $.getOrLoadResourceString("Skredvarsel", :AppName);
+    _noRegionsSelectedText = $.getOrLoadResourceString(
+      "Ingen regioner valgt.",
+      :NoRegionsSelected
+    );
+    _loadingText = $.getOrLoadResourceString("Laster...", :Loading);
 
     setForecastDataFromStorage();
     if (

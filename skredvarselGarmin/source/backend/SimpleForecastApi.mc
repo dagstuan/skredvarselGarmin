@@ -22,7 +22,10 @@ public function getSimpleForecastForRegion(regionId as String) as Array? {
 }
 
 (:background)
-function getSimpleWarningsPathForRegion(regionId as String) as String {
+function getSimpleWarningsPathForRegion(
+  regionId as String,
+  language as Number
+) as String {
   var now = Time.now();
   var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
   var start = now.subtract(twoDays);
@@ -31,14 +34,16 @@ function getSimpleWarningsPathForRegion(regionId as String) as String {
   return (
     "/simpleWarningsByRegion/" +
     regionId +
-    "/1/" +
+    "/" +
+    language +
+    "/" +
     getFormattedDate(start) +
     "/" +
     getFormattedDate(end)
   );
 }
 
-(:glance)
+(:background)
 public function loadSimpleForecastForRegion(
   regionId as String?,
   callback as WebRequestDelegateCallback,
@@ -48,7 +53,8 @@ public function loadSimpleForecastForRegion(
     $.logMessage("Loading simple forecast for " + regionId);
   }
 
-  var path = $.getSimpleWarningsPathForRegion(regionId);
+  var language = $.getForecastLanguage();
+  var path = $.getSimpleWarningsPathForRegion(regionId, language);
   var storageKey = $.getSimpleForecastCacheKeyForRegion(regionId);
 
   $.makeApiRequest(path, storageKey, callback, useQueue);

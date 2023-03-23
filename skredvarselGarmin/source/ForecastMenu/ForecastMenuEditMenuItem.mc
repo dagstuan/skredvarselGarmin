@@ -11,7 +11,7 @@ public class ForecastMenuEditMenuItem extends Ui.CustomMenuItem {
     CustomMenuItem.initialize(id, {});
 
     _screenWidth = $.getDeviceScreenWidth();
-    _text = Ui.loadResource($.Rez.Strings.PickRegions);
+    _text = $.getOrLoadResourceString("Velg regioner", :PickRegions);
   }
 
   public function draw(dc as Gfx.Dc) {

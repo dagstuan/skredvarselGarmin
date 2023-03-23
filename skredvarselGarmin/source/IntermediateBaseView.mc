@@ -26,7 +26,10 @@ public class IntermediateBaseView extends Ui.View {
       _firstShow = false;
     }
 
-    _hitBackToExitText = Ui.loadResource($.Rez.Strings.HitBackToExit);
+    _hitBackToExitText = $.getOrLoadResourceString(
+      "Trykk tilbake for å avslutte.",
+      :HitBackToExit
+    );
   }
 
   public function onUpdate(dc as Gfx.Dc) {

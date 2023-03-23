@@ -25,8 +25,8 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
     var favoriteRegionId = $.getFavoriteRegionId();
 
     var setAsFavoriteMenuItemText = favoriteRegionId.equals(_regionId)
-      ? $.Rez.Strings.RemoveAsFavorite
-      : $.Rez.Strings.SetAsFavorite;
+      ? $.getOrLoadResourceString("Fjern favoritt", :RemoveAsFavorite)
+      : $.getOrLoadResourceString("Sett som favoritt", :SetAsFavorite);
 
     if (selectedRegionIds.size() > 1) {
       menu.addItem(
@@ -34,7 +34,14 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
       );
     }
 
-    menu.addItem(new MenuItem($.Rez.Strings.Remove, null, "remove", {}));
+    menu.addItem(
+      new MenuItem(
+        $.getOrLoadResourceString("Fjern", :Remove),
+        null,
+        "remove",
+        {}
+      )
+    );
 
     var delegate = new DetailedForecastViewMenuDelegate(_regionId);
 
