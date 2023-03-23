@@ -76,11 +76,8 @@ class NoSubscriptionView extends Ui.View {
   ) as Void {
     if (responseCode == 200) {
       $.setHasSubscription(true);
-      Ui.switchToView(
-        new ForecastMenu(),
-        new ForecastMenuDelegate(),
-        Ui.SLIDE_BLINK
-      );
+
+      $.switchToInitialView(Ui.SLIDE_BLINK);
     } else if (responseCode == 401) {
       startTimer();
     }

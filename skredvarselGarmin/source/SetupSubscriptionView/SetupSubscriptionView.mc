@@ -108,11 +108,8 @@ class SetupSubscriptionView extends Ui.View {
 
       if (status.equals("SEEN_WATCH_ACTIVE_SUBSCRIPTION")) {
         $.setHasSubscription(true);
-        Ui.switchToView(
-          new ForecastMenu(),
-          new ForecastMenuDelegate(),
-          Ui.SLIDE_BLINK
-        );
+
+        $.switchToInitialView(Ui.SLIDE_BLINK);
       } else if (status.equals("SEEN_WATCH_INACTIVE_SUBSCRIPTION")) {
         Ui.switchToView(
           new NoSubscriptionView(

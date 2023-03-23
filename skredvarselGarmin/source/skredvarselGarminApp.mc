@@ -6,6 +6,36 @@ using Toybox.WatchUi as Ui;
 using Toybox.Background;
 using Toybox.Application.Storage;
 
+function getInitialViewAndDelegate() as Array<Ui.Views or Ui.InputDelegates> {
+  var deviceSettings = System.getDeviceSettings();
+  if (
+    deviceSettings has :isGlanceModeEnabled &&
+    deviceSettings.isGlanceModeEnabled
+  ) {
+    var monkeyVersion = deviceSettings.monkeyVersion;
+
+    if (monkeyVersion[0] < 4) {
+      // CIQ less than 4 does not support having a menu as
+      // a main view. Need to use an intermediate view.
+      return [new IntermediateBaseView()];
+    }
+
+    return [new ForecastMenu(), new ForecastMenuDelegate()];
+  }
+
+  return [new WidgetView(), new WidgetViewDelegate()];
+}
+
+function switchToInitialView(transition as Ui.SlideType) {
+  var initialViewAndDelegate = $.getInitialViewAndDelegate();
+
+  var view = initialViewAndDelegate[0];
+  var delegate =
+    initialViewAndDelegate.size() > 1 ? initialViewAndDelegate[1] : null;
+
+  Ui.switchToView(view, delegate, transition);
+}
+
 (:background)
 class skredvarselGarminApp extends Application.AppBase {
   const REFRESH_INTERVAL_MINUTES = 60;
@@ -55,23 +85,7 @@ class skredvarselGarminApp extends Application.AppBase {
       return [new SetupSubscriptionView(), new SetupSubscriptionViewDelegate()];
     }
 
-    var deviceSettings = System.getDeviceSettings();
-    if (
-      deviceSettings has :isGlanceModeEnabled &&
-      deviceSettings.isGlanceModeEnabled
-    ) {
-      var monkeyVersion = deviceSettings.monkeyVersion;
-
-      if (monkeyVersion[0] < 4) {
-        // CIQ less than 4 does not support having a menu as
-        // a main view. Need to use an intermediate view.
-        return [new IntermediateBaseView()];
-      }
-
-      return [new ForecastMenu(), new ForecastMenuDelegate()];
-    }
-
-    return [new WidgetView(), new WidgetViewDelegate()];
+    return $.getInitialViewAndDelegate();
   }
 
   (:glance)
