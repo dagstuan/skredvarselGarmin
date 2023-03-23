@@ -8,6 +8,10 @@ processes = []
 [build]
   dockerfile = "Dockerfile"
 
+[mounts]
+  source="skredvarselGarmin_data"
+  destination="/data"
+
 [env]
 
 [experimental]

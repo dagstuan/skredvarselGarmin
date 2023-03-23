@@ -8,11 +8,16 @@ using Hangfire;
 using SkredvarselGarminWeb.Hangfire;
 using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Services;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
 builder.Services.AddMemoryCache();
+
+var dataProtectionPath = builder.Configuration.GetValue<string>("DataProtectionPath");
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath!));
 
 var databaseOptions = builder.Configuration.GetSection("Database").Get<DatabaseOptions>()!;
 builder.Services.ConfigureDatabase(databaseOptions);

@@ -363,3 +363,5 @@ FodyWeavers.xsd
 
 .env
 .env.flyio
+
+dataprotection-keys/
