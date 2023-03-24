@@ -12,7 +12,6 @@ class NoSubscriptionView extends Ui.View {
 
   function initialize(text as String) {
     View.initialize();
-    _checkSubscriptionTimer = new Timer.Timer();
     startTimer();
     _text = text;
 
@@ -49,6 +48,10 @@ class NoSubscriptionView extends Ui.View {
   }
 
   function startTimer() {
+    if (_checkSubscriptionTimer == null) {
+      _checkSubscriptionTimer = new Timer.Timer();
+    }
+
     _checkSubscriptionTimer.start(
       method(:onTimerTrigged),
       5000 /* ms */,

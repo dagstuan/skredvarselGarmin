@@ -39,7 +39,6 @@ class SetupSubscriptionView extends Ui.View {
   function initialize() {
     View.initialize();
 
-    _retryTimer = new Timer.Timer();
     _requestFailed = false;
   }
 
@@ -85,6 +84,9 @@ class SetupSubscriptionView extends Ui.View {
   }
 
   function startRetryTimer() {
+    if (_retryTimer == null) {
+      _retryTimer = new Timer.Timer();
+    }
     _retryTimer.start(method(:onRetryTimerTrigged), 5000 /* ms */, false);
   }
 
