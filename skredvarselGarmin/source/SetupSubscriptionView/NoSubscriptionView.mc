@@ -9,6 +9,8 @@ class NoSubscriptionView extends Ui.View {
   private var _textArea as Ui.TextArea?;
   private var _checkSubscriptionTimer as Timer.Timer?;
   private var _text as String;
+  private var _numRetries as Number = 0;
+  private var _maxRetries = 120;
 
   function initialize(text as String) {
     View.initialize();
@@ -82,7 +84,21 @@ class NoSubscriptionView extends Ui.View {
 
       $.switchToInitialView(Ui.SLIDE_BLINK);
     } else if (responseCode == 401) {
-      startTimer();
+      _numRetries += 1;
+      if (_numRetries >= _maxRetries) {
+        Ui.switchToView(
+          new TextAreaView(
+            $.getOrLoadResourceString(
+              "Fikk ikke til å sette opp abonnement. Avslutt appen og prøv på nytt.",
+              :FailedToSetupSubscription
+            )
+          ),
+          new TextAreaViewDelegate(),
+          Ui.SLIDE_BLINK
+        );
+      } else {
+        startTimer();
+      }
     }
   }
 }

@@ -17,6 +17,7 @@
 	<string id="FailedToFetchTheForecast">Failed to fetch the forecast. Please try again later.</string>
 	<string id="FailedToCheckForSubscription">Failed to check for subscription. Try to reconnect your phone to the watch.</string>
 	<string id="SeenWatchInactiveSubscription">Go to skredvarsel.app on mobile to sign up for the app.</string>
+	<string id="FailedToSetupSubscription">Failed to setup subscription. Close the app and try again.</string>
 	<string id="NewWatch">Log in at skredvarsel.app on mobile, and add the watch with the code:</string>
 	<string id="UseWatchLanguage">Use watch language for user interface</string>
 	<string id="ForecastLanguage">Forecast language</string>
