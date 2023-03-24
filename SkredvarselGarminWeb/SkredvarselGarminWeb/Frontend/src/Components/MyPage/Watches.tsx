@@ -107,7 +107,7 @@ export const Watches = () => {
             </Flex>
             {!isError ? (
               <FormHelperText>
-                Skriv inn koden som står på klokka.
+                Skriv inn koden som står på klokka når du starter appen.
               </FormHelperText>
             ) : (
               <FormErrorMessage>{error}</FormErrorMessage>
