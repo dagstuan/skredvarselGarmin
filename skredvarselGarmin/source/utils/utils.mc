@@ -154,12 +154,21 @@ function colorize(dangerLevel as Number) as Graphics.ColorType {
 
 (:background)
 function getFormattedDate(moment as Time.Moment) as String {
-  var info = Gregorian.utcInfo(moment, Time.FORMAT_SHORT);
+  var info = Gregorian.info(moment, Time.FORMAT_SHORT);
 
   return Lang.format("$1$-$2$-$3$", [
     info.year.format("%04u"),
     info.month.format("%02u"),
     info.day.format("%02u"),
+  ]);
+}
+
+function getFormattedTimestamp(moment as Time.Moment) {
+  var info = Gregorian.info(moment, Time.FORMAT_SHORT);
+
+  return Lang.format("$1$:$2$", [
+    info.hour.format("%02u"),
+    info.min.format("%02u"),
   ]);
 }
 

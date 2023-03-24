@@ -8,9 +8,20 @@ using Toybox.Timer;
 
 using AvalancheUi;
 
-// TODO: Draw header and footer with buffered bitmaps.
+typedef DetailedForecastViewSettings as {
+  :regionId as String,
+  :index as Number,
+  :numWarnings as Number,
+  :warning as DetailedAvalancheWarning,
+  :fetchedTime as Time.Moment,
+};
+
+// TODO: Draw header with buffered bitmaps.
 class DetailedForecastView extends Ui.View {
-  public var warning as DetailedAvalancheWarning?;
+  private const TICK_DURATION = 100;
+
+  private var _warning as DetailedAvalancheWarning?;
+  private var _fetchedTime as Time.Moment;
 
   private var _regionId as String;
   private var _index as Number;
@@ -28,8 +39,8 @@ class DetailedForecastView extends Ui.View {
   private var _currentElement as Number = 0;
   private var _numElements as Number?;
 
-  private var _pageIndicator as AvalancheUi.PageIndicator?;
-  private var _animatePageIndicatorTimer as Timer.Timer?;
+  private var _pageIndicator as AvalancheUi.PageIndicator;
+  private var _ticksBeforeAnimatePageIndicator = 25;
 
   private var _forecastElementsIndicator as
   AvalancheUi.ForecastElementsIndicator?;
@@ -37,55 +48,29 @@ class DetailedForecastView extends Ui.View {
   private var _dangerLevelBitmap as Gfx.BufferedBitmap?;
   private var _dangerLevelBitmapWidth as Numeric?;
 
-  public function initialize(
-    regionId as String,
-    index as Number,
-    numWarnings as Number,
-    warning as DetailedAvalancheWarning,
-    showPageIndicator as Boolean
-  ) {
+  private var _footer as DetailedForecastFooter?;
+
+  private var _updateTimer as Timer.Timer?;
+
+  public function initialize(settings as DetailedForecastViewSettings) {
     View.initialize();
 
-    _regionId = regionId;
-    _index = index;
-    self.warning = warning;
-    _numElements = (warning["avalancheProblems"] as Array).size() + 1;
+    _regionId = settings[:regionId];
+    _index = settings[:index];
+    _warning = settings[:warning];
+    _fetchedTime = settings[:fetchedTime];
+    _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
     _forecastElementsIndicator = new AvalancheUi.ForecastElementsIndicator(
       _numElements
     );
 
-    if (showPageIndicator) {
-      _pageIndicator = new AvalancheUi.PageIndicator(numWarnings);
-    }
-
+    _pageIndicator = new AvalancheUi.PageIndicator(settings[:numWarnings]);
     _deviceScreenWidth = $.getDeviceScreenWidth();
   }
 
   public function onLayout(dc as Gfx.Dc) {
     _width = dc.getWidth();
     _height = dc.getHeight();
-
-    if (_pageIndicator != null) {
-      _animatePageIndicatorTimer = new Timer.Timer();
-      _animatePageIndicatorTimer.start(
-        method(:animatePageIndicatorTimerCallback),
-        2500,
-        false
-      );
-    }
-  }
-
-  function animatePageIndicatorTimerCallback() as Void {
-    Ui.animate(
-      _pageIndicator,
-      :visibilityPercent,
-      Ui.ANIM_TYPE_EASE_OUT,
-      100,
-      0,
-      1,
-      null
-    );
-    _animatePageIndicatorTimer = null;
   }
 
   public function onShow() {
@@ -93,6 +78,48 @@ class DetailedForecastView extends Ui.View {
     _yesterdayText = $.getOrLoadResourceString("I går", :Yesterday);
     _tomorrowText = $.getOrLoadResourceString("I morgen", :Tomorrow);
     _levelText = $.getOrLoadResourceString("Faregrad", :Level);
+
+    _updateTimer = new Timer.Timer();
+    _updateTimer.start(method(:onTick), TICK_DURATION /* ms */, true);
+  }
+
+  public function onTick() as Void {
+    if (_ticksBeforeAnimatePageIndicator > 0) {
+      _ticksBeforeAnimatePageIndicator -= 1;
+    }
+
+    if (_ticksBeforeAnimatePageIndicator == 0) {
+      Ui.animate(
+        _pageIndicator,
+        :visibilityPercent,
+        Ui.ANIM_TYPE_EASE_OUT,
+        100,
+        0,
+        1,
+        null
+      );
+      _ticksBeforeAnimatePageIndicator = -1;
+    }
+
+    Ui.requestUpdate();
+  }
+
+  public function onHide() {
+    if (_updateTimer != null) {
+      _updateTimer.stop();
+      _updateTimer = null;
+    }
+    if (_elements != null) {
+      _elements.onHide();
+      _elements = null;
+    }
+    _todayText = null;
+    _yesterdayText = null;
+    _tomorrowText = null;
+    _levelText = null;
+
+    _footer = null;
+    _dangerLevelBitmap = null;
   }
 
   public function onUpdate(dc as Gfx.Dc) as Void {
@@ -102,9 +129,9 @@ class DetailedForecastView extends Ui.View {
     var titleAreaY0 = 0;
     var titleAreaHeight = _height * 0.18; // 15% of screen
 
-    var startValidity = (warning["validity"] as Array)[0];
+    var startValidity = (_warning["validity"] as Array)[0];
     var validityDate = $.parseDate(startValidity);
-    drawSingleLineTextArea(
+    drawValidityDate(
       dc,
       titleAreaY0,
       titleAreaHeight,
@@ -124,16 +151,9 @@ class DetailedForecastView extends Ui.View {
     var footerY0 = mainContentY0 + mainContentHeight;
     var footerHeight = _height * 0.17; // 15% of screen
 
-    drawSingleLineTextArea(
-      dc,
-      footerY0,
-      footerHeight,
-      $.getRegionName(_regionId)
-    );
+    drawFooter(dc, footerY0, footerHeight);
 
-    if (_pageIndicator != null) {
-      _pageIndicator.draw(dc, _index);
-    }
+    _pageIndicator.draw(dc, _index);
 
     _forecastElementsIndicator.draw(dc, _currentElement);
   }
@@ -154,24 +174,7 @@ class DetailedForecastView extends Ui.View {
     }
   }
 
-  public function onHide() {
-    if (_animatePageIndicatorTimer != null) {
-      _animatePageIndicatorTimer.stop();
-    }
-    if (_elements != null) {
-      _elements.onHide();
-      _elements = null;
-    }
-    _animatePageIndicatorTimer = null;
-    _todayText = null;
-    _yesterdayText = null;
-    _tomorrowText = null;
-    _levelText = null;
-
-    _dangerLevelBitmap = null;
-  }
-
-  private function drawSingleLineTextArea(
+  private function drawValidityDate(
     dc as Gfx.Dc,
     y0 as Numeric,
     height as Numeric,
@@ -210,7 +213,7 @@ class DetailedForecastView extends Ui.View {
     }
 
     if (_dangerLevelBitmap == null) {
-      var dangerLevel = warning["dangerLevel"];
+      var dangerLevel = _warning["dangerLevel"];
       var font = Gfx.FONT_MEDIUM;
       var paddingBetween = _width * 0.02;
       var iconResource = $.getIconResourceForDangerLevel(dangerLevel);
@@ -230,7 +233,7 @@ class DetailedForecastView extends Ui.View {
       });
       var bufferedDc = _dangerLevelBitmap.getDc();
 
-      var color = colorize(warning["dangerLevel"]);
+      var color = colorize(_warning["dangerLevel"]);
       bufferedDc.setColor(color, Gfx.COLOR_TRANSPARENT);
       bufferedDc.drawText(
         0,
@@ -260,7 +263,7 @@ class DetailedForecastView extends Ui.View {
   ) {
     if (_elements == null) {
       _elements = new DetailedForecastElements({
-        :warning => warning,
+        :warning => _warning,
         :locY => y0,
         :height => height,
         :fullWidth => _width,
@@ -268,6 +271,21 @@ class DetailedForecastView extends Ui.View {
     }
 
     _elements.draw(dc);
+  }
+
+  public function drawFooter(dc as Gfx.Dc, y0 as Numeric, height as Numeric) {
+    if (_footer == null) {
+      _footer = new DetailedForecastFooter({
+        :regionName => $.getRegionName(_regionId),
+        :fetchedTime => _fetchedTime,
+        :locY => y0,
+        :locX => 0,
+        :width => _width,
+        :height => height,
+      });
+    }
+
+    _footer.draw(dc);
   }
 
   public function goToNextVisibleElement() {
@@ -292,5 +310,14 @@ class DetailedForecastView extends Ui.View {
     }
 
     _currentElement = _elements.toggleVisibleElement();
+  }
+
+  public function setWarning(
+    warning as DetailedAvalancheWarning,
+    fetchedTime as Time.Moment
+  ) {
+    _warning = warning;
+    _fetchedTime = fetchedTime;
+    _footer = null;
   }
 }

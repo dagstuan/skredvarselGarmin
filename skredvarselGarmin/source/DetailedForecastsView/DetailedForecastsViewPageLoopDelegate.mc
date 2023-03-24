@@ -2,20 +2,21 @@ import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
 using Toybox.Time.Gregorian;
+using Toybox.Time;
 
 typedef DetailedWarningsViewPageLoopDelegateSettings as {
   :index as Number,
   :view as DetailedForecastView,
   :regionId as String,
   :detailedWarnings as Array<DetailedAvalancheWarning>,
-  :dataAge as Number,
+  :fetchedTime as Time.Moment,
 };
 
 class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate {
   private var _index as Number;
 
   private var _detailedWarnings as Array<DetailedAvalancheWarning>;
-  private var _dataAge as Number;
+  private var _fetchedTime as Time.Moment;
 
   private var _numPages as Numeric;
 
@@ -29,11 +30,12 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
 
     _index = settings[:index];
     _detailedWarnings = settings[:detailedWarnings];
-    _dataAge = settings[:dataAge];
+    _fetchedTime = settings[:fetchedTime];
 
     _numPages = _detailedWarnings.size();
 
-    if (_dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
+    var dataAge = Time.now().compare(_fetchedTime);
+    if (dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
       if ($.Debug) {
         $.logMessage("Stale forecast, try to reload in background");
       }
@@ -48,17 +50,14 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
   ) as Void {
     if (responseCode == 200 && data != null) {
       _detailedWarnings = data as Array;
-      _dataAge = 0;
+      _fetchedTime = Time.now();
 
-      _view.warning = _detailedWarnings[_index];
+      _view.setWarning(_detailedWarnings[_index], _fetchedTime);
 
       Ui.requestUpdate();
     }
   }
 
-  //! Handle a physical button being pressed and released
-  //! @param evt The key event that occurred
-  //! @return true if handled, false otherwise
   public function onKey(evt as Ui.KeyEvent) as Boolean {
     var key = evt.getKey();
     if (Ui.KEY_DOWN == key) {
@@ -83,14 +82,12 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     return DetailedForecastViewDelegate.onSwipe(evt);
   }
 
-  //! Go to the next page
   private function onNxtPage() as Void {
     _index = (_index + 1) % _numPages;
     var newView = getView();
     Ui.switchToView(newView, getDelegate(newView), Ui.SLIDE_UP);
   }
 
-  //! Go to the previous page
   private function onPrevPage() as Void {
     _index -= 1;
     if (_index < 0) {
@@ -102,13 +99,13 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
   }
 
   private function getView() as DetailedForecastView {
-    return new DetailedForecastView(
-      _regionId,
-      _index,
-      _detailedWarnings.size(),
-      _detailedWarnings[_index],
-      true
-    );
+    return new DetailedForecastView({
+      :regionId => _regionId,
+      :index => _index,
+      :numWarnings => _detailedWarnings.size(),
+      :warning => _detailedWarnings[_index],
+      :fetchedTime => _fetchedTime,
+    });
   }
 
   private function getDelegate(newView as DetailedForecastView) {
@@ -117,7 +114,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
       :view => newView,
       :detailedWarnings => _detailedWarnings,
       :regionId => _regionId,
-      :dataAge => _dataAge,
+      :fetchedTime => _fetchedTime,
     });
   }
 }

@@ -39,9 +39,11 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
         var warnings = data[0];
         var fetchedTime = data[1];
 
-        var dataAge = Time.now().compare(new Time.Moment(fetchedTime));
-
-        pushDetailedForecastView(_regionId, warnings, dataAge);
+        pushDetailedForecastView(
+          _regionId,
+          warnings,
+          new Time.Moment(fetchedTime)
+        );
       }
     }
 
@@ -56,7 +58,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
       pushDetailedForecastView(
         _regionId,
         data as Array<DetailedAvalancheWarning>,
-        0
+        Time.now()
       );
     } else if (_loadingView != null) {
       Ui.switchToView(
@@ -77,7 +79,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
   private function pushDetailedForecastView(
     regionId as String,
     data as Array<DetailedAvalancheWarning>,
-    dataAge as Number
+    fetchedTime as Time.Moment
   ) {
     // TODO: Make this cleaner.
     var startIndex = 2;
@@ -87,19 +89,19 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
       startIndex = 3;
     }
 
-    var view = new DetailedForecastView(
-      regionId,
-      startIndex,
-      data.size(),
-      data[startIndex],
-      true
-    );
+    var view = new DetailedForecastView({
+      :regionId => regionId,
+      :index => startIndex,
+      :numWarnings => data.size(),
+      :warning => data[startIndex],
+      :fetchedTime => fetchedTime,
+    });
     var delegate = new DetailedForecastViewPageLoopDelegate({
       :index => startIndex,
       :view => view,
       :detailedWarnings => data,
       :regionId => regionId,
-      :dataAge => dataAge,
+      :fetchedTime => fetchedTime,
     });
 
     if (_loadingView != null) {
