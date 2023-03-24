@@ -342,29 +342,6 @@ public function newBufferedBitmap(
 }
 
 (:glance)
-public function useBufferedBitmaps() {
-  var deviceSettings = System.getDeviceSettings();
-  var partNumber = deviceSettings.partNumber;
-  if (
-    partNumber.equals("006-B3289-00") || // F6
-    partNumber.equals("006-B3287-00") || // F6S
-    partNumber.equals("006-B3290-00") || // F6 Pro
-    partNumber.equals("006-B3288-00") || // F6S Pro
-    partNumber.equals("006-B3291-00") || // F6X Pro
-    partNumber.equals("006-B3113-00") || // FR945
-    partNumber.equals("006-B3589-00") || // FR945
-    partNumber.equals("006-B3652-00") || // FR945 LTE
-    partNumber.equals("006-B3077-00") || // FR245 Music
-    partNumber.equals("006-B3624-00") || // Marq Adventurer
-    partNumber.equals("006-B3251-00") // Marq Athlete
-  ) {
-    return false;
-  }
-
-  return true;
-}
-
-(:glance)
 public function getStorageDataAge(data as Array) {
   return Time.now().compare(new Time.Moment(data[1]));
 }

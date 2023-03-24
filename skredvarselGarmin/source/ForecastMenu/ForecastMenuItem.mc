@@ -18,7 +18,6 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   private var _loadingText as Ui.Resource;
 
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
-  private var _useBufferedBitmaps as Boolean;
 
   private var _width as Numeric?;
   private var _height as Numeric?;
@@ -32,7 +31,6 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     _regionId = regionId;
     _screenWidth = $.getDeviceScreenWidth();
     _loadingText = $.getOrLoadResourceString("Laster...", :Loading);
-    _useBufferedBitmaps = $.useBufferedBitmaps();
 
     getForecastFromCache();
     if (_forecast == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
@@ -63,11 +61,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     }
 
     if (_forecast != null && _dataAge < $.TIME_TO_SHOW_LOADING) {
-      if (_useBufferedBitmaps) {
-        drawTimelineBuffered(dc);
-      } else {
-        drawTimeline(dc);
-      }
+      drawTimeline(dc);
     } else {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
@@ -81,7 +75,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     }
   }
 
-  function drawTimelineBuffered(dc as Gfx.Dc) {
+  function drawTimeline(dc as Gfx.Dc) {
     if (_bufferedBitmap == null) {
       _bufferedBitmap = $.newBufferedBitmap({
         :width => _width,
@@ -103,20 +97,6 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     }
 
     dc.drawBitmap(0, 0, _bufferedBitmap);
-  }
-
-  function drawTimeline(dc as Gfx.Dc) {
-    var regionName = $.getRegionName(_regionId);
-    var forecastTimeline = new AvalancheUi.ForecastTimeline({
-      :locX => _marginLeft,
-      :locY => 0,
-      :width => _width - _marginRight,
-      :height => _height,
-      :regionName => regionName,
-      :forecast => _forecast,
-    });
-
-    forecastTimeline.draw(dc);
   }
 
   private function getForecastFromCache() as Void {

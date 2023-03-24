@@ -17,7 +17,7 @@ class GlanceView extends Ui.GlanceView {
   private var _dataAge as Number?;
 
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
-  private var _useBufferedBitmap as Boolean;
+  private var _useBufferedBitmap as Boolean = true;
 
   private var _width as Number?;
   private var _height as Number?;
@@ -26,7 +26,23 @@ class GlanceView extends Ui.GlanceView {
 
   function initialize() {
     GlanceView.initialize();
-    _useBufferedBitmap = $.useBufferedBitmaps();
+
+    var deviceSettings = System.getDeviceSettings();
+    var partNumber = deviceSettings.partNumber;
+
+    if (
+      partNumber.equals("006-B3290-00") || // F6 Pro
+      partNumber.equals("006-B3288-00") || // F6S Pro
+      partNumber.equals("006-B3291-00") || // F6X Pro
+      partNumber.equals("006-B3589-00") || // FR745
+      partNumber.equals("006-B3113-00") || // FR945
+      partNumber.equals("006-B3652-00") || // FR945 LTE
+      partNumber.equals("006-B3077-00") || // FR245 Music
+      partNumber.equals("006-B3624-00") || // Marq Adventurer
+      partNumber.equals("006-B3251-00") // Marq Athlete
+    ) {
+      _useBufferedBitmap = false;
+    }
   }
 
   function onShow() {
