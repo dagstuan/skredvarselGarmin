@@ -11,7 +11,7 @@ import { Features } from "./Features";
 
 import bg from "../assets/bg.jpg";
 import { MyPage } from "./MyPage/MyPage";
-import { VippsButton, VippsButtonProps } from "./VippsButton";
+import { VippsButton } from "./VippsButton";
 import { CiqStoreButton } from "./CiqStoreButton";
 
 export const FrontPage = () => {
