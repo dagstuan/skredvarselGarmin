@@ -11,7 +11,7 @@ import { Features } from "./Features";
 
 import bg from "../assets/bg.jpg";
 import { MyPage } from "./MyPage/MyPage";
-import { VippsButton } from "./VippsButton";
+import { VippsButton, VippsButtonProps } from "./VippsButton";
 import { CiqStoreButton } from "./CiqStoreButton";
 
 export const FrontPage = () => {
@@ -52,10 +52,10 @@ export const FrontPage = () => {
             </Stack>
             <Wrap spacing={2}>
               <WrapItem>
-                <CiqStoreButton />
+                <CiqStoreButton size="lg" />
               </WrapItem>
               <WrapItem>
-                <VippsButton />
+                <VippsButton size="lg" />
               </WrapItem>
             </Wrap>
           </Stack>

@@ -1,8 +1,10 @@
-import { Button, Flex, Text } from "@chakra-ui/react";
+import { Button, ButtonProps, Flex, Text } from "@chakra-ui/react";
 
 import ciqLogo from "../assets/ciq_logo.png";
 
-export const CiqStoreButton = () => {
+type CiqStoreButtonProps = Pick<ButtonProps, "size">;
+
+export const CiqStoreButton = (props: CiqStoreButtonProps) => {
   return (
     <Button
       as="a"
@@ -13,6 +15,7 @@ export const CiqStoreButton = () => {
       rounded={"full"}
       borderRadius={4}
       px={2}
+      size={props.size ?? "md"}
       _hover={{ bg: "#0a1f2e" }}
     >
       <Flex gap={2} h="inherit" p={1} alignItems="center">
