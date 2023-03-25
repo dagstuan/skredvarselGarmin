@@ -10,16 +10,72 @@ import {
   Link,
   ListItem,
   OrderedList,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 
 export const FaqPage = () => {
   return (
-    <Flex m="0 auto" flexDir="column" maxW="4xl" gap={10} p={10}>
+    <Flex
+      m="0 auto"
+      flexDir="column"
+      maxW="4xl"
+      gap={10}
+      py={10}
+      px={useBreakpointValue({ base: 4, sm: 10 })}
+    >
       <Heading as="h2" size="2xl" mb={4}>
         Ofte stilte spørsmål
       </Heading>
 
       <Accordion allowMultiple>
+        <AccordionItem>
+          <h2>
+            <AccordionButton>
+              <Box as="span" flex="1" textAlign="left">
+                Hvordan installerer jeg appen?
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={4}>
+            <OrderedList>
+              <ListItem>
+                Gå til{" "}
+                <Link
+                  href="https://apps.garmin.com/en-US/apps/35174bf3-b1da-4391-9426-70bcb210c292"
+                  target="_blank"
+                  color="blue.600"
+                >
+                  Connect IQ Store
+                </Link>{" "}
+                og last ned appen til klokken din. Det kan hende du må
+                installere "Connect IQ Store"-appen til mobiltelefonen din.
+              </ListItem>
+              <ListItem>
+                <Link
+                  color="blue.600"
+                  href="https://skredvarsel.app/createSubscription"
+                >
+                  Kjøp et abonnement på appen
+                </Link>
+                .
+              </ListItem>
+              <ListItem>
+                Start appen på klokka. Da bør det dukke opp en kode du skal
+                skrive inn.
+              </ListItem>
+              <ListItem>
+                Gå til{" "}
+                <Link color="blue.600" href="https://skredvarsel.app/minSide">
+                  Min side
+                </Link>{" "}
+                og skriv inn koden som står på klokka.
+              </ListItem>
+              <ListItem>Tusen takk! 🎉</ListItem>
+            </OrderedList>
+          </AccordionPanel>
+        </AccordionItem>
+
         <AccordionItem>
           <h2>
             <AccordionButton>
@@ -78,54 +134,6 @@ export const FaqPage = () => {
             alle fysiske klokker, siden jeg ikke eier alle sammen. Send meg
             gjerne et bilde av hvordan det ser ut på klokken din så jeg kan
             forbedre visningen.
-          </AccordionPanel>
-        </AccordionItem>
-
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Hvordan installerer jeg appen?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
-            <OrderedList>
-              <ListItem>
-                Gå til{" "}
-                <Link
-                  href="https://apps.garmin.com/en-US/apps/35174bf3-b1da-4391-9426-70bcb210c292"
-                  target="_blank"
-                  color="blue.600"
-                >
-                  Connect IQ Store
-                </Link>{" "}
-                og last ned appen til klokken din. Det kan hende du må
-                installere "Connect IQ Store"-appen til mobiltelefonen din.
-              </ListItem>
-              <ListItem>
-                <Link
-                  color="blue.600"
-                  href="https://skredvarsel.app/createSubscription"
-                >
-                  Kjøp et abonnement på appen
-                </Link>
-                .
-              </ListItem>
-              <ListItem>
-                Start appen på klokka. Da bør det dukke opp en kode du skal
-                skrive inn.
-              </ListItem>
-              <ListItem>
-                Gå til{" "}
-                <Link color="blue.600" href="https://skredvarsel.app/minSide">
-                  Min side
-                </Link>{" "}
-                og skriv inn koden som står på klokka.
-              </ListItem>
-              <ListItem>Tusen takk! 🎉</ListItem>
-            </OrderedList>
           </AccordionPanel>
         </AccordionItem>
 
@@ -230,7 +238,7 @@ export const FaqPage = () => {
           <h2>
             <AccordionButton>
               <Box as="span" flex="1" textAlign="left">
-                Jeg lurer fortsatt på noe?
+                Jeg lurer fortsatt på noe.
               </Box>
               <AccordionIcon />
             </AccordionButton>
