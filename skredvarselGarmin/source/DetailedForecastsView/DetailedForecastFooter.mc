@@ -14,7 +14,7 @@ typedef DetailedForecastFooterSettings as {
 };
 
 public class DetailedForecastFooter {
-  private const TICKS_AT_START_END = 40;
+  private const TICKS_AT_START_END = 30;
 
   private var _regionName as String;
   private var _fetchedTime as Time.Moment;
@@ -104,7 +104,7 @@ public class DetailedForecastFooter {
         _dir = 1;
       }
 
-      _textOffset += _dir;
+      _textOffset += _dir * 1.25;
     }
   }
 }
