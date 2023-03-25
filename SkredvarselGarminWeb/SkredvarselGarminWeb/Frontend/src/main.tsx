@@ -1,12 +1,12 @@
 import { ChakraProvider } from "@chakra-ui/react";
-import { AxiosError } from "axios";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { QueryCache, QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
 import ErrorPage from "./Components/ErrorPage";
+import { FaqPage } from "./Components/FaqPage";
 import { FrontPage } from "./Components/FrontPage";
 import { PrivacyPolicy } from "./Components/PrivacyPolicy";
 import { SalesConditions } from "./Components/SalesConditions";
@@ -26,6 +26,10 @@ const router = createBrowserRouter([
       {
         path: "minSide",
         element: <FrontPage />,
+      },
+      {
+        path: "faq",
+        element: <FaqPage />,
       },
       {
         path: "salgsbetingelser",

@@ -7,12 +7,15 @@ import {
   DrawerContent,
   DrawerOverlay,
   Heading,
+  Text,
+  Link,
 } from "@chakra-ui/react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
 import { PersonalInfo } from "./PersonalInfo";
 import { Subscription } from "./Subscription";
 import { Watches } from "./Watches";
+import { Link as RouterLink } from "react-router-dom";
 
 export const MyPage = () => {
   const { data: user, isLoading } = useUser();
@@ -37,6 +40,14 @@ export const MyPage = () => {
           <Heading size="md" mt={2} mb={8}>
             Min side
           </Heading>
+
+          <Text mb={10}>
+            Lurer du på noe? Se{" "}
+            <Link as={RouterLink} to="/faq" color="blue.600">
+              ofte stilte spørsmål
+            </Link>
+            .
+          </Text>
 
           <Box mb={10}>
             <Heading size="sm" mb={2}>
