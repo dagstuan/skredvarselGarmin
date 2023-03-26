@@ -25,4 +25,7 @@
 	<string id="Norwegian">Norwegian</string>
 	<string id="English">English</string>
 	<string id="Updated">Updated</string>
+	<string id="ComplicationName">Avalanche</string>
+	<string id="ComplicationLongLabel">Avalanche</string>
+	<string id="ComplicationShortLabel">Ava</string>
 </strings>

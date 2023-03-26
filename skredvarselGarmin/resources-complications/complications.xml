@@ -1,0 +1,17 @@
+<complications>
+    <complication id="0" access="public"
+        longLabel="@Strings.ComplicationLongLabel"
+        shortLabel="@Strings.ComplicationShortLabel"
+        icon="@Drawables.AvalancheIconSvg"
+        glancePreview="true">
+        <faceIt defaultText="@Strings.ComplicationName" />
+        <range>
+            <value>0</value>
+            <value>1</value>
+            <value>2</value>
+            <value>3</value>
+            <value>4</value>
+            <value>5</value>
+        </range>
+    </complication>
+</complications>

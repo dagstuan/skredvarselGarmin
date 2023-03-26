@@ -4,4 +4,5 @@
 	<bitmap id="Level3" filename="level_3_small.png" />
 	<bitmap id="Level4_5" filename="level_4_5_small.png" />
 	<bitmap id="NoLevel" filename="no_level_small.png" />
+	<bitmap id="AvalancheIconSvg" filename="avalanche_icon.svg" />
 </drawables>

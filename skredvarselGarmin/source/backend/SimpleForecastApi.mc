@@ -8,7 +8,7 @@ using Toybox.Application.Storage;
 using Toybox.WatchUi as Ui;
 
 // Returns [forecast, storedTime] array
-(:glance)
+(:glance,:background)
 public function getSimpleForecastForRegion(regionId as String) as Array? {
   var storageKey = $.getSimpleForecastCacheKeyForRegion(regionId);
 

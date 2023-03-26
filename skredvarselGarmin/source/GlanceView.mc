@@ -31,6 +31,8 @@ class GlanceView extends Ui.GlanceView {
     var partNumber = deviceSettings.partNumber;
 
     if (
+      partNumber.equals("006-B3258-00") || // Descent Mk 2
+      partNumber.equals("006-B3542-00") || // Descent Mk 2s
       partNumber.equals("006-B3290-00") || // F6 Pro
       partNumber.equals("006-B3288-00") || // F6S Pro
       partNumber.equals("006-B3291-00") || // F6X Pro

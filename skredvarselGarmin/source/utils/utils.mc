@@ -172,7 +172,7 @@ function getFormattedTimestamp(moment as Time.Moment) {
   ]);
 }
 
-(:glance)
+(:glance,:background)
 function parseDate(dateString as String) as Time.Moment {
   return Gregorian.moment({
     :year => dateString.substring(0, 4).toNumber(),
@@ -313,6 +313,7 @@ function min(a as Numeric, b as Numeric) {
   return a < b ? a : b;
 }
 
+(:background)
 public function getDangerLevelToday(
   forecast as SimpleAvalancheForecast
 ) as Number {

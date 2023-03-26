@@ -45,33 +45,35 @@ class skredvarselGarminApp extends Application.AppBase {
 
   function onStart(state) {
     $.resetStorageCacheIfRequired();
+    $.updateComplicationIfExists();
   }
 
   (:glance)
   private function registerTemporalEvent() {
     var lastRunTime = Background.getLastTemporalEventTime();
 
-    var now = new Time.Moment(Time.now().value());
-
-    var refreshInterval = new Time.Duration(REFRESH_INTERVAL_MINUTES * 60);
-    var registeredEvent = Background.getTemporalEventRegisteredTime();
     if (lastRunTime == null) {
       if ($.Debug) {
         $.logMessage("Background refresh never done. Running immediately.");
       }
+      var now = new Time.Moment(Time.now().value());
       Background.registerForTemporalEvent(now);
-    } else if (
-      registeredEvent == null ||
-      registeredEvent.value() != refreshInterval.value()
-    ) {
-      if ($.Debug) {
-        $.logMessage(
-          "Registering temporal event in " +
-            REFRESH_INTERVAL_MINUTES +
-            " minutes"
-        );
+    } else {
+      var refreshInterval = new Time.Duration(REFRESH_INTERVAL_MINUTES * 60);
+      var registeredEvent = Background.getTemporalEventRegisteredTime();
+      if (
+        registeredEvent == null ||
+        registeredEvent.value() != refreshInterval.value()
+      ) {
+        if ($.Debug) {
+          $.logMessage(
+            "Registering temporal event in " +
+              REFRESH_INTERVAL_MINUTES +
+              " minutes"
+          );
+        }
+        Background.registerForTemporalEvent(refreshInterval);
       }
-      Background.registerForTemporalEvent(refreshInterval);
     }
   }
 

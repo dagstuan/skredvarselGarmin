@@ -12,8 +12,12 @@ class ServiceDelegate extends System.ServiceDelegate {
 
   public function onTemporalEvent() as Void {
     if ($.Debug) {
-      $.logMessage("Temporal event triggered. Reloading region data.");
+      $.logMessage(
+        "Temporal event triggered. Reloading region data and updating complication."
+      );
     }
+
+    $.updateComplicationIfExists();
 
     if ($.canMakeWebRequest() == false) {
       if ($.Debug) {
