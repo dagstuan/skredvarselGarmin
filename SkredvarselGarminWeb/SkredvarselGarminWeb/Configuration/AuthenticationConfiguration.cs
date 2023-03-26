@@ -32,6 +32,7 @@ public static class AuthenticationConfiguration
                 options.ClientSecret = vippsOptions?.ClientSecret;
                 options.ResponseType = "code";
                 options.CallbackPath = "/signin-oidc";
+                options.AccessDeniedPath = "/";
 
                 options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
