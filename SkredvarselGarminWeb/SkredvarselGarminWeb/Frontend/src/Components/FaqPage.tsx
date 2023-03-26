@@ -80,6 +80,23 @@ export const FaqPage = () => {
           <h2>
             <AccordionButton>
               <Box as="span" flex="1" textAlign="left">
+                Kan jeg betale med noe annet enn Vipps?
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={4}>
+            Garmin tilbyr ikke betaling av apper i sin egen "Connect IQ Store",
+            så all betaling for apper til Garmin-klokker må tas utenfor. Derfor
+            må jeg selv lage betalingsløsning, og har enn så lenge valgt å kun
+            tilby Vipps som betalingsløsning.
+          </AccordionPanel>
+        </AccordionItem>
+
+        <AccordionItem>
+          <h2>
+            <AccordionButton>
+              <Box as="span" flex="1" textAlign="left">
                 Hvilke klokker virker appen på?
               </Box>
               <AccordionIcon />
