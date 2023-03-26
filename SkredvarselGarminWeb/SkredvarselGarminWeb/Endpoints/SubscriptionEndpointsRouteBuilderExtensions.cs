@@ -42,6 +42,12 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
                 return Results.Redirect($"{baseUrl}/minSide");
             }
 
+            var pendingAgreementForUser = existingAgreementsForUser.FirstOrDefault(x => x.Status == AgreementStatus.PENDING);
+            if (pendingAgreementForUser != null && pendingAgreementForUser.ConfirmationUrl != null)
+            {
+                return Results.Redirect(pendingAgreementForUser.ConfirmationUrl);
+            }
+
             var request = new DraftAgreementRequest
             {
                 CustomerPhoneNumber = userPhoneNumber,
