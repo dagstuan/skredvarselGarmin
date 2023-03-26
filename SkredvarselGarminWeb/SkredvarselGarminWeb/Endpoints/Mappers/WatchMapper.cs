@@ -16,6 +16,8 @@ public static class WatchMapper
 
     private static string ToWatchName(this string partNumber) => partNumber switch
     {
+        "006-B3258-00" => "Descent Mk2",
+        "006-B3542-00" => "Descent Mk2S",
         "006-B3943-00" => "Epix 2",
         "006-B3110-00" => "Fēnix 5 Plus",
         "006-B2900-00" => "Fēnix 5S Plus",
@@ -32,7 +34,10 @@ public static class WatchMapper
         "006-B3077-00" => "Forerunner 245 Music",
         "006-B3992-00" => "Forerunner 255",
         "006-B3990-00" => "Forerunner 255 Music",
+        "006-B3993-00" => "Forerunner 255S",
+        "006-B3991-00" => "Forerunner 255S Music",
         "006-B4257-00" => "Forerunner 265",
+        "006-B4258-00" => "Forerunner 265S",
         "006-B2156-00" => "Forerunner 630",
         "006-B2886-00" => "Forerunner 645",
         "006-B2888-00" => "Forerunner 645 Music",
