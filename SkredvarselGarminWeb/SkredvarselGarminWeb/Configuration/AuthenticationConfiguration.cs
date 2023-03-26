@@ -70,36 +70,44 @@ public static class AuthenticationConfiguration
                         var rootElement = ctx.User.RootElement;
                         var sub = rootElement.GetString("sub");
 
-                        if (sub != null)
+                        if (sub == null)
                         {
-                            var dbContext = ctx.HttpContext.RequestServices.GetRequiredService<SkredvarselDbContext>();
-
-                            var name = rootElement.GetString("name")!;
-                            var email = rootElement.GetString("email")!;
-                            var phoneNumber = rootElement.GetString("phone_number")!;
-
-                            var user = dbContext.Users.Where(u => u.Id == sub).FirstOrDefault();
-                            if (user == null)
-                            {
-                                var userEntity = new User
-                                {
-                                    Id = sub,
-                                    Name = name,
-                                    Email = email,
-                                    PhoneNumber = phoneNumber
-                                };
-
-                                dbContext.Users.Add(userEntity);
-                            }
-                            else if (user.Name != name || user.Email != email || user.PhoneNumber != phoneNumber)
-                            {
-                                user.Name = name;
-                                user.Email = email;
-                                user.PhoneNumber = phoneNumber;
-                            }
-
-                            dbContext.SaveChanges();
+                            throw new Exception("Invalid login, no sub was returned in user info.");
                         }
+
+                        var dbContext = ctx.HttpContext.RequestServices.GetRequiredService<SkredvarselDbContext>();
+
+                        var name = rootElement.GetString("name")!;
+                        var email = rootElement.GetString("email")!;
+                        var phoneNumber = rootElement.GetString("phone_number")!;
+
+                        var dateNow = DateOnly.FromDateTime(DateTime.Now);
+                        var user = dbContext.Users.Where(u => u.Id == sub).FirstOrDefault();
+                        if (user == null)
+                        {
+                            user = new User
+                            {
+                                Id = sub,
+                                Name = name,
+                                Email = email,
+                                PhoneNumber = phoneNumber,
+                                CreatedDate = dateNow,
+                                LastLoggedIn = dateNow
+                            };
+
+                            dbContext.Users.Add(user);
+                        }
+
+                        if (user.Name != name || user.Email != email || user.PhoneNumber != phoneNumber)
+                        {
+                            user.Name = name;
+                            user.Email = email;
+                            user.PhoneNumber = phoneNumber;
+                        }
+
+                        user.LastLoggedIn = dateNow;
+
+                        dbContext.SaveChanges();
                     }
 
                     return Task.CompletedTask;

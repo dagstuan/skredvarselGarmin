@@ -18,7 +18,10 @@ public class User
     public string PhoneNumber { get; set; } = string.Empty;
 
     [Required]
-    public DateOnly CreatedDate { get; init; } = DateOnly.FromDateTime(DateTime.Now);
+    public required DateOnly LastLoggedIn { get; set; }
+
+    [Required]
+    public required DateOnly CreatedDate { get; init; }
 
     public List<Agreement> Agreements { get; set; } = null!;
 
