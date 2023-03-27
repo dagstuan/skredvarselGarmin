@@ -42,7 +42,7 @@ export const Footer = () => {
             <Text fontSize={"sm"}>
               Ikoner fra{" "}
               <Link href="https://www.avalanches.org/">
-                European Avalance Warning Services.
+                European Avalanche Warning Services.
               </Link>
             </Text>
           </Stack>
