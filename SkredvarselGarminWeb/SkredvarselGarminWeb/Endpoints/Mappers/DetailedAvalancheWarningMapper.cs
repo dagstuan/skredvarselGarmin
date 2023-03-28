@@ -21,7 +21,8 @@ public static class DetailedAvalancheWarningMapper
                 problem.ExposedHeight2,
                 problem.ExposedHeightFill,
             },
-            ValidExpositions = problem.ValidExpositions
+            ValidExpositions = problem.ValidExpositions,
+            DangerLevel = problem.DangerLevel,
         }) ?? new List<AvalancheProblem>()
     };
 }
