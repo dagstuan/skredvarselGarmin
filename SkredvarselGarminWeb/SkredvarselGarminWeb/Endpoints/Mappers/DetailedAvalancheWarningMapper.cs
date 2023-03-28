@@ -23,6 +23,8 @@ public static class DetailedAvalancheWarningMapper
             },
             ValidExpositions = problem.ValidExpositions,
             DangerLevel = problem.DangerLevel,
-        }) ?? new List<AvalancheProblem>()
+        })
+        .OrderByDescending(x => x.DangerLevel)
+        .ToList() ?? new List<AvalancheProblem>()
     };
 }
