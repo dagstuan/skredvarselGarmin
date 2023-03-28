@@ -56,6 +56,7 @@ app.Use(next => context =>
 
 app.UseStaticFiles();
 
+app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -22,8 +22,6 @@ public static class AuthenticationConfiguration
             .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
             {
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-                options.Cookie.SameSite = SameSiteMode.None;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             })
             .AddOpenIdConnect(options =>
             {
@@ -33,9 +31,6 @@ public static class AuthenticationConfiguration
                 options.ResponseType = "code";
                 options.CallbackPath = "/signin-oidc";
                 options.AccessDeniedPath = "/";
-
-                options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
-                options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
 
                 options.GetClaimsFromUserInfoEndpoint = true;
 
