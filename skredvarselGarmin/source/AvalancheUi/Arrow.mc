@@ -18,29 +18,43 @@ module AvalancheUi {
   };
 
   public class Arrow {
-    private var _locX as Numeric;
-    private var _locY as Numeric;
     private var _width as Numeric;
     private var _height as Numeric;
     private var _color as Gfx.ColorType;
     private var _direction as ArrowDirection;
 
+    private var _bufferedBitmap as Gfx.BufferedBitmap?;
+
     public function initialize(settings as ArrowSettings) {
-      _locX = settings[:locX];
-      _locY = settings[:locY];
       _width = settings[:width];
       _height = settings[:height];
       _color = settings[:color];
       _direction = settings[:direction];
     }
 
-    public function draw(dc as Gfx.Dc) {
-      dc.setColor(_color, _color);
+    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
+      if (_bufferedBitmap == null) {
+        createBufferedBitmap();
+      }
+
+      dc.drawBitmap(x0, y0, _bufferedBitmap);
+    }
+
+    private function createBufferedBitmap() {
+      _bufferedBitmap = $.newBufferedBitmap({
+        :width => _width,
+        :height => _height,
+        :palette => [Gfx.COLOR_TRANSPARENT, _color],
+      });
+
+      var bufferedDc = _bufferedBitmap.getDc();
+
+      bufferedDc.setColor(_color, _color);
 
       if (_direction == UP) {
-        drawUpArrow(dc);
+        drawUpArrow(bufferedDc);
       } else if (_direction == DOWN) {
-        drawDownArrow(dc);
+        drawDownArrow(bufferedDc);
       }
     }
 
@@ -49,13 +63,13 @@ module AvalancheUi {
       var shaftHeight = 0.5 * _height;
 
       dc.fillPolygon([
-        [_locX, _locY + shaftHeight],
-        [_locX + _width / 2, _locY],
-        [_locX + _width, _locY + shaftHeight],
-        [_locX + _width - shaftWidth, _locY + shaftHeight],
-        [_locX + _width - shaftWidth, _locY + _height],
-        [_locX + shaftWidth, _locY + _height],
-        [_locX + shaftWidth, _locY + _height - shaftHeight],
+        [0, shaftHeight],
+        [_width / 2, 0],
+        [_width, shaftHeight],
+        [_width - shaftWidth, shaftHeight],
+        [_width - shaftWidth, _height],
+        [shaftWidth, _height],
+        [shaftWidth, _height - shaftHeight],
       ]);
     }
 
@@ -65,13 +79,13 @@ module AvalancheUi {
       var spaceLeftRight = (_width - shaftWidth) / 2;
 
       dc.fillPolygon([
-        [_locX, _locY + shaftHeight],
-        [_locX + spaceLeftRight, _locY + shaftHeight],
-        [_locX + spaceLeftRight, _locY],
-        [_locX + spaceLeftRight + shaftWidth, _locY],
-        [_locX + spaceLeftRight + shaftWidth, _locY + shaftHeight],
-        [_locX + _width, _locY + shaftHeight],
-        [_locX + _width / 2, _locY + _height],
+        [0, shaftHeight],
+        [spaceLeftRight, shaftHeight],
+        [spaceLeftRight, 0],
+        [spaceLeftRight + shaftWidth, 0],
+        [spaceLeftRight + shaftWidth, shaftHeight],
+        [_width, shaftHeight],
+        [_width / 2, _height],
       ]);
     }
   }
