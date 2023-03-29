@@ -17,23 +17,19 @@ function getDetailedWarningsForRegion(regionId as String) as Array? {
 (:background)
 function getDetailedWarningsPathForRegion(
   regionId as String,
-  language as Number
+  language as Number,
+  formattedStartDate as String,
+  formattedEndDate as String
 ) as String {
-  var now = Time.now();
-
-  var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
-  var start = now.subtract(twoDays);
-  var end = now.add(twoDays);
-
   return (
     "/detailedWarningsByRegion/" +
     regionId +
     "/" +
     language +
     "/" +
-    getFormattedDate(start) +
+    formattedStartDate +
     "/" +
-    getFormattedDate(end)
+    formattedEndDate
   );
 }
 
@@ -46,7 +42,13 @@ function loadDetailedWarningsForRegion(
   }
 
   var language = $.getForecastLanguage();
-  var path = $.getDetailedWarningsPathForRegion(regionId, language);
+
+  var now = Time.now();
+  var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
+  var start = getFormattedDate(now.subtract(twoDays));
+  var end = getFormattedDate(now.add(twoDays));
+
+  var path = $.getDetailedWarningsPathForRegion(regionId, language, start, end);
   var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);
 
   $.makeApiRequest(path, storageKey, callback, true);
