@@ -56,7 +56,7 @@ public class SubscriptionService : ISubscriptionService
             return;
         }
 
-        if (agreement.Status == EntityAgreementStatus.UNSUBSCRIBED)
+        if (agreement.Status == EntityAgreementStatus.UNSUBSCRIBED && nowDate > agreement.NextChargeDate)
         {
             var success = await StopAgreementInVipps(agreement.Id);
 
