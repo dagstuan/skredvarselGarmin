@@ -126,6 +126,9 @@ public class SubscriptionService : ISubscriptionService
             throw new Exception("Invalid state for agreement attempting to be deactivated.");
         }
 
+        // If the agreement is new, claim the first charge before deactivating.
+        await UpdateAgreementCharges(agreementId);
+
         if (agreementInDb.NextChargeId != null)
         {
             var result = await _vippsApiClient.CancelCharge(agreementInDb.Id, agreementInDb.NextChargeId, Guid.NewGuid());
