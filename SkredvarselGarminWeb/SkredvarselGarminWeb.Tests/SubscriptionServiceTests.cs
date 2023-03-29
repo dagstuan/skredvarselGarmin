@@ -496,11 +496,41 @@ public class SubscriptionServiceTests
     }
 
     [Fact]
-    public async Task Should_stop_agreements_in_vipps_that_are_unsubscribed()
+    public async Task Should_not_stop_agreements_in_vipps_that_are_unsubscribed_and_date_is_earlier_than_nextChargeDate()
     {
         var nextChargeDate = new DateOnly(2023, 4, 13);
 
-        _dateTimeNowProvider.Now.Returns(nextChargeDate.ToDateTime(TimeOnly.MinValue));
+        _dateTimeNowProvider.Now.Returns(nextChargeDate.ToDateTime(TimeOnly.MinValue).AddDays(-1));
+
+        var agreement = _fixture.Build<Agreement>()
+            .With(a => a.Status, AgreementStatus.UNSUBSCRIBED)
+            .With(a => a.NextChargeDate, nextChargeDate)
+            .Create();
+
+        _dbContext.Add(agreement);
+        _dbContext.SaveChanges();
+
+        var successResponse = Substitute.For<IApiResponse>();
+        successResponse.IsSuccessStatusCode.Returns(true);
+        _vippsApiClient.PatchAgreement(default!, default!, default!).ReturnsForAnyArgs(successResponse);
+
+        await _subscriptionService.UpdateAgreementCharges(agreement.Id);
+
+        await _vippsApiClient.DidNotReceiveWithAnyArgs().PatchAgreement(default!, default!, default!);
+        await _vippsApiClient.DidNotReceiveWithAnyArgs().CaptureCharge(default!, default!, default!, default!);
+        await _vippsApiClient.DidNotReceiveWithAnyArgs().CreateCharge(default!, default!, default!);
+
+        var updatedAgreementInDb = _dbContext.Agreements.Single(a => a.Id == agreement.Id);
+        updatedAgreementInDb.Status.Should().Be(AgreementStatus.UNSUBSCRIBED);
+        updatedAgreementInDb.NextChargeDate.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Should_stop_agreements_in_vipps_that_are_unsubscribed_and_date_is_later_than_nextChargeDate()
+    {
+        var nextChargeDate = new DateOnly(2023, 4, 13);
+
+        _dateTimeNowProvider.Now.Returns(nextChargeDate.ToDateTime(TimeOnly.MinValue).AddDays(1));
 
         var agreement = _fixture.Build<Agreement>()
             .With(a => a.Status, AgreementStatus.UNSUBSCRIBED)
