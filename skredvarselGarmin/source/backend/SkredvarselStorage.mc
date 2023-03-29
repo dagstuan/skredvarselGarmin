@@ -52,7 +52,9 @@ function resetStorageCacheIfRequired() {
     cachedForecastsLanguage != forecastLanguageSetting
   ) {
     if ($.Debug) {
-      $.logMessage("Resetting storage cache.");
+      $.logMessage(
+        "Resetting storage cache. storageVersion in Storage: " + storageVersion
+      );
     }
 
     var hasSubscription = $.getHasSubscription();

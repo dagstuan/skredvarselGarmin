@@ -1,6 +1,8 @@
 import Toybox.Lang;
 import Toybox.System;
 
+using Toybox.Time.Gregorian;
+
 (:background)
 class ServiceDelegate extends System.ServiceDelegate {
   private var _simpleRegionsToReload as Array<String> = [];
@@ -67,11 +69,22 @@ class ServiceDelegate extends System.ServiceDelegate {
   private function reloadNextRegion() as Boolean {
     var language = $.getForecastLanguage();
 
+    var now = Time.now();
+
+    var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
+    var start = getFormattedDate(now.subtract(twoDays));
+    var end = getFormattedDate(now.add(twoDays));
+
     if (_simpleRegionsToReload.size() > 0) {
       var nextRegion = _simpleRegionsToReload[0];
       _simpleRegionsToReload = _simpleRegionsToReload.slice(1, null);
 
-      var path = $.getSimpleWarningsPathForRegion(nextRegion, language);
+      var path = $.getSimpleWarningsPathForRegion(
+        nextRegion,
+        language,
+        start,
+        end
+      );
       var storageKey = $.getSimpleForecastCacheKeyForRegion(nextRegion);
       var delegate = new WebRequestDelegate(
         path,
@@ -85,7 +98,12 @@ class ServiceDelegate extends System.ServiceDelegate {
       var nextRegion = _detailedRegionsToReload[0];
       _detailedRegionsToReload = _detailedRegionsToReload.slice(1, null);
 
-      var path = $.getDetailedWarningsPathForRegion(nextRegion, language);
+      var path = $.getDetailedWarningsPathForRegion(
+        nextRegion,
+        language,
+        start,
+        end
+      );
       var storageKey = $.getDetailedWarningsCacheKeyForRegion(nextRegion);
       var delegate = new WebRequestDelegate(
         path,

@@ -2,6 +2,7 @@ import Toybox.Lang;
 
 using Toybox.Graphics as Gfx;
 using Toybox.Math;
+using Toybox.WatchUi as Ui;
 
 module AvalancheUi {
   typedef ValidExpositionsSettings as {
@@ -15,20 +16,24 @@ module AvalancheUi {
 
   public class ValidExpositions {
     private var _validExpositions as Array<Char>;
-    private var _locX as Numeric;
-    private var _locY as Numeric;
     private var _radius as Numeric;
+
+    private var _font as Ui.Resource;
+    private var _fontHeight as Number;
 
     private var _dangerFillColor as Gfx.ColorType;
     private var _nonDangerFillColor as Gfx.ColorType;
 
+    private var _bufferedBitmap as Gfx.BufferedBitmap?;
+
     public function initialize(settings as ValidExpositionsSettings) {
       _validExpositions = settings[:validExpositions].toCharArray();
-      _locX = settings[:locX];
-      _locY = settings[:locY];
       _radius = settings[:radius];
       _dangerFillColor = settings[:dangerFillColor];
       _nonDangerFillColor = settings[:nonDangerFillColor];
+
+      _font = WatchUi.loadResource($.Rez.Fonts.roboto);
+      _fontHeight = Gfx.getFontHeight(_font);
 
       var numChars = _validExpositions.size();
       if (numChars != 8) {
@@ -38,23 +43,45 @@ module AvalancheUi {
       }
     }
 
-    public function draw(dc as Gfx.Dc) {
-      if ($.DrawOutlines) {
-        $.drawOutline(
-          dc,
-          _locX - _radius,
-          _locY - _radius,
-          _radius * 2,
-          _radius * 2
-        );
+    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
+      if (_bufferedBitmap == null) {
+        createBufferedBitmap();
       }
 
-      dc.setPenWidth(_radius);
-      dc.setAntiAlias(true);
+      dc.drawBitmap(x0 - _radius, y0 - _radius - _fontHeight, _bufferedBitmap);
+    }
+
+    private function createBufferedBitmap() {
+      _bufferedBitmap = $.newBufferedBitmap({
+        :width => _radius * 2,
+        :height => _radius * 2 + _fontHeight,
+      });
+
+      var bufferedDc = _bufferedBitmap.getDc();
+
+      bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+      bufferedDc.drawText(
+        _radius,
+        _fontHeight / 2,
+        _font,
+        "N",
+        Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
+      );
+
+      if ($.DrawOutlines) {
+        $.drawOutline(bufferedDc, 0, 0, _radius * 2, _radius * 2 + _fontHeight);
+      }
+
+      bufferedDc.setPenWidth(_radius);
+      bufferedDc.setAntiAlias(true);
 
       var anglePerChar = 360 / 8;
       var originalStartAngle = 90 + Math.ceil(anglePerChar / 2);
       var startAngle = originalStartAngle;
+
+      var centerX = _radius;
+      var centerY = _radius + _fontHeight;
+
       // Draw cake slices
       for (var i = 0; i < 8; i++) {
         var currChar = _validExpositions[i];
@@ -62,14 +89,14 @@ module AvalancheUi {
         var endAngle = (startAngle - anglePerChar) % 360;
 
         if (currChar == '0') {
-          dc.setColor(_nonDangerFillColor, _nonDangerFillColor);
+          bufferedDc.setColor(_nonDangerFillColor, _nonDangerFillColor);
         } else {
-          dc.setColor(_dangerFillColor, _dangerFillColor);
+          bufferedDc.setColor(_dangerFillColor, _dangerFillColor);
         }
 
-        dc.drawArc(
-          _locX,
-          _locY,
+        bufferedDc.drawArc(
+          centerX,
+          centerY,
           _radius / 2,
           Gfx.ARC_CLOCKWISE,
           startAngle,
@@ -81,31 +108,19 @@ module AvalancheUi {
 
       var lineColor = Gfx.COLOR_BLACK;
 
-      dc.setPenWidth(1);
-      dc.setColor(lineColor, lineColor);
+      bufferedDc.setPenWidth(1);
+      bufferedDc.setColor(lineColor, lineColor);
 
       // draw lines
       startAngle = originalStartAngle;
       for (var i = 0; i < 4; i++) {
         var endAngle = (startAngle + 180) % 360;
-        var start = calcCirclePoint(_locX, _locY, _radius, startAngle);
-        var end = calcCirclePoint(_locX, _locY, _radius, endAngle);
+        var start = calcCirclePoint(centerX, centerY, _radius, startAngle);
+        var end = calcCirclePoint(centerX, centerY, _radius, endAngle);
 
-        dc.drawLine(start[0], start[1], end[0], end[1]);
+        bufferedDc.drawLine(start[0], start[1], end[0], end[1]);
         startAngle = (startAngle + 45) % 360;
       }
-
-      var font = WatchUi.loadResource($.Rez.Fonts.roboto);
-      var fontHeight = Gfx.getFontHeight(font);
-
-      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
-      dc.drawText(
-        _locX,
-        _locY - _radius - fontHeight / 2,
-        font,
-        "N",
-        Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
-      );
     }
   }
 

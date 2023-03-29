@@ -28,7 +28,6 @@ class DetailedForecastView extends Ui.View {
 
   private var _width as Numeric?;
   private var _height as Numeric?;
-  private var _deviceScreenWidth as Numeric;
 
   private var _todayText as Ui.Resource?;
   private var _yesterdayText as Ui.Resource?;
@@ -48,6 +47,7 @@ class DetailedForecastView extends Ui.View {
   private var _dangerLevelBitmap as Gfx.BufferedBitmap?;
   private var _dangerLevelBitmapWidth as Numeric?;
 
+  private var _header as DetailedForecastHeader?;
   private var _footer as DetailedForecastFooter?;
 
   private var _updateTimer as Timer.Timer?;
@@ -65,7 +65,6 @@ class DetailedForecastView extends Ui.View {
     );
 
     _pageIndicator = new AvalancheUi.PageIndicator(settings[:numWarnings]);
-    _deviceScreenWidth = $.getDeviceScreenWidth();
   }
 
   public function onLayout(dc as Gfx.Dc) {
@@ -126,19 +125,11 @@ class DetailedForecastView extends Ui.View {
     dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
     dc.clear();
 
-    var titleAreaY0 = 0;
-    var titleAreaHeight = _height * 0.18; // 15% of screen
+    var headerY0 = 0;
+    var headerHeight = _height * 0.18; // 15% of screen
+    drawHeader(dc, headerY0, headerHeight);
 
-    var startValidity = (_warning["validity"] as Array)[0];
-    var validityDate = $.parseDate(startValidity);
-    drawValidityDate(
-      dc,
-      titleAreaY0,
-      titleAreaHeight,
-      getDateText(validityDate)
-    );
-
-    var dangerLevelY0 = titleAreaY0 + titleAreaHeight;
+    var dangerLevelY0 = headerY0 + headerHeight;
     var dangerLevelHeight = _height * 0.17; // 20% of screen
 
     drawDangerLevel(dc, dangerLevelY0, dangerLevelHeight);
@@ -174,33 +165,22 @@ class DetailedForecastView extends Ui.View {
     }
   }
 
-  private function drawValidityDate(
-    dc as Gfx.Dc,
-    y0 as Numeric,
-    height as Numeric,
-    text as String
-  ) {
-    dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+  public function drawHeader(dc as Gfx.Dc, y0 as Numeric, height as Numeric) {
+    if (_header == null) {
+      var startValidity = (_warning["validity"] as Array)[0];
+      var validityDate = $.parseDate(startValidity);
 
-    var font = Gfx.FONT_XTINY;
-    var fontHeight = Gfx.getFontHeight(font);
-
-    if ($.DrawOutlines) {
-      $.drawOutline(dc, 0, y0, _width, height);
+      _header = new DetailedForecastHeader({
+        :regionName => $.getRegionName(_regionId),
+        :validityDate => getDateText(validityDate),
+        :locY => y0,
+        :locX => 0,
+        :width => _width,
+        :height => height,
+      });
     }
 
-    var textY0 = y0 + height / 2;
-    var width = $.getScreenWidthAtPoint(_deviceScreenWidth, textY0);
-
-    var fitText = Gfx.fitTextToArea(text, font, width, fontHeight, true);
-
-    dc.drawText(
-      _width / 2,
-      textY0,
-      Gfx.FONT_XTINY,
-      fitText,
-      Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
-    );
+    _header.draw(dc);
   }
 
   private function drawDangerLevel(
@@ -276,7 +256,6 @@ class DetailedForecastView extends Ui.View {
   public function drawFooter(dc as Gfx.Dc, y0 as Numeric, height as Numeric) {
     if (_footer == null) {
       _footer = new DetailedForecastFooter({
-        :regionName => $.getRegionName(_regionId),
         :fetchedTime => _fetchedTime,
         :locY => y0,
         :locX => 0,

@@ -10,8 +10,6 @@ module AvalancheUi {
     :exposedHeightFill as Number,
     :dangerFillColor as Gfx.ColorType,
     :nonDangerFillColor as Gfx.ColorType,
-    :locX as Numeric,
-    :locY as Numeric,
     :size as Numeric,
   };
 
@@ -173,41 +171,58 @@ module AvalancheUi {
     ];
 
     private var _exposedHeightFill as Number;
-    private var _locX as Numeric;
-    private var _locY as Numeric;
     private var _size as Numeric;
 
     private var _dangerFillColor as Gfx.ColorType;
     private var _nonDangerFillColor as Gfx.ColorType;
 
+    private var _bufferedBitmap as Gfx.BufferedBitmap?;
+
     public function initialize(settings as ExposedHeightSettings) {
       _exposedHeightFill = settings[:exposedHeightFill];
-      _locX = settings[:locX];
-      _locY = settings[:locY];
       _size = settings[:size];
       _dangerFillColor = settings[:dangerFillColor];
       _nonDangerFillColor = settings[:nonDangerFillColor];
     }
 
-    public function draw(dc as Gfx.Dc) {
-      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
-      dc.setPenWidth(1);
-      dc.setAntiAlias(true);
+    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
+      if (_bufferedBitmap == null) {
+        createBufferedBitmap();
+      }
+
+      dc.drawBitmap(x0, y0, _bufferedBitmap);
+    }
+
+    private function createBufferedBitmap() {
+      _bufferedBitmap = $.newBufferedBitmap({
+        :width => _size,
+        :height => _size,
+      });
+
+      var bufferedDc = _bufferedBitmap.getDc();
+
+      if ($.DrawOutlines) {
+        $.drawOutline(bufferedDc, 0, 0, _size, _size);
+      }
+
+      bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
+      bufferedDc.setPenWidth(1);
+      bufferedDc.setAntiAlias(true);
 
       if (_exposedHeightFill == 1) {
-        drawPoly(dc, _topHalfPoints, _dangerFillColor);
-        drawPoly(dc, _bottomHalfPoints, _nonDangerFillColor);
+        drawPoly(bufferedDc, _topHalfPoints, _dangerFillColor);
+        drawPoly(bufferedDc, _bottomHalfPoints, _nonDangerFillColor);
       } else if (_exposedHeightFill == 2) {
-        drawPoly(dc, _topHalfPoints, _nonDangerFillColor);
-        drawPoly(dc, _bottomHalfPoints, _dangerFillColor);
+        drawPoly(bufferedDc, _topHalfPoints, _nonDangerFillColor);
+        drawPoly(bufferedDc, _bottomHalfPoints, _dangerFillColor);
       } else if (_exposedHeightFill == 3) {
-        drawPoly(dc, _topTripletPoints, _dangerFillColor);
-        drawPoly(dc, _midTripletPoints, _nonDangerFillColor);
-        drawPoly(dc, _bottomTripletPoints, _dangerFillColor);
+        drawPoly(bufferedDc, _topTripletPoints, _dangerFillColor);
+        drawPoly(bufferedDc, _midTripletPoints, _nonDangerFillColor);
+        drawPoly(bufferedDc, _bottomTripletPoints, _dangerFillColor);
       } else if (_exposedHeightFill == 4) {
-        drawPoly(dc, _topTripletPoints, _nonDangerFillColor);
-        drawPoly(dc, _midTripletPoints, _dangerFillColor);
-        drawPoly(dc, _bottomTripletPoints, _nonDangerFillColor);
+        drawPoly(bufferedDc, _topTripletPoints, _nonDangerFillColor);
+        drawPoly(bufferedDc, _midTripletPoints, _dangerFillColor);
+        drawPoly(bufferedDc, _bottomTripletPoints, _nonDangerFillColor);
       }
     }
 
@@ -238,7 +253,7 @@ module AvalancheUi {
     private function calcPoint(x as Numeric, y as Numeric) as Array<Numeric> {
       var scalingFactor = _size / 42.0;
 
-      return [_locX + x * scalingFactor, _locY + y * scalingFactor];
+      return [x * scalingFactor, y * scalingFactor];
     }
   }
 }

@@ -13,4 +13,5 @@ public class AvalancheProblem
     public required string TypeName { get; init; }
     public required int[] ExposedHeights { get; init; }
     public required string ValidExpositions { get; init; }
+    public required int DangerLevel { get; init; }
 }

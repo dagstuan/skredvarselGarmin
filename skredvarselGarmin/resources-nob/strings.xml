@@ -25,6 +25,7 @@
 	<string id="Norwegian">Norsk</string>
 	<string id="English">Engelsk</string>
 	<string id="Updated">Oppdatert</string>
+	<string id="ShortUpdated">Oppd.</string>
 	<string id="ComplicationName">Skredfare</string>
 	<string id="ComplicationLongLabel">Skredfare</string>
 	<string id="ComplicationShortLabel">Ava</string>

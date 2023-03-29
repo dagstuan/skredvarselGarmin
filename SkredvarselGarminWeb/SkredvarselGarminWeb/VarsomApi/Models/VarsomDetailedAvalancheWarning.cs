@@ -17,4 +17,5 @@ public class VarsomAvalancheProblem
     public required int ExposedHeight2 { get; init; }
     public required int ExposedHeightFill { get; init; }
     public required string ValidExpositions { get; init; }
+    public required int DangerLevel { get; init; }
 }

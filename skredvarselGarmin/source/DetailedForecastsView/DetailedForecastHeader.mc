@@ -4,16 +4,19 @@ using Toybox.Graphics as Gfx;
 using Toybox.WatchUi as Ui;
 using Toybox.Time;
 
-typedef DetailedForecastFooterSettings as {
-  :fetchedTime as Time.Moment,
+typedef DetailedForecastHeaderSettings as {
+  :regionName as String,
+  :validityDate as String,
   :locX as Numeric,
   :locY as Numeric,
   :width as Numeric,
   :height as Numeric,
 };
 
-public class DetailedForecastFooter {
-  private var _formattedFetchedTime as String;
+public class DetailedForecastHeader {
+  private var _regionName as String;
+  private var _validityDate as String;
+
   private var _locX as Numeric;
   private var _locY as Numeric;
   private var _width as Numeric;
@@ -26,34 +29,27 @@ public class DetailedForecastFooter {
   private var _bufferedBitmapWidth as Numeric?;
   private var _bufferedBitmapHeight as Numeric?;
 
-  public function initialize(settings as DetailedForecastFooterSettings) {
-    _formattedFetchedTime = $.getFormattedTimestamp(settings[:fetchedTime]);
+  private var _deviceScreenWidth as Numeric;
 
+  public function initialize(settings as DetailedForecastFooterSettings) {
+    _regionName = settings[:regionName];
+    _validityDate = settings[:validityDate];
     _locX = settings[:locX];
     _locY = settings[:locY];
     _width = settings[:width];
     _height = settings[:height];
 
     _fontHeight = Gfx.getFontHeight(_font);
+
+    _deviceScreenWidth = $.getDeviceScreenWidth();
   }
 
   public function draw(dc as Gfx.Dc) {
     if (_bufferedBitmapText == null) {
-      var updatedString = $.getOrLoadResourceString("Oppdatert", :Updated);
-      var updatedShortString = $.getOrLoadResourceString(
-        "Oppd.",
-        :ShortUpdated
-      );
+      var text = _validityDate;
 
-      var text = updatedString + " " + _formattedFetchedTime;
-
-      var screenWidthAtPoint = $.getScreenWidthAtPoint(
-        $.getDeviceScreenWidth(),
-        _locY + _height / 2
-      );
-      var textWidth = dc.getTextWidthInPixels(text, _font);
-      if (textWidth > screenWidthAtPoint) {
-        text = updatedShortString + " " + _formattedFetchedTime;
+      if (_deviceScreenWidth > 240) {
+        text += "\n" + _regionName;
       }
 
       var textDimensions = dc.getTextDimensions(text, _font);
@@ -78,8 +74,9 @@ public class DetailedForecastFooter {
     }
 
     var textX0 = _locX + _width / 2 - _bufferedBitmapWidth / 2;
-    var textY0 = _locY + _height / 2 - _fontHeight / 2;
+    var textYOffset =
+      _deviceScreenWidth > 240 ? 0 : _height / 2 - _fontHeight / 2;
 
-    dc.drawBitmap(textX0, textY0, _bufferedBitmapText);
+    dc.drawBitmap(textX0, _locY + textYOffset, _bufferedBitmapText);
   }
 }

@@ -61,7 +61,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapVippsEndpoints();
-app.MapVarsomApiEndpoints();
+app.MapVarsomApiEndpoints(authOptions!);
 app.MapSubscriptionEndpoints();
 app.MapWatchApiEndpoints();
 

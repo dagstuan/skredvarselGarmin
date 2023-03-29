@@ -1,15 +1,16 @@
 using Microsoft.Extensions.Caching.Memory;
 using SkredvarselGarminWeb.Endpoints.Mappers;
 using SkredvarselGarminWeb.Endpoints.Models;
+using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.VarsomApi;
 
 namespace SkredvarselGarminWeb.Endpoints;
 
 public static class VarsomApiRouteBuilderExtensions
 {
-    public static void MapVarsomApiEndpoints(this IEndpointRouteBuilder app)
+    public static void MapVarsomApiEndpoints(this IEndpointRouteBuilder app, AuthOptions authOptions)
     {
-        app.MapGet("/api/simpleWarningsByRegion/{regionId}/{langKey}/{from}/{to}", async (
+        var simpleGet = app.MapGet("/api/simpleWarningsByRegion/{regionId}/{langKey}/{from}/{to}", async (
             string regionId,
             string langKey,
             DateOnly from,
@@ -33,9 +34,9 @@ public static class VarsomApiRouteBuilderExtensions
                     }
                 });
             });
-        }).RequireAuthorization("Garmin");
+        });
 
-        app.MapGet("/api/detailedWarningsByRegion/{regionId}/{langKey}/{from}/{to}", async (
+        var detailedGet = app.MapGet("/api/detailedWarningsByRegion/{regionId}/{langKey}/{from}/{to}", async (
             string regionId,
             string langKey,
             DateOnly from,
@@ -53,6 +54,12 @@ public static class VarsomApiRouteBuilderExtensions
 
                 return warnings.Select(w => w.ToDetailedAvalancheWarning());
             });
-        }).RequireAuthorization("Garmin");
+        });
+
+        if (authOptions.UseWatchAuthorization)
+        {
+            simpleGet.RequireAuthorization("Garmin");
+            detailedGet.RequireAuthorization("Garmin");
+        }
     }
 }

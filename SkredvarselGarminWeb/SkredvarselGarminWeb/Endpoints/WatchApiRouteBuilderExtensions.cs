@@ -1,5 +1,4 @@
 using System.Net;
-using Microsoft.Extensions.Caching.Memory;
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Endpoints.Mappers;
 using SkredvarselGarminWeb.Endpoints.Models;
