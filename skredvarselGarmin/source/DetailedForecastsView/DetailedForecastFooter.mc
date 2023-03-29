@@ -13,7 +13,7 @@ typedef DetailedForecastFooterSettings as {
 };
 
 public class DetailedForecastFooter {
-  private var _fetchedTime as Time.Moment;
+  private var _formattedFetchedTime as String;
   private var _locX as Numeric;
   private var _locY as Numeric;
   private var _width as Numeric;
@@ -26,35 +26,34 @@ public class DetailedForecastFooter {
   private var _bufferedBitmapWidth as Numeric?;
   private var _bufferedBitmapHeight as Numeric?;
 
-  private var _deviceScreenWidth as Numeric;
-
   public function initialize(settings as DetailedForecastFooterSettings) {
-    _fetchedTime = settings[:fetchedTime];
+    _formattedFetchedTime = $.getFormattedTimestamp(settings[:fetchedTime]);
+
     _locX = settings[:locX];
     _locY = settings[:locY];
     _width = settings[:width];
     _height = settings[:height];
 
     _fontHeight = Gfx.getFontHeight(_font);
-    _deviceScreenWidth = $.getDeviceScreenWidth();
   }
 
   public function draw(dc as Gfx.Dc) {
     if (_bufferedBitmapText == null) {
       var updatedString = $.getOrLoadResourceString("Oppdatert", :Updated);
-      var text = updatedString + " " + $.getFormattedTimestamp(_fetchedTime);
+      var updatedShortString = $.getOrLoadResourceString(
+        "Oppd.",
+        :ShortUpdated
+      );
+
+      var text = updatedString + " " + _formattedFetchedTime;
 
       var screenWidthAtPoint = $.getScreenWidthAtPoint(
-        _deviceScreenWidth,
+        $.getDeviceScreenWidth(),
         _locY + _height / 2
       );
       var textWidth = dc.getTextWidthInPixels(text, _font);
       if (textWidth > screenWidthAtPoint) {
-        var shortUpdatedString = $.getOrLoadResourceString(
-          "Oppd.",
-          :ShortUpdated
-        );
-        text = shortUpdatedString + " " + $.getFormattedTimestamp(_fetchedTime);
+        text = updatedShortString + " " + _formattedFetchedTime;
       }
 
       var textDimensions = dc.getTextDimensions(text, _font);
