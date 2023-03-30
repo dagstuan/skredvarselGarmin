@@ -40,7 +40,6 @@ function getSimpleWarningsPathForRegion(
   );
 }
 
-(:background)
 public function loadSimpleForecastForRegion(
   regionId as String?,
   callback as WebRequestDelegateCallback,

@@ -13,7 +13,6 @@ const DrawOutlines = false;
 (:glance)
 const TIME_TO_SHOW_LOADING = Gregorian.SECONDS_PER_DAY;
 
-(:background)
 const TIME_TO_CONSIDER_DATA_STALE = Gregorian.SECONDS_PER_HOUR * 0.5;
 
 function getSortedRegionIds() as Array<String> {

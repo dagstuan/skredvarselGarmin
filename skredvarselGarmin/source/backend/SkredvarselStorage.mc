@@ -59,7 +59,23 @@ function resetStorageCacheIfRequired() {
 
     var hasSubscription = $.getHasSubscription();
     var selectedRegionIds = $.getSelectedRegionIds();
-    Storage.clearValues();
+    try {
+      Storage.clearValues();
+    } catch (ex instanceof Toybox.Application.ObjectStoreAccessException) {
+      if ($.Debug) {
+        $.logMessage(
+          "Failed to reset storage cache due to object store access exception."
+        );
+        ex.printStackTrace();
+      }
+      throw new Exception();
+    } catch (ex) {
+      if ($.Debug) {
+        $.logMessage("Failed to reset storage cache for some reason.");
+        ex.printStackTrace();
+      }
+      throw new Exception();
+    }
     setSelectedRegionIdsInStorage(selectedRegionIds);
     $.setHasSubscription(hasSubscription);
     Storage.setValue("storageVersion", STORAGE_VERSION);
