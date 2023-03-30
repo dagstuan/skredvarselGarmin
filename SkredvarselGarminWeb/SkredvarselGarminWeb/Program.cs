@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHealthChecks();
+
 builder.Services.AddProblemDetails();
 builder.Services.AddMemoryCache();
 
@@ -59,6 +61,8 @@ app.UseStaticFiles();
 app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHealthChecks("/healthz");
 
 app.MapVippsEndpoints();
 app.MapVarsomApiEndpoints(authOptions!);
