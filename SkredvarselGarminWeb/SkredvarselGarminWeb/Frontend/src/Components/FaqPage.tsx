@@ -11,7 +11,14 @@ import {
   ListItem,
   OrderedList,
   useBreakpointValue,
+  Text,
+  UnorderedList,
+  Wrap,
+  WrapItem,
+  Image,
 } from "@chakra-ui/react";
+
+import problemsHelpImage from "../assets/problems_help.png";
 
 export const FaqPage = () => {
   return (
@@ -23,7 +30,7 @@ export const FaqPage = () => {
       py={10}
       px={useBreakpointValue({ base: 4, sm: 10 })}
     >
-      <Heading as="h2" size="2xl" mb={4}>
+      <Heading as="h1" size="2xl" mb={4}>
         Ofte stilte spørsmål
       </Heading>
 
@@ -80,6 +87,46 @@ export const FaqPage = () => {
           <h2>
             <AccordionButton>
               <Box as="span" flex="1" textAlign="left">
+                Hva betyr symbolene i detaljvisningen?
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={4}>
+            <Flex
+              gap={4}
+              flexDir={useBreakpointValue({ base: "column", sm: "row" })}
+            >
+              <Box flexBasis={useBreakpointValue({ base: "50%", sm: "40%" })}>
+                <Image src={problemsHelpImage} />
+              </Box>
+              <Box flexBasis={useBreakpointValue({ base: "50%" })}>
+                <Text mb={2}>Rødt markerer området som er mest utsatt.</Text>
+                <OrderedList mb={2}>
+                  <ListItem>
+                    Himmelretninger som er mest utsatt for skredproblemet.
+                  </ListItem>
+                  <ListItem>Hvor i fjellet skredproblemet er.</ListItem>
+                  <ListItem>
+                    Høyder over havet hvor skredproblemet finnes.
+                  </ListItem>
+                  <ListItem>Varslet faregrad for skredproblemet.</ListItem>
+                </OrderedList>
+                <Text>
+                  NB! Det vil alltid være lokale variasjoner, og de røde
+                  områdene angir mest utsatte steder. Det vil si at
+                  skredproblemet også kan være tilstede i andre områder, men det
+                  er forventa at det er i mindre omfang her.
+                </Text>
+              </Box>
+            </Flex>
+          </AccordionPanel>
+        </AccordionItem>
+
+        <AccordionItem>
+          <h2>
+            <AccordionButton>
+              <Box as="span" flex="1" textAlign="left">
                 Kan jeg betale med noe annet enn Vipps?
               </Box>
               <AccordionIcon />
@@ -103,16 +150,34 @@ export const FaqPage = () => {
             </AccordionButton>
           </h2>
           <AccordionPanel pb={4}>
-            Appen virker på de fleste nyere Garmin-klokker som har fargeskjerm.
-            En fullstendig oversikt kan sees på{" "}
-            <Link
-              href="https://apps.garmin.com/en-US/apps/35174bf3-b1da-4391-9426-70bcb210c292"
-              target="_blank"
-              color="blue.600"
-            >
-              Connect IQ Store
-            </Link>
-            .
+            <Text mb={4}>
+              Appen virker på de fleste nyere Garmin-klokker som har
+              fargeskjerm. En fullstendig oversikt kan sees på{" "}
+              <Link
+                href="https://apps.garmin.com/en-US/apps/35174bf3-b1da-4391-9426-70bcb210c292"
+                target="_blank"
+                color="blue.600"
+              >
+                Connect IQ Store
+              </Link>
+              . Hvis du har en klokke med støtte for musikk er det større
+              sannsynlighet for at appen virker, siden de klokkene har mer
+              minne.
+            </Text>
+            <Text mb={4}>
+              Klokker hvor appen ikke virker på grunn av manglende minne:
+            </Text>
+            <UnorderedList>
+              <ListItem>Fenix 3</ListItem>
+              <ListItem>Fenix 5</ListItem>
+              <ListItem>Fenix 5S</ListItem>
+              <ListItem>Fenix 5X</ListItem>
+              <ListItem>Fenix 6 (non-pro)</ListItem>
+              <ListItem>Forerunner 635</ListItem>
+              <ListItem>Forerunner 935</ListItem>
+              <ListItem>Forerunner 235 (non-music)</ListItem>
+              <ListItem>Vivoactive 3</ListItem>
+            </UnorderedList>
           </AccordionPanel>
         </AccordionItem>
 
@@ -194,6 +259,58 @@ export const FaqPage = () => {
             tillegg hentes de på nytt når du åpner appen dersom de er gamle.
             Hvis varslene er eldre enn 24 timer gamle vil de ikke lenger vises
             frem.
+          </AccordionPanel>
+        </AccordionItem>
+
+        <AccordionItem>
+          <h2>
+            <AccordionButton>
+              <Box as="span" flex="1" textAlign="left">
+                Hvordan kommuniserer klokka med internett?
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={4}>
+            Klokka er avhengig av tilkobling til mobiltelefon med Bluetooth for
+            å få hentet varsler fra internett, siden nesten ingen Garmin-klokker
+            har direkte tilgang til internett selv. Hvis klokken din har
+            utdaterte varsler eller slutter å vise varsler kan det være fordi
+            klokka mangler tilkobling til mobil.
+          </AccordionPanel>
+        </AccordionItem>
+
+        <AccordionItem>
+          <h2>
+            <AccordionButton>
+              <Box as="span" flex="1" textAlign="left">
+                Kan klokka forstyrre skredsøkeren (sender/mottaker)?
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={4}>
+            Akkurat som at en mobiltelefon kan forstyrre en skredsøker, er det
+            også en viss mulighet for at en smartklokke kan forårsake
+            forstyrrelser. Derfor anbefales det å slå av kommunikasjon med
+            mobiltelefonen mens man går tur. En{" "}
+            <Link
+              href="https://arc.lib.montana.edu/snow-science/objects/ISSW14_paper_P4.13.pdf"
+              color="blue.600"
+              target="_blank"
+            >
+              forskningsartikkel
+            </Link>{" "}
+            fra 2014 publiserte en anbefaling om at man har klokka på motsatt
+            hånd av den hånda man bruker en en skredsøker i søk-modus.
+            <br />
+            <br />
+            For å slå av kommunikasjon med mobiltelefon underveis på turen kan
+            man på de fleste Garmin-klokker konfigurere "Power mode" underveis i
+            en aktivitet. Da kan man velge at "Power mode" for aktiviteten du
+            bruker under topptur slår av kommunikasjon med mobil. Se
+            instruksjonsboka for klokken din for å finne ut hvordan du gjør det
+            på din klokke.
           </AccordionPanel>
         </AccordionItem>
 

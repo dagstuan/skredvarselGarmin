@@ -39,8 +39,9 @@ export const FrontPage = () => {
               lineHeight={1.2}
               fontSize={useBreakpointValue({ base: "3xl", md: "4xl" })}
             >
-              Skredvarsel for Garmin-klokker. Oppdatert og tilgjengelig mens du
-              er på tur.
+              Skredvarsel for Garmin-klokker.
+              <br />
+              Oppdatert og tilgjengelig mens du er på tur.
             </Text>
             <Stack direction={"row"} align={"center"} justify={"center"}>
               <Text color={"white"} fontSize={"3xl"} fontWeight={800}>
