@@ -1,24 +1,27 @@
-# fly.toml file generated for skredvarsel-garmin-web on 2023-02-18T13:06:36+01:00
+# fly.toml file generated for skredvarsel-garmin-web-prod on 2023-03-30T00:30:26+02:00
 
-app = "skredvarsel-garmin-web"
+app = "skredvarsel-garmin-web-prod"
 kill_signal = "SIGINT"
 kill_timeout = 5
+primary_region = "arn"
 processes = []
 
 [build]
   dockerfile = "Dockerfile"
 
-[mounts]
-  source="skredvarselGarmin_data"
-  destination="/data"
-
 [env]
+
+[deploy]
+  strategy = "rolling"
 
 [experimental]
   auto_rollback = true
 
+[mounts]
+  destination = "/data"
+  source = "skredvarselGarmin_data"
+
 [[services]]
-  http_checks = []
   internal_port = 8080
   processes = ["app"]
   protocol = "tcp"
@@ -37,8 +40,17 @@ processes = []
     handlers = ["tls", "http"]
     port = 443
 
+  [[services.http_checks]]
+    interval = 5000
+    grace_period = "10s"
+    method = "get"
+    path = "/healthz"
+    protocol = "http"
+    restart_limit = 0
+    timeout = 2000
+
   [[services.tcp_checks]]
-    grace_period = "1s"
+    grace_period = "10s"
     interval = "15s"
     restart_limit = 0
     timeout = "2s"
