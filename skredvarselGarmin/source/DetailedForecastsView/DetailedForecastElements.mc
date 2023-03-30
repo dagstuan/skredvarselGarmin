@@ -60,8 +60,8 @@ public class DetailedForecastElements {
     var forecastLanguage = $.getForecastLanguage();
     _seeFullForecastText =
       forecastLanguage == 1
-        ? "Se komplett varsel på www.varsom.no"
-        : "See complete forecast at www.varsom.no";
+        ? "Se komplett varsel på varsom.no"
+        : "See complete forecast at varsom.no";
 
     _elements = new [_numElements];
   }
