@@ -250,6 +250,23 @@ function removeStringFromArray(curArray as Array<String>, value as String) {
   return curArray;
 }
 
+public function minValue(arr as Array<Number>) {
+  if (arr == null || arr.size() == 0) {
+    throw new SkredvarselGarminException(
+      "Null or empty array sent to minValue"
+    );
+  }
+
+  var min = 2147483647;
+  for (var i = 0; i < arr.size(); i++) {
+    var val = arr[i];
+    if (val < min) {
+      min = val;
+    }
+  }
+  return min;
+}
+
 (:background)
 public function logMessage(message as String) {
   var info = Gregorian.utcInfo(Time.now(), Time.FORMAT_MEDIUM);

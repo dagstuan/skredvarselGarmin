@@ -29,7 +29,7 @@ public class ForecastMenuEditMenuItem extends Ui.CustomMenuItem {
 
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
-    var font = Graphics.FONT_MEDIUM;
+    var font = Graphics.FONT_SMALL;
 
     dc.drawText(
       paddingLeft + contentWidth / 2,
