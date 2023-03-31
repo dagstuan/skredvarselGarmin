@@ -21,7 +21,7 @@ class DetailedForecastView extends Ui.View {
   private const TICK_DURATION = 100;
 
   private var _warning as DetailedAvalancheWarning?;
-  private var _fetchedTime as Time.Moment;
+  private var _fetchedTime as Time.Moment?;
 
   private var _regionId as String;
   private var _index as Number;
@@ -57,12 +57,8 @@ class DetailedForecastView extends Ui.View {
 
     _regionId = settings[:regionId];
     _index = settings[:index];
-    _warning = settings[:warning];
-    _fetchedTime = settings[:fetchedTime];
-    _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
-    _forecastElementsIndicator = new AvalancheUi.ForecastElementsIndicator(
-      _numElements
-    );
+
+    setWarning(settings[:warning], settings[:fetchedTime]);
 
     _pageIndicator = new AvalancheUi.PageIndicator(settings[:numWarnings]);
   }
@@ -297,6 +293,17 @@ class DetailedForecastView extends Ui.View {
   ) {
     _warning = warning;
     _fetchedTime = fetchedTime;
+
+    _header = null;
+    _dangerLevelBitmap = null;
+    _dangerLevelBitmapWidth = null;
+    _elements = null;
     _footer = null;
+
+    _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
+    _forecastElementsIndicator = new AvalancheUi.ForecastElementsIndicator(
+      _numElements
+    );
+    _currentElement = 0;
   }
 }
