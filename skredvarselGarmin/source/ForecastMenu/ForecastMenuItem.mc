@@ -9,6 +9,7 @@ using Toybox.Time.Gregorian;
 using AvalancheUi;
 
 public class ForecastMenuItem extends Ui.CustomMenuItem {
+  private var _menu as ForecastMenu;
   private var _regionId as String;
   private var _forecast as SimpleAvalancheForecast?;
   private var _dataAge as Number?;
@@ -25,9 +26,10 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   private var _marginLeft as Numeric?;
   private var _marginRight as Numeric?;
 
-  public function initialize(regionId as String) {
+  public function initialize(menu as ForecastMenu, regionId as String) {
     CustomMenuItem.initialize(regionId, {});
 
+    _menu = menu;
     _regionId = regionId;
     _screenWidth = $.getDeviceScreenWidth();
     _loadingText = $.getOrLoadResourceString("Laster...", :Loading);
@@ -116,7 +118,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   ) as Void {
     if (responseCode == 200) {
       getForecastFromCache();
-      Ui.requestUpdate();
+      _menu.redrawTitleAndFooter();
     }
   }
 

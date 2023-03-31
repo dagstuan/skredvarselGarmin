@@ -7,9 +7,12 @@ using Toybox.Math;
 public class ForecastMenu extends Ui.CustomMenu {
   private const _editItemId = "edit";
 
+  private const _marginLeftRightPercent = 0.13;
+
   private var _existingRegionIds as Array<String> = new [0];
 
-  private var _icon as Ui.Resource?;
+  private var _titleBitmap as Gfx.BufferedBitmap?;
+  private var _footerBitmap as Gfx.BufferedBitmap?;
 
   public function initialize() {
     var screenHeight = $.getDeviceScreenHeight();
@@ -27,8 +30,10 @@ public class ForecastMenu extends Ui.CustomMenu {
     var numRegions = regionIds.size();
 
     if (numRegions == 0) {
+      _existingRegionIds = regionIds;
       deleteAllItems();
       addItem(new ForecastMenuEditMenuItem(_editItemId));
+      redrawTitleAndFooter();
       return;
     }
 
@@ -47,52 +52,116 @@ public class ForecastMenu extends Ui.CustomMenu {
       deleteAllItems();
       for (var i = 0; i < regionIds.size(); i++) {
         var regionId = regionIds[i];
-        addItem(new ForecastMenuItem(regionId));
+        addItem(new ForecastMenuItem(self, regionId));
       }
 
       addItem(new ForecastMenuEditMenuItem(_editItemId));
-
       setFocus(0);
-
-      _existingRegionIds = regionIds;
+      redrawTitleAndFooter();
     }
+
+    _existingRegionIds = regionIds;
   }
 
   function drawTitle(dc as Gfx.Dc) {
-    var width = dc.getWidth();
-    var height = dc.getHeight();
+    if (_titleBitmap == null) {
+      var width = dc.getWidth();
+      var height = dc.getHeight();
 
-    dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
-    dc.clear();
+      _titleBitmap = $.newBufferedBitmap({
+        :width => width,
+        :height => height,
+      });
+      var bufferedDc = _titleBitmap.getDc();
 
-    if (_icon == null) {
+      bufferedDc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+      bufferedDc.clear();
+
       var iconResource = getIconResourceToDraw();
-      _icon = Ui.loadResource(iconResource);
+      var icon = Ui.loadResource(iconResource);
+
+      var iconX = width / 2 - $.halfWidthDangerLevelIcon;
+      bufferedDc.drawBitmap(iconX, 10, icon);
+
+      var text = $.getOrLoadResourceString("Skredvarsel", :AppName);
+      bufferedDc.drawText(
+        width / 2,
+        height / 2 + 15,
+        Graphics.FONT_XTINY,
+        text,
+        Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
+      );
+
+      bufferedDc.setPenWidth(1);
+      bufferedDc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
+
+      var offsetFromBottom = 15;
+      var marginLeftRight = width * _marginLeftRightPercent;
+
+      bufferedDc.drawLine(
+        marginLeftRight,
+        height - offsetFromBottom,
+        width - marginLeftRight,
+        height - offsetFromBottom
+      );
     }
 
-    var iconX = width / 2 - $.halfWidthDangerLevelIcon;
-    dc.drawBitmap(iconX, 10, _icon);
+    dc.drawBitmap(0, 0, _titleBitmap);
+  }
 
-    var text = $.getOrLoadResourceString("Skredvarsel", :AppName);
-    dc.drawText(
-      width / 2,
-      height / 2 + 15,
-      Graphics.FONT_XTINY,
-      text,
-      Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
-    );
+  public function drawFooter(dc as Gfx.Dc) {
+    if (_footerBitmap == null && _existingRegionIds.size() > 0) {
+      var lastUpdatedTime = getLastUpdatedTime();
 
-    dc.setPenWidth(1);
+      if (lastUpdatedTime != null) {
+        var width = dc.getWidth();
+        var height = dc.getHeight();
 
-    var offsetFromBottom = 15;
-    var marginLeftRight = 35;
+        _footerBitmap = $.newBufferedBitmap({
+          :width => width,
+          :height => height,
+        });
+        var bufferedDc = _footerBitmap.getDc();
 
-    dc.drawLine(
-      marginLeftRight,
-      height - offsetFromBottom,
-      width - marginLeftRight,
-      height - offsetFromBottom
-    );
+        bufferedDc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
+        bufferedDc.setPenWidth(1);
+
+        var offsetFromTop = 15;
+        var marginLeftRight = width * _marginLeftRightPercent;
+
+        bufferedDc.drawLine(
+          marginLeftRight,
+          offsetFromTop,
+          width - marginLeftRight,
+          offsetFromTop
+        );
+
+        bufferedDc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+
+        var formattedTimestamp = $.getFormattedTimestamp(
+          new Time.Moment(lastUpdatedTime)
+        );
+
+        var updatedString = $.getOrLoadResourceString("Oppdatert", :Updated);
+
+        var textArea = new Ui.TextArea({
+          :text => updatedString + " " + formattedTimestamp,
+          :color => Gfx.COLOR_WHITE,
+          :font => [Gfx.FONT_XTINY],
+          :locX => Ui.LAYOUT_HALIGN_CENTER,
+          :locY => Ui.LAYOUT_VALIGN_CENTER,
+          :justification => Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
+          :width => width * 0.7,
+          :height => height,
+        });
+
+        textArea.draw(bufferedDc);
+      }
+    }
+
+    if (_footerBitmap != null) {
+      dc.drawBitmap(0, 0, _footerBitmap);
+    }
   }
 
   private function getIconResourceToDraw() as Symbol {
@@ -106,11 +175,29 @@ public class ForecastMenu extends Ui.CustomMenu {
 
         return $.getIconResourceForDangerLevel(dangerLevelToday);
       }
-
-      return $.Rez.Drawables.Level2;
     }
 
     return $.Rez.Drawables.Level2;
+  }
+
+  private function getLastUpdatedTime() as Number? {
+    if (_existingRegionIds == null || _existingRegionIds.size() == 0) {
+      return null;
+    }
+
+    var updatedTimes = new [0];
+    for (var i = 0; i < _existingRegionIds.size(); i++) {
+      var data = $.getSimpleForecastForRegion(_existingRegionIds[i]);
+      if (data != null) {
+        updatedTimes.add(data[1]);
+      }
+    }
+
+    if (updatedTimes.size() == 0) {
+      return null;
+    }
+
+    return minValue(updatedTimes);
   }
 
   function deleteAllItems() {
@@ -118,5 +205,12 @@ public class ForecastMenu extends Ui.CustomMenu {
     while (deleteResult != null) {
       deleteResult = deleteItem(0);
     }
+  }
+
+  public function redrawTitleAndFooter() {
+    _titleBitmap = null;
+    _footerBitmap = null;
+
+    Ui.requestUpdate();
   }
 }
