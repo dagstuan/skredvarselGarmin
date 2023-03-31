@@ -148,7 +148,7 @@ public class WidgetView extends Ui.View {
 
     var iconResource = getIconResourceToDraw();
     var icon = Ui.loadResource(iconResource);
-    var iconX = _width / 2 - $.halfWidthDangerLevelIcon;
+    var iconX = _width / 2 - $.getHalfWidthDangerLevelIcon();
     dc.drawBitmap(iconX, 10, icon);
 
     dc.drawText(

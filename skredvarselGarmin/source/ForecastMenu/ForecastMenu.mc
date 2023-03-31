@@ -12,14 +12,17 @@ public class ForecastMenu extends Ui.CustomMenu {
   private var _existingRegionIds as Array<String> = new [0];
 
   private var _titleBitmap as Gfx.BufferedBitmap?;
-  private var _footerBitmap as Gfx.BufferedBitmap?;
+  private var _footerTextBitmap as Gfx.BufferedBitmap?;
+
+  private var _font = Gfx.FONT_XTINY;
+  private var _fontHeight = Gfx.getFontHeight(_font);
+
+  private var _screenHeight = $.getDeviceScreenHeight();
 
   public function initialize() {
-    var screenHeight = $.getDeviceScreenHeight();
-
     var menuElementsHeight = 60;
-    if (screenHeight > 260) {
-      menuElementsHeight += ((screenHeight - 260) * 0.2).toNumber();
+    if (_screenHeight > 260) {
+      menuElementsHeight += ((_screenHeight - 260) * 0.2).toNumber();
     }
 
     CustomMenu.initialize(menuElementsHeight, Gfx.COLOR_BLACK, {});
@@ -80,14 +83,14 @@ public class ForecastMenu extends Ui.CustomMenu {
       var iconResource = getIconResourceToDraw();
       var icon = Ui.loadResource(iconResource);
 
-      var iconX = width / 2 - $.halfWidthDangerLevelIcon;
+      var iconX = width / 2 - $.getHalfWidthDangerLevelIcon();
       bufferedDc.drawBitmap(iconX, 10, icon);
 
       var text = $.getOrLoadResourceString("Skredvarsel", :AppName);
       bufferedDc.drawText(
         width / 2,
         height / 2 + 15,
-        Graphics.FONT_XTINY,
+        _font,
         text,
         Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
       );
@@ -110,31 +113,16 @@ public class ForecastMenu extends Ui.CustomMenu {
   }
 
   public function drawFooter(dc as Gfx.Dc) {
-    if (_footerBitmap == null && _existingRegionIds.size() > 0) {
+    var width = dc.getWidth();
+    if (_footerTextBitmap == null && _existingRegionIds.size() > 0) {
       var lastUpdatedTime = getLastUpdatedTime();
 
       if (lastUpdatedTime != null) {
-        var width = dc.getWidth();
-        var height = dc.getHeight();
-
-        _footerBitmap = $.newBufferedBitmap({
+        _footerTextBitmap = $.newBufferedBitmap({
           :width => width,
-          :height => height,
+          :height => _fontHeight,
         });
-        var bufferedDc = _footerBitmap.getDc();
-
-        bufferedDc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
-        bufferedDc.setPenWidth(1);
-
-        var offsetFromTop = 15;
-        var marginLeftRight = width * _marginLeftRightPercent;
-
-        bufferedDc.drawLine(
-          marginLeftRight,
-          offsetFromTop,
-          width - marginLeftRight,
-          offsetFromTop
-        );
+        var bufferedDc = _footerTextBitmap.getDc();
 
         bufferedDc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
 
@@ -143,24 +131,39 @@ public class ForecastMenu extends Ui.CustomMenu {
         );
 
         var updatedString = $.getOrLoadResourceString("Oppdatert", :Updated);
+        var text = updatedString + " " + formattedTimestamp;
 
-        var textArea = new Ui.TextArea({
-          :text => updatedString + " " + formattedTimestamp,
-          :color => Gfx.COLOR_WHITE,
-          :font => [Gfx.FONT_XTINY],
-          :locX => Ui.LAYOUT_HALIGN_CENTER,
-          :locY => Ui.LAYOUT_VALIGN_CENTER,
-          :justification => Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER,
-          :width => width * 0.7,
-          :height => height,
-        });
-
-        textArea.draw(bufferedDc);
+        bufferedDc.drawText(
+          width / 2,
+          _fontHeight / 2,
+          _font,
+          text,
+          Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
+        );
       }
     }
 
-    if (_footerBitmap != null) {
-      dc.drawBitmap(0, 0, _footerBitmap);
+    if (_footerTextBitmap != null) {
+      dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
+      dc.clear();
+      dc.setPenWidth(1);
+
+      var offsetFromTop = 15;
+      var marginLeftRight = width * _marginLeftRightPercent;
+
+      dc.drawLine(
+        marginLeftRight,
+        offsetFromTop,
+        width - marginLeftRight,
+        offsetFromTop
+      );
+
+      var textOffsetFromTop = 35;
+      if (_screenHeight > 260) {
+        textOffsetFromTop += ((_screenHeight - 260) * 0.1).toNumber();
+      }
+
+      dc.drawBitmap(0, textOffsetFromTop - _fontHeight / 2, _footerTextBitmap);
     }
   }
 
@@ -209,7 +212,7 @@ public class ForecastMenu extends Ui.CustomMenu {
 
   public function redrawTitleAndFooter() {
     _titleBitmap = null;
-    _footerBitmap = null;
+    _footerTextBitmap = null;
 
     Ui.requestUpdate();
   }

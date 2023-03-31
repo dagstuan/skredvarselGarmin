@@ -284,7 +284,14 @@ public function logMessage(message as String) {
   System.println(formattedTime + " - " + message);
 }
 
-const halfWidthDangerLevelIcon = 20;
+var halfWidthDangerLevelIcon = null;
+function getHalfWidthDangerLevelIcon() {
+  if ($.halfWidthDangerLevelIcon == null) {
+    var level2 = Ui.loadResource($.Rez.Drawables.Level2) as Ui.BitmapResource;
+    $.halfWidthDangerLevelIcon = level2.getWidth() / 2;
+  }
+  return $.halfWidthDangerLevelIcon;
+}
 
 function getIconResourceForDangerLevel(dangerLevel as Number) {
   if (dangerLevel == 1) {
