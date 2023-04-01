@@ -1,8 +1,6 @@
-using Toybox.Complications;
-
 (:background)
 public function updateComplicationIfExists() {
-  if ($ has :updateComplication) {
+  if ($ has :updateComplication && Toybox has :Complications) {
     $.updateComplication();
   }
 }
@@ -24,9 +22,15 @@ public function updateComplication() {
     $.logMessage("Setting new complication value " + newComplicationValue);
   }
   try {
-    Complications.updateComplication(0, {
-      :value => newComplicationValue,
-    });
+    if (Toybox.Complications has :updateComplication) {
+      Toybox.Complications.updateComplication(0, {
+        :value => newComplicationValue,
+      });
+    } else {
+      if ($.Debug) {
+        $.logMessage("updateComplication method not found on complications.");
+      }
+    }
   } catch (ex) {
     if ($.Debug) {
       $.logMessage(
