@@ -77,7 +77,7 @@ public class ForecastMenu extends Ui.CustomMenu {
       });
       var bufferedDc = _titleBitmap.getDc();
 
-      bufferedDc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+      bufferedDc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
       bufferedDc.clear();
 
       var iconResource = getIconResourceToDraw();
