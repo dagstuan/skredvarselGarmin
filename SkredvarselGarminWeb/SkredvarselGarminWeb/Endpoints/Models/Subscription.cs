@@ -8,5 +8,5 @@ public class Subscription
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public required AgreementStatus Status { get; init; }
     public required DateOnly? NextChargeDate { get; init; }
-    public required string? VippsConfirmationUrl { get; init; }
+    public string? VippsConfirmationUrl { get; init; }
 }

@@ -150,29 +150,41 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
         {
             var user = dbContext.GetUserOrThrow(ctx.User.Identity);
 
-            var agreementInDb = dbContext.Agreements
+            var agreementsInDb = dbContext.Agreements
                 .OrderByDescending(a => a.Created)
-                .FirstOrDefault(a => a.UserId == user.Id);
+                .Where(a => a.UserId == user.Id)
+                .ToList();
 
-            if (agreementInDb != null)
+            if (agreementsInDb.Any())
             {
-                if (agreementInDb.Status == AgreementStatus.PENDING)
+                var activeAgreement = agreementsInDb.FirstOrDefault(a => a.Status == AgreementStatus.ACTIVE || a.Status == AgreementStatus.UNSUBSCRIBED);
+                if (activeAgreement != null)
                 {
-                    var agreementInVipps = await vippsApiClient.GetAgreement(agreementInDb.Id);
+                    return Results.Ok(new Subscription
+                    {
+                        Status = activeAgreement.Status,
+                        NextChargeDate = activeAgreement.NextChargeDate,
+                    });
+                }
+
+                var pendingAgreement = agreementsInDb.FirstOrDefault(a => a.Status == AgreementStatus.PENDING);
+                if (pendingAgreement != null)
+                {
+                    var agreementInVipps = await vippsApiClient.GetAgreement(pendingAgreement.Id);
 
                     if (agreementInVipps.Status == VippsAgreementStatus.Active)
                     {
-                        agreementInDb.SetAsActive();
+                        pendingAgreement.SetAsActive();
                         dbContext.SaveChanges();
                     }
-                }
 
-                return Results.Ok(new Subscription
-                {
-                    Status = agreementInDb.Status,
-                    NextChargeDate = agreementInDb.NextChargeDate,
-                    VippsConfirmationUrl = agreementInDb.ConfirmationUrl
-                });
+                    return Results.Ok(new Subscription
+                    {
+                        Status = pendingAgreement.Status,
+                        NextChargeDate = pendingAgreement.NextChargeDate,
+                        VippsConfirmationUrl = pendingAgreement.ConfirmationUrl
+                    });
+                }
             }
 
             return Results.NoContent();

@@ -62,7 +62,6 @@ public class SubscriptionService : ISubscriptionService
 
             if (success)
             {
-                agreement.NextChargeDate = null;
                 agreement.SetAsStopped();
                 _dbContext.SaveChanges();
             }
@@ -76,10 +75,10 @@ public class SubscriptionService : ISubscriptionService
 
         if (vippsAgreement.Status == VippsAgreementStatus.Active)
         {
-            if (agreement.NextChargeId == null)
+            if (agreement.NextChargeId == null || !agreement.NextChargeDate.HasValue)
             {
-                _logger.LogInformation("Agreement did not have a NextChargeId set, creating new charge.");
-                await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement);
+                _logger.LogInformation("Agreement did not have a NextChargeId set, creating new charge. Assuming previous charge was today. This should never happen.");
+                await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, DateOnly.FromDateTime(_dateTimeNowProvider.Now));
             }
             else
             {
@@ -88,7 +87,7 @@ public class SubscriptionService : ISubscriptionService
                 if (nextCharge.Status == ChargeStatus.CHARGED)
                 {
                     _logger.LogWarning("Due charge for agreement was already charged. This should not happen.");
-                    await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement);
+                    await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, agreement.NextChargeDate.Value);
                 }
                 else if (nextCharge.Status == ChargeStatus.RESERVED)
                 {
@@ -101,7 +100,7 @@ public class SubscriptionService : ISubscriptionService
 
                     if (response.IsSuccessStatusCode)
                     {
-                        await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement);
+                        await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, agreement.NextChargeDate.Value);
                     }
                     else
                     {
@@ -158,9 +157,9 @@ public class SubscriptionService : ISubscriptionService
 
         var vippsAgreement = await _vippsApiClient.GetAgreement(agreementId);
 
-        var (_, amount) = CalculateNextCharge(vippsAgreement);
+        var (nextChargeDate, amount) = CalculateNextCharge(vippsAgreement, agreementInDb.NextChargeDate.Value);
 
-        var charge = await CreateChargeInVipps(agreementId, agreementInDb.NextChargeDate.Value, amount);
+        var charge = await CreateChargeInVipps(agreementId, nextChargeDate, amount);
 
         agreementInDb.NextChargeId = charge.ChargeId;
         agreementInDb.SetAsActive();
@@ -185,9 +184,9 @@ public class SubscriptionService : ISubscriptionService
         return true;
     }
 
-    private async Task CreateAndStoreNewChargeForAgreement(EntityAgreement agreement, VippsAgreement vippsAgreement)
+    private async Task CreateAndStoreNewChargeForAgreement(EntityAgreement agreement, VippsAgreement vippsAgreement, DateOnly previousChargeDate)
     {
-        var (nextChargeDate, nextChargeAmount) = CalculateNextCharge(vippsAgreement);
+        var (nextChargeDate, nextChargeAmount) = CalculateNextCharge(vippsAgreement, previousChargeDate);
         var newCharge = await CreateChargeInVipps(agreement.Id, nextChargeDate, nextChargeAmount);
 
         agreement.NextChargeDate = nextChargeDate;
@@ -207,7 +206,7 @@ public class SubscriptionService : ISubscriptionService
         }, Guid.NewGuid());
     }
 
-    private (DateOnly, int) CalculateNextCharge(VippsAgreement vippsAgreement)
+    private (DateOnly, int) CalculateNextCharge(VippsAgreement vippsAgreement, DateOnly previousChargeDate)
     {
         var now = _dateTimeNowProvider.Now;
         var nowDateOnly = DateOnly.FromDateTime(now);
@@ -233,9 +232,11 @@ public class SubscriptionService : ISubscriptionService
             }
             else if (campaign.Type == VippsCampaignType.PriceCampaign && now < campaign.End)
             {
+                var nextChargeDate = DateOnly.FromDateTime(now) < previousChargeDate ? previousChargeDate : GetNextChargeDate(previousChargeDate, vippsAgreement.Interval.Unit, vippsAgreement.Interval.Count);
+
                 // Active price campaign, next charge should be campaign price at campaign interval.
                 var charge = (
-                    GetNextChargeDate(nowDateOnly, vippsAgreement.Interval.Unit, vippsAgreement.Interval.Count),
+                    nextChargeDate,
                     campaign.Price
                 );
 
@@ -249,12 +250,22 @@ public class SubscriptionService : ISubscriptionService
             }
         }
 
-        var nextChargeDate = GetNextChargeDate(nowDateOnly, vippsAgreement.Interval.Unit, vippsAgreement.Interval.Count);
-        var nextCharge = (nextChargeDate, vippsAgreement.Pricing.Amount);
+        if (nowDateOnly < previousChargeDate)
+        {
+            // Should create charge at previous charge date;
+            var nextChargeDate = previousChargeDate;
+            var nextCharge = (nextChargeDate, vippsAgreement.Pricing.Amount);
+            _logger.LogInformation("Agreement is outside campaign but nextChargeDate has not happened yet. Next charge date is {nextChargeDate} with price {price}", nextCharge.nextChargeDate, nextCharge.Amount);
 
-        _logger.LogInformation("Agreement is outside campaign. Next charge date is {nextChargeDate} with price {price}", nextCharge.nextChargeDate, nextCharge.Amount);
-
-        return (nextChargeDate, vippsAgreement.Pricing.Amount);
+            return nextCharge;
+        }
+        else
+        {
+            var nextChargeDate = GetNextChargeDate(previousChargeDate, vippsAgreement.Interval.Unit, vippsAgreement.Interval.Count);
+            var nextCharge = (nextChargeDate, vippsAgreement.Pricing.Amount);
+            _logger.LogInformation("Agreement is outside campaign. Next charge date is {nextChargeDate} with price {price}", nextCharge.nextChargeDate, nextCharge.Amount);
+            return nextCharge;
+        }
     }
 
     private static DateOnly GetNextChargeDate(DateOnly previousChargeDate, PeriodUnit unit, int count) => unit switch

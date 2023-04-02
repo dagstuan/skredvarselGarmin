@@ -70,7 +70,7 @@ public class SubscriptionServiceTests
         var nextChargeDate = new DateOnly(2023, 4, 13);
         var expectedNextChargeDate = new DateOnly(2023, 5, 13);
 
-        _dateTimeNowProvider.Now.Returns(nextChargeDate.ToDateTime(TimeOnly.MinValue));
+        _dateTimeNowProvider.Now.Returns(nextChargeDate.ToDateTime(TimeOnly.MinValue).AddDays(7.0));
 
         var nextVippsCharge = _fixture.Build<VippsCharge>()
             .With(c => c.Status, VippsChargeStatus.RESERVED)
@@ -195,7 +195,6 @@ public class SubscriptionServiceTests
         updatedAgreementInDb.NextChargeDate.Should().Be(expectedNextChargeDate);
     }
 
-
     [Fact]
     public async Task Should_not_do_anything_if_agreement_is_not_due_for_charge()
     {
@@ -300,7 +299,7 @@ public class SubscriptionServiceTests
         var expectedNewChargeId = "newChargeId";
         var expectedNextChargeDate = agreementStart.AddDays(7);
 
-        _dateTimeNowProvider.Now.Returns(agreementStart.ToDateTime(TimeOnly.MaxValue));
+        _dateTimeNowProvider.Now.Returns(agreementStart.ToDateTime(TimeOnly.MaxValue).AddDays(1));
 
         var nextVippsCharge = _fixture.Build<VippsCharge>()
             .With(c => c.Status, VippsChargeStatus.RESERVED)
@@ -368,7 +367,7 @@ public class SubscriptionServiceTests
         var expectedNewChargeId = "newChargeId";
         var expectedNextChargeDate = new DateOnly(2023, 3, 20);
 
-        _dateTimeNowProvider.Now.Returns(new DateOnly(2023, 3, 13).ToDateTime(TimeOnly.MinValue));
+        _dateTimeNowProvider.Now.Returns(new DateOnly(2023, 3, 14).ToDateTime(TimeOnly.MinValue));
 
         var nextVippsCharge = _fixture.Build<VippsCharge>()
             .With(c => c.Status, VippsChargeStatus.RESERVED)
@@ -379,6 +378,7 @@ public class SubscriptionServiceTests
             .With(a => a.Status, AgreementStatus.ACTIVE)
             .With(a => a.NextChargeDate, agreementStart)
             .With(a => a.NextChargeId, nextVippsCharge.Id)
+            .With(a => a.NextChargeDate, new DateOnly(2023, 3, 13))
             .Create();
 
         var vippsAgreement = _fixture.Build<VippsAgreement>()
@@ -554,5 +554,171 @@ public class SubscriptionServiceTests
         updatedAgreementInDb.Status.Should().Be(AgreementStatus.STOPPED);
         updatedAgreementInDb.NextChargeId.Should().BeNull();
         updatedAgreementInDb.NextChargeDate.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Should_calculate_reactivation_price_and_date_correctly_when_reactivating_an_agreement_without_campagin()
+    {
+        var fixture = new Fixture();
+        fixture.Customize<DateOnly>(composer => composer.FromFactory<DateTime>(DateOnly.FromDateTime));
+        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+        var agreementStart = new DateOnly(2023, 2, 13);
+        var expectedNewChargeId = "newChargeId";
+
+        _dateTimeNowProvider.Now.Returns(agreementStart.ToDateTime(TimeOnly.MaxValue).AddDays(3));
+
+        var agreement = _fixture.Build<Agreement>()
+            .With(a => a.Start, agreementStart)
+            .With(a => a.Status, AgreementStatus.UNSUBSCRIBED)
+            .With(a => a.NextChargeDate, new DateOnly(2023, 3, 13))
+            .Without(a => a.NextChargeId)
+            .Create();
+
+        var vippsAgreement = _fixture.Build<VippsAgreement>()
+            .With(a => a.Start, agreementStart.ToDateTime(TimeOnly.MinValue))
+            .With(a => a.Status, VippsAgreementStatus.Active)
+            .Without(a => a.Campaign)
+            .With(a => a.Interval, new VippsPeriod
+            {
+                Count = 1,
+                Unit = VippsPeriodUnit.Month
+            })
+            .Create();
+
+        _dbContext.Add(agreement);
+        _dbContext.SaveChanges();
+
+        var agreementFromDb = _dbContext.Agreements.First();
+
+        _vippsApiClient.GetAgreement(agreement.Id).Returns(vippsAgreement);
+        _vippsApiClient.CreateCharge(agreement.Id, Arg.Any<VippsCreateChargeRequest>(), Arg.Any<Guid>()).Returns(new VippsCreateChargeResponse
+        {
+            ChargeId = expectedNewChargeId
+        });
+
+        await _subscriptionService.ReactivateAgreement(agreement.Id);
+
+        await _vippsApiClient.Received(1).CreateCharge(agreement.Id, Arg.Is<VippsCreateChargeRequest>(x => x.Amount == vippsAgreement.Pricing.Amount && x.Due == agreement.NextChargeDate), Arg.Any<Guid>());
+
+        var updatedAgreementInDb = _dbContext.Agreements.Single(a => a.Id == agreement.Id);
+        updatedAgreementInDb.NextChargeId.Should().Be(expectedNewChargeId);
+        updatedAgreementInDb.NextChargeDate.Should().Be(agreement.NextChargeDate);
+    }
+
+    [Fact]
+    public async Task Should_calculate_reactivation_price_and_date_correctly_when_reactivating_an_agreement_with_period_campagin()
+    {
+        var fixture = new Fixture();
+        fixture.Customize<DateOnly>(composer => composer.FromFactory<DateTime>(DateOnly.FromDateTime));
+        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+        var agreementStart = new DateOnly(2023, 2, 13);
+        var expectedNextChargeDate = new DateOnly(2023, 2, 20);
+        var expectedNewChargeId = "newChargeId";
+
+        _dateTimeNowProvider.Now.Returns(agreementStart.ToDateTime(TimeOnly.MaxValue).AddDays(3));
+
+        var agreement = _fixture.Build<Agreement>()
+            .With(a => a.Start, agreementStart)
+            .With(a => a.Status, AgreementStatus.UNSUBSCRIBED)
+            .With(a => a.NextChargeDate, new DateOnly(2023, 3, 13))
+            .Without(a => a.NextChargeId)
+            .Create();
+
+        var vippsAgreement = _fixture.Build<VippsAgreement>()
+            .With(a => a.Start, agreementStart.ToDateTime(TimeOnly.MinValue))
+            .With(a => a.Status, VippsAgreementStatus.Active)
+            .With(a => a.Campaign, new VippsAgreementCampaign
+            {
+                Type = VippsCampaignType.PeriodCampaign,
+                Price = 1000,
+                Period = new VippsPeriod
+                {
+                    Count = 1,
+                    Unit = VippsPeriodUnit.Week
+                }
+            })
+            .With(a => a.Interval, new VippsPeriod
+            {
+                Count = 1,
+                Unit = VippsPeriodUnit.Month
+            })
+            .Create();
+
+        _dbContext.Add(agreement);
+        _dbContext.SaveChanges();
+
+        var agreementFromDb = _dbContext.Agreements.First();
+
+        _vippsApiClient.GetAgreement(agreement.Id).Returns(vippsAgreement);
+        _vippsApiClient.CreateCharge(agreement.Id, Arg.Any<VippsCreateChargeRequest>(), Arg.Any<Guid>()).Returns(new VippsCreateChargeResponse
+        {
+            ChargeId = expectedNewChargeId
+        });
+
+        await _subscriptionService.ReactivateAgreement(agreement.Id);
+
+        await _vippsApiClient.Received(1).CreateCharge(agreement.Id, Arg.Is<VippsCreateChargeRequest>(x => x.Amount == vippsAgreement.Pricing.Amount && x.Due == expectedNextChargeDate), Arg.Any<Guid>());
+
+        var updatedAgreementInDb = _dbContext.Agreements.Single(a => a.Id == agreement.Id);
+        updatedAgreementInDb.NextChargeId.Should().Be(expectedNewChargeId);
+        updatedAgreementInDb.NextChargeDate.Should().Be(agreement.NextChargeDate);
+    }
+
+    [Fact]
+    public async Task Should_calculate_reactivation_price_and_date_correctly_when_reactivating_an_agreement_with_price_campagin()
+    {
+        var fixture = new Fixture();
+        fixture.Customize<DateOnly>(composer => composer.FromFactory<DateTime>(DateOnly.FromDateTime));
+        fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+        var agreementStart = new DateOnly(2023, 2, 13);
+        var expectedNextChargeDate = new DateOnly(2023, 3, 13);
+        var expectedNewChargeId = "newChargeId";
+
+        _dateTimeNowProvider.Now.Returns(agreementStart.ToDateTime(TimeOnly.MaxValue).AddDays(3));
+
+        var agreement = _fixture.Build<Agreement>()
+            .With(a => a.Start, agreementStart)
+            .With(a => a.Status, AgreementStatus.UNSUBSCRIBED)
+            .With(a => a.NextChargeDate, new DateOnly(2023, 3, 13))
+            .Without(a => a.NextChargeId)
+            .Create();
+
+        var vippsAgreement = _fixture.Build<VippsAgreement>()
+            .With(a => a.Start, agreementStart.ToDateTime(TimeOnly.MinValue))
+            .With(a => a.Status, VippsAgreementStatus.Active)
+            .With(a => a.Campaign, new VippsAgreementCampaign
+            {
+                Price = 1000,
+                Type = VippsCampaignType.PriceCampaign,
+                End = agreementStart.AddMonths(1).ToDateTime(TimeOnly.MinValue)
+            })
+            .With(a => a.Interval, new VippsPeriod
+            {
+                Count = 1,
+                Unit = VippsPeriodUnit.Month
+            })
+            .Create();
+
+        _dbContext.Add(agreement);
+        _dbContext.SaveChanges();
+
+        var agreementFromDb = _dbContext.Agreements.First();
+
+        _vippsApiClient.GetAgreement(agreement.Id).Returns(vippsAgreement);
+        _vippsApiClient.CreateCharge(agreement.Id, Arg.Any<VippsCreateChargeRequest>(), Arg.Any<Guid>()).Returns(new VippsCreateChargeResponse
+        {
+            ChargeId = expectedNewChargeId
+        });
+
+        await _subscriptionService.ReactivateAgreement(agreement.Id);
+
+        await _vippsApiClient.Received(1).CreateCharge(agreement.Id, Arg.Is<VippsCreateChargeRequest>(x => x.Amount == vippsAgreement.Campaign!.Price && x.Due == expectedNextChargeDate), Arg.Any<Guid>());
+
+        var updatedAgreementInDb = _dbContext.Agreements.Single(a => a.Id == agreement.Id);
+        updatedAgreementInDb.NextChargeId.Should().Be(expectedNewChargeId);
+        updatedAgreementInDb.NextChargeDate.Should().Be(agreement.NextChargeDate);
     }
 }
