@@ -15,23 +15,8 @@ public static class HangfireConfiguration
             Port = databaseOptions.Port,
             Username = databaseOptions.Username,
             Password = databaseOptions.Password,
-            SslMode = SslMode.Prefer,
-            TrustServerCertificate = true,
-            Database = "postgres"
+            Database = databaseOptions.HangfireDatabase
         };
-
-        var dataSource = new NpgsqlDataSourceBuilder(connectionStringBuilder.ToString()).Build();
-        var getCmd = dataSource.CreateCommand("SELECT 1 FROM pg_database WHERE datname = 'hangfire'");
-        var res = getCmd.ExecuteReader();
-        var databaseExists = res.HasRows;
-
-        if (!databaseExists)
-        {
-            var cmd = dataSource.CreateCommand("CREATE DATABASE hangfire");
-            cmd.ExecuteNonQuery();
-        }
-
-        connectionStringBuilder.Database = "hangfire";
 
         serviceCollection.AddHangfire(configuration => configuration
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)

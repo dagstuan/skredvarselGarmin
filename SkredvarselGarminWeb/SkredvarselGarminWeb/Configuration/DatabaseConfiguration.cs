@@ -16,8 +16,6 @@ public static class DatabaseConfiguration
             Username = databaseOptions.Username,
             Password = databaseOptions.Password,
             Database = databaseOptions.Database,
-            SslMode = SslMode.Prefer,
-            TrustServerCertificate = true
         };
 
         serviceCollection.AddDbContext<SkredvarselDbContext>(options =>
