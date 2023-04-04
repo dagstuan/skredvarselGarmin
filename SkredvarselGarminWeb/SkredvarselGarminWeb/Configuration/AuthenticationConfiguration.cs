@@ -3,6 +3,7 @@ using System.Net;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.EntityFrameworkCore;
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Options;
@@ -58,7 +59,7 @@ public static class AuthenticationConfiguration
                     return Task.CompletedTask;
                 };
 
-                options.Events.OnUserInformationReceived = (ctx) =>
+                options.Events.OnUserInformationReceived = async (ctx) =>
                 {
                     if (ctx.Principal != null)
                     {
@@ -70,14 +71,13 @@ public static class AuthenticationConfiguration
                             throw new Exception("Invalid login, no sub was returned in user info.");
                         }
 
-                        var dbContext = ctx.HttpContext.RequestServices.GetRequiredService<SkredvarselDbContext>();
-
                         var name = rootElement.GetString("name")!;
                         var email = rootElement.GetString("email")!;
                         var phoneNumber = rootElement.GetString("phone_number")!;
-
                         var dateNow = DateOnly.FromDateTime(DateTime.Now);
-                        var user = dbContext.Users.Where(u => u.Id == sub).FirstOrDefault();
+
+                        using var dbContext = ctx.HttpContext.RequestServices.GetRequiredService<SkredvarselDbContext>();
+                        var user = await dbContext.Users.Where(u => u.Id == sub).FirstOrDefaultAsync();
                         if (user == null)
                         {
                             user = new User
@@ -102,10 +102,8 @@ public static class AuthenticationConfiguration
 
                         user.LastLoggedIn = dateNow;
 
-                        dbContext.SaveChanges();
+                        await dbContext.SaveChangesAsync();
                     }
-
-                    return Task.CompletedTask;
                 };
             })
             .AddScheme<GarminAuthenticationSchemeOptions, GarminAuthenticationHandler>("Garmin", options => { });
