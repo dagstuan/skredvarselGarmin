@@ -121,7 +121,7 @@ module AvalancheUi {
         _ticksAtStart += 1;
       } else {
         _ticksAtStart = 0;
-        _textAnimationXOffset -= 1;
+        _textAnimationXOffset -= 1.25;
       }
 
       if (atEnd && _ticksAtEnd > TICKS_AT_START_END) {

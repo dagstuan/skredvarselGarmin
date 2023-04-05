@@ -114,7 +114,7 @@ module AvalancheUi {
         _ticksAtTop += 1;
       } else {
         _ticksAtTop = 0;
-        _textOffset -= 0.8; // bump size determines speed
+        _textOffset -= 1; // bump size determines speed
       }
 
       if (atBottom && _ticksAtBottom > TICKS_AT_TOP_BOTTOM) {
