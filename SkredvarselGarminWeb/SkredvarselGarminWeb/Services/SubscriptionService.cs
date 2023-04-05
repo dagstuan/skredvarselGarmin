@@ -52,12 +52,14 @@ public class SubscriptionService : ISubscriptionService
         if (nowDate < agreement.NextChargeDate)
         {
             // Not due for a charge
-            _logger.LogWarning("Job was triggered to update charges on an agreement that is not due for a charge.");
+            _logger.LogWarning("Job was triggered to update charges on an agreement that is not due for a charge. Agreement ID: {agreementId}", agreementId);
             return;
         }
 
         if (agreement.Status == EntityAgreementStatus.UNSUBSCRIBED && nowDate > agreement.NextChargeDate)
         {
+            _logger.LogInformation("Agreement {agreementId} was unsubscribed and due for charge. Stopping agreement in vipps and setting as stopped.", agreement.Id);
+
             var success = await StopAgreementInVipps(agreement.Id);
 
             if (success)
@@ -110,7 +112,7 @@ public class SubscriptionService : ISubscriptionService
                 }
                 else
                 {
-                    _logger.LogWarning("Due charge for agreement was not charged and not reserved. Status was {status}. Will retry, possibly forever.", nextCharge.Status);
+                    _logger.LogWarning("Due charge for agreement {agreementId} was not charged and not reserved. Status was {status}. Will retry, possibly forever.", agreement.Id, nextCharge.Status);
                 }
             }
         }
@@ -118,6 +120,8 @@ public class SubscriptionService : ISubscriptionService
 
     public async Task DeactivateAgreement(string agreementId)
     {
+        _logger.LogInformation("Deactivating agreement {agreementId}", agreementId);
+
         var agreementInDb = _dbContext.Agreements.First(a => a.Id == agreementId);
 
         if (agreementInDb.Status != EntityAgreementStatus.ACTIVE)
@@ -148,6 +152,8 @@ public class SubscriptionService : ISubscriptionService
 
     public async Task ReactivateAgreement(string agreementId)
     {
+        _logger.LogInformation("Reactivating agreement {agreementId}", agreementId);
+
         var agreementInDb = _dbContext.Agreements.First(a => a.Id == agreementId);
 
         if (agreementInDb.Status != EntityAgreementStatus.UNSUBSCRIBED || !agreementInDb.NextChargeDate.HasValue)
@@ -224,7 +230,10 @@ public class SubscriptionService : ISubscriptionService
                 if (nowDateOnly < periodEndDate)
                 {
                     // Active period campaign. Next charge should be full price at the end of the campaign.
-                    var charge = (periodEndDate, vippsAgreement.Pricing.Amount);
+                    var charge = (
+                        periodEndDate,
+                        vippsAgreement.Pricing.Amount
+                    );
 
                     _logger.LogInformation("Agreement is in an active period campaign. Next charge date is {nextChargeDate} with price {price}", charge.periodEndDate, charge.Amount);
                     return charge;
@@ -240,7 +249,7 @@ public class SubscriptionService : ISubscriptionService
                     campaign.Price
                 );
 
-                _logger.LogInformation("Agreement is in an active price campaign. Next charge date is {nextChargeDate} with price {price}", charge.Item1, charge.Price);
+                _logger.LogInformation("Agreement is in an active price campaign. Next charge date is {nextChargeDate} with price {price}", charge.nextChargeDate, charge.Price);
 
                 return charge;
             }

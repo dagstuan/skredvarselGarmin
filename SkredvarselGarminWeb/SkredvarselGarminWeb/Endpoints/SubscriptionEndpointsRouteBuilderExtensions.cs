@@ -1,3 +1,4 @@
+using Hangfire;
 using Refit;
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Endpoints.Models;
@@ -114,6 +115,7 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
             SkredvarselDbContext dbContext,
             IVippsApiClient vippsApiClient,
             ISubscriptionService subscriptionService,
+            IBackgroundJobClient backgroundJobClient,
             IDateTimeNowProvider dateTimeNowProvider) =>
         {
             var pendingAgreements = dbContext.GetPendingAgreements();
@@ -128,17 +130,11 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
                 else if (agreementInVipps.Status == VippsAgreementStatus.Active)
                 {
                     agreement.SetAsActive();
+                    backgroundJobClient.Enqueue(() => subscriptionService.UpdateAgreementCharges(agreement.Id));
                 }
             }
 
             dbContext.SaveChanges();
-
-            var agreementsThatAreDue = dbContext.GetAgreementsThatAreDue(dateTimeNowProvider);
-
-            var tasks = agreementsThatAreDue
-                .Select(async (a) => await subscriptionService.UpdateAgreementCharges(a.Id));
-
-            await Task.WhenAll(tasks);
 
             return Results.Redirect("/minSide?subscribed");
         });
@@ -146,6 +142,8 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
         app.MapGet("/api/subscription", async (
             HttpContext ctx,
             IVippsApiClient vippsApiClient,
+            ISubscriptionService subscriptionService,
+            IBackgroundJobClient backgroundJobClient,
             SkredvarselDbContext dbContext) =>
         {
             var user = dbContext.GetUserOrThrow(ctx.User.Identity);
@@ -176,6 +174,8 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
                     {
                         pendingAgreement.SetAsActive();
                         dbContext.SaveChanges();
+
+                        backgroundJobClient.Enqueue(() => subscriptionService.UpdateAgreementCharges(pendingAgreement.Id));
                     }
 
                     return Results.Ok(new Subscription
