@@ -1,8 +1,8 @@
 import Toybox.Lang;
 
 using Toybox.Communications as Comm;
-using Toybox.Time.Gregorian;
 using Toybox.System as Sys;
+using Toybox.Time;
 using Toybox.Application.Storage;
 
 const BaseApiUrl = "https://skredvarsel.app/api";
@@ -14,6 +14,7 @@ typedef WebRequestDelegateCallback as (Method
   (responseCode as Number, data as WebRequestCallbackData) as Void
 );
 
+(:background)
 function makeApiRequest(
   path as String,
   storageKey as String,
@@ -70,21 +71,15 @@ class WebRequestDelegate {
     data as Dictionary<String, Object?> or String or Null
   ) as Void {
     if (responseCode == 200) {
-      if (_storageKey != null) {
-        if ($.Debug) {
-          $.logMessage("200 OK. Storing in storage with key: " + _storageKey);
-        }
-        Storage.setValue(_storageKey, [data, Time.now().value()]);
-      }
-    } else if (responseCode == 401) {
       if ($.Debug) {
-        $.logMessage("Api responded with 401. No subscription for user.");
+        $.logMessage("200 OK. Storing in storage with key: " + _storageKey);
       }
+      Storage.setValue(_storageKey, [data, Time.now().value()]);
+    } else if (responseCode == 401 && $.Debug) {
+      $.logMessage("Api responded with 401. No subscription for user.");
       $.setHasSubscription(false);
-    } else {
-      if ($.Debug) {
-        $.logMessage("Failed request. Response code: " + responseCode);
-      }
+    } else if ($.Debug) {
+      $.logMessage("Failed request. Response code: " + responseCode);
     }
 
     _callback.invoke(responseCode, data);

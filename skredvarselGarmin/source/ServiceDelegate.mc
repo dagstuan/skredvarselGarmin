@@ -8,10 +8,20 @@ class ServiceDelegate extends System.ServiceDelegate {
   private var _simpleRegionsToReload as Array<String> = [];
   private var _detailedRegionsToReload as Array<String> = [];
 
-  private var _webRequestDelegate as WebRequestDelegate?;
+  private var _language as Number;
+  private var _start as String;
+  private var _end as String;
 
   public function initialize() {
     ServiceDelegate.initialize();
+
+    _language = $.getForecastLanguage();
+
+    var now = Time.now();
+
+    var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
+    _start = getFormattedDate(now.subtract(twoDays));
+    _end = getFormattedDate(now.add(twoDays));
   }
 
   public function onTemporalEvent() as Void {
@@ -61,46 +71,29 @@ class ServiceDelegate extends System.ServiceDelegate {
     responseCode as Number,
     data as WebRequestCallbackData
   ) as Void {
-    _webRequestDelegate = null;
-    var reloadedNextRegion = reloadNextRegion();
-
-    if (reloadedNextRegion == false) {
-      Background.exit(true);
+    if (responseCode == 200) {
+      var reloadedNextRegion = reloadNextRegion();
+      if (reloadedNextRegion == false) {
+        Background.exit(true);
+      }
+    } else {
+      Background.exit(false);
     }
   }
 
   private function reloadNextRegion() as Boolean {
-    var language = $.getForecastLanguage();
-
-    var now = Time.now();
-
-    var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
-    var start = getFormattedDate(now.subtract(twoDays));
-    var end = getFormattedDate(now.add(twoDays));
-
-    if (_webRequestDelegate != null) {
-      throw new SkredvarselGarminException(
-        "_webRequestDelegate was not null when reloading next region."
-      );
-    }
-
     if (_simpleRegionsToReload.size() > 0) {
       var nextRegion = _simpleRegionsToReload[0];
       _simpleRegionsToReload = _simpleRegionsToReload.slice(1, null);
 
       var path = $.getSimpleWarningsPathForRegion(
         nextRegion,
-        language,
-        start,
-        end
+        _language,
+        _start,
+        _end
       );
       var storageKey = $.getSimpleForecastCacheKeyForRegion(nextRegion);
-      _webRequestDelegate = new WebRequestDelegate(
-        path,
-        storageKey,
-        method(:onReloadedRegion)
-      );
-      _webRequestDelegate.makeRequest();
+      $.makeApiRequest(path, storageKey, method(:onReloadedRegion), false);
 
       return true;
     } else if (_detailedRegionsToReload.size() > 0) {
@@ -109,17 +102,12 @@ class ServiceDelegate extends System.ServiceDelegate {
 
       var path = $.getDetailedWarningsPathForRegion(
         nextRegion,
-        language,
-        start,
-        end
+        _language,
+        _start,
+        _end
       );
       var storageKey = $.getDetailedWarningsCacheKeyForRegion(nextRegion);
-      _webRequestDelegate = new WebRequestDelegate(
-        path,
-        storageKey,
-        method(:onReloadedRegion)
-      );
-      _webRequestDelegate.makeRequest();
+      $.makeApiRequest(path, storageKey, method(:onReloadedRegion), false);
 
       return true;
     }
