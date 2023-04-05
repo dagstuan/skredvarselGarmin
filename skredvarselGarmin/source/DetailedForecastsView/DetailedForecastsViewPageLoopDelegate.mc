@@ -40,6 +40,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
         $.logMessage("Stale forecast, try to reload in background");
       }
 
+      _view.setIsLoading(true);
       $.loadDetailedWarningsForRegion(settings[:regionId], method(:onReceive));
     }
   }
@@ -53,6 +54,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
       _fetchedTime = Time.now();
 
       _view.setWarning(_detailedWarnings[_index], _fetchedTime);
+      _view.setIsLoading(false);
 
       Ui.requestUpdate();
     }

@@ -9,6 +9,7 @@ using AvalancheUi;
 typedef AvalancheForecastElement as interface {
   function onShow() as Void;
   function onHide() as Void;
+  function onTick() as Void;
   function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void;
 };
 
@@ -75,6 +76,14 @@ public class DetailedForecastElements {
     }
   }
 
+  public function onTick() {
+    for (var i = 0; i < _elements.size(); i++) {
+      if (_elements[i] != null) {
+        _elements[i].onTick();
+      }
+    }
+  }
+
   public function goToNextElement() as Number {
     if (_currentPage == _numElements - 1) {
       return _currentPage;
@@ -131,7 +140,7 @@ public class DetailedForecastElements {
     );
   }
 
-  function pageAnimateComplete() as Void {
+  public function pageAnimateComplete() as Void {
     _animating = false;
     animationTime = 0;
     Ui.requestUpdate();

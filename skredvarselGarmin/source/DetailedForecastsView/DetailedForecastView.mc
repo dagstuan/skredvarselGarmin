@@ -22,6 +22,7 @@ class DetailedForecastView extends Ui.View {
 
   private var _warning as DetailedAvalancheWarning?;
   private var _fetchedTime as Time.Moment?;
+  private var _isLoading as Boolean;
 
   private var _regionId as String;
   private var _index as Number;
@@ -57,6 +58,7 @@ class DetailedForecastView extends Ui.View {
 
     _regionId = settings[:regionId];
     _index = settings[:index];
+    _isLoading = false;
 
     setWarning(settings[:warning], settings[:fetchedTime]);
 
@@ -79,6 +81,13 @@ class DetailedForecastView extends Ui.View {
   }
 
   public function onTick() as Void {
+    if (_footer != null) {
+      _footer.onTick();
+    }
+    if (_elements != null) {
+      _elements.onTick();
+    }
+
     if (_ticksBeforeAnimatePageIndicator > 0) {
       _ticksBeforeAnimatePageIndicator -= 1;
     }
@@ -257,6 +266,7 @@ class DetailedForecastView extends Ui.View {
         :locX => 0,
         :width => _width,
         :height => height,
+        :isLoading => _isLoading,
       });
     }
 
@@ -285,6 +295,13 @@ class DetailedForecastView extends Ui.View {
     }
 
     _currentElement = _elements.toggleVisibleElement();
+  }
+
+  public function setIsLoading(isLoading as Boolean) {
+    _isLoading = isLoading;
+    if (_footer != null) {
+      _footer.setIsLoading(isLoading);
+    }
   }
 
   public function setWarning(

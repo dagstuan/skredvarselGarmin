@@ -7,8 +7,6 @@ using Toybox.WatchUi as Ui;
 module AvalancheUi {
   typedef ValidExpositionsSettings as {
     :validExpositions as String,
-    :locX as Numeric,
-    :locY as Numeric,
     :radius as Numeric,
     :dangerFillColor as Gfx.ColorType,
     :nonDangerFillColor as Gfx.ColorType,

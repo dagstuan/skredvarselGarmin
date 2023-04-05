@@ -44,6 +44,12 @@ module AvalancheUi {
       _isVisible = false;
     }
 
+    public function onTick() as Void {
+      if (_isVisible) {
+        calcTextOffset();
+      }
+    }
+
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
       if (_bufferedBitmapText == null) {
         var font = Gfx.FONT_SYSTEM_XTINY;
@@ -88,10 +94,6 @@ module AvalancheUi {
       }
 
       if (_textHeight > _height) {
-        if (_isVisible) {
-          calcTextOffset();
-        }
-
         dc.setClip(x0, y0, _width, _height);
         dc.drawBitmap(x0, y0 + _textOffset, _bufferedBitmapText);
         dc.clearClip();

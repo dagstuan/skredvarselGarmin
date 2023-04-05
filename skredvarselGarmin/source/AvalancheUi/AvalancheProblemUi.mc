@@ -86,6 +86,15 @@ module AvalancheUi {
       }
     }
 
+    public function onTick() as Void {
+      if (_problemText != null) {
+        _problemText.onTick();
+      }
+      if (_exposedHeightTextUi != null) {
+        _exposedHeightTextUi.onTick();
+      }
+    }
+
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
       drawProblemText(dc, x0, y0);
 

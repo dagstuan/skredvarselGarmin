@@ -72,6 +72,12 @@ module AvalancheUi {
       _isVisible = false;
     }
 
+    public function onTick() as Void {
+      if (_isVisible) {
+        calcTextOffset();
+      }
+    }
+
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
       if (_bufferedBitmapText == null) {
         _textWidth = dc.getTextWidthInPixels(_text, _font);
@@ -87,10 +93,6 @@ module AvalancheUi {
       }
 
       if (_textWidth > _containerWidth) {
-        if (_isVisible) {
-          calcTextOffset();
-        }
-
         dc.setClip(x0, y0 + _textYOffset, _containerWidth, _fontHeight);
         dc.drawBitmap(
           x0 + _textAnimationXOffset,

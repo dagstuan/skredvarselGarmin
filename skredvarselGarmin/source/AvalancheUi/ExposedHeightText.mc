@@ -78,6 +78,14 @@ module AvalancheUi {
       }
     }
 
+    public function onTick() as Void {
+      for (var i = 0; i < _scrollingTexts.size(); i++) {
+        if (_scrollingTexts[i] != null) {
+          _scrollingTexts[i].onTick();
+        }
+      }
+    }
+
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
       if ($.DrawOutlines) {
         $.drawOutline(dc, x0, y0, _width, _halfHeight);
