@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Security.Principal;
 using Microsoft.EntityFrameworkCore;
 using SkredvarselGarminWeb.Entities;
+using SkredvarselGarminWeb.Helpers;
 
 namespace SkredvarselGarminWeb.Database;
 
@@ -24,5 +25,13 @@ public static class DbContextUserExtensions
         return dbContext.Watches
             .Include(w => w.User)
             .FirstOrDefault(w => w.Id == watchId)?.User;
+    }
+
+    public static List<User> GetUsersNotLoggedInForAMonthWithoutAgreements(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider)
+    {
+        return dbContext.Users
+            .Include(u => u.Agreements)
+            .Where(u => u.LastLoggedIn < DateOnly.FromDateTime(dateTimeNowProvider.UtcNow.AddMonths(-1)) && !u.Agreements.Any())
+            .ToList();
     }
 }

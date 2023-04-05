@@ -8,8 +8,9 @@ public static class DbContextAgreementExtensions
 {
     public static List<Agreement> GetAgreementsThatAreDue(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider) =>
         dbContext.Agreements
-            .Where(a => DateOnly.FromDateTime(dateTimeNowProvider.Now) >= a.NextChargeDate)
+            .Where(a => DateOnly.FromDateTime(dateTimeNowProvider.UtcNow) >= a.NextChargeDate)
             .ToList();
+
     public static List<Agreement> GetPendingAgreements(this SkredvarselDbContext dbContext) =>
         dbContext.Agreements
             .Where(a => a.Status == AgreementStatus.PENDING)

@@ -56,7 +56,7 @@ public class HangfireService
     {
         var pendingAgreementsInDb = _dbContext.Agreements
             .Where(a => a.Status == Entities.AgreementStatus.PENDING)
-            .Where(a => a.Created < DateTime.UtcNow.AddMinutes(-10))
+            .Where(a => a.Created < _dateTimeNowProvider.UtcNow.AddMinutes(-10))
             .ToList();
 
         foreach (var agreement in pendingAgreementsInDb)
@@ -87,7 +87,7 @@ public class HangfireService
     public void RemoveStaleWatchAddRequests()
     {
         var staleWatchAddRequests = _dbContext.WatchAddRequests
-            .Where(a => a.Created < DateTime.UtcNow.AddMinutes(-10))
+            .Where(a => a.Created < _dateTimeNowProvider.UtcNow.AddMinutes(-10))
             .ToList();
 
         _dbContext.RemoveRange(staleWatchAddRequests);

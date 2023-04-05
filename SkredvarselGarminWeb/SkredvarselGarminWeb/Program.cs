@@ -68,6 +68,7 @@ app.MapVippsEndpoints();
 app.MapVarsomApiEndpoints(authOptions!);
 app.MapSubscriptionEndpoints();
 app.MapWatchApiEndpoints();
+app.MapAdminEndpoints();
 
 app.MapHangfireDashboard();
 
