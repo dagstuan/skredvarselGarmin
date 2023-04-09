@@ -106,8 +106,14 @@ class SetupSubscriptionView extends Ui.View {
     }
 
     if (_loadingView != null) {
-      Ui.popView(Ui.SLIDE_BLINK);
-      _loadingView = null;
+      try {
+        Ui.popView(Ui.SLIDE_BLINK);
+        _loadingView = null;
+      } catch (ex) {
+        if ($.Debug) {
+          $.logMessage("Failed to pop loading view on receive.");
+        }
+      }
     }
 
     if (responseCode == 200) {
