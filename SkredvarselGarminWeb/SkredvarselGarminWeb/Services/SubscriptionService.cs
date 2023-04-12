@@ -9,6 +9,7 @@ using EntityAgreement = SkredvarselGarminWeb.Entities.Agreement;
 using EntityAgreementStatus = SkredvarselGarminWeb.Entities.AgreementStatus;
 using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Entities.Extensions;
+using Hangfire;
 
 namespace SkredvarselGarminWeb.Services;
 
@@ -33,8 +34,11 @@ public class SubscriptionService : ISubscriptionService
         _logger = logger;
     }
 
+    [DisableConcurrentExecution(10)]
     public async Task UpdateAgreementCharges(string agreementId)
     {
+        using var transaction = _dbContext.Database.BeginTransaction();
+
         var agreement = _dbContext.Agreements
             .Where(a => a.Id == agreementId)
             .Where(a =>
@@ -79,7 +83,7 @@ public class SubscriptionService : ISubscriptionService
         {
             if (agreement.NextChargeId == null || !agreement.NextChargeDate.HasValue)
             {
-                _logger.LogInformation("Agreement did not have a NextChargeId set, creating new charge. Assuming previous charge was today. This should never happen.");
+                _logger.LogInformation("Agreement did not have a NextChargeId set, creating new charge. Assuming previous charge was today. This should not happen.");
                 await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, DateOnly.FromDateTime(_dateTimeNowProvider.Now));
             }
             else
@@ -116,6 +120,8 @@ public class SubscriptionService : ISubscriptionService
                 }
             }
         }
+
+        transaction.Commit();
     }
 
     public async Task DeactivateAgreement(string agreementId)

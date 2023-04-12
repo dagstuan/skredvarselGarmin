@@ -77,7 +77,7 @@ using (var scope = app.Services.CreateScope())
     var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
     recurringJobManager.AddOrUpdate<HangfireService>("UpdatePendingAgreements", s => s.UpdatePendingAgreements(), "*/10 * * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("RemoveStalePendingAgreements", s => s.RemoveStalePendingAgreements(), "*/10 * * * *");
-    recurringJobManager.AddOrUpdate<HangfireService>("UpdateAgreementCharges", s => s.UpdateAgreementCharges(), Cron.Hourly);
+    recurringJobManager.AddOrUpdate<HangfireService>("UpdateAgreementCharges", s => s.UpdateAgreementCharges(), "5 * * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("RemoveStaleWatchAddRequests", s => s.RemoveStaleWatchAddRequests(), "*/5 * * * *");
 }
 
