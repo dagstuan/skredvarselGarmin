@@ -5,7 +5,7 @@ using Toybox.Time.Gregorian;
 using Toybox.Time;
 
 typedef DetailedWarningsViewPageLoopDelegateSettings as {
-  :index as Number,
+  :visibleDate as Time.Moment,
   :view as DetailedForecastView,
   :regionId as String,
   :detailedWarnings as Array<DetailedAvalancheWarning>,
@@ -13,12 +13,10 @@ typedef DetailedWarningsViewPageLoopDelegateSettings as {
 };
 
 class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate {
-  private var _index as Number;
+  private var _visibleDate as Time.Moment;
 
   private var _detailedWarnings as Array<DetailedAvalancheWarning>;
   private var _fetchedTime as Time.Moment;
-
-  private var _numPages as Numeric;
 
   public function initialize(
     settings as DetailedWarningsViewPageLoopDelegateSettings
@@ -28,14 +26,12 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
       :regionId => settings[:regionId],
     });
 
-    _index = settings[:index];
+    _visibleDate = settings[:visibleDate];
     _detailedWarnings = settings[:detailedWarnings];
     _fetchedTime = settings[:fetchedTime];
 
-    _numPages = _detailedWarnings.size();
-
     var dataAge = Time.now().compare(_fetchedTime);
-    if (dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
+    if (dataAge > $.TIME_TO_CONSIDER_DATA_STALE && $.canMakeWebRequest()) {
       if ($.Debug) {
         $.logMessage("Stale forecast, try to reload in background");
       }
@@ -53,7 +49,17 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
       _detailedWarnings = data as Array;
       _fetchedTime = Time.now();
 
-      _view.setWarning(_detailedWarnings[_index], _fetchedTime);
+      var index = $.getDateIndexForDetailedWarnings(
+        _detailedWarnings,
+        _visibleDate
+      );
+
+      _view.setWarning(
+        index,
+        _detailedWarnings.size(),
+        _detailedWarnings[index],
+        _fetchedTime
+      );
       _view.setIsLoading(false);
 
       Ui.requestUpdate();
@@ -85,34 +91,74 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
   }
 
   private function onNxtPage() as Void {
-    _index = (_index + 1) % _numPages;
-    var newView = getView();
+    var newVisibleDate = _visibleDate.add(
+      new Time.Duration(Gregorian.SECONDS_PER_DAY)
+    );
+
+    if ($.Debug) {
+      $.logMessage(
+        "Next page, new date: " + $.getFormattedDate(newVisibleDate)
+      );
+    }
+
+    var newIndex = $.getDateIndexForDetailedWarnings(
+      _detailedWarnings,
+      newVisibleDate
+    );
+
+    if (newIndex == -1) {
+      // Loop around
+      newIndex = 0;
+      _visibleDate = $.parseDate(_detailedWarnings[newIndex]["validity"][0]);
+    } else {
+      _visibleDate = newVisibleDate;
+    }
+
+    var newView = getView(newIndex);
     Ui.switchToView(newView, getDelegate(newView), Ui.SLIDE_UP);
   }
 
   private function onPrevPage() as Void {
-    _index -= 1;
-    if (_index < 0) {
-      _index = _numPages - 1;
+    var newVisibleDate = _visibleDate.subtract(
+      new Time.Duration(Gregorian.SECONDS_PER_DAY)
+    );
+
+    if ($.Debug) {
+      $.logMessage(
+        "Prev page, new date: " + $.getFormattedDate(newVisibleDate)
+      );
     }
-    _index = _index % _numPages;
-    var newView = getView();
+
+    var newIndex = $.getDateIndexForDetailedWarnings(
+      _detailedWarnings,
+      newVisibleDate
+    );
+
+    if (newIndex == -1) {
+      // Loop around
+      newIndex = _detailedWarnings.size() - 1;
+      _visibleDate = $.parseDate(_detailedWarnings[newIndex]["validity"][0]);
+    } else {
+      _visibleDate = newVisibleDate;
+    }
+
+    var newView = getView(newIndex);
     Ui.switchToView(newView, getDelegate(newView), Ui.SLIDE_DOWN);
   }
 
-  private function getView() as DetailedForecastView {
+  private function getView(index as Number) as DetailedForecastView {
     return new DetailedForecastView({
       :regionId => _regionId,
-      :index => _index,
+      :index => index,
       :numWarnings => _detailedWarnings.size(),
-      :warning => _detailedWarnings[_index],
+      :warning => _detailedWarnings[index],
       :fetchedTime => _fetchedTime,
     });
   }
 
   private function getDelegate(newView as DetailedForecastView) {
     return new DetailedForecastViewPageLoopDelegate({
-      :index => _index,
+      :visibleDate => _visibleDate,
       :view => newView,
       :detailedWarnings => _detailedWarnings,
       :regionId => _regionId,

@@ -173,7 +173,7 @@ function getFormattedTimestamp(moment as Time.Moment) {
 
 (:glance,:background)
 function parseDate(dateString as String) as Time.Moment {
-  return Gregorian.moment({
+  var utcMoment = Gregorian.moment({
     :year => dateString.substring(0, 4).toNumber(),
     :month => dateString.substring(5, 7).toNumber(),
     :day => dateString.substring(8, 10).toNumber(),
@@ -181,6 +181,12 @@ function parseDate(dateString as String) as Time.Moment {
     :minute => dateString.substring(14, 16).toNumber(),
     :second => dateString.substring(17, 19).toNumber(),
   });
+
+  var timeZoneOffsetDuration = Gregorian.duration({
+    :seconds => System.getClockTime().timeZoneOffset,
+  });
+
+  return utcMoment.subtract(timeZoneOffsetDuration);
 }
 
 function isToday(shortInfo as Gregorian.Info) {
@@ -340,19 +346,36 @@ function min(a as Numeric, b as Numeric) {
 public function getDangerLevelToday(
   forecast as SimpleAvalancheForecast
 ) as Number {
-  var now = Time.now();
+  var today = Time.today();
   for (var i = 0; i < forecast.size(); i++) {
     var warning = forecast[i];
     var validity = warning["validity"] as Array;
     if (
-      now.compare($.parseDate(validity[0])) > 0 &&
-      now.compare($.parseDate(validity[1])) <= 0
+      today.compare($.parseDate(validity[0])) >= 0 &&
+      today.compare($.parseDate(validity[1])) < 0
     ) {
       return warning["dangerLevel"];
     }
   }
 
   return 0;
+}
+
+public function getDateIndexForDetailedWarnings(
+  warnings as Array<DetailedAvalancheWarning>,
+  date as Time.Moment
+) {
+  for (var i = 0; i < warnings.size(); i++) {
+    var validity = warnings[i]["validity"] as Array;
+    if (
+      date.compare($.parseDate(validity[0])) >= 0 &&
+      date.compare($.parseDate(validity[1])) < 0
+    ) {
+      return i;
+    }
+  }
+
+  return -1;
 }
 
 (:glance)
