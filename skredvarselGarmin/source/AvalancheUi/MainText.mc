@@ -13,7 +13,7 @@ module AvalancheUi {
   };
 
   class MainText {
-    private const TICKS_AT_TOP_BOTTOM = 30;
+    private const TICKS_AT_TOP_BOTTOM = 20;
 
     private var _text as String;
     private var _width as Numeric;
