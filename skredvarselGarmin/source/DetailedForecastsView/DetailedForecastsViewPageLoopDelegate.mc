@@ -54,6 +54,21 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
         _visibleDate
       );
 
+      if (index == -1) {
+        // Visible date is not part of received data.
+        _visibleDate = $.getStartDateForDetailedWarnings();
+        index = $.getDateIndexForDetailedWarnings(
+          _detailedWarnings,
+          _visibleDate
+        );
+
+        if (index == -1) {
+          // Still cant find the damn index.
+          index = 0;
+          _visibleDate = $.parseDate(_detailedWarnings[index]["validity"][0]);
+        }
+      }
+
       _view.setWarning(
         index,
         _detailedWarnings.size(),

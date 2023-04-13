@@ -5,15 +5,6 @@ using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.Timer;
 
-public function getStartDateForDetailedWarnings() {
-  var startDate = Time.today();
-  var now = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-  if (now.hour >= 17) {
-    startDate = startDate.add(new Time.Duration(Gregorian.SECONDS_PER_DAY));
-  }
-  return startDate;
-}
-
 public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
   private var _regionId as String?;
 
