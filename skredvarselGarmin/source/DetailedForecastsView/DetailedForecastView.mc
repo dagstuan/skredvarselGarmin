@@ -16,7 +16,6 @@ typedef DetailedForecastViewSettings as {
   :fetchedTime as Time.Moment,
 };
 
-// TODO: Draw header with buffered bitmaps.
 class DetailedForecastView extends Ui.View {
   private const TICK_DURATION = 100;
 
