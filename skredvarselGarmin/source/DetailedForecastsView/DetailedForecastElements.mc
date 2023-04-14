@@ -213,13 +213,23 @@ public class DetailedForecastElements {
     }
 
     // Add a dot if it's not there in the main text.
-    if (
-      mainText.length() > 0 &&
-      !mainText.substring(mainText.length() - 1, mainText.length()).equals(".")
-    ) {
-      mainText += ".";
+    var length = mainText.length();
+    if (length > 0) {
+      var lastChar = mainText.substring(length - 1, length);
+
+      if (
+        !lastChar.equals(".") &&
+        !lastChar.equals("!") &&
+        !lastChar.equals("?")
+      ) {
+        mainText += ".";
+      }
     }
 
-    return mainText + " " + _seeFullForecastText;
+    if (mainText.length() > 0) {
+      mainText += " " + _seeFullForecastText;
+    }
+
+    return mainText;
   }
 }

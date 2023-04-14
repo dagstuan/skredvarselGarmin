@@ -15,7 +15,7 @@ module AvalancheUi {
   };
 
   public class ScrollingText {
-    private const TICKS_AT_START_END = 30;
+    private const TICKS_AT_START_END = 20;
 
     private var _text as String;
     private var _containerWidth as Numeric;

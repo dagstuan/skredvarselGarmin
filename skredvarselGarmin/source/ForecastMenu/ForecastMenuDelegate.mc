@@ -81,12 +81,12 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
     data as Array<DetailedAvalancheWarning>,
     fetchedTime as Time.Moment
   ) {
-    // TODO: Make this cleaner.
-    var startIndex = 2;
+    var startDate = $.getStartDateForDetailedWarnings();
+    var startIndex = $.getDateIndexForDetailedWarnings(data, startDate);
 
-    var now = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-    if (now.hour >= 17) {
-      startIndex = 3;
+    if (startIndex == -1) {
+      startIndex = 0;
+      startDate = $.parseDate(data[startIndex]["validity"][0]);
     }
 
     var view = new DetailedForecastView({
@@ -97,7 +97,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
       :fetchedTime => fetchedTime,
     });
     var delegate = new DetailedForecastViewPageLoopDelegate({
-      :index => startIndex,
+      :visibleDate => startDate,
       :view => view,
       :detailedWarnings => data,
       :regionId => regionId,

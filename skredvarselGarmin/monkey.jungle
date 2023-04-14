@@ -33,5 +33,6 @@ fr945lte.excludeAnnotations=hasComplication
 marqadventurer.excludeAnnotations=hasComplication
 marqathlete.excludeAnnotations=hasComplication
 vivoactive3m.excludeAnnotations=hasComplication
+vivoactive3mlte.excludeAnnotations=hasComplication
 vivoactive4.excludeAnnotations=hasComplication
 vivoactive4s.excludeAnnotations=hasComplication

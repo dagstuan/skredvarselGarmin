@@ -18,7 +18,7 @@ module AvalancheUi {
     }
 
     public function draw(dc as Gfx.Dc, selectedIndex as Number) as Void {
-      if (_numElements == 0) {
+      if (_numElements < 2) {
         return;
       }
 

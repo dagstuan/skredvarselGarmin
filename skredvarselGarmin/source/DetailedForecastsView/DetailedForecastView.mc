@@ -16,16 +16,15 @@ typedef DetailedForecastViewSettings as {
   :fetchedTime as Time.Moment,
 };
 
-// TODO: Draw header with buffered bitmaps.
 class DetailedForecastView extends Ui.View {
   private const TICK_DURATION = 100;
 
   private var _warning as DetailedAvalancheWarning?;
   private var _fetchedTime as Time.Moment?;
   private var _isLoading as Boolean;
-
+  private var _index as Number = 0;
+  private var _numWarnings as Number = 0;
   private var _regionId as String;
-  private var _index as Number;
 
   private var _width as Numeric?;
   private var _height as Numeric?;
@@ -57,12 +56,16 @@ class DetailedForecastView extends Ui.View {
     View.initialize();
 
     _regionId = settings[:regionId];
-    _index = settings[:index];
     _isLoading = false;
 
-    setWarning(settings[:warning], settings[:fetchedTime]);
+    setWarning(
+      settings[:index],
+      settings[:numWarnings],
+      settings[:warning],
+      settings[:fetchedTime]
+    );
 
-    _pageIndicator = new AvalancheUi.PageIndicator(settings[:numWarnings]);
+    _pageIndicator = new AvalancheUi.PageIndicator();
   }
 
   public function onLayout(dc as Gfx.Dc) {
@@ -149,7 +152,7 @@ class DetailedForecastView extends Ui.View {
 
     drawFooter(dc, footerY0, footerHeight);
 
-    _pageIndicator.draw(dc, _index);
+    _pageIndicator.draw(dc, _numWarnings, _index);
 
     _forecastElementsIndicator.draw(dc, _currentElement);
   }
@@ -305,9 +308,13 @@ class DetailedForecastView extends Ui.View {
   }
 
   public function setWarning(
+    index as Number,
+    numWarnings as Number,
     warning as DetailedAvalancheWarning,
     fetchedTime as Time.Moment
   ) {
+    _index = index;
+    _numWarnings = numWarnings;
     _warning = warning;
     _fetchedTime = fetchedTime;
 

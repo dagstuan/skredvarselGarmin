@@ -6,7 +6,6 @@ using Toybox.Math;
 module AvalancheUi {
   class PageIndicator {
     public var visibilityPercent as Number;
-    private var _numPages as Number;
 
     private var _indicatorSize = 8;
     private var _paddingFromEdge = 6;
@@ -14,12 +13,15 @@ module AvalancheUi {
     private var _centerAngle = 270;
     private var _anglePerPage = 6;
 
-    public function initialize(numPages as Number) {
-      _numPages = numPages;
+    public function initialize() {
       visibilityPercent = 100;
     }
 
-    public function draw(dc as Gfx.Dc, selectedIndex as Number) as Void {
+    public function draw(
+      dc as Gfx.Dc,
+      numPages as Number,
+      selectedIndex as Number
+    ) as Void {
       if (visibilityPercent == 0) {
         return;
       }
@@ -37,12 +39,12 @@ module AvalancheUi {
       var rad = width / 2 - _paddingFromEdge + mod; // Assume circular screen
 
       var angle =
-        _centerAngle - (_numPages * _anglePerPage - _indicatorSize) / 2;
+        _centerAngle - (numPages * _anglePerPage - _indicatorSize) / 2;
 
       var x0 = cX + rad * Math.sin(Math.toRadians(angle));
       var y0 = cY + rad * Math.cos(Math.toRadians(angle));
 
-      for (var i = 0; i < _numPages; i++) {
+      for (var i = 0; i < numPages; i++) {
         x0 = cX + rad * Math.sin(Math.toRadians(angle));
         y0 = cY + rad * Math.cos(Math.toRadians(angle));
 
