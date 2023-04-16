@@ -15,6 +15,7 @@ namespace SkredvarselGarminWeb.Services;
 
 public class SubscriptionService : ISubscriptionService
 {
+    private readonly TimeSpan ChargeRetryDays = TimeSpan.FromDays(2);
     private const string ChargeText = "Abonnement på Skredvarsel for Garmin";
 
     private readonly SkredvarselDbContext _dbContext;
@@ -60,7 +61,7 @@ public class SubscriptionService : ISubscriptionService
             return;
         }
 
-        if (agreement.Status == EntityAgreementStatus.UNSUBSCRIBED && nowDate > agreement.NextChargeDate)
+        if (agreement.Status == EntityAgreementStatus.UNSUBSCRIBED && nowDate >= agreement.NextChargeDate)
         {
             _logger.LogInformation("Agreement {agreementId} was unsubscribed and due for charge. Stopping agreement in vipps and setting as stopped.", agreement.Id);
 
@@ -71,52 +72,93 @@ public class SubscriptionService : ISubscriptionService
                 agreement.SetAsStopped();
                 _dbContext.SaveChanges();
             }
-
-            return;
         }
-
-        _logger.LogInformation("Updating charges for agreement {agreementId}", agreement.Id);
-
-        var vippsAgreement = await _vippsApiClient.GetAgreement(agreement.Id);
-
-        if (vippsAgreement.Status == VippsAgreementStatus.Active)
+        else
         {
-            if (agreement.NextChargeId == null || !agreement.NextChargeDate.HasValue)
-            {
-                _logger.LogInformation("Agreement did not have a NextChargeId set, creating new charge. Assuming previous charge was today. This should not happen.");
-                await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, DateOnly.FromDateTime(_dateTimeNowProvider.Now));
-            }
-            else
-            {
-                var nextCharge = await _vippsApiClient.GetCharge(agreement.Id, agreement.NextChargeId);
+            _logger.LogInformation("Updating charges for agreement {agreementId}", agreement.Id);
 
-                if (nextCharge.Status == ChargeStatus.CHARGED)
-                {
-                    _logger.LogWarning("Due charge for agreement was already charged. This should not happen.");
-                    await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, agreement.NextChargeDate.Value);
-                }
-                else if (nextCharge.Status == ChargeStatus.RESERVED)
-                {
-                    _logger.LogInformation("Capturing charge {chargeId} for agreement {agreementId} and creating new charge.", nextCharge.Id, agreement.Id);
-                    var response = await _vippsApiClient.CaptureCharge(agreement.Id, nextCharge.Id, new CaptureChargeRequest
-                    {
-                        Amount = nextCharge.Amount,
-                        Description = ChargeText
-                    }, Guid.NewGuid());
+            var vippsAgreement = await _vippsApiClient.GetAgreement(agreement.Id);
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, agreement.NextChargeDate.Value);
-                    }
-                    else
-                    {
-                        _logger.LogError(response.Error, response.Error?.Content);
-                        throw new Exception($"Failed to capture charge {nextCharge.Id}.");
-                    }
+            if (vippsAgreement.Status == VippsAgreementStatus.Active)
+            {
+                if (agreement.NextChargeId == null || !agreement.NextChargeDate.HasValue)
+                {
+                    _logger.LogInformation("Agreement did not have a NextChargeId set, creating new charge. Assuming previous charge was today. This should not happen.");
+                    await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, DateOnly.FromDateTime(_dateTimeNowProvider.Now));
                 }
                 else
                 {
-                    _logger.LogWarning("Due charge for agreement {agreementId} was not charged and not reserved. Status was {status}. Will retry, possibly forever.", agreement.Id, nextCharge.Status);
+                    var nextCharge = await _vippsApiClient.GetCharge(agreement.Id, agreement.NextChargeId);
+
+                    if (nextCharge.Status == ChargeStatus.CHARGED)
+                    {
+                        _logger.LogWarning("Due charge for agreement was already charged. This should not happen.");
+
+                        // Check for existing charge in Vipps.
+                        var pendingChargesInVipps = _vippsApiClient.GetCharges(agreement.Id, ChargeStatus.PENDING);
+                        var dueChargesInVipps = _vippsApiClient.GetCharges(agreement.Id, ChargeStatus.DUE);
+                        var reservedChargesInVipps = _vippsApiClient.GetCharges(agreement.Id, ChargeStatus.RESERVED);
+
+                        await Task.WhenAll(pendingChargesInVipps, dueChargesInVipps, reservedChargesInVipps);
+
+                        var chargesInVipps = (await pendingChargesInVipps)
+                            .Concat(await dueChargesInVipps)
+                            .Concat(await reservedChargesInVipps);
+
+                        var numChargesInVipps = chargesInVipps.Count();
+                        if (numChargesInVipps == 1)
+                        {
+                            var chargeInVipps = chargesInVipps.Single();
+                            _logger.LogInformation("Found pending or due charge in Vipps, setting it as next charge.");
+
+                            agreement.NextChargeDate = DateOnly.FromDateTime(chargeInVipps.Due);
+                            agreement.NextChargeId = nextCharge.Id;
+                        }
+                        else if (numChargesInVipps > 1)
+                        {
+                            _logger.LogError("Multiple new charges found in Vipps. This should not happen.");
+                            throw new Exception("Multiple new charges found in Vipps. This should not happen.");
+                        }
+                        else
+                        {
+                            _logger.LogInformation("No new charge found in Vipps. Creating new charge.");
+                            await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, agreement.NextChargeDate.Value);
+                        }
+                    }
+                    else if (nextCharge.Status == ChargeStatus.DUE)
+                    {
+                        _logger.LogWarning("Next charge for agreement {agreementId} was still due. Charge id {chargeId}. Will retry.", agreement.Id, nextCharge.Id);
+                    }
+                    else if (nextCharge.Status == ChargeStatus.RESERVED)
+                    {
+                        _logger.LogInformation("Capturing charge {chargeId} for agreement {agreementId} and creating new charge.", nextCharge.Id, agreement.Id);
+                        var response = await _vippsApiClient.CaptureCharge(agreement.Id, nextCharge.Id, new CaptureChargeRequest
+                        {
+                            Amount = nextCharge.Amount,
+                            Description = ChargeText
+                        }, Guid.NewGuid());
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, agreement.NextChargeDate.Value);
+                        }
+                        else
+                        {
+                            _logger.LogError(response.Error, response.Error?.Content);
+                            throw new Exception($"Failed to capture charge {nextCharge.Id}.");
+                        }
+                    }
+                    else if (nextCharge.Status == ChargeStatus.FAILED)
+                    {
+                        _logger.LogInformation("Agreement {agreementId} had nextCharge status failed. Stopping agreement. Failed charge had id {chargeId}", agreement.Id, nextCharge.Id);
+                        agreement.SetAsStopped();
+                        _dbContext.SaveChanges();
+                    }
+                    else
+                    {
+                        // If nextcharge is due, and time passed is less than retrydays, do nothing since HF will retry.
+                        _logger.LogWarning("Next charge for agreement {agreementId} had unknown status. Status was {status}. Will retry.", agreement.Id, nextCharge.Status);
+                    }
                 }
             }
         }
@@ -214,7 +256,7 @@ public class SubscriptionService : ISubscriptionService
             Amount = amount,
             Description = ChargeText,
             Due = due,
-            RetryDays = 2,
+            RetryDays = ChargeRetryDays.Days,
         }, Guid.NewGuid());
     }
 
