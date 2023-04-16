@@ -66,7 +66,7 @@ export const Features = () => (
         objectFit="cover"
         maxW={{ base: "100%", sm: "200px" }}
         src={offlineImage}
-        alt="Caffe Latte"
+        alt="Skredvarsel for Garmin"
       />
 
       <Stack>
