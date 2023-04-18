@@ -69,7 +69,7 @@ class WebRequestCommand {
 
   function handleResponse(
     responseCode as Number,
-    data as Null or Dictionary or String
+    data as WebRequestCallbackData
   ) as Void {
     _callback.invoke(responseCode, data);
     _callback = null;

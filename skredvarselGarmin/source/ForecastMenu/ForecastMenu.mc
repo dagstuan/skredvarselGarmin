@@ -184,7 +184,7 @@ public class ForecastMenu extends Ui.CustomMenu {
   }
 
   private function getLastUpdatedTime() as Number? {
-    if (_existingRegionIds == null || _existingRegionIds.size() == 0) {
+    if (_existingRegionIds.size() == 0) {
       return null;
     }
 

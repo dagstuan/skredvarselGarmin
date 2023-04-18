@@ -191,17 +191,14 @@ module AvalancheUi {
           _exposedHeight2 + "m"
         );
       } else if (_exposedHeightFill == 4) {
-        var font = Gfx.FONT_XTINY;
-        var fontHeight = Gfx.getFontHeight(font);
-
         var text = _exposedHeight2 + "-" + _exposedHeight1 + "m";
 
         drawArrow(
           dc,
           0,
           x0,
-          y0 + _height / 2 - fontHeight - fontHeight / 2,
-          fontHeight,
+          y0 + _height / 2 - _fontHeight - _fontHeight / 2,
+          _fontHeight,
           _width,
           X_ALIGN_CENTER,
           Y_ALIGN_BOTTOM,
@@ -211,8 +208,8 @@ module AvalancheUi {
           dc,
           0,
           x0,
-          y0 + _height / 2 - fontHeight / 2,
-          fontHeight,
+          y0 + _height / 2 - _fontHeight / 2,
+          _fontHeight,
           _width,
           X_ALIGN_CENTER,
           Y_ALIGN_CENTER,
@@ -222,8 +219,8 @@ module AvalancheUi {
           dc,
           1,
           x0,
-          y0 + _height / 2 + fontHeight / 2,
-          fontHeight,
+          y0 + _height / 2 + _fontHeight / 2,
+          _fontHeight,
           _width,
           X_ALIGN_CENTER,
           Y_ALIGN_TOP,

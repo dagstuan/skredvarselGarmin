@@ -27,7 +27,6 @@ public class DetailedForecastElements {
   private var _warning as DetailedAvalancheWarning;
 
   private var _locY as Numeric;
-  private var _height as Numeric;
   private var _fullWidth as Numeric;
 
   private var _areaWidth as Numeric;
@@ -48,13 +47,13 @@ public class DetailedForecastElements {
   public function initialize(settings as DetailedForecastElementsSettings) {
     _warning = settings[:warning];
     _locY = settings[:locY];
-    _height = settings[:height];
     _fullWidth = settings[:fullWidth];
 
+    var height = settings[:height];
     _areaWidth = Math.ceil(_fullWidth * 0.82);
-    _areaHeight = _height * 0.9;
+    _areaHeight = height * 0.9;
     _x0 = _fullWidth / 2 - _areaWidth / 2;
-    _y0 = _locY + (_height / 2 - _areaHeight / 2);
+    _y0 = _locY + (height / 2 - _areaHeight / 2);
 
     _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
 
@@ -148,8 +147,6 @@ public class DetailedForecastElements {
 
   public function draw(dc as Gfx.Dc) {
     if ($.DrawOutlines) {
-      $.drawOutline(dc, 0, _locY, _fullWidth, _height);
-
       $.drawOutline(dc, _x0, _y0, _areaWidth, _areaHeight);
     }
 

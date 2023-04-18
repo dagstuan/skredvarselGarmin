@@ -1,12 +1,12 @@
 (:background)
 public function updateComplicationIfExists() {
-  if ($ has :updateComplication && Toybox has :Complications) {
-    $.updateComplication();
+  if ($ has :updateSkredvarselComplication && Toybox has :Complications) {
+    $.updateSkredvarselComplication();
   }
 }
 
 (:hasComplication,:background)
-public function updateComplication() {
+public function updateSkredvarselComplication() {
   var favoriteRegionId = $.getFavoriteRegionId();
 
   var newComplicationValue = null;

@@ -27,7 +27,7 @@ function getSelectedRegionIds() as Array<String> {
 function getFavoriteRegionId() as String? {
   var favoriteRegions = $.getSelectedRegionIds();
 
-  if (favoriteRegions != null && favoriteRegions.size() > 0) {
+  if (favoriteRegions.size() > 0) {
     return favoriteRegions[0];
   }
 
@@ -89,33 +89,30 @@ function setSelectedRegionIdsInStorage(regionIds as Array<String>) {
 public function toggleFavoriteRegion(regionId as String) as Void {
   var selectedRegionIds = self.getSelectedRegionIds();
 
-  if (selectedRegionIds != null) {
-    // Remove from favorites.
-    var regionIdsSize = selectedRegionIds.size();
+  var regionIdsSize = selectedRegionIds.size();
 
-    if (regionId.equals(selectedRegionIds[0])) {
-      selectedRegionIds[0] = selectedRegionIds[1];
-      selectedRegionIds[1] = regionId;
-    } else {
-      // Set as favorite.
-      // Move element to beginning, shifting other elements.
-      var index = -1;
-      for (var i = 0; i < regionIdsSize; i++) {
-        if (selectedRegionIds[i].equals(regionId)) {
-          index = i;
-          break;
-        }
+  if (regionId.equals(selectedRegionIds[0])) {
+    selectedRegionIds[0] = selectedRegionIds[1];
+    selectedRegionIds[1] = regionId;
+  } else {
+    // Set as favorite.
+    // Move element to beginning, shifting other elements.
+    var index = -1;
+    for (var i = 0; i < regionIdsSize; i++) {
+      if (selectedRegionIds[i].equals(regionId)) {
+        index = i;
+        break;
       }
-
-      for (var i = index; i > 0; i--) {
-        selectedRegionIds[i] = selectedRegionIds[i - 1];
-      }
-
-      selectedRegionIds[0] = regionId;
     }
 
-    setSelectedRegionIdsInStorage(selectedRegionIds);
+    for (var i = index; i > 0; i--) {
+      selectedRegionIds[i] = selectedRegionIds[i - 1];
+    }
+
+    selectedRegionIds[0] = regionId;
   }
+
+  setSelectedRegionIdsInStorage(selectedRegionIds);
 }
 
 public function removeSelectedRegion(regionId as String) {

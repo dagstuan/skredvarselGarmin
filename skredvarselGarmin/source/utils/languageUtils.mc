@@ -22,9 +22,7 @@ function getOrLoadResourceString(
   resourceRef as Symbol
 ) {
   if ($.getUseWatchLanguage() == true) {
-    var strings = $.Rez.Strings as Dictionary<Symbol, Symbol>;
-
-    return Application.loadResource(strings[resourceRef]);
+    return Application.loadResource(($.Rez.Strings as Object)[resourceRef]);
   }
 
   return defaultString;

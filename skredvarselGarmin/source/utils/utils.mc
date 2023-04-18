@@ -261,10 +261,8 @@ function removeStringFromArray(curArray as Array<String>, value as String) {
 }
 
 public function minValue(arr as Array<Number>) {
-  if (arr == null || arr.size() == 0) {
-    throw new SkredvarselGarminException(
-      "Null or empty array sent to minValue"
-    );
+  if (arr.size() == 0) {
+    throw new SkredvarselGarminException("Empty array sent to minValue");
   }
 
   var min = 2147483647;
