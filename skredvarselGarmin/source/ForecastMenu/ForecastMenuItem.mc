@@ -36,11 +36,9 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
     getForecastFromCache();
     if (_forecast == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
-      if ($.Debug) {
-        $.logMessage(
-          "Null or stale simple forecast for menu item, try to reload in background"
-        );
-      }
+      $.log(
+        "Null or stale simple forecast for menu item, try to reload in background"
+      );
 
       $.loadSimpleForecastForRegion(_regionId, method(:onReceive), true);
     }

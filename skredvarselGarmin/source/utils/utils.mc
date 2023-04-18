@@ -7,7 +7,11 @@ using Toybox.Time.Gregorian;
 using Toybox.System;
 using Toybox.Math;
 
+(:debug)
+const Debug = true;
+(:release)
 const Debug = false;
+
 const DrawOutlines = false;
 
 (:glance)
@@ -273,8 +277,11 @@ public function minValue(arr as Array<Number>) {
   return min;
 }
 
-(:background)
-public function logMessage(message as String) {
+(:release)
+public function log(message as String) {}
+
+(:background,:debug)
+public function log(message as String) {
   var info = Gregorian.utcInfo(Time.now(), Time.FORMAT_MEDIUM);
 
   var formattedTime = Lang.format("$1$:$2$:$3$ $4$ $5$ $6$ $7$", [

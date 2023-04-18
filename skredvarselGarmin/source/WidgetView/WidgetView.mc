@@ -40,11 +40,9 @@ public class WidgetView extends Ui.View {
       _regionId != null &&
       (_forecast == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE)
     ) {
-      if ($.Debug) {
-        $.logMessage(
-          "Null or stale simple forecast for widget, try to reload in background"
-        );
-      }
+      $.log(
+        "Null or stale simple forecast for widget, try to reload in background"
+      );
 
       $.loadSimpleForecastForRegion(_regionId, method(:onReceive), false);
     }

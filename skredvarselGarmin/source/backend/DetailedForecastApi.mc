@@ -37,9 +37,7 @@ function loadDetailedWarningsForRegion(
   regionId as String?,
   callback as WebRequestDelegateCallback
 ) {
-  if ($.Debug) {
-    $.logMessage("Loading detailed forecast for " + regionId);
-  }
+  $.log("Loading detailed forecast for " + regionId);
 
   var language = $.getForecastLanguage();
 

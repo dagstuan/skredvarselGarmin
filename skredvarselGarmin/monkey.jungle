@@ -1,5 +1,7 @@
 project.manifest = manifest.xml
 
+base.sourcePath = source
+
 fenix7.resourcePath = $(base.resourcePath);resources-complications
 fenix7s.resourcePath = $(base.resourcePath);resources-complications
 fenix7x.resourcePath = $(base.resourcePath);resources-complications

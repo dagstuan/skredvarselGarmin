@@ -32,9 +32,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
 
     var dataAge = Time.now().compare(_fetchedTime);
     if (dataAge > $.TIME_TO_CONSIDER_DATA_STALE && $.canMakeWebRequest()) {
-      if ($.Debug) {
-        $.logMessage("Stale forecast, try to reload in background");
-      }
+      $.log("Stale forecast, try to reload in background");
 
       _view.setIsLoading(true);
       $.loadDetailedWarningsForRegion(settings[:regionId], method(:onReceive));
@@ -110,11 +108,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
       new Time.Duration(Gregorian.SECONDS_PER_DAY)
     );
 
-    if ($.Debug) {
-      $.logMessage(
-        "Next page, new date: " + $.getFormattedDate(newVisibleDate)
-      );
-    }
+    $.log("Next page, new date: " + $.getFormattedDate(newVisibleDate));
 
     var newIndex = $.getDateIndexForDetailedWarnings(
       _detailedWarnings,
@@ -138,11 +132,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
       new Time.Duration(Gregorian.SECONDS_PER_DAY)
     );
 
-    if ($.Debug) {
-      $.logMessage(
-        "Prev page, new date: " + $.getFormattedDate(newVisibleDate)
-      );
-    }
+    $.log("Prev page, new date: " + $.getFormattedDate(newVisibleDate));
 
     var newIndex = $.getDateIndexForDetailedWarnings(
       _detailedWarnings,

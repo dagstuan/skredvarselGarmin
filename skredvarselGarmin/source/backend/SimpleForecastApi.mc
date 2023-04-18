@@ -45,9 +45,7 @@ public function loadSimpleForecastForRegion(
   callback as WebRequestDelegateCallback,
   useQueue as Boolean
 ) {
-  if ($.Debug) {
-    $.logMessage("Loading simple forecast for " + regionId);
-  }
+  $.log("Loading simple forecast for " + regionId);
 
   var language = $.getForecastLanguage();
 

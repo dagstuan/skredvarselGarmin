@@ -51,27 +51,25 @@ function resetStorageCacheIfRequired() {
     storageVersion != STORAGE_VERSION ||
     cachedForecastsLanguage != forecastLanguageSetting
   ) {
-    if ($.Debug) {
-      $.logMessage(
-        "Resetting storage cache. storageVersion in Storage: " + storageVersion
-      );
-    }
+    $.log(
+      "Resetting storage cache. storageVersion in Storage: " + storageVersion
+    );
 
     var hasSubscription = $.getHasSubscription();
     var selectedRegionIds = $.getSelectedRegionIds();
     try {
       Storage.clearValues();
     } catch (ex instanceof Toybox.Application.ObjectStoreAccessException) {
+      $.log(
+        "Failed to reset storage cache due to object store access exception."
+      );
       if ($.Debug) {
-        $.logMessage(
-          "Failed to reset storage cache due to object store access exception."
-        );
         ex.printStackTrace();
       }
       throw new Exception();
     } catch (ex) {
+      $.log("Failed to reset storage cache for some reason.");
       if ($.Debug) {
-        $.logMessage("Failed to reset storage cache for some reason.");
         ex.printStackTrace();
       }
       throw new Exception();

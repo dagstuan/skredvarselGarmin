@@ -49,9 +49,7 @@ class WebRequestDelegate {
   }
 
   function makeRequest() {
-    if ($.Debug) {
-      $.logMessage("Fetching: " + _path);
-    }
+    $.log("Fetching: " + _path);
 
     Communications.makeWebRequest(
       $.BaseApiUrl + _path,
@@ -71,15 +69,15 @@ class WebRequestDelegate {
     data as Dictionary<String, Object?> or String or Null
   ) as Void {
     if (responseCode == 200) {
-      if ($.Debug) {
-        $.logMessage("200 OK. Storing in storage with key: " + _storageKey);
-      }
+      $.log("200 OK. Storing in storage with key: " + _storageKey);
+
       Storage.setValue(_storageKey, [data, Time.now().value()]);
-    } else if (responseCode == 401 && $.Debug) {
-      $.logMessage("Api responded with 401. No subscription for user.");
+    } else if (responseCode == 401) {
+      $.log("Api responded with 401. No subscription for user.");
+
       $.setHasSubscription(false);
-    } else if ($.Debug) {
-      $.logMessage("Failed request. Response code: " + responseCode);
+    } else {
+      $.log("Failed request. Response code: " + responseCode);
     }
 
     _callback.invoke(responseCode, data);

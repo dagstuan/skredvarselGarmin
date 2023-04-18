@@ -7,9 +7,7 @@ using Toybox.Communications as Comm;
 using Toybox.Timer;
 
 function setupSubscription(callback as WebRequestDelegateCallback) {
-  if ($.Debug) {
-    $.logMessage("Asking server to setup subscription.");
-  }
+  $.log("Asking server to setup subscription.");
 
   var deviceSettings = Sys.getDeviceSettings();
 
@@ -101,18 +99,14 @@ class SetupSubscriptionView extends Ui.View {
     responseCode as Number,
     data as WebRequestCallbackData
   ) as Void {
-    if ($.Debug) {
-      $.logMessage("Received response " + responseCode);
-    }
+    $.log("Received response " + responseCode);
 
     if (_loadingView != null) {
       try {
         Ui.popView(Ui.SLIDE_BLINK);
         _loadingView = null;
       } catch (ex) {
-        if ($.Debug) {
-          $.logMessage("Failed to pop loading view on receive.");
-        }
+        $.log("Failed to pop loading view on receive.");
       }
     }
 

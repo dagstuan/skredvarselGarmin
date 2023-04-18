@@ -18,28 +18,21 @@ public function updateComplication() {
     }
   }
 
-  if ($.Debug) {
-    $.logMessage("Setting new complication value " + newComplicationValue);
-  }
+  $.log("Setting new complication value " + newComplicationValue);
+
   try {
     if (Toybox.Complications has :updateComplication) {
       Toybox.Complications.updateComplication(0, {
         :value => newComplicationValue,
       });
     } else {
-      if ($.Debug) {
-        $.logMessage("updateComplication method not found on complications.");
-      }
+      $.log("updateComplication method not found on complications.");
     }
   } catch (ex) {
+    $.log("Failed to update complication. Error was: " + ex.getErrorMessage());
     if ($.Debug) {
-      $.logMessage(
-        "Failed to update complication. Error was: " + ex.getErrorMessage()
-      );
       ex.printStackTrace();
     }
   }
-  if ($.Debug) {
-    $.logMessage("Done update complication");
-  }
+  $.log("Done update complication");
 }

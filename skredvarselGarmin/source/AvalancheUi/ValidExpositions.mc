@@ -26,7 +26,7 @@ module AvalancheUi {
 
     public function initialize(settings as ValidExpositionsSettings) {
       _validExpositions = settings[:validExpositions].toCharArray();
-      _radius = settings[:radius];
+      _radius = settings[:radius] as Numeric;
       _dangerFillColor = settings[:dangerFillColor];
       _nonDangerFillColor = settings[:nonDangerFillColor];
 

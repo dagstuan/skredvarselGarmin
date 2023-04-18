@@ -53,9 +53,8 @@ class skredvarselGarminApp extends Application.AppBase {
     var lastRunTime = Background.getLastTemporalEventTime();
 
     if (lastRunTime == null) {
-      if ($.Debug) {
-        $.logMessage("Background refresh never done. Running immediately.");
-      }
+      $.log("Background refresh never done. Running immediately.");
+
       var now = new Time.Moment(Time.now().value());
       Background.registerForTemporalEvent(now);
     } else {
@@ -65,13 +64,12 @@ class skredvarselGarminApp extends Application.AppBase {
         registeredEvent == null ||
         registeredEvent.value() != refreshInterval.value()
       ) {
-        if ($.Debug) {
-          $.logMessage(
-            "Registering temporal event in " +
-              REFRESH_INTERVAL_MINUTES +
-              " minutes"
-          );
-        }
+        $.log(
+          "Registering temporal event in " +
+            REFRESH_INTERVAL_MINUTES +
+            " minutes"
+        );
+
         Background.registerForTemporalEvent(refreshInterval);
       }
     }
@@ -82,9 +80,7 @@ class skredvarselGarminApp extends Application.AppBase {
     registerTemporalEvent();
 
     if ($.getHasSubscription() == false) {
-      if ($.Debug) {
-        $.logMessage("No subscription detected.");
-      }
+      $.log("No subscription detected.");
       return [new SetupSubscriptionView(), new SetupSubscriptionViewDelegate()];
     }
 
@@ -105,9 +101,7 @@ class skredvarselGarminApp extends Application.AppBase {
   public function onBackgroundData(
     fetchedData as Application.PersistableType
   ) as Void {
-    if ($.Debug) {
-      $.logMessage("Exited background job. Fetched data: " + fetchedData);
-    }
+    $.log("Exited background job. Fetched data: " + fetchedData);
 
     if (fetchedData == true) {
       Ui.requestUpdate();
