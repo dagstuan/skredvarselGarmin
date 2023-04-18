@@ -93,8 +93,8 @@ public class DetailedForecastFooter {
       bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
 
       bufferedDc.drawText(
-        textDimensions[0] / 2,
-        textDimensions[1] / 2,
+        _bufferedBitmapWidth / 2,
+        _bufferedBitmapHeight / 2,
         _font,
         text,
         Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER

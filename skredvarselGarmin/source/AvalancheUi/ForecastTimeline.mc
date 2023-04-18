@@ -73,9 +73,7 @@ module AvalancheUi {
       var currXOffset = _locX;
 
       for (var i = 0; i < _numWarnings; i++) {
-        var warning = _forecast[i];
-
-        var lengthDrawn = drawWarning(dc, currXOffset, warning);
+        var lengthDrawn = drawWarning(dc, currXOffset, _forecast[i]);
 
         if (lengthDrawn > 0) {
           currXOffset += lengthDrawn + _gap;
@@ -121,16 +119,12 @@ module AvalancheUi {
       }
 
       var color = colorize(dangerLevel);
-
-      var lineStart = x0;
-      var lineEnd = x0 + lengthThisElem;
-
       dc.setColor(color, Graphics.COLOR_TRANSPARENT);
 
       dc.fillRectangle(
-        lineStart,
+        x0,
         _locY + (_height / 2 - _lineHeight / 2),
-        lineEnd - lineStart,
+        lengthThisElem,
         _lineHeight
       );
 

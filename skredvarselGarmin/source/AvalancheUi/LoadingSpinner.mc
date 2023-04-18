@@ -19,6 +19,8 @@ module AvalancheUi {
     private var _angle as Numeric = 0;
     private var _anglePerTick = 40;
 
+    private var _penWidth = 2;
+
     public function initialize(settings as LoadingSpinnerSettings) {
       _radius = settings[:radius];
       _locX = settings[:locX];
@@ -30,15 +32,14 @@ module AvalancheUi {
     }
 
     public function draw(dc as Gfx.Dc) {
-      var penWidth = 2;
       dc.setAntiAlias(true);
       dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
-      dc.setPenWidth(penWidth);
+      dc.setPenWidth(_penWidth);
 
       dc.drawArc(
         _locX,
         _locY,
-        _radius - penWidth / 2.0,
+        _radius - _penWidth / 2.0,
         Gfx.ARC_CLOCKWISE,
         _angle,
         (_angle - 270) % 360

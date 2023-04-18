@@ -9,6 +9,23 @@ using Toybox.Time.Gregorian;
 using AvalancheUi;
 
 (:glance)
+function getMemoryConstrainedDevices() {
+  return [
+    "006-B3258-00", // Descent Mk 2
+    "006-B3542-00", // Descent Mk 2s
+    "006-B3290-00", // F6 Pro
+    "006-B3288-00", // F6S Pro
+    "006-B3291-00", // F6X Pro
+    "006-B3589-00", // FR745
+    "006-B3113-00", // FR945
+    "006-B3652-00", // FR945 LTE
+    "006-B3077-00", // FR245 Music
+    "006-B3624-00", // Marq Adventurer
+    "006-B3251-00", // Marq Athlete
+  ];
+}
+
+(:glance)
 class GlanceView extends Ui.GlanceView {
   private var _hasSubscription as Boolean?;
   private var _favoriteRegionId as String?;
@@ -30,19 +47,7 @@ class GlanceView extends Ui.GlanceView {
     var deviceSettings = System.getDeviceSettings();
     var partNumber = deviceSettings.partNumber;
 
-    if (
-      partNumber.equals("006-B3258-00") || // Descent Mk 2
-      partNumber.equals("006-B3542-00") || // Descent Mk 2s
-      partNumber.equals("006-B3290-00") || // F6 Pro
-      partNumber.equals("006-B3288-00") || // F6S Pro
-      partNumber.equals("006-B3291-00") || // F6X Pro
-      partNumber.equals("006-B3589-00") || // FR745
-      partNumber.equals("006-B3113-00") || // FR945
-      partNumber.equals("006-B3652-00") || // FR945 LTE
-      partNumber.equals("006-B3077-00") || // FR245 Music
-      partNumber.equals("006-B3624-00") || // Marq Adventurer
-      partNumber.equals("006-B3251-00") // Marq Athlete
-    ) {
+    if (arrayContainsString(getMemoryConstrainedDevices(), partNumber)) {
       _useBufferedBitmap = false;
     }
   }

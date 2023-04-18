@@ -47,6 +47,7 @@ public class ForecastMenu extends Ui.CustomMenu {
       for (var i = 0; i < regionIds.size(); i++) {
         if (!regionIds[i].equals(_existingRegionIds[i])) {
           regionsChanged = true;
+          break;
         }
       }
     }
@@ -54,8 +55,7 @@ public class ForecastMenu extends Ui.CustomMenu {
     if (regionsChanged) {
       deleteAllItems();
       for (var i = 0; i < regionIds.size(); i++) {
-        var regionId = regionIds[i];
-        addItem(new ForecastMenuItem(self, regionId));
+        addItem(new ForecastMenuItem(self, regionIds[i]));
       }
 
       addItem(new ForecastMenuEditMenuItem(_editItemId));

@@ -177,8 +177,6 @@ public class WidgetView extends Ui.View {
 
         return $.getIconResourceForDangerLevel(dangerLevelToday);
       }
-
-      return $.Rez.Drawables.Level2;
     }
 
     return $.Rez.Drawables.Level2;

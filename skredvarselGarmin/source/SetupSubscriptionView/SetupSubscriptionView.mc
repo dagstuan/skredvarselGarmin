@@ -144,7 +144,7 @@ class SetupSubscriptionView extends Ui.View {
         );
       }
     } else {
-      _numRetries += 1;
+      _numRetries++;
       if (_numRetries >= _maxRetries) {
         Ui.switchToView(
           new TextAreaView(

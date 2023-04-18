@@ -9,8 +9,8 @@ using Toybox.Time.Gregorian;
 using AvalancheUi;
 
 public class ForecastMenuItem extends Ui.CustomMenuItem {
+  public var regionId as String;
   private var _menu as ForecastMenu;
-  private var _regionId as String;
   private var _forecast as SimpleAvalancheForecast?;
   private var _dataAge as Number?;
 
@@ -29,8 +29,8 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   public function initialize(menu as ForecastMenu, regionId as String) {
     CustomMenuItem.initialize(regionId, {});
 
+    self.regionId = regionId;
     _menu = menu;
-    _regionId = regionId;
     _screenWidth = $.getDeviceScreenWidth();
     _loadingText = $.getOrLoadResourceString("Laster...", :Loading);
 
@@ -40,7 +40,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
         "Null or stale simple forecast for menu item, try to reload in background"
       );
 
-      $.loadSimpleForecastForRegion(_regionId, method(:onReceive), true);
+      $.loadSimpleForecastForRegion(regionId, method(:onReceive), true);
     }
   }
 
@@ -83,7 +83,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
       });
       var bufferedDc = _bufferedBitmap.getDc();
 
-      var regionName = $.getRegionName(_regionId);
+      var regionName = $.getRegionName(regionId);
       var forecastTimeline = new AvalancheUi.ForecastTimeline({
         :locX => _marginLeft,
         :locY => 0,
@@ -100,7 +100,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   }
 
   private function getForecastFromCache() as Void {
-    var data = $.getSimpleForecastForRegion(_regionId);
+    var data = $.getSimpleForecastForRegion(regionId);
 
     if (data != null) {
       // Reset buffered bitmap when receiving new data
@@ -118,9 +118,5 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
       getForecastFromCache();
       _menu.redrawTitleAndFooter();
     }
-  }
-
-  public function getRegionId() as String {
-    return _regionId;
   }
 }

@@ -277,27 +277,21 @@ class DetailedForecastView extends Ui.View {
   }
 
   public function goToNextVisibleElement() {
-    if (_elements == null) {
-      return;
+    if (_elements != null) {
+      _currentElement = _elements.goToNextElement();
     }
-
-    _currentElement = _elements.goToNextElement();
   }
 
   public function goToPreviousVisibleElement() {
-    if (_elements == null) {
-      return;
+    if (_elements != null) {
+      _currentElement = _elements.goToPreviousElement();
     }
-
-    _currentElement = _elements.goToPreviousElement();
   }
 
   public function toggleVisibleElement() {
-    if (_elements == null) {
-      return;
+    if (_elements != null) {
+      _currentElement = _elements.toggleVisibleElement();
     }
-
-    _currentElement = _elements.toggleVisibleElement();
   }
 
   public function setIsLoading(isLoading as Boolean) {

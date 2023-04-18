@@ -229,6 +229,7 @@ function isTomorrow(shortInfo as Gregorian.Info) {
   );
 }
 
+(:glance)
 function arrayContainsString(arr as Array<String>, str as String) {
   for (var i = 0; i < arr.size(); i++) {
     if (arr[i].equals(str)) {
@@ -330,6 +331,16 @@ function getScreenWidthAtPoint(deviceScreenWidth as Numeric, y as Numeric) {
   ).toNumber();
 }
 
+(:release)
+function drawOutline(
+  dc as Graphics.Dc,
+  x0 as Numeric,
+  y0 as Numeric,
+  width as Numeric,
+  height as Numeric
+) {}
+
+(:debug)
 function drawOutline(
   dc as Graphics.Dc,
   x0 as Numeric,
@@ -404,11 +415,9 @@ public function newBufferedBitmap(
       :alphaBlending as Graphics.AlphaBlending,
     }
 ) {
-  if (Graphics has :createBufferedBitmap) {
-    return Graphics.createBufferedBitmap(options).get();
-  }
-
-  return new Graphics.BufferedBitmap(options);
+  return Graphics has :createBufferedBitmap
+    ? Graphics.createBufferedBitmap(options).get()
+    : new Graphics.BufferedBitmap(options);
 }
 
 (:glance)

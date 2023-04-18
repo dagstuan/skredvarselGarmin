@@ -24,7 +24,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
         WatchUi.SLIDE_LEFT
       );
     } else {
-      _regionId = (item as ForecastMenuItem).getRegionId();
+      _regionId = (item as ForecastMenuItem).regionId;
 
       var data = $.getDetailedWarningsForRegion(_regionId);
 

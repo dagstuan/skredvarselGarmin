@@ -43,9 +43,11 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
       )
     );
 
-    var delegate = new DetailedForecastViewMenuDelegate(_regionId);
-
-    Ui.pushView(menu, delegate, Ui.SLIDE_BLINK);
+    Ui.pushView(
+      menu,
+      new DetailedForecastViewMenuDelegate(_regionId),
+      Ui.SLIDE_BLINK
+    );
 
     return true;
   }
@@ -66,8 +68,7 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
   //! @param evt The key event that occurred
   //! @return true if handled, false otherwise
   public function onKey(evt as Ui.KeyEvent) as Boolean {
-    var key = evt.getKey();
-    if (Ui.KEY_ENTER == key) {
+    if (Ui.KEY_ENTER == evt.getKey()) {
       _view.toggleVisibleElement();
       return true;
     }

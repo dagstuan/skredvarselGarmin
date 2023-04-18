@@ -12,13 +12,7 @@ using Toybox.WatchUi as Ui;
 public function getSimpleForecastForRegion(regionId as String) as Array? {
   var storageKey = $.getSimpleForecastCacheKeyForRegion(regionId);
 
-  var valueFromStorage = Storage.getValue(storageKey) as Array?;
-
-  if (valueFromStorage != null) {
-    return valueFromStorage;
-  }
-
-  return null;
+  return Storage.getValue(storageKey);
 }
 
 (:background)

@@ -13,8 +13,15 @@ module AvalancheUi {
     private var _degreesPerElement = 3;
     private var _degreesPaddingBetweenElements = 2;
 
+    private var _centerAngle = 30;
+    private var _totalLengthDegrees as Number;
+
     public function initialize(numElements as Number) {
       _numElements = numElements;
+
+      var degreesPadding = _degreesPaddingBetweenElements * (_numElements - 1);
+
+      _totalLengthDegrees = _numElements * _degreesPerElement + degreesPadding;
     }
 
     public function draw(dc as Gfx.Dc, selectedIndex as Number) as Void {
@@ -31,20 +38,13 @@ module AvalancheUi {
       var cY = height / 2;
       var rad = width / 2 - _paddingFromEdge; // Assume circular screen
 
-      var centerAngle = 30;
-
-      var degreesPadding = _degreesPaddingBetweenElements * (_numElements - 1);
-
-      var totalLengthDegrees =
-        _numElements * _degreesPerElement + degreesPadding;
-      var angle = centerAngle + totalLengthDegrees / 2;
+      var angle = _centerAngle + _totalLengthDegrees / 2;
 
       for (var i = 0; i < _numElements; i++) {
-        if (i == selectedIndex) {
-          dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
-        } else {
-          dc.setColor(Gfx.COLOR_DK_GRAY, Gfx.COLOR_TRANSPARENT);
-        }
+        dc.setColor(
+          i == selectedIndex ? Gfx.COLOR_LT_GRAY : Gfx.COLOR_DK_GRAY,
+          Gfx.COLOR_TRANSPARENT
+        );
 
         dc.drawArc(
           cX,
