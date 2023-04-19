@@ -68,7 +68,7 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
                     Period = new()
                     {
                         Count = 1,
-                        Unit = PeriodUnit.Month
+                        Unit = PeriodUnit.Week
                     }
                 } : null,
                 InitialCharge = isNewCustomer ? new()
