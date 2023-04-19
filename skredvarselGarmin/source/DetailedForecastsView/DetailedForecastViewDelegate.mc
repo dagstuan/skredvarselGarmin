@@ -64,9 +64,6 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
     return false;
   }
 
-  //! Handle a physical button being pressed and released
-  //! @param evt The key event that occurred
-  //! @return true if handled, false otherwise
   public function onKey(evt as Ui.KeyEvent) as Boolean {
     if (Ui.KEY_ENTER == evt.getKey()) {
       _view.toggleVisibleElement();

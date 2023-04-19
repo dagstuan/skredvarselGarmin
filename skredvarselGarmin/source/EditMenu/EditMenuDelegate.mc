@@ -5,8 +5,6 @@ public class EditMenuDelegate extends Ui.Menu2InputDelegate {
     Menu2InputDelegate.initialize();
   }
 
-  //! Handle an item being selected
-  //! @param item The selected menu item
   public function onSelect(item as Ui.MenuItem) as Void {
     var editMenuItem = item as EditMenuItem;
 
@@ -23,7 +21,6 @@ public class EditMenuDelegate extends Ui.Menu2InputDelegate {
     WatchUi.requestUpdate();
   }
 
-  //! Handle the back key being pressed
   public function onBack() as Void {
     WatchUi.popView(WatchUi.SLIDE_DOWN);
   }
