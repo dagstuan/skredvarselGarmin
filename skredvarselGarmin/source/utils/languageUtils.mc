@@ -16,13 +16,13 @@ function getUseWatchLanguage() as Boolean {
   return $.useWatchLanguage;
 }
 
-(:glance)
+(:glance,:typecheck(false))
 function getOrLoadResourceString(
   defaultString as String,
   resourceRef as Symbol
 ) {
   if ($.getUseWatchLanguage() == true) {
-    return Application.loadResource(($.Rez.Strings as Object)[resourceRef]);
+    return Application.loadResource($.Rez.Strings[resourceRef]);
   }
 
   return defaultString;

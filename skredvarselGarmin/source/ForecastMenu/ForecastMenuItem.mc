@@ -14,24 +14,16 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   private var _forecast as SimpleAvalancheForecast?;
   private var _dataAge as Number?;
 
-  private var _screenWidth as Number;
-
   private var _loadingText as Ui.Resource;
 
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
-
-  private var _width as Numeric?;
-  private var _height as Numeric?;
-
-  private var _marginLeft as Numeric?;
-  private var _marginRight as Numeric?;
 
   public function initialize(menu as ForecastMenu, regionId as String) {
     CustomMenuItem.initialize(regionId, {});
 
     self.regionId = regionId;
     _menu = menu;
-    _screenWidth = $.getDeviceScreenWidth();
+
     _loadingText = $.getOrLoadResourceString("Laster...", :Loading);
 
     getForecastFromCache();
@@ -47,19 +39,6 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   //! Draw the item string at the center of the item.
   //! @param dc Device context
   public function draw(dc as Gfx.Dc) as Void {
-    if (
-      _width == null ||
-      _height == null ||
-      _marginLeft == null ||
-      _marginRight == null
-    ) {
-      _width = dc.getWidth();
-      _height = dc.getHeight();
-      _marginLeft = _width == _screenWidth ? _screenWidth * 0.05 : 0;
-      _marginRight =
-        _width == _screenWidth ? _screenWidth * 0.05 : _screenWidth * 0.1;
-    }
-
     if (_forecast != null && _dataAge < $.TIME_TO_SHOW_LOADING) {
       drawTimeline(dc);
     } else {
@@ -77,18 +56,25 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
   function drawTimeline(dc as Gfx.Dc) {
     if (_bufferedBitmap == null) {
+      var screenWidth = $.getDeviceScreenWidth();
+      var width = dc.getWidth();
+      var height = dc.getHeight();
+      var marginLeft = width == screenWidth ? screenWidth * 0.05 : 0;
+      var marginRight =
+        width == screenWidth ? screenWidth * 0.05 : screenWidth * 0.1;
+
       _bufferedBitmap = $.newBufferedBitmap({
-        :width => _width,
-        :height => _height,
+        :width => width,
+        :height => height,
       });
       var bufferedDc = _bufferedBitmap.getDc();
 
       var regionName = $.getRegionName(regionId);
       var forecastTimeline = new AvalancheUi.ForecastTimeline({
-        :locX => _marginLeft,
+        :locX => marginLeft,
         :locY => 0,
-        :width => _width - _marginRight,
-        :height => _height,
+        :width => width - marginRight,
+        :height => height,
         :regionName => regionName,
         :forecast => _forecast,
       });
