@@ -74,7 +74,7 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
                 InitialCharge = isNewCustomer ? new()
                 {
                     Amount = 100,
-                    Description = "Første måned"
+                    Description = "Første uke"
                 } : new()
                 {
                     Amount = FullPrice,

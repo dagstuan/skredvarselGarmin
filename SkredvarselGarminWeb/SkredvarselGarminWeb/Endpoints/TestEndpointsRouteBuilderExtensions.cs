@@ -61,7 +61,7 @@ public static class TestEndpointsRouteBuilderExtensions
                     InitialCharge = new()
                     {
                         Amount = 100,
-                        Description = "Første måned"
+                        Description = "Første uke"
                     },
                     ProductName = "Skredvarsel for Garmin",
                     MerchantAgreementUrl = $"{baseUrl}/minSide/",
