@@ -2,6 +2,7 @@ namespace SkredvarselGarminWeb.Endpoints.Models;
 
 public class DetailedAvalancheWarning
 {
+    public required DateTime Published { get; init; }
     public required int DangerLevel { get; init; }
     public required DateTime[] Validity { get; init; }
     public required string MainText { get; init; }

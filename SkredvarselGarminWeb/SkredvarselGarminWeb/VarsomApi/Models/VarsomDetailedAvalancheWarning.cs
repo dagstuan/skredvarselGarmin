@@ -2,6 +2,7 @@ namespace SkredvarselGarminWeb.VarsomApi.Models;
 
 public class VarsomDetailedAvalancheWarning
 {
+    public required DateTime PublishTime { get; init; }
     public required DateTime ValidFrom { get; init; }
     public required DateTime ValidTo { get; init; }
     public required string DangerLevel { get; init; }
