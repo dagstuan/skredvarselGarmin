@@ -40,6 +40,13 @@ public class SubscriptionService : ISubscriptionService
     {
         using var transaction = _dbContext.Database.BeginTransaction();
 
+        await UpdateAgreementChargesInternal(agreementId);
+
+        transaction.Commit();
+    }
+
+    private async Task UpdateAgreementChargesInternal(string agreementId)
+    {
         var agreement = _dbContext.Agreements
             .Where(a => a.Id == agreementId)
             .Where(a =>
@@ -162,12 +169,12 @@ public class SubscriptionService : ISubscriptionService
                 }
             }
         }
-
-        transaction.Commit();
     }
 
     public async Task DeactivateAgreement(string agreementId)
     {
+        using var transaction = _dbContext.Database.BeginTransaction();
+
         _logger.LogInformation("Deactivating agreement {agreementId}", agreementId);
 
         var agreementInDb = _dbContext.Agreements.First(a => a.Id == agreementId);
@@ -178,7 +185,7 @@ public class SubscriptionService : ISubscriptionService
         }
 
         // If the agreement is new, claim the first charge before deactivating.
-        await UpdateAgreementCharges(agreementId);
+        await UpdateAgreementChargesInternal(agreementId);
 
         if (agreementInDb.NextChargeId != null)
         {
@@ -196,10 +203,14 @@ public class SubscriptionService : ISubscriptionService
 
         agreementInDb.Status = EntityAgreementStatus.UNSUBSCRIBED;
         _dbContext.SaveChanges();
+
+        transaction.Commit();
     }
 
     public async Task ReactivateAgreement(string agreementId)
     {
+        using var transaction = _dbContext.Database.BeginTransaction();
+
         _logger.LogInformation("Reactivating agreement {agreementId}", agreementId);
 
         var agreementInDb = _dbContext.Agreements.First(a => a.Id == agreementId);
@@ -218,6 +229,8 @@ public class SubscriptionService : ISubscriptionService
         agreementInDb.NextChargeId = charge.ChargeId;
         agreementInDb.SetAsActive();
         _dbContext.SaveChanges();
+
+        transaction.Commit();
     }
 
     private async Task<bool> StopAgreementInVipps(string agreementId)
