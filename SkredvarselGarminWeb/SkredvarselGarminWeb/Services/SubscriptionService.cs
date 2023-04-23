@@ -15,7 +15,7 @@ namespace SkredvarselGarminWeb.Services;
 
 public class SubscriptionService : ISubscriptionService
 {
-    private readonly TimeSpan ChargeRetryDays = TimeSpan.FromDays(2);
+    private readonly TimeSpan ChargeRetryDays = TimeSpan.FromDays(3);
     private const string ChargeText = "Abonnement på Skredvarsel for Garmin";
 
     private readonly SkredvarselDbContext _dbContext;
