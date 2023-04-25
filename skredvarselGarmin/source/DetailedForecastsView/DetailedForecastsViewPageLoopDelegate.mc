@@ -109,8 +109,6 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
       new Time.Duration(Gregorian.SECONDS_PER_DAY)
     );
 
-    $.log("Next page, new date: " + $.getFormattedDate(newVisibleDate));
-
     var newIndex = $.getDateIndexForDetailedWarnings(
       _detailedWarnings,
       newVisibleDate
@@ -132,8 +130,6 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     var newVisibleDate = _visibleDate.subtract(
       new Time.Duration(Gregorian.SECONDS_PER_DAY)
     );
-
-    $.log("Prev page, new date: " + $.getFormattedDate(newVisibleDate));
 
     var newIndex = $.getDateIndexForDetailedWarnings(
       _detailedWarnings,
