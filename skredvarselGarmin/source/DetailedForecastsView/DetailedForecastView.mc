@@ -29,11 +29,6 @@ class DetailedForecastView extends Ui.View {
   private var _width as Numeric?;
   private var _height as Numeric?;
 
-  private var _todayText as Ui.Resource?;
-  private var _yesterdayText as Ui.Resource?;
-  private var _tomorrowText as Ui.Resource?;
-  private var _levelText as Ui.Resource?;
-
   private var _elements as DetailedForecastElements?;
   private var _currentElement as Number = 0;
   private var _numElements as Number?;
@@ -74,11 +69,6 @@ class DetailedForecastView extends Ui.View {
   }
 
   public function onShow() {
-    _todayText = $.getOrLoadResourceString("I dag", :Today);
-    _yesterdayText = $.getOrLoadResourceString("I går", :Yesterday);
-    _tomorrowText = $.getOrLoadResourceString("I morgen", :Tomorrow);
-    _levelText = $.getOrLoadResourceString("Faregrad", :Level);
-
     _updateTimer = new Timer.Timer();
     _updateTimer.start(method(:onTick), TICK_DURATION /* ms */, true);
   }
@@ -120,10 +110,6 @@ class DetailedForecastView extends Ui.View {
       _elements.onHide();
       _elements = null;
     }
-    _todayText = null;
-    _yesterdayText = null;
-    _tomorrowText = null;
-    _levelText = null;
 
     _footer = null;
     _dangerLevelBitmap = null;
@@ -161,11 +147,11 @@ class DetailedForecastView extends Ui.View {
     var info = Gregorian.info(date, Time.FORMAT_SHORT);
 
     if ($.isToday(info)) {
-      return _todayText;
+      return $.getOrLoadResourceString("I dag", :Today);
     } else if ($.isYesterday(info)) {
-      return _yesterdayText;
+      return $.getOrLoadResourceString("I går", :Yesterday);
     } else if ($.isTomorrow(info)) {
-      return _tomorrowText;
+      return $.getOrLoadResourceString("I morgen", :Tomorrow);
     } else {
       var validityInfo = Gregorian.info(date, Time.FORMAT_MEDIUM);
 
@@ -209,7 +195,8 @@ class DetailedForecastView extends Ui.View {
       var iconWidth = icon.getWidth();
       var iconHeight = icon.getHeight();
 
-      var text = _levelText + " " + dangerLevel.toString();
+      var levelText = $.getOrLoadResourceString("Faregrad", :Level);
+      var text = levelText + " " + dangerLevel.toString();
 
       var textWidth = dc.getTextWidthInPixels(text, font);
       var centerY0 = height / 2;
