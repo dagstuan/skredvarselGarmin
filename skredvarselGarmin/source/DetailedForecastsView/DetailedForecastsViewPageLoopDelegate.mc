@@ -73,10 +73,11 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
         _detailedWarnings[index],
         _fetchedTime
       );
-      _view.setIsLoading(false);
-
-      Ui.requestUpdate();
     }
+
+    _view.setIsLoading(false);
+
+    Ui.requestUpdate();
   }
 
   public function onKey(evt as Ui.KeyEvent) as Boolean {
