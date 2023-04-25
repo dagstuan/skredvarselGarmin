@@ -20,8 +20,8 @@ class ServiceDelegate extends System.ServiceDelegate {
     var now = Time.now();
 
     var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
-    _start = getFormattedDate(now.subtract(twoDays));
-    _end = getFormattedDate(now.add(twoDays));
+    _start = $.getFormattedDateForApiCall(now.subtract(twoDays));
+    _end = $.getFormattedDateForApiCall(now.add(twoDays));
   }
 
   public function onTemporalEvent() as Void {

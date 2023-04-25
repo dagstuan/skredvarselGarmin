@@ -45,8 +45,8 @@ public function loadSimpleForecastForRegion(
 
   var now = Time.now();
   var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
-  var start = getFormattedDate(now.subtract(twoDays));
-  var end = getFormattedDate(now.add(twoDays));
+  var start = $.getFormattedDateForApiCall(now.subtract(twoDays));
+  var end = $.getFormattedDateForApiCall(now.add(twoDays));
 
   var path = $.getSimpleWarningsPathForRegion(regionId, language, start, end);
   var storageKey = $.getSimpleForecastCacheKeyForRegion(regionId);
