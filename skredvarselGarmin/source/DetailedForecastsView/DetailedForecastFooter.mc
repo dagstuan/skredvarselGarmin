@@ -1,7 +1,6 @@
 import Toybox.Lang;
 
 using Toybox.Graphics as Gfx;
-using Toybox.WatchUi as Ui;
 using Toybox.Time;
 
 typedef DetailedForecastFooterSettings as {

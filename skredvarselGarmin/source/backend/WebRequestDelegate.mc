@@ -1,7 +1,6 @@
 import Toybox.Lang;
 
-using Toybox.Communications as Comm;
-using Toybox.System as Sys;
+using Toybox.Communications;
 using Toybox.Time;
 using Toybox.Application.Storage;
 

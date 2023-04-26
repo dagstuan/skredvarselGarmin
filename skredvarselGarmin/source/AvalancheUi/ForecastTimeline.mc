@@ -2,7 +2,6 @@ import Toybox.Lang;
 
 using Toybox.Graphics as Gfx;
 using Toybox.Time;
-using Toybox.Time.Gregorian;
 
 module AvalancheUi {
   typedef ForecastTimelineSettings as {
@@ -30,9 +29,7 @@ module AvalancheUi {
     private var _markerHeight = 18;
     private var _strokeOffset = 4;
 
-    private var _oneDayValue = (new Time.Duration(Gregorian.SECONDS_PER_DAY))
-      .value()
-      .toFloat();
+    private var _oneDayValue = $.dayDuration(1).value().toFloat();
 
     private var _earlyCutoffTime as Time.Moment;
 
@@ -62,9 +59,7 @@ module AvalancheUi {
       var now = Time.getCurrentTime({
         :currentTimeType => Time.CURRENT_TIME_DEFAULT,
       });
-      _earlyCutoffTime = now.subtract(
-        new Time.Duration(Gregorian.SECONDS_PER_DAY * 2)
-      );
+      _earlyCutoffTime = $.subtractDays(now, 2);
     }
 
     public function draw(dc as Gfx.Dc) {

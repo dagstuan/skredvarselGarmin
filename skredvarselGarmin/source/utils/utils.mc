@@ -307,7 +307,7 @@ public function getStartDateForDetailedWarnings() {
   var startDate = Time.today();
   var now = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
   if (now.hour >= 17) {
-    startDate = startDate.add(new Time.Duration(Gregorian.SECONDS_PER_DAY));
+    startDate = addDays(startDate, 1);
   }
   return startDate;
 }

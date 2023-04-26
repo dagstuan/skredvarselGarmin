@@ -2,8 +2,6 @@ import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
 using Toybox.Time;
-using Toybox.Time.Gregorian;
-using Toybox.Timer;
 
 public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
   private var _regionId as String?;

@@ -1,7 +1,6 @@
 import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
-using Toybox.Time.Gregorian;
 using Toybox.Time;
 
 typedef DetailedWarningsViewPageLoopDelegateSettings as {
@@ -105,9 +104,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
   }
 
   private function onNxtPage() as Void {
-    var newVisibleDate = _visibleDate.add(
-      new Time.Duration(Gregorian.SECONDS_PER_DAY)
-    );
+    var newVisibleDate = $.addDays(_visibleDate, 1);
 
     var newIndex = $.getDateIndexForDetailedWarnings(
       _detailedWarnings,
@@ -127,9 +124,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
   }
 
   private function onPrevPage() as Void {
-    var newVisibleDate = _visibleDate.subtract(
-      new Time.Duration(Gregorian.SECONDS_PER_DAY)
-    );
+    var newVisibleDate = $.subtractDays(_visibleDate, 1);
 
     var newIndex = $.getDateIndexForDetailedWarnings(
       _detailedWarnings,

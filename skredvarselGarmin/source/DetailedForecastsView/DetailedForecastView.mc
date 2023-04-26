@@ -2,7 +2,6 @@ import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
-using Toybox.Time.Gregorian;
 using Toybox.Time;
 using Toybox.Timer;
 
@@ -143,22 +142,6 @@ class DetailedForecastView extends Ui.View {
     _forecastElementsIndicator.draw(dc, _currentElement);
   }
 
-  function getDateText(date as Time.Moment) {
-    var info = Gregorian.info(date, Time.FORMAT_SHORT);
-
-    if ($.isToday(info)) {
-      return $.getOrLoadResourceString("I dag", :Today);
-    } else if ($.isYesterday(info)) {
-      return $.getOrLoadResourceString("I går", :Yesterday);
-    } else if ($.isTomorrow(info)) {
-      return $.getOrLoadResourceString("I morgen", :Tomorrow);
-    } else {
-      var validityInfo = Gregorian.info(date, Time.FORMAT_MEDIUM);
-
-      return Lang.format("$1$ $2$", [validityInfo.day, validityInfo.month]);
-    }
-  }
-
   public function drawHeader(dc as Gfx.Dc, y0 as Numeric, height as Numeric) {
     if (_header == null) {
       var startValidity = (_warning["validity"] as Array)[0];
@@ -166,7 +149,7 @@ class DetailedForecastView extends Ui.View {
 
       _header = new DetailedForecastHeader({
         :regionName => $.getRegionName(_regionId),
-        :validityDate => getDateText(validityDate),
+        :validityDate => $.getHumanReadableDateText(validityDate),
         :locY => y0,
         :locX => 0,
         :width => _width,

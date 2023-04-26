@@ -1,8 +1,6 @@
 import Toybox.Lang;
 
 using Toybox.Graphics as Gfx;
-using Toybox.WatchUi as Ui;
-using Toybox.Timer;
 
 module AvalancheUi {
   typedef ScrollingTextSettings as {

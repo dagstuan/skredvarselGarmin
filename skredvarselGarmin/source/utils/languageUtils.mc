@@ -2,7 +2,6 @@ import Toybox.Lang;
 
 using Toybox.Application;
 using Toybox.Application.Properties;
-using Toybox.WatchUi as Ui;
 
 (:glance)
 var useWatchLanguage as Boolean?;

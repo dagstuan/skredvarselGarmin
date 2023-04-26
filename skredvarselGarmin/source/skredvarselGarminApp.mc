@@ -4,7 +4,6 @@ import Toybox.System;
 
 using Toybox.WatchUi as Ui;
 using Toybox.Background;
-using Toybox.Application.Storage;
 
 function getInitialViewAndDelegate() as Array<Ui.Views or Ui.InputDelegates> {
   var deviceSettings = System.getDeviceSettings();

@@ -2,7 +2,6 @@ import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
-using Toybox.Math;
 
 public class ForecastMenu extends Ui.CustomMenu {
   private const _editItemId = "edit";

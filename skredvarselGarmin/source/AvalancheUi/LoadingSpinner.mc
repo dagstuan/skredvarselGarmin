@@ -1,8 +1,6 @@
 import Toybox.Lang;
 
 using Toybox.Graphics as Gfx;
-using Toybox.Math;
-using Toybox.WatchUi as Ui;
 
 module AvalancheUi {
   typedef LoadingSpinnerSettings as {

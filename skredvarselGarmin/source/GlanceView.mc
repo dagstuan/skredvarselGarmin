@@ -2,9 +2,6 @@ import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
-using Toybox.System as Sys;
-using Toybox.Time;
-using Toybox.Time.Gregorian;
 
 using AvalancheUi;
 

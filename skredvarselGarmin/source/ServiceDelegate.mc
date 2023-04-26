@@ -1,8 +1,6 @@
 import Toybox.Lang;
 import Toybox.System;
 
-using Toybox.Time.Gregorian;
-
 (:background)
 class ServiceDelegate extends System.ServiceDelegate {
   private var _simpleRegionsToReload as Array<String> = [];
@@ -18,10 +16,8 @@ class ServiceDelegate extends System.ServiceDelegate {
     _language = $.getForecastLanguage();
 
     var now = Time.now();
-
-    var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
-    _start = $.getFormattedDateForApiCall(now.subtract(twoDays));
-    _end = $.getFormattedDateForApiCall(now.add(twoDays));
+    _start = $.getFormattedDateForApiCall($.subtractDays(now, 2));
+    _end = $.getFormattedDateForApiCall($.addDays(now, 2));
   }
 
   public function onTemporalEvent() as Void {

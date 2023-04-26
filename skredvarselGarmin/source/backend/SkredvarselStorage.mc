@@ -1,8 +1,6 @@
 import Toybox.Lang;
 
 using Toybox.Application.Storage;
-using Toybox.Time;
-using Toybox.Time.Gregorian;
 
 const SelectedRegionIdsStorageKey = "selectedRegionIds";
 

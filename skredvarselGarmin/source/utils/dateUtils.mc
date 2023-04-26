@@ -4,6 +4,21 @@ using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.System;
 
+(:background)
+function dayDuration(numDays as Number) as Time.Duration {
+  return new Time.Duration(Gregorian.SECONDS_PER_DAY * numDays);
+}
+
+(:background)
+function addDays(moment as Time.Moment, numDays as Number) {
+  return moment.add($.dayDuration(numDays));
+}
+
+(:background)
+function subtractDays(moment as Time.Moment, numDays as Number) {
+  return moment.subtract($.dayDuration(numDays));
+}
+
 function getFormattedTimestamp(moment as Time.Moment) {
   var info = Gregorian.info(moment, Time.FORMAT_SHORT);
 
@@ -43,7 +58,7 @@ function isToday(shortInfo as Gregorian.Info) {
 
 function isYesterday(shortInfo as Gregorian.Info) {
   var yesterday = Gregorian.info(
-    Time.today().subtract(new Time.Duration(Gregorian.SECONDS_PER_DAY)),
+    $.subtractDays(Time.today(), 1),
     Time.FORMAT_SHORT
   );
 
@@ -55,14 +70,27 @@ function isYesterday(shortInfo as Gregorian.Info) {
 }
 
 function isTomorrow(shortInfo as Gregorian.Info) {
-  var tomorrow = Gregorian.info(
-    Time.today().add(new Time.Duration(Gregorian.SECONDS_PER_DAY)),
-    Time.FORMAT_SHORT
-  );
+  var tomorrow = Gregorian.info($.addDays(Time.today(), 1), Time.FORMAT_SHORT);
 
   return (
     shortInfo.day == tomorrow.day &&
     shortInfo.month == tomorrow.month &&
     shortInfo.year == tomorrow.year
   );
+}
+
+function getHumanReadableDateText(date as Time.Moment) {
+  var info = Gregorian.info(date, Time.FORMAT_SHORT);
+
+  if ($.isToday(info)) {
+    return $.getOrLoadResourceString("I dag", :Today);
+  } else if ($.isYesterday(info)) {
+    return $.getOrLoadResourceString("I går", :Yesterday);
+  } else if ($.isTomorrow(info)) {
+    return $.getOrLoadResourceString("I morgen", :Tomorrow);
+  } else {
+    var validityInfo = Gregorian.info(date, Time.FORMAT_MEDIUM);
+
+    return Lang.format("$1$ $2$", [validityInfo.day, validityInfo.month]);
+  }
 }

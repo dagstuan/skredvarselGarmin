@@ -1,11 +1,7 @@
 import Toybox.Lang;
 
-using Toybox.Communications as Comm;
-using Toybox.Time.Gregorian;
-using Toybox.Time as Time;
-using Toybox.System as Sys;
 using Toybox.Application.Storage;
-using Toybox.WatchUi as Ui;
+using Toybox.Time;
 
 // Returns [warning, storedTime] array
 function getDetailedWarningsForRegion(regionId as String) as Array? {
@@ -42,9 +38,8 @@ function loadDetailedWarningsForRegion(
   var language = $.getForecastLanguage();
 
   var now = Time.now();
-  var twoDays = new Time.Duration(Gregorian.SECONDS_PER_DAY * 2);
-  var start = $.getFormattedDateForApiCall(now.subtract(twoDays));
-  var end = $.getFormattedDateForApiCall(now.add(twoDays));
+  var start = $.getFormattedDateForApiCall($.subtractDays(now, 2));
+  var end = $.getFormattedDateForApiCall($.addDays(now, 2));
 
   var path = $.getDetailedWarningsPathForRegion(regionId, language, start, end);
   var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);

@@ -1,7 +1,5 @@
 import Toybox.Lang;
 
-using Toybox.Time;
-
 typedef SimpleAvalancheWarning as {
   "dangerLevel" as Number,
   "validity" as Array,

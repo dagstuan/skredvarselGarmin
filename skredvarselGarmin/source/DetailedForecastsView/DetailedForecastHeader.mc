@@ -1,8 +1,6 @@
 import Toybox.Lang;
 
 using Toybox.Graphics as Gfx;
-using Toybox.WatchUi as Ui;
-using Toybox.Time;
 
 typedef DetailedForecastHeaderSettings as {
   :regionName as String,

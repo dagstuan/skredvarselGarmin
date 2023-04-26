@@ -1,7 +1,6 @@
 import Toybox.Lang;
 
 using Toybox.Graphics as Gfx;
-using Toybox.Math;
 
 function getTopHalfPoints() {
   return [
