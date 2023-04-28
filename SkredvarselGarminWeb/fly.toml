@@ -1,56 +1,56 @@
-# fly.toml file generated for skredvarsel-garmin-web-prod on 2023-03-30T00:30:26+02:00
+# fly.toml app configuration file generated for skredvarsel-garmin-web-prod on 2023-04-27T20:54:09+02:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
 app = "skredvarsel-garmin-web-prod"
-kill_signal = "SIGINT"
-kill_timeout = 5
 primary_region = "arn"
-processes = []
-
-[build]
-  dockerfile = "Dockerfile"
-
-[env]
-
-[deploy]
-  strategy = "rolling"
+kill_signal = "SIGINT"
+kill_timeout = "5s"
 
 [experimental]
   auto_rollback = true
 
-[mounts]
+[deploy]
+  strategy = "rolling"
+
+[env]
+  PRIMARY_REGION = "arn"
+
+[[mounts]]
+  source = "skredvarselGarmin_data_machines"
   destination = "/data"
-  source = "skredvarselGarmin_data"
+  processes = ["app"]
 
 [[services]]
+  protocol = "tcp"
   internal_port = 8080
   processes = ["app"]
-  protocol = "tcp"
-  script_checks = []
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
   [services.concurrency]
+    type = "connections"
     hard_limit = 25
     soft_limit = 20
-    type = "connections"
 
-  [[services.ports]]
-    force_https = true
-    handlers = ["http"]
-    port = 80
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
+  [[services.tcp_checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "10s"
+    restart_limit = 0
 
   [[services.http_checks]]
-    interval = 5000
+    interval = "5s"
+    timeout = "2s"
     grace_period = "10s"
+    restart_limit = 0
     method = "get"
     path = "/healthz"
     protocol = "http"
-    restart_limit = 0
-    timeout = 2000
-
-  [[services.tcp_checks]]
-    grace_period = "10s"
-    interval = "15s"
-    restart_limit = 0
-    timeout = "2s"
