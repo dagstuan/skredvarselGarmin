@@ -93,4 +93,17 @@ public class HangfireService
         _dbContext.RemoveRange(staleWatchAddRequests);
         _dbContext.SaveChanges();
     }
+
+    public void RemoveStaleUsers()
+    {
+        var staleUsers = _dbContext.GetUsersNotLoggedInForAMonthWithoutAgreements(_dateTimeNowProvider);
+
+        foreach (var user in staleUsers)
+        {
+            _logger.LogInformation("Removing stale user {userId} due to no logins for 1 month and no agreements.", user.Id);
+            _dbContext.Remove(user);
+        }
+
+        _dbContext.SaveChanges();
+    }
 }
