@@ -70,15 +70,9 @@ public class SubscriptionService : ISubscriptionService
 
         if (agreement.Status == EntityAgreementStatus.UNSUBSCRIBED && nowDate >= agreement.NextChargeDate)
         {
-            _logger.LogInformation("Agreement {agreementId} was unsubscribed and due for charge. Stopping agreement in vipps and setting as stopped.", agreement.Id);
+            _logger.LogInformation("Agreement {agreementId} was unsubscribed and due for charge.", agreement.Id);
 
-            var success = await StopAgreementInVipps(agreement.Id);
-
-            if (success)
-            {
-                agreement.SetAsStopped();
-                _dbContext.SaveChanges();
-            }
+            await StopAgreement(agreement);
         }
         else
         {
@@ -158,8 +152,8 @@ public class SubscriptionService : ISubscriptionService
                     else if (nextCharge.Status == ChargeStatus.FAILED)
                     {
                         _logger.LogInformation("Agreement {agreementId} had nextCharge status failed. Stopping agreement. Failed charge had id {chargeId}", agreement.Id, nextCharge.Id);
-                        agreement.SetAsStopped();
-                        _dbContext.SaveChanges();
+
+                        await StopAgreement(agreement);
                     }
                     else
                     {
@@ -168,6 +162,23 @@ public class SubscriptionService : ISubscriptionService
                     }
                 }
             }
+        }
+    }
+
+    public async Task StopAgreement(EntityAgreement agreement)
+    {
+        _logger.LogInformation("Stopping agreement in vipps and setting as stopped.");
+
+        var success = await StopAgreementInVipps(agreement.Id);
+
+        if (success)
+        {
+            agreement.SetAsStopped();
+            _dbContext.SaveChanges();
+        }
+        else
+        {
+            _logger.LogError("Failed to stop agreement in Vipps.");
         }
     }
 
