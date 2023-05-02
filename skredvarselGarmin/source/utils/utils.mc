@@ -245,18 +245,6 @@ function getIconResourceForDangerLevel(dangerLevel as Number) {
   return $.Rez.Drawables.NoLevel;
 }
 
-function getScreenWidthAtPoint(deviceScreenWidth as Numeric, y as Numeric) {
-  var radius = deviceScreenWidth / 2;
-  return (
-    2 *
-    radius *
-    Math.sin(
-      Math.toRadians(2 * Math.toDegrees(Math.acos(1 - y.toFloat() / radius))) /
-        2
-    )
-  ).toNumber();
-}
-
 (:release)
 function drawOutline(
   dc as Graphics.Dc,

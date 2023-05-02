@@ -91,6 +91,6 @@ function getHumanReadableDateText(date as Time.Moment) {
   } else {
     var validityInfo = Gregorian.info(date, Time.FORMAT_MEDIUM);
 
-    return Lang.format("$1$ $2$", [validityInfo.day, validityInfo.month]);
+    return Lang.format("$1$. $2$", [validityInfo.day, validityInfo.month]);
   }
 }

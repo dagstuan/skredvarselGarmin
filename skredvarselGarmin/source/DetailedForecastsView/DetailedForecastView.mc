@@ -19,7 +19,6 @@ class DetailedForecastView extends Ui.View {
   private const TICK_DURATION = 100;
 
   private var _warning as DetailedAvalancheWarning?;
-  private var _fetchedTime as Time.Moment?;
   private var _isLoading as Boolean;
   private var _index as Number = 0;
   private var _numWarnings as Number = 0;
@@ -234,7 +233,7 @@ class DetailedForecastView extends Ui.View {
   public function drawFooter(dc as Gfx.Dc, y0 as Numeric, height as Numeric) {
     if (_footer == null) {
       _footer = new DetailedForecastFooter({
-        :fetchedTime => _fetchedTime,
+        :publishedTime => _warning["published"],
         :locY => y0,
         :locX => 0,
         :width => _width,
@@ -267,7 +266,7 @@ class DetailedForecastView extends Ui.View {
   public function setIsLoading(isLoading as Boolean) {
     _isLoading = isLoading;
     if (_footer != null) {
-      _footer.setIsLoading(isLoading);
+      _footer.onUpdate(isLoading, _warning["published"]);
     }
   }
 
@@ -280,7 +279,6 @@ class DetailedForecastView extends Ui.View {
     _index = index;
     _numWarnings = numWarnings;
     _warning = warning;
-    _fetchedTime = fetchedTime;
 
     _header = null;
     _dangerLevelBitmap = null;

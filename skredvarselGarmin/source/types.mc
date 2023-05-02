@@ -15,6 +15,7 @@ typedef AvalancheProblem as {
 };
 
 typedef DetailedAvalancheWarning as {
+  "published" as String,
   "dangerLevel" as Number,
   "validity" as Array,
   "mainText" as String,
