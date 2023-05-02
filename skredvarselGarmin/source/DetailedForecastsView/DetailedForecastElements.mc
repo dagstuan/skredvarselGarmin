@@ -40,7 +40,7 @@ public class DetailedForecastElements {
 
   private var _elements as Array<AvalancheForecastElement?>;
 
-  private var _seeFullForecastText as Ui.Resource?;
+  private var _seeFullForecastText as String;
 
   public function initialize(settings as DetailedForecastElementsSettings) {
     _warning = settings[:warning];
@@ -200,28 +200,23 @@ public class DetailedForecastElements {
     }
 
     // Remove all spaces from the end.
-    while (
-      mainText.substring(mainText.length() - 1, mainText.length()).equals(" ")
-    ) {
-      mainText = mainText.substring(0, mainText.length() - 1);
+    var length = mainText.length();
+    while (mainText.substring(length - 1, length).equals(" ")) {
+      mainText = mainText.substring(0, length - 1);
+      length = mainText.length();
     }
 
     // Add a dot if it's not there in the main text.
-    var length = mainText.length();
     if (length > 0) {
       var lastChar = mainText.substring(length - 1, length);
 
-      if (
-        !lastChar.equals(".") &&
-        !lastChar.equals("!") &&
-        !lastChar.equals("?")
-      ) {
-        mainText += ".";
-      }
-    }
-
-    if (mainText.length() > 0) {
-      mainText += " " + _seeFullForecastText;
+      mainText = Lang.format("$1$$2$ $3$", [
+        mainText,
+        lastChar.equals(".") || lastChar.equals("!") || lastChar.equals("?")
+          ? ""
+          : ".",
+        _seeFullForecastText,
+      ]);
     }
 
     return mainText;
