@@ -23,10 +23,12 @@ export const MyPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isOnMinSide = location.pathname == "/minSide";
+  const isOnMinSide = location.pathname.toLowerCase() == "/minside";
 
   if (isOnMinSide && !isLoading && !user) {
-    window.location.href = "/vipps-login?returnUrl=/minSide";
+    setTimeout(() => {
+      window.location.href = "/vipps-login?returnUrl=/minSide";
+    }, 0);
     return null;
   }
 

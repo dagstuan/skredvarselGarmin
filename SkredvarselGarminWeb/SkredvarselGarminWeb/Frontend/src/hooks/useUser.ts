@@ -8,11 +8,13 @@ const config = {
   },
 };
 
-const fetchUser = async () =>
-  api.get("/api/vipps-user", config).then((res) => res.data as User);
+const fetchUser = async () => {
+  const res = await api.get("/api/vipps-user", config);
+  return res.data as User;
+};
 
 export const useUser = () =>
-  useQuery(["user"], async () => fetchUser(), {
+  useQuery(["user"], fetchUser, {
     staleTime: Infinity,
     cacheTime: Infinity,
     retry: false,
