@@ -105,30 +105,18 @@ function getHumanReadableDateText(date as Time.Moment) {
 }
 
 function getNorwegianMonthShort(monthNum as Number) {
-  if (monthNum == 1) {
-    return "Jan";
-  } else if (monthNum == 2) {
-    return "Feb";
-  } else if (monthNum == 3) {
-    return "Mar";
-  } else if (monthNum == 4) {
-    return "Apr";
-  } else if (monthNum == 5) {
-    return "Mai";
-  } else if (monthNum == 6) {
-    return "Jun";
-  } else if (monthNum == 7) {
-    return "Jul";
-  } else if (monthNum == 8) {
-    return "Aug";
-  } else if (monthNum == 9) {
-    return "Sep";
-  } else if (monthNum == 10) {
-    return "Okt";
-  } else if (monthNum == 11) {
-    return "Nov";
-  } else if (monthNum == 12) {
-    return "Des";
-  }
-  throw new SkredvarselGarminException("Invalid month");
+  return [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Okt",
+    "Nov",
+    "Des",
+  ][monthNum - 1];
 }
