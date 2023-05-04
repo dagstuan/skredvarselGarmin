@@ -89,8 +89,46 @@ function getHumanReadableDateText(date as Time.Moment) {
   } else if ($.isTomorrow(info)) {
     return $.getOrLoadResourceString("I morgen", :Tomorrow);
   } else {
-    var validityInfo = Gregorian.info(date, Time.FORMAT_MEDIUM);
+    var useWatchLanguage = $.getUseWatchLanguage();
+    if (useWatchLanguage) {
+      var validityInfo = Gregorian.info(date, Time.FORMAT_MEDIUM);
 
-    return Lang.format("$1$. $2$", [validityInfo.day, validityInfo.month]);
+      return Lang.format("$1$. $2$", [validityInfo.day, validityInfo.month]);
+    } else {
+      var validityInfo = Gregorian.info(date, Time.FORMAT_SHORT);
+      return Lang.format("$1$. $2$", [
+        validityInfo.day,
+        getNorwegianMonthShort(validityInfo.month),
+      ]);
+    }
   }
+}
+
+function getNorwegianMonthShort(monthNum as Number) {
+  if (monthNum == 1) {
+    return "Jan";
+  } else if (monthNum == 2) {
+    return "Feb";
+  } else if (monthNum == 3) {
+    return "Mar";
+  } else if (monthNum == 4) {
+    return "Apr";
+  } else if (monthNum == 5) {
+    return "Mai";
+  } else if (monthNum == 6) {
+    return "Jun";
+  } else if (monthNum == 7) {
+    return "Jul";
+  } else if (monthNum == 8) {
+    return "Aug";
+  } else if (monthNum == 9) {
+    return "Sep";
+  } else if (monthNum == 10) {
+    return "Okt";
+  } else if (monthNum == 11) {
+    return "Nov";
+  } else if (monthNum == 12) {
+    return "Des";
+  }
+  throw new SkredvarselGarminException("Invalid month");
 }
