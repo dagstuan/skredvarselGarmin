@@ -23,7 +23,7 @@ public class DetailedForecastFooter {
   private var _font = Gfx.FONT_XTINY;
   private var _fontHeight as Number;
 
-  private var _bufferedBitmapText as Gfx.BufferedBitmap?;
+  private var _bufferedBitmap as Gfx.BufferedBitmap?;
   private var _bufferedBitmapWidth as Numeric?;
   private var _bufferedBitmapHeight as Numeric?;
 
@@ -53,7 +53,7 @@ public class DetailedForecastFooter {
   }
 
   public function draw(dc as Gfx.Dc) {
-    if (_isLoading || _publishedTime == null) {
+    if (_isLoading) {
       if (_loadingSpinner == null) {
         _loadingSpinner = new AvalancheUi.LoadingSpinner({
           :locX => _locX + _width / 2.0,
@@ -66,7 +66,7 @@ public class DetailedForecastFooter {
       return;
     }
 
-    if (_bufferedBitmapText == null) {
+    if (_bufferedBitmap == null && _publishedTime != null) {
       var updatedIcon =
         Ui.loadResource($.Rez.Drawables.UpdatedIcon) as Ui.BitmapResource;
       var iconWidth = updatedIcon.getWidth();
@@ -84,11 +84,11 @@ public class DetailedForecastFooter {
       _bufferedBitmapHeight =
         textDimensions[1] > iconHeight ? textDimensions[1] : iconHeight;
 
-      _bufferedBitmapText = $.newBufferedBitmap({
+      _bufferedBitmap = $.newBufferedBitmap({
         :width => _bufferedBitmapWidth,
         :height => _bufferedBitmapHeight,
       });
-      var bufferedDc = _bufferedBitmapText.getDc();
+      var bufferedDc = _bufferedBitmap.getDc();
       bufferedDc.setAntiAlias(true);
       bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
 
@@ -107,19 +107,21 @@ public class DetailedForecastFooter {
       );
     }
 
-    var textX0 = _locX + _width / 2.0 - _bufferedBitmapWidth / 2.0;
-    var textY0 =
-      _deviceScreenWidth > 240 ? _locY + _bufferedBitmapHeight / 2.0 : _locY;
+    if (_bufferedBitmap != null) {
+      var textX0 = _locX + _width / 2.0 - _bufferedBitmapWidth / 2.0;
+      var textY0 =
+        _deviceScreenWidth > 240 ? _locY + _bufferedBitmapHeight / 2.0 : _locY;
 
-    dc.drawBitmap(textX0, textY0, _bufferedBitmapText);
+      dc.drawBitmap(textX0, textY0, _bufferedBitmap);
+    }
   }
 
-  public function onUpdate(isLoading as Boolean, publishedTime as String) {
+  public function onUpdate(isLoading as Boolean, publishedTime as String?) {
     _isLoading = isLoading;
     if (_isLoading == false) {
       _loadingSpinner = null;
     }
     _publishedTime = publishedTime;
-    _bufferedBitmapText = null;
+    _bufferedBitmap = null;
   }
 }

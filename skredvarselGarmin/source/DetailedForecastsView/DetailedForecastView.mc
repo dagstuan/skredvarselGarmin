@@ -178,7 +178,7 @@ class DetailedForecastView extends Ui.View {
       var iconHeight = icon.getHeight();
 
       var levelText = $.getOrLoadResourceString("Faregrad", :Level);
-      var text = levelText + " " + dangerLevel.toString();
+      var text = Lang.format("$1$ $2$", [levelText, dangerLevel]);
 
       var textWidth = dc.getTextWidthInPixels(text, font);
       var centerY0 = height / 2;
@@ -233,7 +233,9 @@ class DetailedForecastView extends Ui.View {
   public function drawFooter(dc as Gfx.Dc, y0 as Numeric, height as Numeric) {
     if (_footer == null) {
       _footer = new DetailedForecastFooter({
-        :publishedTime => _warning["published"],
+        :publishedTime => _warning["dangerLevel"] > 0
+          ? _warning["published"]
+          : null,
         :locY => y0,
         :locX => 0,
         :width => _width,
@@ -266,7 +268,10 @@ class DetailedForecastView extends Ui.View {
   public function setIsLoading(isLoading as Boolean) {
     _isLoading = isLoading;
     if (_footer != null) {
-      _footer.onUpdate(isLoading, _warning["published"]);
+      _footer.onUpdate(
+        isLoading,
+        _warning["dangerLevel"] > 0 ? _warning["published"] : null
+      );
     }
   }
 
