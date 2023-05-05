@@ -64,9 +64,9 @@ class skredvarselGarminApp extends Application.AppBase {
         registeredEvent.value() != refreshInterval.value()
       ) {
         $.log(
-          "Registering temporal event in " +
-            REFRESH_INTERVAL_MINUTES +
-            " minutes"
+          Lang.format("Registering temporal event in $1$ minutes", [
+            REFRESH_INTERVAL_MINUTES,
+          ])
         );
 
         Background.registerForTemporalEvent(refreshInterval);
@@ -100,7 +100,9 @@ class skredvarselGarminApp extends Application.AppBase {
   public function onBackgroundData(
     fetchedData as Application.PersistableType
   ) as Void {
-    $.log("Exited background job. Fetched data: " + fetchedData);
+    $.log(
+      Lang.format("Exited background job. Fetched data: $1$", [fetchedData])
+    );
 
     if (fetchedData == true) {
       Ui.requestUpdate();

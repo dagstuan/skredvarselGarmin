@@ -68,7 +68,9 @@ class NoSubscriptionView extends Ui.View {
       {
         :method => Comm.HTTP_REQUEST_METHOD_GET,
         :headers => {
-          "Authorization" => "Garmin " + $.getDeviceIdentifier(),
+          "Authorization" => Lang.format("Garmin $1$", [
+            $.getDeviceIdentifier(),
+          ]),
         },
       },
       method(:onCheckSubscriptionResponse)

@@ -17,23 +17,19 @@ function getDetailedWarningsPathForRegion(
   formattedStartDate as String,
   formattedEndDate as String
 ) as String {
-  return (
-    "/detailedWarningsByRegion/" +
-    regionId +
-    "/" +
-    language +
-    "/" +
-    formattedStartDate +
-    "/" +
-    formattedEndDate
-  );
+  return Lang.format("/detailedWarningsByRegion/$1$/$2$/$3$/$4$", [
+    regionId,
+    language,
+    formattedStartDate,
+    formattedEndDate,
+  ]);
 }
 
 function loadDetailedWarningsForRegion(
   regionId as String?,
   callback as WebRequestDelegateCallback
 ) {
-  $.log("Loading detailed forecast for " + regionId);
+  $.log(Lang.format("Loading detailed forecast for $1$", [regionId]));
 
   var language = $.getForecastLanguage();
 

@@ -210,16 +210,16 @@ public function log(message as String) {
   var info = Gregorian.utcInfo(Time.now(), Time.FORMAT_MEDIUM);
 
   var formattedTime = Lang.format("$1$:$2$:$3$ $4$ $5$ $6$ $7$", [
-    info.hour < 10 ? "0" + info.hour : info.hour,
-    info.min < 10 ? "0" + info.min : info.min,
-    info.sec < 10 ? "0" + info.sec : info.sec,
+    info.hour.format("%02u"),
+    info.min.format("%02u"),
+    info.sec.format("%02u"),
     info.day_of_week,
     info.day,
     info.month,
     info.year,
   ]);
 
-  System.println(formattedTime + " - " + message);
+  System.println(Lang.format("$1$ - $2$", [formattedTime, message]));
 }
 
 var halfWidthDangerLevelIcon = null;

@@ -47,7 +47,7 @@ public class DetailedForecastHeader {
       var text = _validityDate;
 
       if (_deviceScreenWidth > 240) {
-        text += "\n" + _regionName;
+        text = Lang.format("$1$\n$2$", [text, _regionName]);
       }
 
       var textDimensions = dc.getTextDimensions(text, _font);

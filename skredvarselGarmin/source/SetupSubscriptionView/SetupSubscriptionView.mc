@@ -99,7 +99,7 @@ class SetupSubscriptionView extends Ui.View {
     responseCode as Number,
     data as WebRequestCallbackData
   ) as Void {
-    $.log("Received response " + responseCode);
+    $.log(Lang.format("Received response $1$", [responseCode]));
 
     if (_loadingView != null) {
       try {
@@ -132,12 +132,13 @@ class SetupSubscriptionView extends Ui.View {
       } else if (status.equals("NEW_WATCH")) {
         Ui.switchToView(
           new NoSubscriptionView(
-            $.getOrLoadResourceString(
-              "Logg inn på skredvarsel.app på mobilen, og legg til klokken med koden:",
-              :NewWatch
-            ) +
-              "\n\n" +
-              response["addWatchKey"]
+            Lang.format("$1$\n\n$2$", [
+              $.getOrLoadResourceString(
+                "Logg inn på skredvarsel.app på mobilen, og legg til klokken med koden:",
+                :NewWatch
+              ),
+              response["addWatchKey"],
+            ])
           ),
           null,
           Ui.SLIDE_BLINK

@@ -6,12 +6,12 @@ const SelectedRegionIdsStorageKey = "selectedRegionIds";
 
 (:background)
 function getSimpleForecastCacheKeyForRegion(regionId as String) {
-  return "simple_" + regionId;
+  return Lang.format("simple_$1$", [regionId]);
 }
 
 (:background)
 function getDetailedWarningsCacheKeyForRegion(regionId as String) {
-  return "detailed_" + regionId;
+  return Lang.format("detailed_$1$", [regionId]);
 }
 
 (:background)
@@ -50,7 +50,9 @@ function resetStorageCacheIfRequired() {
     cachedForecastsLanguage != forecastLanguageSetting
   ) {
     $.log(
-      "Resetting storage cache. storageVersion in Storage: " + storageVersion
+      Lang.format("Resetting storage cache. storageVersion in Storage: $1$", [
+        storageVersion,
+      ])
     );
 
     var hasSubscription = $.getHasSubscription();

@@ -40,13 +40,10 @@ class ServiceDelegate extends System.ServiceDelegate {
       !(monkeyVersion[0] >= 3 && monkeyVersion[1] >= 2)
     ) {
       $.log(
-        "Api version " +
-          monkeyVersion[0] +
-          "." +
-          monkeyVersion[1] +
-          "." +
-          monkeyVersion[2] +
-          ". No API support for modifying store in background. Not refreshing data."
+        Lang.format(
+          "Api version $1$.$2$.$3$. No API support for modifying store in background. Not refreshing data.",
+          monkeyVersion
+        )
       );
       return;
     }

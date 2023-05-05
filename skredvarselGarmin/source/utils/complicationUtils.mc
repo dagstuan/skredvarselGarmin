@@ -1,3 +1,5 @@
+import Toybox.Lang;
+
 (:background)
 public function updateComplicationIfExists() {
   if ($ has :updateSkredvarselComplication && Toybox has :Complications) {
@@ -18,7 +20,9 @@ public function updateSkredvarselComplication() {
     }
   }
 
-  $.log("Setting new complication value " + newComplicationValue);
+  $.log(
+    Lang.format("Setting new complication value $1$", [newComplicationValue])
+  );
 
   try {
     if (Toybox.Complications has :updateComplication) {
@@ -29,7 +33,11 @@ public function updateSkredvarselComplication() {
       $.log("updateComplication method not found on complications.");
     }
   } catch (ex) {
-    $.log("Failed to update complication. Error was: " + ex.getErrorMessage());
+    $.log(
+      Lang.format("Failed to update complication. Error was: $1$", [
+        ex.getErrorMessage(),
+      ])
+    );
     if ($.Debug) {
       ex.printStackTrace();
     }

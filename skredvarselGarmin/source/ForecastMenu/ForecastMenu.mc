@@ -130,7 +130,7 @@ public class ForecastMenu extends Ui.CustomMenu {
         );
 
         var updatedString = $.getOrLoadResourceString("Oppdatert", :Updated);
-        var text = updatedString + " " + formattedTimestamp;
+        var text = Lang.format("$1$ $2$", [updatedString, formattedTimestamp]);
 
         bufferedDc.drawText(
           width / 2,

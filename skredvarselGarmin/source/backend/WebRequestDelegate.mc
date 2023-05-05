@@ -48,7 +48,7 @@ class WebRequestDelegate {
   }
 
   function makeRequest() {
-    $.log("Fetching: " + _path);
+    $.log(Lang.format("Fetching: $1$", [_path]));
 
     Communications.makeWebRequest(
       $.BaseApiUrl + _path,
@@ -56,7 +56,9 @@ class WebRequestDelegate {
       {
         :method => Communications.HTTP_REQUEST_METHOD_GET,
         :headers => {
-          "Authorization" => "Garmin " + $.getDeviceIdentifier(),
+          "Authorization" => Lang.format("Garmin $1$", [
+            $.getDeviceIdentifier(),
+          ]),
         },
       },
       method(:onReceive)
@@ -68,7 +70,9 @@ class WebRequestDelegate {
     data as Dictionary<String, Object?> or String or Null
   ) as Void {
     if (responseCode == 200) {
-      $.log("200 OK. Storing in storage with key: " + _storageKey);
+      $.log(
+        Lang.format("200 OK. Storing in storage with key: $1$", [_storageKey])
+      );
 
       Storage.setValue(_storageKey, [data, Time.now().value()]);
     } else if (responseCode == 401) {
@@ -76,7 +80,7 @@ class WebRequestDelegate {
 
       $.setHasSubscription(false);
     } else {
-      $.log("Failed request. Response code: " + responseCode);
+      $.log(Lang.format("Failed request. Response code: $1$", [responseCode]));
     }
 
     _callback.invoke(responseCode, data);

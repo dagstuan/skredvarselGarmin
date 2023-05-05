@@ -191,7 +191,7 @@ module AvalancheUi {
           _exposedHeight2 + "m"
         );
       } else if (_exposedHeightFill == 4) {
-        var text = _exposedHeight2 + "-" + _exposedHeight1 + "m";
+        var text = Lang.format("$1$-$2$m", [_exposedHeight2, _exposedHeight1]);
 
         drawArrow(
           dc,

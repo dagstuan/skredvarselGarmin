@@ -18,16 +18,12 @@ function getSimpleWarningsPathForRegion(
   formattedStartDate as String,
   formattedEndDate as String
 ) as String {
-  return (
-    "/simpleWarningsByRegion/" +
-    regionId +
-    "/" +
-    language +
-    "/" +
-    formattedStartDate +
-    "/" +
-    formattedEndDate
-  );
+  return Lang.format("/simpleWarningsByRegion/$1$/$2$/$3$/$4$", [
+    regionId,
+    language,
+    formattedStartDate,
+    formattedEndDate,
+  ]);
 }
 
 public function loadSimpleForecastForRegion(
@@ -35,7 +31,7 @@ public function loadSimpleForecastForRegion(
   callback as WebRequestDelegateCallback,
   useQueue as Boolean
 ) {
-  $.log("Loading simple forecast for " + regionId);
+  $.log(Lang.format("Loading simple forecast for $1$", [regionId]));
 
   var language = $.getForecastLanguage();
 
