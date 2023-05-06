@@ -4,6 +4,7 @@ import Toybox.System;
 
 using Toybox.WatchUi as Ui;
 using Toybox.Background;
+using Toybox.Time.Gregorian;
 
 function getInitialViewAndDelegate() as Array<Ui.Views or Ui.InputDelegates> {
   var deviceSettings = System.getDeviceSettings();
@@ -37,7 +38,6 @@ function switchToInitialView(transition as Ui.SlideType) {
 
 (:background)
 class skredvarselGarminApp extends Application.AppBase {
-  const REFRESH_INTERVAL_MINUTES = 60;
   function initialize() {
     AppBase.initialize();
   }
@@ -57,15 +57,22 @@ class skredvarselGarminApp extends Application.AppBase {
       var now = new Time.Moment(Time.now().value());
       Background.registerForTemporalEvent(now);
     } else {
-      var refreshInterval = new Time.Duration(REFRESH_INTERVAL_MINUTES * 60);
+      var today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+
+      var refreshIntervalSeconds =
+        today.month > 5 && today.month < 12
+          ? Gregorian.SECONDS_PER_HOUR * 12
+          : Gregorian.SECONDS_PER_HOUR;
+
+      var refreshInterval = new Time.Duration(refreshIntervalSeconds);
       var registeredEvent = Background.getTemporalEventRegisteredTime();
       if (
         registeredEvent == null ||
         registeredEvent.value() != refreshInterval.value()
       ) {
         $.log(
-          Lang.format("Registering temporal event in $1$ minutes", [
-            REFRESH_INTERVAL_MINUTES,
+          Lang.format("Registering temporal event in $1$ seconds", [
+            refreshInterval.value(),
           ])
         );
 
