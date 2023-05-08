@@ -34,7 +34,8 @@ class ServiceDelegate extends System.ServiceDelegate {
       return;
     }
 
-    var monkeyVersion = $.getMonkeyVersion();
+    var deviceSettings = System.getDeviceSettings();
+    var monkeyVersion = deviceSettings.monkeyVersion;
     if (
       monkeyVersion[0] < 4 &&
       !(monkeyVersion[0] >= 3 && monkeyVersion[1] >= 2)

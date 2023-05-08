@@ -17,7 +17,7 @@ const DrawOutlines = false;
 (:glance)
 const TIME_TO_SHOW_LOADING = Gregorian.SECONDS_PER_DAY;
 
-const TIME_TO_CONSIDER_DATA_STALE = Gregorian.SECONDS_PER_HOUR * 0.5;
+const TIME_TO_CONSIDER_DATA_STALE = Gregorian.SECONDS_PER_HOUR / 2;
 
 function getSortedRegionIds() as Array<String> {
   return [
@@ -117,12 +117,6 @@ function canMakeWebRequest() as Boolean {
 }
 
 (:background)
-function getMonkeyVersion() as Array<Number> {
-  var deviceSettings = System.getDeviceSettings();
-  return deviceSettings.monkeyVersion;
-}
-
-(:background)
 function getDeviceIdentifier() as String {
   var deviceSettings = System.getDeviceSettings();
   return deviceSettings.uniqueIdentifier;
@@ -166,34 +160,26 @@ function arrayContainsString(arr as Array<String>, str as String) {
   return false;
 }
 
-function removeStringFromArray(curArray as Array<String>, value as String) {
-  if (arrayContainsString(curArray, value)) {
-    var curSize = curArray.size();
-    var newArray = new [curSize - 1];
-
-    var j = 0;
-    for (var i = 0; i < curSize; i++) {
-      var elem = curArray[i];
-      if (elem.equals(value)) {
-        continue;
-      }
-
-      newArray[j] = elem;
-      j++;
+function removeStringFromArray(currArray as Array<String>, value as String) {
+  var newArray = [];
+  for (var i = 0; i < currArray.size(); i++) {
+    var elem = currArray[i];
+    if (!elem.equals(value)) {
+      newArray.add(elem);
     }
-    return newArray;
   }
 
-  return curArray;
+  return newArray;
 }
 
 public function minValue(arr as Array<Number>) {
-  if (arr.size() == 0) {
+  var size = arr.size();
+  if (size == 0) {
     throw new SkredvarselGarminException("Empty array sent to minValue");
   }
 
   var min = 2147483647;
-  for (var i = 0; i < arr.size(); i++) {
+  for (var i = 0; i < size; i++) {
     var val = arr[i];
     if (val < min) {
       min = val;
@@ -209,17 +195,18 @@ public function log(message as String) {}
 public function log(message as String) {
   var info = Gregorian.utcInfo(Time.now(), Time.FORMAT_MEDIUM);
 
-  var formattedTime = Lang.format("$1$:$2$:$3$ $4$ $5$ $6$ $7$", [
-    info.hour.format("%02u"),
-    info.min.format("%02u"),
-    info.sec.format("%02u"),
-    info.day_of_week,
-    info.day,
-    info.month,
-    info.year,
-  ]);
-
-  System.println(Lang.format("$1$ - $2$", [formattedTime, message]));
+  System.println(
+    Lang.format("$1$:$2$:$3$ $4$ $5$ $6$ $7$ - $8$", [
+      info.hour.format("%02u"),
+      info.min.format("%02u"),
+      info.sec.format("%02u"),
+      info.day_of_week,
+      info.day,
+      info.month,
+      info.year,
+      message,
+    ])
+  );
 }
 
 var halfWidthDangerLevelIcon = null;

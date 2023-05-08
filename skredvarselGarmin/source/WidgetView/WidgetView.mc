@@ -144,7 +144,7 @@ public class WidgetView extends Ui.View {
     dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
     dc.clear();
 
-    var iconResource = getIconResourceToDraw();
+    var iconResource = $.getIconResourceForForecastMenu();
     var icon = Ui.loadResource(iconResource);
     var iconX = _width / 2 - $.getHalfWidthDangerLevelIcon();
     dc.drawBitmap(iconX, 10, icon);
@@ -157,28 +157,12 @@ public class WidgetView extends Ui.View {
       Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
     );
 
+    dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
     dc.setPenWidth(1);
 
     var marginLeftRight = 35;
-    var yOffset = _height * 0.3;
+    var yOffset = _height * 0.33;
 
     dc.drawLine(marginLeftRight, yOffset, _width - marginLeftRight, yOffset);
-  }
-
-  private function getIconResourceToDraw() as Symbol {
-    var favoriteRegionId = $.getFavoriteRegionId();
-
-    if (favoriteRegionId != null) {
-      var dataForFavoriteRegion =
-        $.getSimpleForecastForRegion(favoriteRegionId);
-
-      if (dataForFavoriteRegion != null) {
-        var dangerLevelToday = $.getDangerLevelToday(dataForFavoriteRegion[0]);
-
-        return $.getIconResourceForDangerLevel(dangerLevelToday);
-      }
-    }
-
-    return $.Rez.Drawables.Level2;
   }
 }

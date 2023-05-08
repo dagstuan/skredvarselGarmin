@@ -79,8 +79,7 @@ public class ForecastMenu extends Ui.CustomMenu {
       bufferedDc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
       bufferedDc.clear();
 
-      var iconResource = getIconResourceToDraw();
-      var icon = Ui.loadResource(iconResource);
+      var icon = Ui.loadResource($.getIconResourceForForecastMenu());
 
       var iconX = width / 2 - $.getHalfWidthDangerLevelIcon();
       bufferedDc.drawBitmap(iconX, 10, icon);
@@ -97,7 +96,7 @@ public class ForecastMenu extends Ui.CustomMenu {
       bufferedDc.setPenWidth(1);
       bufferedDc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
 
-      var offsetFromBottom = 15;
+      var offsetFromBottom = height * 0.15;
       var marginLeftRight = width * _marginLeftRightPercent;
 
       bufferedDc.drawLine(
@@ -129,8 +128,10 @@ public class ForecastMenu extends Ui.CustomMenu {
           new Time.Moment(lastUpdatedTime)
         );
 
-        var updatedString = $.getOrLoadResourceString("Oppdatert", :Updated);
-        var text = Lang.format("$1$ $2$", [updatedString, formattedTimestamp]);
+        var text = Lang.format("$1$ $2$", [
+          $.getOrLoadResourceString("Oppdatert", :Updated),
+          formattedTimestamp,
+        ]);
 
         bufferedDc.drawText(
           width / 2,
@@ -166,27 +167,7 @@ public class ForecastMenu extends Ui.CustomMenu {
     }
   }
 
-  private function getIconResourceToDraw() as Symbol {
-    var favoriteRegionId = $.getFavoriteRegionId();
-
-    if (favoriteRegionId != null) {
-      var forecast = $.getSimpleForecastForRegion(favoriteRegionId);
-
-      if (forecast != null) {
-        var dangerLevelToday = $.getDangerLevelToday(forecast[0]);
-
-        return $.getIconResourceForDangerLevel(dangerLevelToday);
-      }
-    }
-
-    return $.Rez.Drawables.Level2;
-  }
-
   private function getLastUpdatedTime() as Number? {
-    if (_existingRegionIds.size() == 0) {
-      return null;
-    }
-
     var updatedTimes = new [0];
     for (var i = 0; i < _existingRegionIds.size(); i++) {
       var data = $.getSimpleForecastForRegion(_existingRegionIds[i]);
@@ -195,11 +176,7 @@ public class ForecastMenu extends Ui.CustomMenu {
       }
     }
 
-    if (updatedTimes.size() == 0) {
-      return null;
-    }
-
-    return minValue(updatedTimes);
+    return updatedTimes.size() > 0 ? $.minValue(updatedTimes) : null;
   }
 
   function deleteAllItems() {
@@ -215,4 +192,20 @@ public class ForecastMenu extends Ui.CustomMenu {
 
     Ui.requestUpdate();
   }
+}
+
+function getIconResourceForForecastMenu() as Symbol {
+  var favoriteRegionId = $.getFavoriteRegionId();
+
+  if (favoriteRegionId != null) {
+    var forecast = $.getSimpleForecastForRegion(favoriteRegionId);
+
+    if (forecast != null) {
+      var dangerLevelToday = $.getDangerLevelToday(forecast[0]);
+
+      return $.getIconResourceForDangerLevel(dangerLevelToday);
+    }
+  }
+
+  return $.Rez.Drawables.Level2;
 }
