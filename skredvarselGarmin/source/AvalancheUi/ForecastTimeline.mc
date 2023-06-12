@@ -123,7 +123,7 @@ module AvalancheUi {
         _lineHeight
       );
 
-      var dangerLevelString = dangerLevel.toString();
+      var dangerLevelString = dangerLevel == 0 ? "?" : dangerLevel.toString();
       var textWidth = dc.getTextWidthInPixels(
         dangerLevelString,
         _dangerLevelFont
@@ -132,7 +132,7 @@ module AvalancheUi {
         dc.setColor(color, Graphics.COLOR_TRANSPARENT);
         dc.drawText(
           x0,
-          _locY + (_height - dc.getFontHeight(_dangerLevelFont)),
+          _locY + _height / 2 + _height * 0.05,
           _dangerLevelFont,
           dangerLevelString,
           Graphics.TEXT_JUSTIFY_LEFT

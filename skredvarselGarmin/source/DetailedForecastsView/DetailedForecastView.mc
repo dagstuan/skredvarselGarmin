@@ -178,7 +178,10 @@ class DetailedForecastView extends Ui.View {
       var iconHeight = icon.getHeight();
 
       var levelText = $.getOrLoadResourceString("Faregrad", :Level);
-      var text = Lang.format("$1$ $2$", [levelText, dangerLevel]);
+      var text = Lang.format("$1$ $2$", [
+        levelText,
+        dangerLevel == 0 ? '?' : dangerLevel,
+      ]);
 
       var textWidth = dc.getTextWidthInPixels(text, font);
       var centerY0 = height / 2;
