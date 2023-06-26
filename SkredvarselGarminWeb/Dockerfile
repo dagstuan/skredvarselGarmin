@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0.304-bullseye-slim AS base
+FROM mcr.microsoft.com/dotnet/sdk:7.0.305-bullseye-slim AS base
 RUN apt-get update
 RUN apt-get install -y curl
 RUN apt-get install -y libpng-dev libjpeg-dev curl libxi6 build-essential libgl1-mesa-glx lsb-release
@@ -10,7 +10,7 @@ WORKDIR /app
 COPY SkredvarselGarminWeb SkredvarselGarminWeb/
 RUN dotnet publish SkredvarselGarminWeb -c Release -o publish
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0.304-bullseye-slim
+FROM mcr.microsoft.com/dotnet/sdk:7.0.305-bullseye-slim
 EXPOSE 8080
 WORKDIR /app
 COPY --from=builder /app/publish ./
