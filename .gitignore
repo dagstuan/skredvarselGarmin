@@ -1,1 +1,2 @@
 .DS_Store
+**/*/appsettings.Development.json
