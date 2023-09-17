@@ -1,9 +1,9 @@
-name: Fly
+name: Fly Deploy
 
 on:
-  release:
-    types:
-      - published
+  push:
+    tags:
+      - "web-*"
 
 jobs:
   build-and-deploy:
