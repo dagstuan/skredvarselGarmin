@@ -4,7 +4,15 @@ updates:
     directory: "/SkredvarselGarminWeb"
     schedule:
       interval: "weekly"
+    groups:
+      docker-dependencies:
+        patterns:
+          - "*"
   - package-ecosystem: "npm"
     directory: "/SkredvarselGarminWeb/SkredvarselGarminWeb/Frontend"
     schedule:
       interval: "weekly"
+    groups:
+      frontend-dependencies:
+        patterns:
+          - "*"
