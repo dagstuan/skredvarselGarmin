@@ -1,3 +1,5 @@
+import Toybox.Lang;
+
 using Toybox.WatchUi as Ui;
 
 public class EditMenuDelegate extends Ui.Menu2InputDelegate {
@@ -8,7 +10,7 @@ public class EditMenuDelegate extends Ui.Menu2InputDelegate {
   public function onSelect(item as Ui.MenuItem) as Void {
     var editMenuItem = item as EditMenuItem;
 
-    var regionId = editMenuItem.getId();
+    var regionId = editMenuItem.getId() as String;
     var isEnabled = editMenuItem.isEnabled();
     if (isEnabled) {
       $.addSelectedRegion(regionId);
