@@ -22,6 +22,6 @@ public class EditMenuDelegate extends Ui.Menu2InputDelegate {
   }
 
   public function onBack() as Void {
-    WatchUi.popView(WatchUi.SLIDE_DOWN);
+    WatchUi.popView(WatchUi.SLIDE_RIGHT);
   }
 }
