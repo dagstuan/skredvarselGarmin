@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
+import https from "https";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -19,16 +20,19 @@ export default defineConfig({
         target: "https://localhost:8080",
         changeOrigin: true,
         secure: false,
+        agent: new https.Agent(),
       },
       "/createSubscription": {
         target: "https://localhost:8080",
         changeOrigin: true,
         secure: false,
+        agent: new https.Agent(),
       },
       "^/api/.*": {
         target: "https://localhost:8080",
         changeOrigin: true,
         secure: false,
+        agent: new https.Agent(),
       },
     },
   },
