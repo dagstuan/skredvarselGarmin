@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0.305-bullseye-slim AS base
+FROM mcr.microsoft.com/dotnet/sdk:7.0.401-bullseye-slim AS base
 RUN apt-get update
 RUN apt-get install -y ca-certificates curl gnupg
 RUN mkdir -p /etc/apt/keyrings
@@ -15,7 +15,7 @@ WORKDIR /app
 COPY SkredvarselGarminWeb SkredvarselGarminWeb/
 RUN dotnet publish SkredvarselGarminWeb -c Release -o publish
 
-FROM mcr.microsoft.com/dotnet/sdk:7.0.305-bullseye-slim
+FROM mcr.microsoft.com/dotnet/sdk:7.0.401-bullseye-slim
 EXPOSE 8080
 WORKDIR /app
 COPY --from=builder /app/publish ./
