@@ -77,6 +77,7 @@ export const FrontPage = () => {
           </VStack>
           <SlideFade
             reverse={false}
+            offsetY="20px"
             in={scrollPosition === 0}
             transition={{
               exit: {
@@ -90,7 +91,8 @@ export const FrontPage = () => {
             <ChevronIcon
               color="white"
               opacity={0.6}
-              boxSize={useBreakpointValue({ base: 10, md: 100 })}
+              mb={5}
+              boxSize={useBreakpointValue({ base: 50, md: 100 })}
             />
           </SlideFade>
         </Box>
