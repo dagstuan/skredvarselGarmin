@@ -372,7 +372,7 @@ export const FaqPage = () => {
           <h2>
             <AccordionButton>
               <Box as="span" flex="1" textAlign="left">
-                Jeg lurer fortsatt på noe.
+                Jeg lurer fortsatt på noe. Hvordan kan jeg ta kontakt?
               </Box>
               <AccordionIcon />
             </AccordionButton>

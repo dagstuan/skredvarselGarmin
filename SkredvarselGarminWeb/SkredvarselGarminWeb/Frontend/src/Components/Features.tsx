@@ -74,7 +74,7 @@ export const Features = () => (
           <Heading size="md">Tilgjengelig uten tilkobling</Heading>
 
           <Text py="2">
-            Appen synkroniserer skredvarselet for alle valgte regioner hver
+            Appen synkroniserer snøskredvarselet for alle valgte regioner hver
             time. Og varselet er tilgjengelig selv om du er på tur uten dekning
             eller uten mobil.
           </Text>
