@@ -46,3 +46,12 @@ fly.toml
 **/node_modules
 .dotnet
 .Microsoft.DotNet.ImageBuilder
+
+dataprotection-keys/
+.env
+.env.flyio
+.gitignore
+docker-compose.yml
+fly.toml
+generate_watch_mappings.sh
+README.sh

@@ -12,7 +12,8 @@ RUN apt-get install -y nodejs
 
 FROM base as builder
 WORKDIR /app
-COPY SkredvarselGarminWeb SkredvarselGarminWeb/
+COPY . .
+RUN dotnet test
 RUN dotnet publish SkredvarselGarminWeb -c Release -o publish
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0.402-bullseye-slim
