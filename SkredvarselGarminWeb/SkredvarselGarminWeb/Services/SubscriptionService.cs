@@ -10,6 +10,7 @@ using EntityAgreementStatus = SkredvarselGarminWeb.Entities.AgreementStatus;
 using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Entities.Extensions;
 using Hangfire;
+using SkredvarselGarminWeb.NtfyApi;
 
 namespace SkredvarselGarminWeb.Services;
 

@@ -2,6 +2,7 @@ using Polly;
 using Polly.Extensions.Http;
 using Polly.Timeout;
 using Refit;
+using SkredvarselGarminWeb.NtfyApi;
 using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.VarsomApi;
 using SkredvarselGarminWeb.VippsApi;
@@ -47,5 +48,11 @@ public static class RefitConfiguration
             })
             .AddPolicyHandler(retryPolicy)
             .AddPolicyHandler(timeoutPolicy);
+
+        serviceCollection.AddRefitClient<INtfyApiClient>()
+            .ConfigureHttpClient(c =>
+            {
+                c.BaseAddress = new Uri("https://ntfy.sh/skredvarsel");
+            });
     }
 }
