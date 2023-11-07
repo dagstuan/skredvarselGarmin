@@ -1,6 +1,7 @@
-version: '3.1'
+version: '3.8'
 services:
   db:
+    container_name: skredvarsel-garmin-db
     image: postgres
     restart: always
     environment:
