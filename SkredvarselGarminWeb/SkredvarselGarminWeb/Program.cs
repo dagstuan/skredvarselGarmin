@@ -64,6 +64,7 @@ app.UseAuthorization();
 
 app.MapHealthChecks("/healthz");
 
+app.MapUserEndpoints();
 app.MapVippsEndpoints();
 app.MapVarsomApiEndpoints(authOptions!);
 app.MapSubscriptionEndpoints();

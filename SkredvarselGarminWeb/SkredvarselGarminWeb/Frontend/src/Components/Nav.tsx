@@ -7,6 +7,7 @@ import {
   Heading,
   Spinner,
   useBreakpointValue,
+  HStack,
 } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 
@@ -60,16 +61,30 @@ export const Nav = () => {
               </Button>
             </>
           ) : (
-            <Button
-              as={RouterLink}
-              to="/minSide"
-              isLoading={isLoading}
-              bg={"blue.400"}
-              color={"white"}
-              _hover={{ bg: "blue.500" }}
-            >
-              Min side
-            </Button>
+            <HStack gap={4}>
+              {user.isAdmin && (
+                <Button
+                  as={RouterLink}
+                  to="/admin"
+                  isLoading={isLoading}
+                  bg={"blue.400"}
+                  color={"white"}
+                  _hover={{ bg: "blue.500" }}
+                >
+                  Admin
+                </Button>
+              )}
+              <Button
+                as={RouterLink}
+                to="/minSide"
+                isLoading={isLoading}
+                bg={"blue.400"}
+                color={"white"}
+                _hover={{ bg: "blue.500" }}
+              >
+                Min side
+              </Button>
+            </HStack>
           )}
         </Box>
       </Flex>

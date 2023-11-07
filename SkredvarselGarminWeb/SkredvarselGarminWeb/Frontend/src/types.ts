@@ -8,6 +8,7 @@ export type User = {
   name: string;
   email: string;
   phoneNumber: string;
+  isAdmin: boolean;
 };
 
 export type Watch = {
@@ -20,4 +21,18 @@ export type ProblemDetails = {
   title: string;
   status: number;
   detail: string;
+};
+
+type AdminDataUser = {
+  id: string;
+  name: string;
+};
+
+export type AdminData = {
+  staleUsers: Array<AdminDataUser>;
+  numUsers: number;
+  activeAgreements: number;
+  unsubscribedAgreements: number;
+  activeOrUnsubscribedAgreements: number;
+  watches: number;
 };

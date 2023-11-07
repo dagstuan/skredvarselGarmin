@@ -10,6 +10,8 @@ import { FaqPage } from "./Components/FaqPage";
 import { FrontPage } from "./Components/FrontPage";
 import { PrivacyPolicy } from "./Components/PrivacyPolicy";
 import { SalesConditions } from "./Components/SalesConditions";
+import { RequireAdmin } from "./Components/Admin/RequireAdmin";
+import { AdminPage } from "./Components/Admin/AdminPage";
 
 export const queryClient = new QueryClient();
 
@@ -39,6 +41,14 @@ const router = createBrowserRouter([
         path: "personvern",
         element: <PrivacyPolicy />,
       },
+      {
+        path: "admin",
+        element: (
+          <RequireAdmin>
+            <AdminPage />
+          </RequireAdmin>
+        ),
+      },
     ],
   },
 ]);
@@ -51,5 +61,5 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <ReactQueryDevtools initialIsOpen={false} />
       </ChakraProvider>
     </QueryClientProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
