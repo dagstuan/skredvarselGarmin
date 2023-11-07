@@ -4,6 +4,7 @@ using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Endpoints.Models;
 using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.Helpers;
+using SkredvarselGarminWeb.NtfyApi;
 using SkredvarselGarminWeb.Services;
 using SkredvarselGarminWeb.VippsApi;
 using SkredvarselGarminWeb.VippsApi.Models;
@@ -115,6 +116,7 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
             SkredvarselDbContext dbContext,
             IVippsApiClient vippsApiClient,
             ISubscriptionService subscriptionService,
+            INtfyApiClient ntifyApiClient,
             IBackgroundJobClient backgroundJobClient,
             IDateTimeNowProvider dateTimeNowProvider) =>
         {
@@ -135,6 +137,11 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
             }
 
             dbContext.SaveChanges();
+
+            _ = Task.Run(() => ntifyApiClient.SendNotification(
+                "New subscription!",
+                "A new user subscribed to Skredvarsel!"
+            ));
 
             return Results.Redirect("/minSide?subscribed");
         });
@@ -193,6 +200,7 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
         app.MapDelete("/api/subscription", async (
             HttpContext ctx,
             ISubscriptionService subscriptionService,
+            INtfyApiClient ntifyApiClient,
             SkredvarselDbContext dbContext) =>
         {
             var user = dbContext.GetUserOrThrow(ctx.User.Identity);
@@ -208,6 +216,14 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
 
             await subscriptionService.DeactivateAgreement(agreementInDb.Id);
 
+            _ = Task.Run(() =>
+            {
+                ntifyApiClient.SendNotification(
+                    "Subscription deactivated",
+                    "A user deactivated their subscription to Skredvarsel"
+                );
+            });
+
             return Results.Ok();
 
         }).RequireAuthorization();
@@ -215,6 +231,7 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
         app.MapPut("/api/subscription/reactivate", async (
             HttpContext ctx,
             ISubscriptionService subscriptionService,
+            INtfyApiClient ntifyApiClient,
             SkredvarselDbContext dbContext) =>
         {
             var user = dbContext.GetUserOrThrow(ctx.User.Identity);
@@ -229,6 +246,14 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
             }
 
             await subscriptionService.ReactivateAgreement(agreementInDb.Id);
+
+            _ = Task.Run(() =>
+            {
+                ntifyApiClient.SendNotification(
+                    "Subscription reactivated!",
+                    "A user reactivated their subscription to Skredvarsel"
+                );
+            });
 
             return Results.Ok();
         }).RequireAuthorization();

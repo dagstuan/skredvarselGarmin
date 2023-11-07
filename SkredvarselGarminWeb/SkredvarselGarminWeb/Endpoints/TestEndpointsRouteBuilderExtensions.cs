@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Refit;
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities.Extensions;
+using SkredvarselGarminWeb.NtfyApi;
 using SkredvarselGarminWeb.VippsApi;
 using SkredvarselGarminWeb.VippsApi.Models;
 
@@ -175,6 +176,13 @@ public static class TestEndpointsRouteBuilderExtensions
             }
 
             return Results.BadRequest((result.Error as ValidationApiException)!.Content);
+        });
+
+        app.MapGet("/api/testNotification", async (INtfyApiClient ntifyApiClient) =>
+        {
+            await ntifyApiClient.SendNotification("lol", "kek");
+
+            return Results.Ok();
         });
     }
 }
