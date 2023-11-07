@@ -4,6 +4,6 @@ namespace SkredvarselGarminWeb.NtfyApi;
 
 public interface INtfyApiClient
 {
-    [Post("/")]
+    [Post("")]
     Task SendNotification([Header("Title")] string title, [Body] string message);
 }
