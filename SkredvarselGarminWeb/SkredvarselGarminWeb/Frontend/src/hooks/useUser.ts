@@ -9,7 +9,7 @@ const config = {
 };
 
 const fetchUser = async () => {
-  const res = await api.get("/api/vipps-user", config);
+  const res = await api.get("/api/user", config);
   return res.data as User;
 };
 
