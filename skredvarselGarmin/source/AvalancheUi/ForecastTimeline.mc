@@ -123,7 +123,7 @@ module AvalancheUi {
         _lineHeight
       );
 
-      var dangerLevelString = dangerLevel == 0 ? "?" : dangerLevel.toString();
+      var dangerLevelString = dangerLevel.toString();
       var textWidth = dc.getTextWidthInPixels(
         dangerLevelString,
         _dangerLevelFont
