@@ -36,7 +36,8 @@ export const Watches = () => {
   useEffect(() => {
     if (addWatch.isError) {
       setError(
-        ((addWatch.error as AxiosError).response?.data as ProblemDetails).detail
+        ((addWatch.error as AxiosError).response?.data as ProblemDetails)
+          .detail,
       );
     }
   }, [addWatch.isError, addWatch.error, setError]);
