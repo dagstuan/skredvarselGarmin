@@ -52,7 +52,7 @@ export const Subscription = () => {
     subscription.nextChargeDate != null
       ? format(
           parse(subscription.nextChargeDate, "yyyy-mm-dd", new Date()),
-          "dd.mm.yyyy"
+          "dd.mm.yyyy",
         )
       : null;
 
