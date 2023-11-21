@@ -56,8 +56,6 @@ app.Use(next => context =>
     return next(context);
 });
 
-app.UseStaticFiles();
-
 app.UseCookiePolicy();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -111,6 +109,7 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
+    app.UseStaticFiles();
     app.MapFallbackToFile("index.html");
 }
 
