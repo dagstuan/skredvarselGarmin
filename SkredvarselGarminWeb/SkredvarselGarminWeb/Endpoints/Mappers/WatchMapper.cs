@@ -20,6 +20,7 @@ public static class WatchMapper
         "006-B3702-00" => "Descent™ Mk2",
         "006-B3542-00" => "Descent™ Mk2 S",
         "006-B3930-00" => "Descent™ Mk2 S",
+        "006-B4222-00" => "Descent™ Mk3 43mm",
         "006-B4223-00" => "Descent™ Mk3 51mm",
         "006-B3943-00" => "epix™ (Gen 2)",
         "006-B3944-00" => "epix™ (Gen 2)",

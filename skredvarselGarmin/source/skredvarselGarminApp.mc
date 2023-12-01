@@ -94,7 +94,9 @@ class skredvarselGarminApp extends Application.AppBase {
   }
 
   (:glance)
-  public function getGlanceView() as Lang.Array<Ui.GlanceView>? {
+  public function getGlanceView() as Lang.Array<
+    Ui.GlanceView or Ui.GlanceViewDelegate
+  >? {
     registerTemporalEvent();
 
     return [new GlanceView()];
