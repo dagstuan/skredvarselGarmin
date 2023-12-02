@@ -3,9 +3,6 @@ using System.Net;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.EntityFrameworkCore;
-using SkredvarselGarminWeb.Database;
-using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Options;
 
 namespace SkredvarselGarminWeb.Configuration;
@@ -24,88 +21,7 @@ public static class AuthenticationConfiguration
             {
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
             })
-            .AddOpenIdConnect(options =>
-            {
-                options.Authority = vippsOptions?.Authority;
-                options.ClientId = vippsOptions?.ClientId;
-                options.ClientSecret = vippsOptions?.ClientSecret;
-                options.ResponseType = "code";
-                options.CallbackPath = "/signin-oidc";
-                options.AccessDeniedPath = "/";
-
-                options.GetClaimsFromUserInfoEndpoint = true;
-
-                options.Scope.Clear();
-                options.Scope.Add("openid");
-                options.Scope.Add("name");
-                options.Scope.Add("email");
-                options.Scope.Add("phoneNumber");
-
-                options.ClaimActions.MapJsonKey("phone_number", "phone_number");
-                options.ClaimActions.MapJsonKey("sub", "sub");
-
-                options.Events.OnRedirectToIdentityProvider = (ctx) =>
-                {
-                    if (ctx.Request.Path.StartsWithSegments("/api"))
-                    {
-                        if (ctx.Response.StatusCode == (int)HttpStatusCode.OK)
-                        {
-                            ctx.Response.StatusCode = 401;
-                        }
-
-                        ctx.HandleResponse();
-                    }
-
-                    return Task.CompletedTask;
-                };
-
-                options.Events.OnUserInformationReceived = async (ctx) =>
-                {
-                    if (ctx.Principal != null)
-                    {
-                        var rootElement = ctx.User.RootElement;
-                        var sub = rootElement.GetString("sub");
-
-                        if (sub == null)
-                        {
-                            throw new Exception("Invalid login, no sub was returned in user info.");
-                        }
-
-                        var name = rootElement.GetString("name")!;
-                        var email = rootElement.GetString("email")!;
-                        var phoneNumber = rootElement.GetString("phone_number")!;
-                        var dateNow = DateOnly.FromDateTime(DateTime.Now);
-
-                        using var dbContext = ctx.HttpContext.RequestServices.GetRequiredService<SkredvarselDbContext>();
-                        var user = await dbContext.Users.Where(u => u.Id == sub).FirstOrDefaultAsync();
-                        if (user == null)
-                        {
-                            user = new User
-                            {
-                                Id = sub,
-                                Name = name,
-                                Email = email,
-                                PhoneNumber = phoneNumber,
-                                CreatedDate = dateNow,
-                                LastLoggedIn = dateNow
-                            };
-
-                            dbContext.Users.Add(user);
-                        }
-
-                        if (user.Name != name || user.Email != email || user.PhoneNumber != phoneNumber)
-                        {
-                            user.Name = name;
-                            user.Email = email;
-                            user.PhoneNumber = phoneNumber;
-                        }
-
-                        user.LastLoggedIn = dateNow;
-
-                        await dbContext.SaveChangesAsync();
-                    }
-                };
-            })
+            .AddVipps(vippsOptions)
             .AddScheme<GarminAuthenticationSchemeOptions, GarminAuthenticationHandler>("Garmin", options => { });
 
         serviceCollection.AddAuthorization(options =>
@@ -119,6 +35,45 @@ public static class AuthenticationConfiguration
                 policy.AuthenticationSchemes.Add("Garmin");
                 policy.RequireAuthenticatedUser();
             });
+        });
+    }
+
+    public static AuthenticationBuilder AddVipps(this AuthenticationBuilder builder, VippsOptions vippsOptions)
+    {
+        return builder.AddOpenIdConnect(options =>
+        {
+            options.Authority = vippsOptions?.Authority;
+            options.ClientId = vippsOptions?.ClientId;
+            options.ClientSecret = vippsOptions?.ClientSecret;
+            options.ResponseType = "code";
+            options.CallbackPath = "/signin-oidc";
+            options.AccessDeniedPath = "/";
+
+            options.GetClaimsFromUserInfoEndpoint = true;
+
+            options.Scope.Clear();
+            options.Scope.Add("openid");
+            options.Scope.Add("name");
+            options.Scope.Add("email");
+            options.Scope.Add("phoneNumber");
+
+            options.ClaimActions.MapJsonKey("phone_number", "phone_number");
+            options.ClaimActions.MapJsonKey("sub", "sub");
+
+            options.Events.OnRedirectToIdentityProvider = (ctx) =>
+            {
+                if (ctx.Request.Path.StartsWithSegments("/api"))
+                {
+                    if (ctx.Response.StatusCode == (int)HttpStatusCode.OK)
+                    {
+                        ctx.Response.StatusCode = 401;
+                    }
+
+                    ctx.HandleResponse();
+                }
+
+                return Task.CompletedTask;
+            };
         });
     }
 }
