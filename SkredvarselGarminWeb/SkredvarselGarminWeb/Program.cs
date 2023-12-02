@@ -32,6 +32,7 @@ var vippsOptions = vippsOptionsSection.Get<VippsOptions>();
 builder.Services.AddTransient<IDateTimeNowProvider, DateTimeNowProvider>();
 builder.Services.AddTransient<IGarminAuthenticationService, GarminAuthenticationService>();
 builder.Services.AddTransient<ISubscriptionService, SubscriptionService>();
+builder.Services.AddTransient<IUserService, UserService>();
 
 var authOptions = builder.Configuration.GetSection("Auth").Get<AuthOptions>();
 
