@@ -9,19 +9,19 @@ public static class DetailedAvalancheWarningMapper
     {
         Published = varsomWarning.PublishTime,
         DangerLevel = int.Parse(varsomWarning.DangerLevel),
-        Validity = new DateTime[] {
+        Validity = [
             varsomWarning.ValidFrom,
             varsomWarning.ValidTo,
-        },
+        ],
         MainText = varsomWarning.MainText,
         AvalancheProblems = varsomWarning.AvalancheProblems?.Select(problem => new AvalancheProblem()
         {
             TypeName = problem.AvalancheProblemTypeName,
-            ExposedHeights = new int[] {
+            ExposedHeights = [
                 problem.ExposedHeight1,
                 problem.ExposedHeight2,
                 problem.ExposedHeightFill,
-            },
+            ],
             ValidExpositions = problem.ValidExpositions,
             DangerLevel = problem.DangerLevel,
         })
