@@ -74,7 +74,7 @@ export const MyPage = () => {
           <Box>
             <Button
               as="a"
-              href="/vipps-logout"
+              href="/logout"
               bg={"blue.400"}
               color={"white"}
               _hover={{ bg: "blue.500" }}

@@ -5,7 +5,7 @@ import {
   useStopSubscription,
   useSubscription,
 } from "../../hooks/useSubscription";
-import { VippsButton } from "../VippsButton";
+import { VippsButton } from "../Buttons/VippsButton";
 
 export const Subscription = () => {
   const { data: subscription, isLoading: isSubscriptionLoading } =

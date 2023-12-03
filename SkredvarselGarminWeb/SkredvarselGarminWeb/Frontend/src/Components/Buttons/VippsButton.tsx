@@ -1,6 +1,6 @@
 import { Button, ButtonProps, Flex, Text } from "@chakra-ui/react";
 
-import vippsLogoWhite from "../assets/vipps_logo_white.svg";
+import vippsLogoWhite from "../../assets/vipps_logo_white.svg";
 
 type VippsButtonProps = {
   text?: string;

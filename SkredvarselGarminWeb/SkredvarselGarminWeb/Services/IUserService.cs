@@ -1,8 +1,8 @@
-using SkredvarselGarminWeb.ServiceModels;
+using System.Security.Claims;
 
 namespace SkredvarselGarminWeb.Services;
 
 public interface IUserService
 {
-    Task RegisterLogin(UserLogin user);
+    Task RegisterLogin(ClaimsPrincipal user);
 }

@@ -28,7 +28,6 @@ public static class UserRouteBuilderExtensions
                 {
                     Name = userInDb.Name,
                     Email = userInDb.Email,
-                    PhoneNumber = userInDb.PhoneNumber,
                     IsAdmin = isAdmin?.Succeeded ?? false
                 });
             }

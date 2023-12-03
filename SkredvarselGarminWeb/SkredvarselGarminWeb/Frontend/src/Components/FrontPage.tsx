@@ -8,12 +8,13 @@ import {
   WrapItem,
   SlideFade,
   Box,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { Features } from "./Features";
 
 import bg from "../assets/bg.jpg";
 import { MyPage } from "./MyPage/MyPage";
-import { VippsButton } from "./VippsButton";
+import { VippsButton } from "./Buttons/VippsButton";
 import { CiqStoreButton } from "./CiqStoreButton";
 import { useScrollPosition } from "../hooks/useScrollPosition";
 import { ChevronIcon } from "./ChevronIcon";

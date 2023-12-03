@@ -29,6 +29,8 @@ var vippsOptionsSection = builder.Configuration.GetSection("Vipps");
 builder.Services.Configure<VippsOptions>(vippsOptionsSection);
 var vippsOptions = vippsOptionsSection.Get<VippsOptions>();
 
+var googleOptions = builder.Configuration.GetSection("Google").Get<GoogleOptions>();
+
 builder.Services.AddTransient<IDateTimeNowProvider, DateTimeNowProvider>();
 builder.Services.AddTransient<IGarminAuthenticationService, GarminAuthenticationService>();
 builder.Services.AddTransient<ISubscriptionService, SubscriptionService>();
@@ -36,7 +38,7 @@ builder.Services.AddTransient<IUserService, UserService>();
 
 var authOptions = builder.Configuration.GetSection("Auth").Get<AuthOptions>();
 
-builder.Services.SetupAuthentication(vippsOptions!, authOptions!);
+builder.Services.SetupAuthentication(vippsOptions!, authOptions!, googleOptions!);
 builder.Services.AddRefitClients(vippsOptions!);
 
 var app = builder.Build();
@@ -64,7 +66,7 @@ app.UseAuthorization();
 app.MapHealthChecks("/healthz");
 
 app.MapUserEndpoints();
-app.MapVippsEndpoints();
+app.MapAuthEndpoints();
 app.MapVarsomApiEndpoints(authOptions!);
 app.MapSubscriptionEndpoints();
 app.MapWatchApiEndpoints();

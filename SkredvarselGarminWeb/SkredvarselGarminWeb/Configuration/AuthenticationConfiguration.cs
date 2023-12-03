@@ -9,7 +9,11 @@ namespace SkredvarselGarminWeb.Configuration;
 
 public static class AuthenticationConfiguration
 {
-    public static void SetupAuthentication(this IServiceCollection serviceCollection, VippsOptions vippsOptions, AuthOptions authOptions)
+    public static void SetupAuthentication(
+        this IServiceCollection serviceCollection,
+        VippsOptions vippsOptions,
+        AuthOptions authOptions,
+        GoogleOptions googleOptions)
     {
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
         serviceCollection.AddAuthentication(options =>
@@ -22,7 +26,15 @@ public static class AuthenticationConfiguration
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
             })
             .AddVipps(vippsOptions)
-            .AddScheme<GarminAuthenticationSchemeOptions, GarminAuthenticationHandler>("Garmin", options => { });
+            .AddScheme<GarminAuthenticationSchemeOptions, GarminAuthenticationHandler>("Garmin", options => { })
+            .AddGoogle(options =>
+            {
+                options.ClientId = googleOptions.ClientId;
+                options.ClientSecret = googleOptions.ClientSecret;
+                options.ClaimActions.MapUniqueJsonKey("sub", "sub");
+                options.ClaimActions.MapUniqueJsonKey("name", "name");
+                options.ClaimActions.MapUniqueJsonKey("email", "email");
+            });
 
         serviceCollection.AddAuthorization(options =>
         {
@@ -57,8 +69,10 @@ public static class AuthenticationConfiguration
             options.Scope.Add("email");
             options.Scope.Add("phoneNumber");
 
-            options.ClaimActions.MapJsonKey("phone_number", "phone_number");
             options.ClaimActions.MapJsonKey("sub", "sub");
+            options.ClaimActions.MapUniqueJsonKey("name", "name");
+            options.ClaimActions.MapUniqueJsonKey("email", "email");
+            options.ClaimActions.MapUniqueJsonKey("phone_number", "phone_number");
 
             options.Events.OnRedirectToIdentityProvider = (ctx) =>
             {
