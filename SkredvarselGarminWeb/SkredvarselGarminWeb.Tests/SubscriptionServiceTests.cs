@@ -545,6 +545,11 @@ public class SubscriptionServiceTests
         successResponse.IsSuccessStatusCode.Returns(true);
         _vippsApiClient.PatchAgreement(default!, default!, default!).ReturnsForAnyArgs(successResponse);
 
+        _vippsApiClient.GetAgreement(agreement.Id).Returns(_fixture.Build<VippsAgreement>()
+            .With(x => x.Id, agreement.Id)
+            .With(x => x.Status, VippsAgreementStatus.Active)
+            .Create());
+
         await _subscriptionService.UpdateAgreementCharges(agreement.Id);
 
         await _vippsApiClient.Received(1).PatchAgreement(agreement.Id, Arg.Is<VippsPatchAgreementRequest>(r => r.Status == VippsPatchAgreementStatus.Stopped), Arg.Any<Guid>());
@@ -574,6 +579,12 @@ public class SubscriptionServiceTests
 
         var successResponse = Substitute.For<IApiResponse>();
         successResponse.IsSuccessStatusCode.Returns(true);
+
+        _vippsApiClient.GetAgreement(agreement.Id).Returns(_fixture.Build<VippsAgreement>()
+            .With(x => x.Id, agreement.Id)
+            .With(x => x.Status, VippsAgreementStatus.Active)
+            .Create());
+
         _vippsApiClient.PatchAgreement(default!, default!, default!).ReturnsForAnyArgs(successResponse);
 
         await _subscriptionService.UpdateAgreementCharges(agreement.Id);
