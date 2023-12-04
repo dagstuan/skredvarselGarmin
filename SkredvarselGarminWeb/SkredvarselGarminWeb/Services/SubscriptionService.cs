@@ -69,17 +69,17 @@ public class SubscriptionService : ISubscriptionService
             return;
         }
 
+        var vippsAgreement = await _vippsApiClient.GetAgreement(agreement.Id);
+
         if (agreement.Status == EntityAgreementStatus.UNSUBSCRIBED && nowDate >= agreement.NextChargeDate)
         {
             _logger.LogInformation("Agreement {agreementId} was unsubscribed and due for charge.", agreement.Id);
 
-            await StopAgreement(agreement);
+            await StopAgreement(agreement, vippsAgreement);
         }
         else
         {
             _logger.LogInformation("Updating charges for agreement {agreementId}", agreement.Id);
-
-            var vippsAgreement = await _vippsApiClient.GetAgreement(agreement.Id);
 
             if (vippsAgreement.Status == VippsAgreementStatus.Active)
             {
@@ -154,7 +154,7 @@ public class SubscriptionService : ISubscriptionService
                     {
                         _logger.LogInformation("Agreement {agreementId} had nextCharge status failed. Stopping agreement. Failed charge had id {chargeId}", agreement.Id, nextCharge.Id);
 
-                        await StopAgreement(agreement);
+                        await StopAgreement(agreement, vippsAgreement);
                     }
                     else
                     {
@@ -166,21 +166,23 @@ public class SubscriptionService : ISubscriptionService
         }
     }
 
-    public async Task StopAgreement(EntityAgreement agreement)
+    public async Task StopAgreement(EntityAgreement agreement, VippsAgreement vippsAgreement)
     {
         _logger.LogInformation("Stopping agreement in vipps and setting as stopped.");
 
-        var success = await StopAgreementInVipps(agreement.Id);
+        if (vippsAgreement.Status != VippsAgreementStatus.Stopped)
+        {
+            var success = await StopAgreementInVipps(agreement.Id);
 
-        if (success)
-        {
-            agreement.SetAsStopped();
-            _dbContext.SaveChanges();
+            if (!success)
+            {
+                _logger.LogError("Failed to stop agreement in Vipps.");
+                throw new Exception("Failed to stop agreement in Vipps.");
+            }
         }
-        else
-        {
-            _logger.LogError("Failed to stop agreement in Vipps.");
-        }
+
+        agreement.SetAsStopped();
+        _dbContext.SaveChanges();
     }
 
     public async Task DeactivateAgreement(string agreementId)
