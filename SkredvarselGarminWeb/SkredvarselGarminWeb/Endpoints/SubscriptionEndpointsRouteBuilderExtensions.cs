@@ -3,6 +3,7 @@ using Refit;
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Endpoints.Models;
 using SkredvarselGarminWeb.Entities.Extensions;
+using SkredvarselGarminWeb.Extensions;
 using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.NtfyApi;
 using SkredvarselGarminWeb.Services;
@@ -29,13 +30,12 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
             var user = dbContext.GetUserOrThrow(ctx.User.Identity);
 
             var userId = user.Id;
-            var userPhoneNumber = user.PhoneNumber;
 
             var existingAgreementsForUser = dbContext.Agreements
                 .Where(a => a.UserId == userId)
                 .ToList();
 
-            var isNewCustomer = !existingAgreementsForUser.Any();
+            var isNewCustomer = existingAgreementsForUser.Count == 0;
 
             var baseUrl = $"{ctx.Request.Scheme}://{ctx.Request.Host}";
 
@@ -52,7 +52,7 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
 
             var request = new DraftAgreementRequest
             {
-                CustomerPhoneNumber = userPhoneNumber,
+                CustomerPhoneNumber = ctx.User.Claims.GetClaimValueOrNull("phone_number"),
                 Pricing = new()
                 {
                     Amount = FullPrice,

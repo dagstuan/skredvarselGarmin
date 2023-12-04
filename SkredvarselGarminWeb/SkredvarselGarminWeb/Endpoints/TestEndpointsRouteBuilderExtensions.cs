@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Refit;
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities.Extensions;
+using SkredvarselGarminWeb.Extensions;
 using SkredvarselGarminWeb.NtfyApi;
 using SkredvarselGarminWeb.VippsApi;
 using SkredvarselGarminWeb.VippsApi.Models;
@@ -39,7 +40,7 @@ public static class TestEndpointsRouteBuilderExtensions
             {
                 var request = new DraftAgreementRequest
                 {
-                    CustomerPhoneNumber = user.PhoneNumber,
+                    CustomerPhoneNumber = ctx.User.Claims.GetClaimValueOrNull("phone_number"),
                     Pricing = new()
                     {
                         Amount = 3000,

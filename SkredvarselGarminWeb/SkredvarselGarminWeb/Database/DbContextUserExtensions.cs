@@ -15,9 +15,9 @@ public static class DbContextUserExtensions
             throw new Exception("Unauthenticated user.");
         }
 
-        var sub = ((ClaimsIdentity)identity).FindFirst("sub")!.Value;
+        var email = ((ClaimsIdentity)identity).FindFirst("email")!.Value;
 
-        return dbContext.Users.First(u => u.Id == sub);
+        return dbContext.Users.First(u => u.Email == email);
     }
 
     public static User? GetUserForWatchOrNull(this SkredvarselDbContext dbContext, string watchId)
