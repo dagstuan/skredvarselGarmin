@@ -34,7 +34,7 @@ public class SubscriptionServiceTests
     private readonly SkredvarselDbContext _dbContext;
     private readonly IDateTimeNowProvider _dateTimeNowProvider;
     private readonly IVippsApiClient _vippsApiClient;
-    private readonly ISubscriptionService _subscriptionService;
+    private readonly IVippsAgreementService _subscriptionService;
 
     public SubscriptionServiceTests()
     {
@@ -54,11 +54,11 @@ public class SubscriptionServiceTests
         _vippsApiClient = Substitute.For<IVippsApiClient>();
         _dateTimeNowProvider = Substitute.For<IDateTimeNowProvider>();
 
-        _subscriptionService = new SubscriptionService(
+        _subscriptionService = new VippsAgreementService(
             _dbContext,
             _vippsApiClient,
             _dateTimeNowProvider,
-            Substitute.For<ILogger<SubscriptionService>>());
+            Substitute.For<ILogger<VippsAgreementService>>());
     }
 
     [Fact]

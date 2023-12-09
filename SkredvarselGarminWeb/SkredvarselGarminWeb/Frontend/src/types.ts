@@ -1,5 +1,29 @@
-export type Subscription = {
-  status: "ACTIVE" | "STOPPED" | "EXPIRED" | "PENDING" | "UNSUBSCRIBED";
+type SubscriptionType = "Stripe" | "Vipps";
+
+type StripeSubscriptionStatus =
+  | "ACTIVE"
+  | "UNSUBSCRIBED"
+  | "CANCELED"
+  | "INCOMPLETE"
+  | "INCOMPLETE_EXPIRED"
+  | "PAST_DUE"
+  | "PAUSED"
+  | "TRIALING"
+  | "UNPAID";
+
+type VippsAgreementStatus =
+  | "ACTIVE"
+  | "STOPPED"
+  | "EXPIRED"
+  | "PENDING"
+  | "UNSUBSCRIBED";
+
+export type Subscription<TType extends SubscriptionType> = {
+  subscriptionType: TType;
+  stripeSubscriptionStatus: TType extends "Stripe"
+    ? StripeSubscriptionStatus
+    : never;
+  vippsAgreementStatus: TType extends "Vipps" ? VippsAgreementStatus : never;
   nextChargeDate: string | undefined;
   vippsConfirmationUrl: string | undefined;
 };

@@ -15,7 +15,7 @@ public class HangfireService
     private readonly IVippsApiClient _vippsApiClient;
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IDateTimeNowProvider _dateTimeNowProvider;
-    private readonly ISubscriptionService _subscriptionService;
+    private readonly IVippsAgreementService _subscriptionService;
     private readonly ILogger<HangfireService> _logger;
 
     public HangfireService(
@@ -23,7 +23,7 @@ public class HangfireService
         IVippsApiClient vippsApiClient,
         IBackgroundJobClient backgroundJobClient,
         IDateTimeNowProvider dateTimeNowProvider,
-        ISubscriptionService subscriptionService,
+        IVippsAgreementService subscriptionService,
         ILogger<HangfireService> logger)
     {
         _dbContext = dbContext;

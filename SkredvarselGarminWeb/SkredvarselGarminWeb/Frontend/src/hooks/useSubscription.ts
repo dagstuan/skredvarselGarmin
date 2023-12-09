@@ -6,27 +6,29 @@ import { Subscription } from "../types";
 const fetchSubscription = async () =>
   api
     .get("/api/subscription")
-    .then((res) => (res.data ? (res.data as Subscription) : null));
+    .then((res) =>
+      res.data ? (res.data as Subscription<"Vipps" | "Stripe">) : null,
+    );
 
 export const useSubscription = () =>
   useQuery(["subscription"], async () => fetchSubscription());
 
-const stopSubscription = async () => api.delete("/api/subscription");
+const stopVippsAgreement = async () => api.delete("/api/vippsAgreement");
 
-export const useStopSubscription = () =>
+export const useStopVippsAgreement = () =>
   useMutation({
-    mutationFn: stopSubscription,
+    mutationFn: stopVippsAgreement,
     onSuccess: () => {
       queryClient.invalidateQueries("subscription");
     },
   });
 
-const reactivateSubscription = async () =>
-  api.put("/api/subscription/reactivate");
+const reactivateVippsAgreement = async () =>
+  api.put("/api/vippsAgreement/reactivate");
 
-export const useReactivateSubscription = () =>
+export const useReactivateVippsAgreement = () =>
   useMutation({
-    mutationFn: reactivateSubscription,
+    mutationFn: reactivateVippsAgreement,
     onSuccess: () => {
       queryClient.invalidateQueries("subscription");
     },

@@ -61,7 +61,7 @@ export const FaqPage = () => {
               <ListItem>
                 <Link
                   color="blue.600"
-                  href="https://skredvarsel.app/createSubscription"
+                  href="https://skredvarsel.app/createVippsAgreement"
                 >
                   Kjøp et abonnement på appen
                 </Link>

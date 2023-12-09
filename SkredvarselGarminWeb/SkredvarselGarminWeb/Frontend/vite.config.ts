@@ -16,13 +16,13 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      "^/(vipps|google|logout).*": {
+      "^/(vipps|google|logout|stripe).*": {
         target: "https://localhost:8080",
         changeOrigin: true,
         secure: false,
         agent: new https.Agent(),
       },
-      "/createSubscription": {
+      "^/create(VippsAgreement|StripeSubscription)": {
         target: "https://localhost:8080",
         changeOrigin: true,
         secure: false,
