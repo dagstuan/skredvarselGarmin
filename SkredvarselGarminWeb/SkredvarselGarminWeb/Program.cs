@@ -9,6 +9,7 @@ using SkredvarselGarminWeb.Hangfire;
 using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Services;
 using Microsoft.AspNetCore.DataProtection;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,7 @@ builder.Services.AddHealthChecks();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddMemoryCache();
+builder.Services.AddHttpContextAccessor();
 
 var dataProtectionPath = builder.Configuration.GetValue<string>("DataProtectionPath");
 builder.Services.AddDataProtection()
@@ -29,12 +31,20 @@ var vippsOptionsSection = builder.Configuration.GetSection("Vipps");
 builder.Services.Configure<VippsOptions>(vippsOptionsSection);
 var vippsOptions = vippsOptionsSection.Get<VippsOptions>();
 
+var stripeOptionsSection = builder.Configuration.GetSection("Stripe");
+builder.Services.Configure<StripeOptions>(stripeOptionsSection);
+
+builder.Services.AddTransient<IStripeClient>(f => new StripeClient(stripeOptionsSection.Get<StripeOptions>()!.ApiKey));
+
+StripeConfiguration.ApiKey = stripeOptionsSection.Get<StripeOptions>()!.ApiKey;
+
 var googleOptions = builder.Configuration.GetSection("Google").Get<GoogleOptions>();
 
 builder.Services.AddTransient<IDateTimeNowProvider, DateTimeNowProvider>();
 builder.Services.AddTransient<IGarminAuthenticationService, GarminAuthenticationService>();
-builder.Services.AddTransient<ISubscriptionService, SubscriptionService>();
+builder.Services.AddTransient<IVippsAgreementService, SkredvarselGarminWeb.Services.VippsAgreementService>();
 builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IStripeService, StripeService>();
 
 var authOptions = builder.Configuration.GetSection("Auth").Get<AuthOptions>();
 
@@ -68,7 +78,9 @@ app.MapHealthChecks("/healthz");
 app.MapUserEndpoints();
 app.MapAuthEndpoints();
 app.MapVarsomApiEndpoints(authOptions!);
-app.MapSubscriptionEndpoints();
+app.MapStripeSubscriptionEndpoints();
+app.MapVippsSubscriptionEndpoints();
+app.MapSubscriptionApiEndpoints();
 app.MapWatchApiEndpoints();
 app.MapAdminEndpoints();
 

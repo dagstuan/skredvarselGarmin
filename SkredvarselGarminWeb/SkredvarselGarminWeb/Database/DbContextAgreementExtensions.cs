@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Helpers;
 
@@ -22,7 +21,14 @@ public static class DbContextAgreementExtensions
 
     public static bool DoesUserHaveActiveAgreement(this SkredvarselDbContext dbContext, string userId)
     {
-        return dbContext.Agreements.Where(a => a.UserId == userId)
+        var activeOrUnsubbedVippsAgreements = dbContext.Agreements
+            .Where(a => a.UserId == userId)
             .Any(a => a.Status == AgreementStatus.ACTIVE || a.Status == AgreementStatus.UNSUBSCRIBED);
+
+        var activeOrUnsubbedStripeSubscriptions = dbContext.StripeSubscriptions
+            .Where(ss => ss.UserId == userId)
+            .Any(ss => ss.Status == StripeSubscriptionStatus.ACTIVE || ss.Status == StripeSubscriptionStatus.UNSUBSCRIBED);
+
+        return activeOrUnsubbedVippsAgreements || activeOrUnsubbedStripeSubscriptions;
     }
 }

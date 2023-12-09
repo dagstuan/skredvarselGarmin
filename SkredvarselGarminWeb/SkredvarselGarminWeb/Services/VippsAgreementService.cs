@@ -10,11 +10,10 @@ using EntityAgreementStatus = SkredvarselGarminWeb.Entities.AgreementStatus;
 using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Entities.Extensions;
 using Hangfire;
-using SkredvarselGarminWeb.NtfyApi;
 
 namespace SkredvarselGarminWeb.Services;
 
-public class SubscriptionService : ISubscriptionService
+public class VippsAgreementService : IVippsAgreementService
 {
     private readonly TimeSpan ChargeRetryDays = TimeSpan.FromDays(3);
     private const string ChargeText = "Abonnement på Skredvarsel for Garmin";
@@ -22,13 +21,13 @@ public class SubscriptionService : ISubscriptionService
     private readonly SkredvarselDbContext _dbContext;
     private readonly IVippsApiClient _vippsApiClient;
     private readonly IDateTimeNowProvider _dateTimeNowProvider;
-    private readonly ILogger<SubscriptionService> _logger;
+    private readonly ILogger<VippsAgreementService> _logger;
 
-    public SubscriptionService(
+    public VippsAgreementService(
         SkredvarselDbContext dbContext,
         IVippsApiClient vippsApiClient,
         IDateTimeNowProvider dateTimeNowProvider,
-        ILogger<SubscriptionService> logger)
+        ILogger<VippsAgreementService> logger)
     {
         _dbContext = dbContext;
         _vippsApiClient = vippsApiClient;

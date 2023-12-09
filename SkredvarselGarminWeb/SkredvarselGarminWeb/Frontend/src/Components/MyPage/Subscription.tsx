@@ -1,67 +1,99 @@
-import { Spinner, Button, Text } from "@chakra-ui/react";
+import {
+  Spinner,
+  Button,
+  Text,
+  VStack,
+  Center,
+  AbsoluteCenter,
+  Box,
+  Divider,
+} from "@chakra-ui/react";
 import { format, parse } from "date-fns";
 import {
-  useReactivateSubscription,
-  useStopSubscription,
+  useReactivateVippsAgreement,
+  useStopVippsAgreement,
   useSubscription,
 } from "../../hooks/useSubscription";
 import { VippsButton } from "../Buttons/VippsButton";
+import { StripeButton } from "../Buttons/StripeButton";
+
+const StripeCustomerPortalButton = () => (
+  <Button
+    as="a"
+    href="/stripe-customer-portal"
+    colorScheme="blue"
+    bg={"blue.400"}
+    color={"white"}
+    _hover={{ bg: "blue.500" }}
+  >
+    Gå til Stripe for å endre abonnement
+  </Button>
+);
 
 export const Subscription = () => {
   const { data: subscription, isLoading: isSubscriptionLoading } =
     useSubscription();
 
-  const stopSubscription = useStopSubscription();
-  const reactivateSubscription = useReactivateSubscription();
+  const stopSubscription = useStopVippsAgreement();
+  const reactivateSubscription = useReactivateVippsAgreement();
 
   if (isSubscriptionLoading) {
     return <Spinner />;
   }
 
-  if (
-    !subscription ||
-    subscription.status == "STOPPED" ||
-    subscription.status == "EXPIRED"
-  ) {
+  if (!subscription) {
     return (
-      <>
-        <Text mb={2}>
-          Du har ikke registrert et abonnement på appen. Gå til Vipps for å
-          registrere deg.
-        </Text>
+      <VStack align="flex-start" gap={2}>
+        <Text mb={2}>Du har ikke registrert et abonnement på appen.</Text>
 
-        <VippsButton />
-      </>
+        <VStack gap={5} alignItems="stretch">
+          <VippsButton />
+          <Box position="relative">
+            <Divider />
+            <AbsoluteCenter bg="white" px="4">
+              Eller
+            </AbsoluteCenter>
+          </Box>
+          <StripeButton />
+        </VStack>
+      </VStack>
     );
   }
 
-  if (subscription.status == "PENDING" && subscription.vippsConfirmationUrl) {
-    return (
-      <>
-        <Text mb={2}>
-          Du har en pågående registrering for et abonnement. Gå til Vipps for å
-          fullføre registreringen.
-        </Text>
+  const {
+    subscriptionType,
+    nextChargeDate,
+    stripeSubscriptionStatus,
+    vippsAgreementStatus,
+    vippsConfirmationUrl,
+  } = subscription;
 
-        <VippsButton text="Gå til" link={subscription.vippsConfirmationUrl} />
-      </>
-    );
+  if (subscriptionType === "Vipps") {
+    if (vippsAgreementStatus === "PENDING" && vippsConfirmationUrl) {
+      return (
+        <>
+          <Text mb={2}>
+            Du har en pågående registrering for et abonnement. Gå til Vipps for
+            å fullføre registreringen.
+          </Text>
+
+          <VippsButton text="Gå til" link={vippsConfirmationUrl} />
+        </>
+      );
+    }
   }
 
-  var nextChargeDate =
-    subscription.nextChargeDate != null
-      ? format(
-          parse(subscription.nextChargeDate, "yyyy-mm-dd", new Date()),
-          "dd.mm.yyyy",
-        )
+  var formattedNextChargeDate =
+    nextChargeDate != null
+      ? format(parse(nextChargeDate, "yyyy-mm-dd", new Date()), "dd.mm.yyyy")
       : null;
 
-  if (subscription.status == "UNSUBSCRIBED") {
+  if (subscriptionType === "Vipps" && vippsAgreementStatus == "UNSUBSCRIBED") {
     return (
       <>
         <Text mb={2}>
           Du har sagt opp abonnementet ditt. Du har fortsatt tilgang frem til{" "}
-          {nextChargeDate}.
+          {formattedNextChargeDate}.
         </Text>
 
         <Button
@@ -75,23 +107,43 @@ export const Subscription = () => {
     );
   }
 
+  if (
+    subscriptionType === "Stripe" &&
+    stripeSubscriptionStatus == "UNSUBSCRIBED"
+  ) {
+    return (
+      <>
+        <Text mb={2}>
+          Du har sagt opp abonnementet ditt. Du har fortsatt tilgang frem til{" "}
+          {formattedNextChargeDate}.
+        </Text>
+
+        <StripeCustomerPortalButton />
+      </>
+    );
+  }
+
   return (
     <>
       {subscription != null && (
         <>
           <Text mb={2}>
             Du har registrert et abonnement på appen. Tusen takk!{" "}
-            {nextChargeDate &&
-              `Abonnementet fornyes automatisk ${nextChargeDate}`}
+            {formattedNextChargeDate &&
+              `Abonnementet fornyes automatisk ${formattedNextChargeDate}`}
           </Text>
 
-          <Button
-            color="gray.500"
-            isDisabled={stopSubscription.isLoading}
-            onClick={() => stopSubscription.mutate()}
-          >
-            Avslutt abonnement
-          </Button>
+          {subscriptionType == "Vipps" && (
+            <Button
+              color="gray.500"
+              isDisabled={stopSubscription.isLoading}
+              onClick={() => stopSubscription.mutate()}
+            >
+              Avslutt abonnement
+            </Button>
+          )}
+
+          {subscriptionType == "Stripe" && <StripeCustomerPortalButton />}
         </>
       )}
     </>

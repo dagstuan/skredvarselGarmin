@@ -1,6 +1,6 @@
 namespace SkredvarselGarminWeb.Services;
 
-public interface ISubscriptionService
+public interface IVippsAgreementService
 {
     Task UpdateAgreementCharges(string agreementId);
     Task DeactivateAgreement(string agreementId);

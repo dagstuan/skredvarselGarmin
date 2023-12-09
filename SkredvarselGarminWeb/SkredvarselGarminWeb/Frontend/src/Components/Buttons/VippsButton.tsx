@@ -8,7 +8,8 @@ type VippsButtonProps = {
 } & Pick<ButtonProps, "size">;
 
 export const VippsButton = (props: VippsButtonProps) => {
-  const { text = "Kjøp abonnement med", link = "/createSubscription" } = props;
+  const { text = "Kjøp abonnement med", link = "/createVippsAgreement" } =
+    props;
 
   return (
     <Button
