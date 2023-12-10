@@ -22,11 +22,11 @@ public static class WatchApiRouteBuilderExtensions
 
             if (existingWatch != null)
             {
-                var activeAgreementForUser = dbContext.GetActiveAgreementForUser(existingWatch.UserId);
+                var doesUserHaveActiveAgreement = dbContext.DoesUserHaveActiveAgreement(existingWatch.UserId);
 
                 return Results.Ok(new SetupSubscriptionResponse
                 {
-                    Status = activeAgreementForUser != null ?
+                    Status = doesUserHaveActiveAgreement ?
                         SetupSubscriptionStatus.SEEN_WATCH_ACTIVE_SUBSCRIPTION :
                         SetupSubscriptionStatus.SEEN_WATCH_INACTIVE_SUBSCRIPTION,
                 });
