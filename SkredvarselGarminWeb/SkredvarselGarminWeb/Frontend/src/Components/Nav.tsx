@@ -61,9 +61,9 @@ export const Nav = () => {
               <>
                 <Button
                   onClick={onLoginOpen}
-                  bg={"blue.400"}
                   color={"white"}
-                  _hover={{ bg: "blue.500" }}
+                  colorScheme="blue"
+                  borderRadius={4}
                 >
                   Logg inn
                 </Button>
@@ -75,9 +75,8 @@ export const Nav = () => {
                     as={RouterLink}
                     to="/admin"
                     isLoading={isLoading}
-                    bg={"blue.400"}
-                    color={"white"}
-                    _hover={{ bg: "blue.500" }}
+                    colorScheme="blue"
+                    borderRadius={4}
                   >
                     Admin
                   </Button>
@@ -86,9 +85,8 @@ export const Nav = () => {
                   as={RouterLink}
                   to="/minSide"
                   isLoading={isLoading}
-                  bg={"blue.400"}
-                  color={"white"}
-                  _hover={{ bg: "blue.500" }}
+                  colorScheme="blue"
+                  borderRadius={4}
                 >
                   Min side
                 </Button>

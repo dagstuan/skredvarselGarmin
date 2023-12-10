@@ -1,24 +1,23 @@
 import { Button, Flex, Icon, Text } from "@chakra-ui/react";
-import { FcGoogle } from "react-icons/fc";
+import { SiFacebook } from "react-icons/si";
 
-type GoogleButtonProps = {
+type FacebookButtonProps = {
   link: string;
 };
 
-export const GoogleButton = ({ link }: GoogleButtonProps) => {
+export const FacebookButton = ({ link }: FacebookButtonProps) => {
   return (
     <Button
       as="a"
       href={link}
       rounded={"full"}
       borderRadius={4}
-      colorScheme="gray"
-      variant="outline"
+      colorScheme="facebook"
       size={"md"}
     >
       <Flex gap={2} alignItems="center">
-        <Icon as={FcGoogle} w={6} h={6} />
-        <Text>Fortsett med Google</Text>
+        <Icon as={SiFacebook} w={6} h={6} />
+        <Text>Fortsett med Facebook</Text>
       </Flex>
     </Button>
   );

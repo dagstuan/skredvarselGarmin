@@ -38,17 +38,17 @@ builder.Services.AddTransient<IStripeClient>(f => new StripeClient(stripeOptions
 
 StripeConfiguration.ApiKey = stripeOptionsSection.Get<StripeOptions>()!.ApiKey;
 
+var authOptions = builder.Configuration.GetSection("Auth").Get<AuthOptions>();
 var googleOptions = builder.Configuration.GetSection("Google").Get<GoogleOptions>();
+var facebookOptions = builder.Configuration.GetSection("Facebook").Get<FacebookOptions>();
 
 builder.Services.AddTransient<IDateTimeNowProvider, DateTimeNowProvider>();
 builder.Services.AddTransient<IGarminAuthenticationService, GarminAuthenticationService>();
-builder.Services.AddTransient<IVippsAgreementService, SkredvarselGarminWeb.Services.VippsAgreementService>();
+builder.Services.AddTransient<IVippsAgreementService, VippsAgreementService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IStripeService, StripeService>();
 
-var authOptions = builder.Configuration.GetSection("Auth").Get<AuthOptions>();
-
-builder.Services.SetupAuthentication(vippsOptions!, authOptions!, googleOptions!);
+builder.Services.SetupAuthentication(vippsOptions!, authOptions!, googleOptions!, facebookOptions!);
 builder.Services.AddRefitClients(vippsOptions!);
 
 var app = builder.Build();

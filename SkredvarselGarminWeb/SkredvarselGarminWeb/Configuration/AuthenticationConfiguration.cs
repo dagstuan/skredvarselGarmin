@@ -13,9 +13,11 @@ public static class AuthenticationConfiguration
         this IServiceCollection serviceCollection,
         VippsOptions vippsOptions,
         AuthOptions authOptions,
-        GoogleOptions googleOptions)
+        GoogleOptions googleOptions,
+        FacebookOptions facebookOptions)
     {
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
         serviceCollection.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -34,20 +36,25 @@ public static class AuthenticationConfiguration
                 options.ClaimActions.MapUniqueJsonKey("sub", "sub");
                 options.ClaimActions.MapUniqueJsonKey("name", "name");
                 options.ClaimActions.MapUniqueJsonKey("email", "email");
+            })
+            .AddFacebook(options =>
+            {
+                options.AppId = facebookOptions.AppId;
+                options.AppSecret = facebookOptions.AppSecret;
+                options.ClaimActions.MapUniqueJsonKey("sub", "id");
+                options.ClaimActions.MapUniqueJsonKey("name", "name");
+                options.ClaimActions.MapUniqueJsonKey("email", "email");
             });
 
-        serviceCollection.AddAuthorization(options =>
-        {
-            options.AddPolicy("Admin", policy =>
-                policy.RequireClaim("sub", authOptions.AdminSub));
-
-            options.AddPolicy("Garmin", policy =>
+        serviceCollection.AddAuthorizationBuilder()
+            .AddPolicy("Admin", policy =>
+                policy.RequireClaim("sub", authOptions.AdminSub))
+            .AddPolicy("Garmin", policy =>
             {
                 policy.AuthenticationSchemes.Clear();
                 policy.AuthenticationSchemes.Add("Garmin");
                 policy.RequireAuthenticatedUser();
             });
-        });
     }
 
     public static AuthenticationBuilder AddVipps(this AuthenticationBuilder builder, VippsOptions vippsOptions)

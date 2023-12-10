@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { GoogleButton } from "./Buttons/GoogleButton";
 import { VippsButton } from "./Buttons/VippsButton";
+import { FacebookButton } from "./Buttons/FacebookButton";
 
 type LoginModalProps = {
   isOpen: boolean;
@@ -31,6 +32,7 @@ export const LoginModal = (props: LoginModalProps) => {
               text="Fortsett med"
             />
             <GoogleButton link="/google-login?returnUrl=/minSide" />
+            <FacebookButton link="/facebook-login?returnUrl=/minSide" />
           </VStack>
         </ModalBody>
       </ModalContent>

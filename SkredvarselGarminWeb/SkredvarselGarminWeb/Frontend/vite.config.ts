@@ -16,7 +16,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      "^/(vipps|google|logout|stripe).*": {
+      "^/(vipps|google|facebook|logout|stripe).*": {
         target: "https://localhost:8080",
         changeOrigin: true,
         secure: false,
