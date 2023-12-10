@@ -7,9 +7,9 @@ import {
   ModalBody,
   VStack,
 } from "@chakra-ui/react";
+import { FacebookButton } from "./Buttons/FacebookButton";
 import { GoogleButton } from "./Buttons/GoogleButton";
 import { VippsButton } from "./Buttons/VippsButton";
-import { FacebookButton } from "./Buttons/FacebookButton";
 
 type LoginModalProps = {
   isOpen: boolean;
