@@ -13,6 +13,13 @@ import { SalesConditions } from "./Components/SalesConditions";
 import { RequireAdmin } from "./Components/Admin/RequireAdmin";
 import { AdminPage } from "./Components/Admin/AdminPage";
 
+// Remove facebook oauth redirect hash.
+if (window.location.hash === "#_=_") {
+  history.replaceState
+    ? history.replaceState(null, "", window.location.href.split("#")[0])
+    : (window.location.hash = "");
+}
+
 export const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
