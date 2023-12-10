@@ -1,6 +1,6 @@
 import { Button, ButtonProps, Flex, Text } from "@chakra-ui/react";
 
-import vippsLogoWhite from "../../assets/vipps_logo_white.svg";
+import { VippsIcon } from "../Icons/VippsIcon";
 
 type VippsButtonProps = {
   text?: string;
@@ -22,9 +22,9 @@ export const VippsButton = (props: VippsButtonProps) => {
       size={props.size ?? "md"}
       _hover={{ bg: "#ec6638" }}
     >
-      <Flex gap={2} alignItems="flex-end">
+      <Flex gap={2} alignItems="center">
         <Text>{text}</Text>
-        <img src={vippsLogoWhite} />
+        <VippsIcon alignSelf="flex-end" w={14} h={4} />
       </Flex>
     </Button>
   );

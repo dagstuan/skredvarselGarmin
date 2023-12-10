@@ -8,19 +8,50 @@ import {
   WrapItem,
   SlideFade,
   Box,
+  Button,
+  Icon,
+  HStack,
   useDisclosure,
 } from "@chakra-ui/react";
 import { Features } from "./Features";
 
 import bg from "../assets/bg.jpg";
 import { MyPage } from "./MyPage/MyPage";
-import { VippsButton } from "./Buttons/VippsButton";
 import { CiqStoreButton } from "./CiqStoreButton";
 import { useScrollPosition } from "../hooks/useScrollPosition";
 import { ChevronIcon } from "./ChevronIcon";
+import {
+  FaApplePay,
+  FaCcMastercard,
+  FaCcVisa,
+  FaGooglePay,
+  FaSkiing,
+  FaSkiingNordic,
+} from "react-icons/fa";
+import { VippsIcon } from "./Icons/VippsIcon";
+import { BuySubscriptionModal } from "./BuySubscriptionModal";
+import { useUser } from "../hooks/useUser";
+import { useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const FrontPage = () => {
   const scrollPosition = useScrollPosition();
+  const { data: user } = useUser();
+  const navigate = useNavigate();
+
+  const {
+    isOpen: isLoginOpen,
+    onOpen: onLoginOpen,
+    onClose: onLoginClose,
+  } = useDisclosure();
+
+  const onBuyClick = useCallback(() => {
+    if (user) {
+      navigate("/minSide");
+    } else {
+      onLoginOpen();
+    }
+  }, [navigate, user, onLoginOpen]);
 
   return (
     <>
@@ -70,7 +101,24 @@ export const FrontPage = () => {
                     <CiqStoreButton size="lg" />
                   </WrapItem>
                   <WrapItem>
-                    <VippsButton size="lg" />
+                    <VStack gap={1} align="flex-start">
+                      <Button
+                        leftIcon={<Icon as={FaSkiingNordic} />}
+                        rightIcon={<Icon as={FaSkiing} />}
+                        onClick={onBuyClick}
+                        size="lg"
+                        colorScheme="green"
+                      >
+                        Logg inn og kjøp abonnement
+                      </Button>
+                      <HStack>
+                        <VippsIcon color="white" w={14} h={7} />
+                        <Icon color="white" as={FaCcVisa} w={7} h={7} />
+                        <Icon color="white" as={FaCcMastercard} w={7} h={7} />
+                        <Icon color="white" as={FaApplePay} w={9} h={9} />
+                        <Icon color="white" as={FaGooglePay} w={9} h={9} />
+                      </HStack>
+                    </VStack>
                   </WrapItem>
                 </Wrap>
               </Stack>
@@ -100,6 +148,7 @@ export const FrontPage = () => {
       </Flex>
       <Features />
       <MyPage />
+      <BuySubscriptionModal isOpen={isLoginOpen} onClose={onLoginClose} />
     </>
   );
 };
