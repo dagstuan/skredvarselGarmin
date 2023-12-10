@@ -80,7 +80,14 @@ public class StripeService(
     {
         using var transaction = dbContext.Database.BeginTransaction();
 
-        var subscriptionInDb = dbContext.StripeSubscriptions.Single(s => s.SubscriptionId == subscription.Id);
+        var subscriptionInDb = dbContext.StripeSubscriptions.SingleOrDefault(s => s.SubscriptionId == subscription.Id);
+
+        if (subscriptionInDb == null)
+        {
+            logger.LogInformation("Received subscription updated event for subscription not in local database.");
+            transaction.Commit();
+            return;
+        }
 
         subscriptionInDb.Status = subscription.ToStripeSubscriptionStatus();
         subscriptionInDb.NextChargeDate = DateOnly.FromDateTime(subscription.CurrentPeriodEnd);
