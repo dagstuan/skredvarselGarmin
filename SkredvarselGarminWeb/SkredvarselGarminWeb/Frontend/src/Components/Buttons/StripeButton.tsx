@@ -1,6 +1,11 @@
-import { Button, ButtonProps, Flex, Img, Text } from "@chakra-ui/react";
-
-import stripeLogo from "../../assets/stripe_logo.svg";
+import { Button, ButtonProps, HStack, Icon, VStack } from "@chakra-ui/react";
+import {
+  FaStripe,
+  FaCcVisa,
+  FaCcMastercard,
+  FaApplePay,
+  FaGooglePay,
+} from "react-icons/fa";
 
 type StripeButtonProps = {
   text?: string;
@@ -12,22 +17,23 @@ export const StripeButton = (props: StripeButtonProps) => {
     props;
 
   return (
-    <Button
-      as="a"
-      href={link}
-      bg="white"
-      color="#30313d"
-      rounded={"full"}
-      borderRadius={4}
-      border="2px"
-      borderColor="#0570DE"
-      size={props.size ?? "md"}
-      colorScheme="gray"
-    >
-      <Flex gap={2} alignItems="flex-start">
-        <Text>{text}</Text>
-        <Img src={stripeLogo} />
-      </Flex>
-    </Button>
+    <VStack gap={0} alignItems="flex-start">
+      <Button
+        as="a"
+        href={link}
+        borderRadius={4}
+        colorScheme="purple"
+        size={props.size ?? "md"}
+        rightIcon={<Icon as={FaStripe} h={10} w={12} />}
+      >
+        {text}
+      </Button>
+      <HStack>
+        <Icon as={FaCcVisa} w={6} h={6} />
+        <Icon as={FaCcMastercard} w={6} h={6} />
+        <Icon as={FaApplePay} w={9} h={9} />
+        <Icon as={FaGooglePay} w={9} h={9} />
+      </HStack>
+    </VStack>
   );
 };

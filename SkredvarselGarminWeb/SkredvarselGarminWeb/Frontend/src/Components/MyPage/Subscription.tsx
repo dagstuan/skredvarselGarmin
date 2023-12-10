@@ -3,7 +3,6 @@ import {
   Button,
   Text,
   VStack,
-  Center,
   AbsoluteCenter,
   Box,
   Divider,
@@ -22,9 +21,7 @@ const StripeCustomerPortalButton = () => (
     as="a"
     href="/stripe-customer-portal"
     colorScheme="blue"
-    bg={"blue.400"}
-    color={"white"}
-    _hover={{ bg: "blue.500" }}
+    borderRadius={4}
   >
     Gå til Stripe for å endre abonnement
   </Button>
@@ -98,6 +95,7 @@ export const Subscription = () => {
 
         <Button
           colorScheme="green"
+          borderRadius={4}
           isDisabled={reactivateSubscription.isLoading}
           onClick={() => reactivateSubscription.mutate()}
         >
@@ -135,7 +133,8 @@ export const Subscription = () => {
 
           {subscriptionType == "Vipps" && (
             <Button
-              color="gray.500"
+              colorScheme="gray"
+              borderRadius={4}
               isDisabled={stopSubscription.isLoading}
               onClick={() => stopSubscription.mutate()}
             >

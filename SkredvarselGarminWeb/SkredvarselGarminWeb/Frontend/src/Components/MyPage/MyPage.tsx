@@ -71,14 +71,8 @@ export const MyPage = () => {
             <PersonalInfo />
           </Box>
 
-          <Box>
-            <Button
-              as="a"
-              href="/logout"
-              bg={"blue.400"}
-              color={"white"}
-              _hover={{ bg: "blue.500" }}
-            >
+          <Box mb={5}>
+            <Button as="a" href="/logout" colorScheme="blue" borderRadius={4}>
               Logg ut
             </Button>
           </Box>
