@@ -21,6 +21,7 @@ import {
   FaApplePay,
   FaCcMastercard,
   FaCcVisa,
+  FaCreditCard,
   FaGooglePay,
 } from "react-icons/fa";
 
@@ -46,11 +47,11 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
 
             <VStack gap={2} mb={7}>
               <Text>Du kan betale med:</Text>
-              <HStack>
-                <VippsIcon w={14} h={4} /> <Icon as={FaCcVisa} w={7} h={7} />
-                <Icon as={FaCcMastercard} w={7} h={7} />
-                <Icon as={FaApplePay} w={9} h={9} />
-                <Icon as={FaGooglePay} w={9} h={9} />
+              <HStack alignItems="center">
+                <VippsIcon title="Vipps" w={14} h="100%" />
+                <Icon title="Kort" as={FaCreditCard} w={6} h="100%" />
+                <Icon title="Apple Pay" as={FaApplePay} w={9} h="100%" />
+                <Icon title="Google Pay" as={FaGooglePay} w={9} h="100%" />
               </HStack>
             </VStack>
 
