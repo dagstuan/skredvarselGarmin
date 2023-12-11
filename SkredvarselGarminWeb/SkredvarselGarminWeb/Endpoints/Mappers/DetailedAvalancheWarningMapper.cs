@@ -14,18 +14,23 @@ public static class DetailedAvalancheWarningMapper
             varsomWarning.ValidTo,
         ],
         MainText = varsomWarning.MainText,
-        AvalancheProblems = varsomWarning.AvalancheProblems?.Select(problem => new AvalancheProblem()
+        AvalancheProblems = (varsomWarning.AvalancheProblems ?? [])?.Select(problem => new AvalancheProblem()
         {
             TypeName = problem.AvalancheProblemTypeName,
             ExposedHeights = [
-                problem.ExposedHeight1,
-                problem.ExposedHeight2,
-                problem.ExposedHeightFill,
-            ],
+                    problem.ExposedHeight1,
+                    problem.ExposedHeight2,
+                    problem.ExposedHeightFill,
+                ],
             ValidExpositions = problem.ValidExpositions,
             DangerLevel = problem.DangerLevel,
-        })
-        .OrderByDescending(x => x.DangerLevel)
-        .ToList() ?? new List<AvalancheProblem>()
+        }).OrderByDescending(x => x.DangerLevel),
+        IsTendency = varsomWarning.IsTendency,
+        EmergencyWarning = varsomWarning.EmergencyWarning.ToEmergencyWarning()
     };
+
+    private static string? ToEmergencyWarning(this string emergencyWarning) =>
+        !emergencyWarning.Equals("ikke gitt", StringComparison.CurrentCultureIgnoreCase)
+            ? emergencyWarning
+            : null;
 }

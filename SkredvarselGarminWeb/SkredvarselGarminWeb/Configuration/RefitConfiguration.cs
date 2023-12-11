@@ -44,7 +44,7 @@ public static class RefitConfiguration
         serviceCollection.AddRefitClient<IVarsomApi>(varsomApiSettings)
             .ConfigureHttpClient(c =>
             {
-                c.BaseAddress = new Uri("https://api01.nve.no/hydrology/forecast/avalanche/v6.2.1/api");
+                c.BaseAddress = new Uri("https://api01.nve.no/hydrology/forecast/avalanche/v6.3.0/api");
             })
             .AddPolicyHandler(retryPolicy)
             .AddPolicyHandler(timeoutPolicy);

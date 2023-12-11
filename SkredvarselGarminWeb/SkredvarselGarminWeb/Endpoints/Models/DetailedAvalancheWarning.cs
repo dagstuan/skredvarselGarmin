@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace SkredvarselGarminWeb.Endpoints.Models;
 
 public class DetailedAvalancheWarning
@@ -7,6 +9,10 @@ public class DetailedAvalancheWarning
     public required DateTime[] Validity { get; init; }
     public required string MainText { get; init; }
     public required IEnumerable<AvalancheProblem>? AvalancheProblems { get; init; }
+    public required bool IsTendency { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public required string? EmergencyWarning { get; init; }
 }
 
 public class AvalancheProblem

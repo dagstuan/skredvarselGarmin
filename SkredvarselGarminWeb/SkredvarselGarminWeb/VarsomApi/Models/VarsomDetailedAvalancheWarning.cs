@@ -8,6 +8,8 @@ public class VarsomDetailedAvalancheWarning
     public required string DangerLevel { get; init; }
     public required string MainText { get; init; }
     public required IEnumerable<VarsomAvalancheProblem> AvalancheProblems { get; init; }
+    public required string EmergencyWarning { get; init; }
+    public required bool IsTendency { get; init; }
 }
 
 public class VarsomAvalancheProblem
