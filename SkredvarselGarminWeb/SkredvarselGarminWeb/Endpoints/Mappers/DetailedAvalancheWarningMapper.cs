@@ -30,6 +30,7 @@ public static class DetailedAvalancheWarningMapper
     };
 
     private static string? ToEmergencyWarning(this string emergencyWarning) =>
+        !string.IsNullOrWhiteSpace(emergencyWarning) &&
         !emergencyWarning.Equals("ikke gitt", StringComparison.CurrentCultureIgnoreCase)
             ? emergencyWarning
             : null;
