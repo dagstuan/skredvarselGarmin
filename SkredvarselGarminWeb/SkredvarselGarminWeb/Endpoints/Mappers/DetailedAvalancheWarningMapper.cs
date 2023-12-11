@@ -26,7 +26,7 @@ public static class DetailedAvalancheWarningMapper
             DangerLevel = problem.DangerLevel,
         }).OrderByDescending(x => x.DangerLevel),
         IsTendency = varsomWarning.IsTendency,
-        EmergencyWarning = varsomWarning.EmergencyWarning.ToEmergencyWarning()
+        EmergencyWarning = varsomWarning.EmergencyWarning?.ToEmergencyWarning()
     };
 
     private static string? ToEmergencyWarning(this string emergencyWarning) =>
