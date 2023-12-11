@@ -58,17 +58,17 @@ export const FrontPage = () => {
   return (
     <>
       <Flex
-        w={"full"}
-        h={"calc(100vh - var(--chakra-sizes-20))"}
-        flexDir={"column"}
+        w="full"
+        h="calc(100vh - var(--chakra-sizes-20))"
+        flexDir="column"
         backgroundImage={bg}
-        backgroundSize={"cover"}
-        backgroundPosition={"center center"}
+        backgroundSize="cover"
+        backgroundPosition="center center"
       >
         <Box
           w="full"
-          h={"calc(100vh - var(--chakra-sizes-20))"}
-          bgGradient={"linear(to-r, blackAlpha.500, transparent)"}
+          h="calc(100vh - var(--chakra-sizes-20))"
+          bgGradient="linear(to-r, blackAlpha.500, transparent)"
           display="flex"
           flexDirection="column"
           alignItems="center"
@@ -79,9 +79,16 @@ export const FrontPage = () => {
             px={useBreakpointValue({ base: 4, md: 8 })}
           >
             <VStack>
-              <Stack pb="42px" maxW={"4xl"} align={"flex-start"} spacing={6}>
+              <Stack
+                boxShadow="0px 0px 100px 100px var(--chakra-colors-blackAlpha-200);"
+                bg="blackAlpha.200"
+                rounded="2xl"
+                maxW="4xl"
+                align="flex-start"
+                spacing={6}
+              >
                 <Text
-                  color={"white"}
+                  color="white"
                   fontWeight={700}
                   lineHeight={1.2}
                   fontSize={useBreakpointValue({ base: "3xl", md: "4xl" })}
@@ -90,11 +97,11 @@ export const FrontPage = () => {
                   <br />
                   Oppdatert og tilgjengelig mens du er på tur.
                 </Text>
-                <Stack direction={"row"} align={"center"} justify={"center"}>
-                  <Text color={"white"} fontSize={"3xl"} fontWeight={800}>
+                <Stack direction="row" align="center" justify="center">
+                  <Text color="white" fontSize="3xl" fontWeight={800}>
                     30 kr
                   </Text>
-                  <Text fontSize={"xl"} color={"white"}>
+                  <Text fontSize="xl" color="white">
                     /år
                   </Text>
                 </Stack>
