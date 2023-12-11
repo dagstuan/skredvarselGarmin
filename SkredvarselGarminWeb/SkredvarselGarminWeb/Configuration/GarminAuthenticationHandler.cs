@@ -3,6 +3,7 @@ using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using SkredvarselGarminWeb.Services;
 
@@ -19,12 +20,12 @@ public partial class GarminAuthenticationHandler : AuthenticationHandler<GarminA
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        if (!Request.Headers.ContainsKey(HeaderNames.Authorization))
+        if (!Request.Headers.TryGetValue(HeaderNames.Authorization, out StringValues value))
         {
             return Task.FromResult(AuthenticateResult.Fail("Header Not Found."));
         }
 
-        var header = Request.Headers[HeaderNames.Authorization].ToString();
+        var header = value.ToString();
         var tokenMatch = GarminAuthenticationHeader().Match(header);
 
         if (tokenMatch.Success)
@@ -44,7 +45,7 @@ public partial class GarminAuthenticationHandler : AuthenticationHandler<GarminA
             }
         }
 
-        return Task.FromResult(AuthenticateResult.Fail("Did not find active agreement for watch."));
+        return Task.FromResult(AuthenticateResult.Fail($"Did not find active agreement for watch {header}."));
     }
 
     [GeneratedRegex("Garmin (?<token>.*)")]
