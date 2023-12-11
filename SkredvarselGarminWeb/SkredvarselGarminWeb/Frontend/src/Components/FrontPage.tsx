@@ -19,12 +19,14 @@ import bg from "../assets/bg.jpg";
 import { MyPage } from "./MyPage/MyPage";
 import { CiqStoreButton } from "./CiqStoreButton";
 import { useScrollPosition } from "../hooks/useScrollPosition";
-import { ChevronIcon } from "./ChevronIcon";
+import { ChevronIcon } from "./Icons/ChevronIcon";
 import {
   FaApplePay,
   FaCcMastercard,
   FaCcVisa,
+  FaCreditCard,
   FaGooglePay,
+  FaRegCreditCard,
   FaSkiing,
   FaSkiingNordic,
 } from "react-icons/fa";
@@ -111,12 +113,34 @@ export const FrontPage = () => {
                       >
                         Logg inn og kjøp abonnement
                       </Button>
-                      <HStack>
-                        <VippsIcon color="white" w={14} h={7} />
-                        <Icon color="white" as={FaCcVisa} w={7} h={7} />
-                        <Icon color="white" as={FaCcMastercard} w={7} h={7} />
-                        <Icon color="white" as={FaApplePay} w={9} h={9} />
-                        <Icon color="white" as={FaGooglePay} w={9} h={9} />
+                      <HStack alignItems="center">
+                        <VippsIcon
+                          title="Vipps"
+                          color="white"
+                          w={14}
+                          h="100%"
+                        />
+                        <Icon
+                          title="Kort"
+                          color="white"
+                          as={FaCreditCard}
+                          w={7}
+                          h="100%"
+                        />
+                        <Icon
+                          title="Apple Pay"
+                          color="white"
+                          as={FaApplePay}
+                          w={9}
+                          h="100%"
+                        />
+                        <Icon
+                          title="Google Pay"
+                          color="white"
+                          as={FaGooglePay}
+                          w={9}
+                          h="100%"
+                        />
                       </HStack>
                     </VStack>
                   </WrapItem>

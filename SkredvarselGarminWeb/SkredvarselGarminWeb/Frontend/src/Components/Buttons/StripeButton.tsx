@@ -5,6 +5,7 @@ import {
   FaCcMastercard,
   FaApplePay,
   FaGooglePay,
+  FaCreditCard,
 } from "react-icons/fa";
 
 type StripeButtonProps = {
@@ -28,11 +29,10 @@ export const StripeButton = (props: StripeButtonProps) => {
       >
         {text}
       </Button>
-      <HStack>
-        <Icon as={FaCcVisa} w={6} h={6} />
-        <Icon as={FaCcMastercard} w={6} h={6} />
-        <Icon as={FaApplePay} w={9} h={9} />
-        <Icon as={FaGooglePay} w={9} h={9} />
+      <HStack alignItems="center">
+        <Icon title="Kort" as={FaCreditCard} w={6} h="100%" />
+        <Icon title="Apple pay" as={FaApplePay} w={9} h="100%" />
+        <Icon title="Google pay" as={FaGooglePay} w={9} h="100%" />
       </HStack>
     </VStack>
   );
