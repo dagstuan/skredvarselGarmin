@@ -118,7 +118,7 @@ export const FrontPage = () => {
                         size="lg"
                         colorScheme="green"
                       >
-                        Logg inn og kjøp abonnement
+                        Kjøp abonnement
                       </Button>
                       <HStack alignItems="center">
                         <VippsIcon
