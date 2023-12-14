@@ -5,6 +5,16 @@ namespace SkredvarselGarminWeb.Endpoints.Mappers;
 
 public static class DetailedAvalancheWarningMapper
 {
+    public static SimpleAvalancheWarning ToSimpleAvalancheWarning(this VarsomDetailedAvalancheWarning varsomWarning) => new()
+    {
+        DangerLevel = int.Parse(varsomWarning.DangerLevel),
+        Validity = [
+            varsomWarning.ValidFrom,
+            varsomWarning.ValidTo,
+        ],
+        HasEmergency = !string.IsNullOrWhiteSpace(varsomWarning.EmergencyWarning?.ToEmergencyWarning()),
+    };
+
     public static DetailedAvalancheWarning ToDetailedAvalancheWarning(this VarsomDetailedAvalancheWarning varsomWarning) => new()
     {
         Published = varsomWarning.PublishTime,
