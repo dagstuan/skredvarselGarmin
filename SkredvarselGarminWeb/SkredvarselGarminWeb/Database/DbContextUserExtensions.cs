@@ -29,9 +29,8 @@ public static class DbContextUserExtensions
 
     public static List<User> GetUsersNotLoggedInForAMonthWithoutAgreements(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider)
     {
-        return dbContext.Users
+        return [.. dbContext.Users
             .Include(u => u.Agreements)
-            .Where(u => u.LastLoggedIn < DateOnly.FromDateTime(dateTimeNowProvider.UtcNow.AddMonths(-1)) && !u.Agreements.Any())
-            .ToList();
+            .Where(u => u.LastLoggedIn < DateOnly.FromDateTime(dateTimeNowProvider.UtcNow.AddMonths(-1)) && u.Agreements.Count == 0)];
     }
 }
