@@ -6,21 +6,12 @@ using SkredvarselGarminWeb.VippsApi.Models;
 
 namespace SkredvarselGarminWeb.VippsApi;
 
-public class VippsAuthenticatedHttpClientHandler : DelegatingHandler
+public class VippsAuthenticatedHttpClientHandler(
+    VippsAuthTokenStore authTokenStore,
+    IOptions<VippsOptions> vippsOptions,
+    ILogger<VippsAuthenticatedHttpClientHandler> logger) : DelegatingHandler
 {
-    private readonly VippsOptions _vippsOptions;
-    private readonly VippsAuthTokenStore _authTokenStore;
-    private readonly ILogger<VippsAuthenticatedHttpClientHandler> _logger;
-
-    public VippsAuthenticatedHttpClientHandler(
-        VippsAuthTokenStore authTokenStore,
-        IOptions<VippsOptions> vippsOptions,
-        ILogger<VippsAuthenticatedHttpClientHandler> logger)
-    {
-        _authTokenStore = authTokenStore;
-        _vippsOptions = vippsOptions.Value;
-        _logger = logger;
-    }
+    private readonly VippsOptions _vippsOptions = vippsOptions.Value;
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
@@ -38,7 +29,7 @@ public class VippsAuthenticatedHttpClientHandler : DelegatingHandler
 
     private async Task<AuthTokenResponse> GetToken()
     {
-        var token = _authTokenStore.AuthToken;
+        var token = authTokenStore.AuthToken;
         if (token != null && !token.IsExpired())
         {
             return token;
@@ -61,12 +52,12 @@ public class VippsAuthenticatedHttpClientHandler : DelegatingHandler
             response.EnsureSuccessStatusCode();
             authenticationResponse =
                 JsonSerializer.Deserialize<AuthTokenResponse>(await response.Content.ReadAsStringAsync());
-            _authTokenStore.AuthToken = authenticationResponse ?? throw new Exception("Failed to deserialize auth token");
+            authTokenStore.AuthToken = authenticationResponse ?? throw new Exception("Failed to deserialize auth token");
         }
 
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error getting vipps access token.");
+            logger.LogError(ex, $"Error getting vipps access token.");
             throw;
         }
 

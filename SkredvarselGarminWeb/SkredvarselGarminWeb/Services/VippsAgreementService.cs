@@ -13,32 +13,19 @@ using Hangfire;
 
 namespace SkredvarselGarminWeb.Services;
 
-public class VippsAgreementService : IVippsAgreementService
+public class VippsAgreementService(
+    SkredvarselDbContext dbContext,
+    IVippsApiClient vippsApiClient,
+    IDateTimeNowProvider dateTimeNowProvider,
+    ILogger<VippsAgreementService> logger) : IVippsAgreementService
 {
     private readonly TimeSpan ChargeRetryDays = TimeSpan.FromDays(3);
     private const string ChargeText = "Abonnement på Skredvarsel for Garmin";
 
-    private readonly SkredvarselDbContext _dbContext;
-    private readonly IVippsApiClient _vippsApiClient;
-    private readonly IDateTimeNowProvider _dateTimeNowProvider;
-    private readonly ILogger<VippsAgreementService> _logger;
-
-    public VippsAgreementService(
-        SkredvarselDbContext dbContext,
-        IVippsApiClient vippsApiClient,
-        IDateTimeNowProvider dateTimeNowProvider,
-        ILogger<VippsAgreementService> logger)
-    {
-        _dbContext = dbContext;
-        _vippsApiClient = vippsApiClient;
-        _dateTimeNowProvider = dateTimeNowProvider;
-        _logger = logger;
-    }
-
     [DisableConcurrentExecution(10)]
     public async Task UpdateAgreementCharges(string agreementId)
     {
-        using var transaction = _dbContext.Database.BeginTransaction();
+        using var transaction = dbContext.Database.BeginTransaction();
 
         await UpdateAgreementChargesInternal(agreementId);
 
@@ -47,7 +34,7 @@ public class VippsAgreementService : IVippsAgreementService
 
     private async Task UpdateAgreementChargesInternal(string agreementId)
     {
-        var agreement = _dbContext.Agreements
+        var agreement = dbContext.Agreements
             .Where(a => a.Id == agreementId)
             .Where(a =>
                 a.Status == EntityAgreementStatus.ACTIVE ||
@@ -56,49 +43,49 @@ public class VippsAgreementService : IVippsAgreementService
 
         if (agreement == null)
         {
-            _logger.LogWarning("Job to update agreement charges for agreement was triggered on inactive agreement. Agreement ID: {agreementId}", agreementId);
+            logger.LogWarning("Job to update agreement charges for agreement was triggered on inactive agreement. Agreement ID: {agreementId}", agreementId);
             return;
         }
 
-        var nowDate = DateOnly.FromDateTime(_dateTimeNowProvider.Now);
+        var nowDate = DateOnly.FromDateTime(dateTimeNowProvider.Now);
         if (nowDate < agreement.NextChargeDate)
         {
             // Not due for a charge
-            _logger.LogWarning("Job was triggered to update charges on an agreement that is not due for a charge. Agreement ID: {agreementId}", agreementId);
+            logger.LogWarning("Job was triggered to update charges on an agreement that is not due for a charge. Agreement ID: {agreementId}", agreementId);
             return;
         }
 
-        var vippsAgreement = await _vippsApiClient.GetAgreement(agreement.Id);
+        var vippsAgreement = await vippsApiClient.GetAgreement(agreement.Id);
 
         if (agreement.Status == EntityAgreementStatus.UNSUBSCRIBED && nowDate >= agreement.NextChargeDate)
         {
-            _logger.LogInformation("Agreement {agreementId} was unsubscribed and due for charge.", agreement.Id);
+            logger.LogInformation("Agreement {agreementId} was unsubscribed and due for charge.", agreement.Id);
 
             await StopAgreement(agreement, vippsAgreement);
         }
         else
         {
-            _logger.LogInformation("Updating charges for agreement {agreementId}", agreement.Id);
+            logger.LogInformation("Updating charges for agreement {agreementId}", agreement.Id);
 
             if (vippsAgreement.Status == VippsAgreementStatus.Active)
             {
                 if (agreement.NextChargeId == null || !agreement.NextChargeDate.HasValue)
                 {
-                    _logger.LogInformation("Agreement did not have a NextChargeId set, creating new charge. Assuming previous charge was today. This should not happen.");
-                    await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, DateOnly.FromDateTime(_dateTimeNowProvider.Now));
+                    logger.LogInformation("Agreement did not have a NextChargeId set, creating new charge. Assuming previous charge was today. This should not happen.");
+                    await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, DateOnly.FromDateTime(dateTimeNowProvider.Now));
                 }
                 else
                 {
-                    var nextCharge = await _vippsApiClient.GetCharge(agreement.Id, agreement.NextChargeId);
+                    var nextCharge = await vippsApiClient.GetCharge(agreement.Id, agreement.NextChargeId);
 
                     if (nextCharge.Status == ChargeStatus.CHARGED)
                     {
-                        _logger.LogWarning("Due charge for agreement was already charged. This should not happen.");
+                        logger.LogWarning("Due charge for agreement was already charged. This should not happen.");
 
                         // Check for existing charge in Vipps.
-                        var pendingChargesInVipps = _vippsApiClient.GetCharges(agreement.Id, ChargeStatus.PENDING);
-                        var dueChargesInVipps = _vippsApiClient.GetCharges(agreement.Id, ChargeStatus.DUE);
-                        var reservedChargesInVipps = _vippsApiClient.GetCharges(agreement.Id, ChargeStatus.RESERVED);
+                        var pendingChargesInVipps = vippsApiClient.GetCharges(agreement.Id, ChargeStatus.PENDING);
+                        var dueChargesInVipps = vippsApiClient.GetCharges(agreement.Id, ChargeStatus.DUE);
+                        var reservedChargesInVipps = vippsApiClient.GetCharges(agreement.Id, ChargeStatus.RESERVED);
 
                         await Task.WhenAll(pendingChargesInVipps, dueChargesInVipps, reservedChargesInVipps);
 
@@ -110,30 +97,30 @@ public class VippsAgreementService : IVippsAgreementService
                         if (numChargesInVipps == 1)
                         {
                             var chargeInVipps = chargesInVipps.Single();
-                            _logger.LogInformation("Found pending or due charge in Vipps, setting it as next charge.");
+                            logger.LogInformation("Found pending or due charge in Vipps, setting it as next charge.");
 
                             agreement.NextChargeDate = DateOnly.FromDateTime(chargeInVipps.Due);
                             agreement.NextChargeId = nextCharge.Id;
                         }
                         else if (numChargesInVipps > 1)
                         {
-                            _logger.LogError("Multiple new charges found in Vipps. This should not happen.");
+                            logger.LogError("Multiple new charges found in Vipps. This should not happen.");
                             throw new Exception("Multiple new charges found in Vipps. This should not happen.");
                         }
                         else
                         {
-                            _logger.LogInformation("No new charge found in Vipps. Creating new charge.");
+                            logger.LogInformation("No new charge found in Vipps. Creating new charge.");
                             await CreateAndStoreNewChargeForAgreement(agreement, vippsAgreement, agreement.NextChargeDate.Value);
                         }
                     }
                     else if (nextCharge.Status == ChargeStatus.DUE)
                     {
-                        _logger.LogWarning("Next charge for agreement {agreementId} was still due. Charge id {chargeId}. Will retry.", agreement.Id, nextCharge.Id);
+                        logger.LogWarning("Next charge for agreement {agreementId} was still due. Charge id {chargeId}. Will retry.", agreement.Id, nextCharge.Id);
                     }
                     else if (nextCharge.Status == ChargeStatus.RESERVED)
                     {
-                        _logger.LogInformation("Capturing charge {chargeId} for agreement {agreementId} and creating new charge.", nextCharge.Id, agreement.Id);
-                        var response = await _vippsApiClient.CaptureCharge(agreement.Id, nextCharge.Id, new CaptureChargeRequest
+                        logger.LogInformation("Capturing charge {chargeId} for agreement {agreementId} and creating new charge.", nextCharge.Id, agreement.Id);
+                        var response = await vippsApiClient.CaptureCharge(agreement.Id, nextCharge.Id, new CaptureChargeRequest
                         {
                             Amount = nextCharge.Amount,
                             Description = ChargeText
@@ -145,20 +132,20 @@ public class VippsAgreementService : IVippsAgreementService
                         }
                         else
                         {
-                            _logger.LogError(response.Error, response.Error?.Content);
+                            logger.LogError(response.Error, response.Error?.Content);
                             throw new Exception($"Failed to capture charge {nextCharge.Id}.");
                         }
                     }
                     else if (nextCharge.Status == ChargeStatus.FAILED)
                     {
-                        _logger.LogInformation("Agreement {agreementId} had nextCharge status failed. Stopping agreement. Failed charge had id {chargeId}", agreement.Id, nextCharge.Id);
+                        logger.LogInformation("Agreement {agreementId} had nextCharge status failed. Stopping agreement. Failed charge had id {chargeId}", agreement.Id, nextCharge.Id);
 
                         await StopAgreement(agreement, vippsAgreement);
                     }
                     else
                     {
                         // If nextcharge is due, and time passed is less than retrydays, do nothing since HF will retry.
-                        _logger.LogWarning("Next charge for agreement {agreementId} had unknown status. Status was {status}. Will retry.", agreement.Id, nextCharge.Status);
+                        logger.LogWarning("Next charge for agreement {agreementId} had unknown status. Status was {status}. Will retry.", agreement.Id, nextCharge.Status);
                     }
                 }
             }
@@ -167,7 +154,7 @@ public class VippsAgreementService : IVippsAgreementService
 
     public async Task StopAgreement(EntityAgreement agreement, VippsAgreement vippsAgreement)
     {
-        _logger.LogInformation("Stopping agreement in vipps and setting as stopped.");
+        logger.LogInformation("Stopping agreement in vipps and setting as stopped.");
 
         if (vippsAgreement.Status != VippsAgreementStatus.Stopped)
         {
@@ -175,22 +162,22 @@ public class VippsAgreementService : IVippsAgreementService
 
             if (!success)
             {
-                _logger.LogError("Failed to stop agreement in Vipps.");
+                logger.LogError("Failed to stop agreement in Vipps.");
                 throw new Exception("Failed to stop agreement in Vipps.");
             }
         }
 
         agreement.SetAsStopped();
-        _dbContext.SaveChanges();
+        dbContext.SaveChanges();
     }
 
     public async Task DeactivateAgreement(string agreementId)
     {
-        using var transaction = _dbContext.Database.BeginTransaction();
+        using var transaction = dbContext.Database.BeginTransaction();
 
-        _logger.LogInformation("Deactivating agreement {agreementId}", agreementId);
+        logger.LogInformation("Deactivating agreement {agreementId}", agreementId);
 
-        var agreementInDb = _dbContext.Agreements.First(a => a.Id == agreementId);
+        var agreementInDb = dbContext.Agreements.First(a => a.Id == agreementId);
 
         if (agreementInDb.Status != EntityAgreementStatus.ACTIVE)
         {
@@ -202,7 +189,7 @@ public class VippsAgreementService : IVippsAgreementService
 
         if (agreementInDb.NextChargeId != null)
         {
-            var result = await _vippsApiClient.CancelCharge(agreementInDb.Id, agreementInDb.NextChargeId, Guid.NewGuid());
+            var result = await vippsApiClient.CancelCharge(agreementInDb.Id, agreementInDb.NextChargeId, Guid.NewGuid());
 
             if (result.IsSuccessStatusCode)
             {
@@ -210,30 +197,30 @@ public class VippsAgreementService : IVippsAgreementService
             }
             else
             {
-                _logger.LogWarning("Failed to cancel charge when unsubscribing.");
+                logger.LogWarning("Failed to cancel charge when unsubscribing.");
             }
         }
 
         agreementInDb.Status = EntityAgreementStatus.UNSUBSCRIBED;
-        _dbContext.SaveChanges();
+        dbContext.SaveChanges();
 
         transaction.Commit();
     }
 
     public async Task ReactivateAgreement(string agreementId)
     {
-        using var transaction = _dbContext.Database.BeginTransaction();
+        using var transaction = dbContext.Database.BeginTransaction();
 
-        _logger.LogInformation("Reactivating agreement {agreementId}", agreementId);
+        logger.LogInformation("Reactivating agreement {agreementId}", agreementId);
 
-        var agreementInDb = _dbContext.Agreements.First(a => a.Id == agreementId);
+        var agreementInDb = dbContext.Agreements.First(a => a.Id == agreementId);
 
         if (agreementInDb.Status != EntityAgreementStatus.UNSUBSCRIBED || !agreementInDb.NextChargeDate.HasValue)
         {
             throw new Exception("Invalid state for agreement attempting to be reactivated.");
         }
 
-        var vippsAgreement = await _vippsApiClient.GetAgreement(agreementId);
+        var vippsAgreement = await vippsApiClient.GetAgreement(agreementId);
 
         var (nextChargeDate, amount) = CalculateNextCharge(vippsAgreement, agreementInDb.NextChargeDate.Value);
 
@@ -241,23 +228,23 @@ public class VippsAgreementService : IVippsAgreementService
 
         agreementInDb.NextChargeId = charge.ChargeId;
         agreementInDb.SetAsActive();
-        _dbContext.SaveChanges();
+        dbContext.SaveChanges();
 
         transaction.Commit();
     }
 
     private async Task<bool> StopAgreementInVipps(string agreementId)
     {
-        _logger.LogInformation("Stopping agreement {agreementId} in Vipps", agreementId);
+        logger.LogInformation("Stopping agreement {agreementId} in Vipps", agreementId);
 
-        var result = await _vippsApiClient.PatchAgreement(agreementId, new PatchAgreementRequest
+        var result = await vippsApiClient.PatchAgreement(agreementId, new PatchAgreementRequest
         {
             Status = PatchAgreementStatus.Stopped
         }, Guid.NewGuid());
 
         if (!result.IsSuccessStatusCode)
         {
-            _logger.LogWarning("Failed to stop agreement in Vipps. Will be retried by Hangfire.");
+            logger.LogWarning("Failed to stop agreement in Vipps. Will be retried by Hangfire.");
             return false;
         }
 
@@ -272,12 +259,12 @@ public class VippsAgreementService : IVippsAgreementService
         agreement.NextChargeDate = nextChargeDate;
         agreement.NextChargeId = newCharge.ChargeId;
 
-        _dbContext.SaveChanges();
+        dbContext.SaveChanges();
     }
 
     private async Task<CreateChargeResponse> CreateChargeInVipps(string agreementId, DateOnly due, int amount)
     {
-        return await _vippsApiClient.CreateCharge(agreementId, new CreateChargeRequest
+        return await vippsApiClient.CreateCharge(agreementId, new CreateChargeRequest
         {
             Amount = amount,
             Description = ChargeText,
@@ -288,10 +275,10 @@ public class VippsAgreementService : IVippsAgreementService
 
     private (DateOnly, int) CalculateNextCharge(VippsAgreement vippsAgreement, DateOnly previousChargeDate)
     {
-        var now = _dateTimeNowProvider.Now;
+        var now = dateTimeNowProvider.Now;
         var nowDateOnly = DateOnly.FromDateTime(now);
 
-        _logger.LogInformation("Calculating next charge for agreement {agreementId}", vippsAgreement.Id);
+        logger.LogInformation("Calculating next charge for agreement {agreementId}", vippsAgreement.Id);
 
         if (vippsAgreement.Campaign != null)
         {
@@ -309,7 +296,7 @@ public class VippsAgreementService : IVippsAgreementService
                         vippsAgreement.Pricing.Amount
                     );
 
-                    _logger.LogInformation("Agreement is in an active period campaign. Next charge date is {nextChargeDate} with price {price}", charge.periodEndDate, charge.Amount);
+                    logger.LogInformation("Agreement is in an active period campaign. Next charge date is {nextChargeDate} with price {price}", charge.periodEndDate, charge.Amount);
                     return charge;
                 }
             }
@@ -323,7 +310,7 @@ public class VippsAgreementService : IVippsAgreementService
                     campaign.Price
                 );
 
-                _logger.LogInformation("Agreement is in an active price campaign. Next charge date is {nextChargeDate} with price {price}", charge.nextChargeDate, charge.Price);
+                logger.LogInformation("Agreement is in an active price campaign. Next charge date is {nextChargeDate} with price {price}", charge.nextChargeDate, charge.Price);
 
                 return charge;
             }
@@ -338,7 +325,7 @@ public class VippsAgreementService : IVippsAgreementService
             // Should create charge at previous charge date;
             var nextChargeDate = previousChargeDate;
             var nextCharge = (nextChargeDate, vippsAgreement.Pricing.Amount);
-            _logger.LogInformation("Agreement is outside campaign but nextChargeDate has not happened yet. Next charge date is {nextChargeDate} with price {price}", nextCharge.nextChargeDate, nextCharge.Amount);
+            logger.LogInformation("Agreement is outside campaign but nextChargeDate has not happened yet. Next charge date is {nextChargeDate} with price {price}", nextCharge.nextChargeDate, nextCharge.Amount);
 
             return nextCharge;
         }
@@ -346,7 +333,7 @@ public class VippsAgreementService : IVippsAgreementService
         {
             var nextChargeDate = GetNextChargeDate(previousChargeDate, vippsAgreement.Interval.Unit, vippsAgreement.Interval.Count);
             var nextCharge = (nextChargeDate, vippsAgreement.Pricing.Amount);
-            _logger.LogInformation("Agreement is outside campaign. Next charge date is {nextChargeDate} with price {price}", nextCharge.nextChargeDate, nextCharge.Amount);
+            logger.LogInformation("Agreement is outside campaign. Next charge date is {nextChargeDate} with price {price}", nextCharge.nextChargeDate, nextCharge.Amount);
             return nextCharge;
         }
     }

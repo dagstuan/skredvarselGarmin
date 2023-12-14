@@ -9,101 +9,84 @@ using SkredvarselGarminWeb.Services;
 
 namespace SkredvarselGarminWeb.Hangfire;
 
-public class HangfireService
+public class HangfireService(
+    SkredvarselDbContext dbContext,
+    IVippsApiClient vippsApiClient,
+    IBackgroundJobClient backgroundJobClient,
+    IDateTimeNowProvider dateTimeNowProvider,
+    IVippsAgreementService subscriptionService,
+    ILogger<HangfireService> logger)
 {
-    private readonly SkredvarselDbContext _dbContext;
-    private readonly IVippsApiClient _vippsApiClient;
-    private readonly IBackgroundJobClient _backgroundJobClient;
-    private readonly IDateTimeNowProvider _dateTimeNowProvider;
-    private readonly IVippsAgreementService _subscriptionService;
-    private readonly ILogger<HangfireService> _logger;
-
-    public HangfireService(
-        SkredvarselDbContext dbContext,
-        IVippsApiClient vippsApiClient,
-        IBackgroundJobClient backgroundJobClient,
-        IDateTimeNowProvider dateTimeNowProvider,
-        IVippsAgreementService subscriptionService,
-        ILogger<HangfireService> logger)
-    {
-        _dbContext = dbContext;
-        _vippsApiClient = vippsApiClient;
-        _backgroundJobClient = backgroundJobClient;
-        _dateTimeNowProvider = dateTimeNowProvider;
-        _subscriptionService = subscriptionService;
-        _logger = logger;
-    }
-
     public async Task UpdatePendingAgreements()
     {
-        var pendingAgreementsInDb = _dbContext.GetPendingAgreements();
+        var pendingAgreementsInDb = dbContext.GetPendingAgreements();
 
         foreach (var agreement in pendingAgreementsInDb)
         {
-            var vippsAgreement = await _vippsApiClient.GetAgreement(agreement.Id);
+            var vippsAgreement = await vippsApiClient.GetAgreement(agreement.Id);
 
             if (vippsAgreement.Status == VippsAgreementStatus.Active)
             {
-                _logger.LogInformation("Setting pending agreement {agreementId} as active with hangfire", agreement.Id);
+                logger.LogInformation("Setting pending agreement {agreementId} as active with hangfire", agreement.Id);
                 agreement.SetAsActive();
             }
         }
 
-        _dbContext.SaveChanges();
+        dbContext.SaveChanges();
     }
 
     public async Task RemoveStalePendingAgreements()
     {
-        var pendingAgreementsInDb = _dbContext.Agreements
+        var pendingAgreementsInDb = dbContext.Agreements
             .Where(a => a.Status == Entities.AgreementStatus.PENDING)
-            .Where(a => a.Created < _dateTimeNowProvider.UtcNow.AddMinutes(-10))
+            .Where(a => a.Created < dateTimeNowProvider.UtcNow.AddMinutes(-10))
             .ToList();
 
         foreach (var agreement in pendingAgreementsInDb)
         {
-            var vippsAgreement = await _vippsApiClient.GetAgreement(agreement.Id);
+            var vippsAgreement = await vippsApiClient.GetAgreement(agreement.Id);
 
             if (vippsAgreement.Status == VippsAgreementStatus.Expired ||
                 vippsAgreement.Status == VippsAgreementStatus.Stopped)
             {
-                _logger.LogInformation("Deleting stale agreement {agreementId} since it was expired in Vipps.", agreement.Id);
-                _dbContext.Remove(agreement);
+                logger.LogInformation("Deleting stale agreement {agreementId} since it was expired in Vipps.", agreement.Id);
+                dbContext.Remove(agreement);
             }
         }
 
-        _dbContext.SaveChanges();
+        dbContext.SaveChanges();
     }
 
     public void UpdateAgreementCharges()
     {
-        var agreementsThatAreDue = _dbContext.GetAgreementsThatAreDue(_dateTimeNowProvider);
+        var agreementsThatAreDue = dbContext.GetAgreementsThatAreDue(dateTimeNowProvider);
 
         foreach (var agreement in agreementsThatAreDue)
         {
-            _backgroundJobClient.Enqueue(() => _subscriptionService.UpdateAgreementCharges(agreement.Id));
+            backgroundJobClient.Enqueue(() => subscriptionService.UpdateAgreementCharges(agreement.Id));
         }
     }
 
     public void RemoveStaleWatchAddRequests()
     {
-        var staleWatchAddRequests = _dbContext.WatchAddRequests
-            .Where(a => a.Created < _dateTimeNowProvider.UtcNow.AddMinutes(-10))
+        var staleWatchAddRequests = dbContext.WatchAddRequests
+            .Where(a => a.Created < dateTimeNowProvider.UtcNow.AddMinutes(-10))
             .ToList();
 
-        _dbContext.RemoveRange(staleWatchAddRequests);
-        _dbContext.SaveChanges();
+        dbContext.RemoveRange(staleWatchAddRequests);
+        dbContext.SaveChanges();
     }
 
     public void RemoveStaleUsers()
     {
-        var staleUsers = _dbContext.GetUsersNotLoggedInForAMonthWithoutAgreements(_dateTimeNowProvider);
+        var staleUsers = dbContext.GetUsersNotLoggedInForAMonthWithoutAgreements(dateTimeNowProvider);
 
         foreach (var user in staleUsers)
         {
-            _logger.LogInformation("Removing stale user {userId} due to no logins for 1 month and no agreements.", user.Id);
-            _dbContext.Remove(user);
+            logger.LogInformation("Removing stale user {userId} due to no logins for 1 month and no agreements.", user.Id);
+            dbContext.Remove(user);
         }
 
-        _dbContext.SaveChanges();
+        dbContext.SaveChanges();
     }
 }

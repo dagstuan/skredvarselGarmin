@@ -19,11 +19,11 @@ public static class AdminEndpointsRouteBuilderExtensions
 
             return new AdminData
             {
-                StaleUsers = staleUsers.Select(u => new AdminDataUser
+                StaleUsers = [.. staleUsers.Select(u => new AdminDataUser
                 {
                     Id = u.Id,
                     Name = u.Name
-                }).ToList(),
+                })],
                 NumUsers = numUsers,
                 ActiveAgreements = activeAgreements,
                 UnsubscribedAgreements = unsubscribedAgreements,
