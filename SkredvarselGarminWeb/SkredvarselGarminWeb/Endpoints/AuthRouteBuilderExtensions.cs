@@ -18,9 +18,10 @@ public static class AuthRouteBuilderExtensions
 
         app.MapGet("/logout", async (HttpContext ctx) =>
         {
-            await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
-            return Results.Redirect("/");
+            await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme, new()
+            {
+                RedirectUri = "/"
+            });
         }).AllowAnonymous();
     }
 
