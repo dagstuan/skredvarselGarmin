@@ -95,7 +95,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
   public function onReceive(
     responseCode as Number,
-    data as WebRequestCallbackData
+    data as WebRequestDelegateCallbackData
   ) as Void {
     if (responseCode == 200) {
       getForecastFromCache();

@@ -8,9 +8,13 @@ const BaseApiUrl = "https://skredvarsel.app/api";
 // const BaseApiUrl = "https://localhost:8080/api";
 
 typedef WebRequestCallbackData as Null or Dictionary or String;
-
-typedef WebRequestDelegateCallback as (Method
+typedef WebRequestCallback as (Method
   (responseCode as Number, data as WebRequestCallbackData) as Void
+);
+
+typedef WebRequestDelegateCallbackData as WebRequestCallbackData or Array;
+typedef WebRequestDelegateCallback as (Method
+  (responseCode as Number, data as WebRequestDelegateCallbackData) as Void
 );
 
 (:background)
@@ -67,7 +71,7 @@ class WebRequestDelegate {
 
   function onReceive(
     responseCode as Number,
-    data as Dictionary<String, Object?> or String or Null
+    data as WebRequestCallbackData
   ) as Void {
     if (responseCode == 200) {
       $.log(
@@ -83,6 +87,6 @@ class WebRequestDelegate {
       $.log(Lang.format("Failed request. Response code: $1$", [responseCode]));
     }
 
-    _callback.invoke(responseCode, data);
+    _callback.invoke(responseCode, data as WebRequestDelegateCallbackData);
   }
 }

@@ -50,7 +50,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
 
   public function onReceive(
     responseCode as Number,
-    data as WebRequestCallbackData
+    data as WebRequestDelegateCallbackData
   ) as Void {
     if (responseCode == 200 && data != null) {
       pushDetailedForecastView(

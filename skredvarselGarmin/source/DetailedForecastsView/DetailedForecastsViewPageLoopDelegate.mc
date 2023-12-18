@@ -40,7 +40,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
 
   public function onReceive(
     responseCode as Number,
-    data as WebRequestCallbackData
+    data as WebRequestDelegateCallbackData
   ) as Void {
     if (responseCode == 200 && data != null) {
       _detailedWarnings = data as Array;
