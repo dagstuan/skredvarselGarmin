@@ -3,6 +3,7 @@ import Toybox.Lang;
 typedef SimpleAvalancheWarning as {
   "dangerLevel" as Number,
   "validity" as Array,
+  "hasEmergency" as Boolean,
 };
 
 typedef SimpleAvalancheForecast as Array<SimpleAvalancheWarning>;
@@ -20,6 +21,8 @@ typedef DetailedAvalancheWarning as {
   "validity" as Array,
   "mainText" as String,
   "avalancheProblems" as Array<AvalancheProblem>,
+  "isTendency" as Boolean,
+  "emergencyWarning" as String?,
 };
 
 typedef SetupSubscriptionResponse as {

@@ -87,6 +87,7 @@ module AvalancheUi {
       var validFrom = $.parseDate(validity[0]);
       var validTo = $.parseDate(validity[1]);
       var dangerLevel = warning["dangerLevel"];
+      var hasEmergency = warning["hasEmergency"];
 
       if (validTo.lessThan(_earlyCutoffTime)) {
         // Forecast is earlier than we will render.
@@ -124,6 +125,11 @@ module AvalancheUi {
       );
 
       var dangerLevelString = dangerLevel.toString();
+
+      if (hasEmergency) {
+        dangerLevelString += "!";
+      }
+
       var textWidth = dc.getTextWidthInPixels(
         dangerLevelString,
         _dangerLevelFont
