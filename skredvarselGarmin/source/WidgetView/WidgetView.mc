@@ -132,7 +132,7 @@ public class WidgetView extends Ui.View {
 
   function onReceive(
     responseCode as Number,
-    data as WebRequestCallbackData
+    data as WebRequestDelegateCallbackData
   ) as Void {
     if (responseCode == 200) {
       setForecastDataFromStorage();

@@ -6,7 +6,7 @@ using Toybox.System as Sys;
 using Toybox.Communications as Comm;
 using Toybox.Timer;
 
-function setupSubscription(callback as WebRequestDelegateCallback) {
+function setupSubscription(callback as WebRequestCallback) {
   $.log("Asking server to setup subscription.");
 
   var deviceSettings = Sys.getDeviceSettings();
