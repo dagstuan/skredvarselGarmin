@@ -21,7 +21,7 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
             IBackgroundJobClient backgroundJobClient,
             SkredvarselDbContext dbContext) =>
         {
-            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+            var user = dbContext.GetUserOrThrow(ctx.User);
 
             var vippsAgreementsInDb = dbContext.Agreements
                 .OrderByDescending(a => a.Created)

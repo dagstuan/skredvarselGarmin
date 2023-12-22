@@ -64,7 +64,7 @@ public static class WatchApiRouteBuilderExtensions
 
         app.MapGet("/api/watches", (HttpContext ctx, SkredvarselDbContext dbContext) =>
         {
-            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+            var user = dbContext.GetUserOrThrow(ctx.User);
 
             var watches = dbContext.Watches.Where(w => w.UserId == user.Id);
 
@@ -73,7 +73,7 @@ public static class WatchApiRouteBuilderExtensions
 
         app.MapPost("/api/watches/{watchAddKey}", (HttpContext ctx, string watchAddKey, SkredvarselDbContext dbContext) =>
         {
-            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+            var user = dbContext.GetUserOrThrow(ctx.User);
 
             var watchAddRequest = dbContext.WatchAddRequests.FirstOrDefault(r => r.Key == watchAddKey);
 
@@ -96,7 +96,7 @@ public static class WatchApiRouteBuilderExtensions
 
         app.MapDelete("/api/watches/{watchId}", (HttpContext ctx, SkredvarselDbContext dbContext, string watchId) =>
         {
-            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+            var user = dbContext.GetUserOrThrow(ctx.User);
 
             var watch = dbContext.Watches.FirstOrDefault(w => w.Id == watchId && w.UserId == user.Id);
 

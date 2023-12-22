@@ -22,7 +22,7 @@ public static class UserRouteBuilderExtensions
             }
             else
             {
-                var userInDb = dbContext.GetUserOrThrow(ctx.User.Identity);
+                var userInDb = dbContext.GetUserOrThrow(ctx.User);
                 var isAdmin = await authorizationService.AuthorizeAsync(ctx.User, "Admin");
                 return Results.Ok(new User
                 {

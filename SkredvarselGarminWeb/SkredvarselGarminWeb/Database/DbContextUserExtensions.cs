@@ -2,22 +2,40 @@ using System.Security.Claims;
 using System.Security.Principal;
 using Microsoft.EntityFrameworkCore;
 using SkredvarselGarminWeb.Entities;
+using SkredvarselGarminWeb.Extensions;
 using SkredvarselGarminWeb.Helpers;
 
 namespace SkredvarselGarminWeb.Database;
 
 public static class DbContextUserExtensions
 {
-    public static User GetUserOrThrow(this SkredvarselDbContext dbContext, IIdentity? identity)
+    public static User? GetUserOrNull(this SkredvarselDbContext dbContext, ClaimsPrincipal? principal)
     {
-        if (identity == null)
+        if (principal == null)
         {
-            throw new Exception("Unauthenticated user.");
+            return null;
         }
 
-        var email = ((ClaimsIdentity)identity).FindFirst("email")!.Value;
+        var claims = principal.Claims;
 
-        return dbContext.Users.First(u => u.Email == email);
+        var email = claims.GetClaimValueOrNull("email");
+
+        var user = dbContext.Users.FirstOrDefault(u => u.Email == email);
+
+        if (user == null)
+        {
+            var sub = claims.GetClaimValueOrNull("sub");
+
+            return dbContext.Users.FirstOrDefault(u => u.Id == sub);
+        }
+
+        return user;
+    }
+
+    public static User GetUserOrThrow(this SkredvarselDbContext dbContext, ClaimsPrincipal? principal)
+    {
+        return dbContext.GetUserOrNull(principal)
+            ?? throw new Exception("Unable to find user for principal.");
     }
 
     public static User? GetUserForWatchOrNull(this SkredvarselDbContext dbContext, string watchId)

@@ -32,7 +32,7 @@ public static class TestEndpointsRouteBuilderExtensions
 
         app.MapGet("/api/test/agreements/create", async (HttpContext ctx, IVippsApiClient vippsApiClient, SkredvarselDbContext dbContext) =>
         {
-            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+            var user = dbContext.GetUserOrThrow(ctx.User);
 
             var baseUrl = "https://skredvarsel.app";
 
