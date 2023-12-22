@@ -6,4 +6,5 @@
 	<bitmap id="NoLevel" filename="no_level_h40.png" />
 	<bitmap id="AvalancheIconSvg" filename="avalanche_icon.svg" />
 	<bitmap id="UpdatedIcon" filename="updated_icon_16x16.png"/>
+	<bitmap id="EmergencyWarningIcon" filename="emergency_warning_icon_24x24.png" />
 </drawables>

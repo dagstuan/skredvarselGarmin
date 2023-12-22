@@ -1,123 +1,155 @@
 import Toybox.Lang;
 
+using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
+using Toybox.Math;
 
 module AvalancheUi {
   typedef MainTextSettings as {
     :text as String,
+    :emergencyWarning as String?,
     :width as Numeric,
     :height as Numeric,
   };
 
   class MainText {
-    private const TICKS_AT_TOP_BOTTOM = 20;
-
     private var _text as String;
+    private var _hasEmergencyWarning as Boolean;
+    private var _emergencyWarning as String?;
     private var _width as Numeric;
     private var _height as Numeric;
+    private var _paddingTopBottom as Numeric;
+    private var _paddingLeftRightEmergencyWarningText as Numeric;
 
-    private var _textOffset as Numeric = 0.0;
-    private var _textHeight as Number?;
+    private var _font = Gfx.FONT_SYSTEM_XTINY;
+    private var _fontHeight = Gfx.getFontHeight(_font);
 
-    private var _ticksAtTop = 0;
-    private var _ticksAtBottom = 0;
+    private var _emergencyWarningIconWidth as Numeric?;
+    private var _emergencyWarningHeight as Numeric = 0.0;
+    private var _emergencyWarningContentWidth as Numeric = 0.0;
 
-    private var _bufferedBitmapText as Gfx.BufferedBitmap?;
-
-    private var _isVisible as Boolean;
+    private var _emergencyWarningIcon as Ui.BitmapResource?;
+    private var _emergencyWarningText as AvalancheUi.ScrollingText?;
+    private var _mainText as AvalancheUi.ScrollingText?;
 
     public function initialize(settings as MainTextSettings) {
       _text = settings[:text];
+      _emergencyWarning = settings[:emergencyWarning];
+      _hasEmergencyWarning = _emergencyWarning != null;
       _width = settings[:width];
       _height = settings[:height];
-      _isVisible = false;
+      _paddingLeftRightEmergencyWarningText = _width * 0.02;
+      _paddingTopBottom = _height * 0.05;
     }
 
     public function onShow() as Void {
-      _isVisible = true;
+      if (_emergencyWarningText != null) {
+        _emergencyWarningText.onShow();
+      }
+
+      if (_mainText != null) {
+        _mainText.onShow();
+      }
     }
 
     public function onHide() as Void {
-      _isVisible = false;
+      if (_emergencyWarningText != null) {
+        _emergencyWarningText.onHide();
+      }
+
+      if (_mainText != null) {
+        _mainText.onHide();
+      }
     }
 
     public function onTick() as Void {
-      if (_isVisible) {
-        calcTextOffset();
+      if (_emergencyWarningText != null) {
+        _emergencyWarningText.onTick();
+      }
+
+      if (_mainText != null) {
+        _mainText.onTick();
       }
     }
 
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
-      if (_bufferedBitmapText == null) {
-        var font = Gfx.FONT_SYSTEM_XTINY;
+      y0 += _paddingTopBottom;
 
-        var fitText = Gfx.fitTextToArea(
-          _text,
-          font,
-          _width,
-          _height * 5,
-          false
-        );
+      if (_hasEmergencyWarning) {
+        if (_emergencyWarningIcon == null || _emergencyWarningText == null) {
+          _emergencyWarningIcon =
+            Ui.loadResource($.Rez.Drawables.EmergencyWarningIcon) as
+            Ui.BitmapResource;
 
-        var fitTextDimensions = dc.getTextDimensions(fitText, font);
-        _textHeight = fitTextDimensions[1];
+          _emergencyWarningIconWidth = _emergencyWarningIcon.getWidth();
 
-        _bufferedBitmapText = $.newBufferedBitmap({
-          :width => _width,
-          :height => _textHeight,
-        });
+          var iconHeight = _emergencyWarningIcon.getHeight();
+          if (_fontHeight > iconHeight) {
+            _emergencyWarningHeight = _fontHeight;
+          } else {
+            _emergencyWarningHeight = iconHeight;
+          }
 
-        var bufferedDc = _bufferedBitmapText.getDc();
+          var textWidth = dc.getTextWidthInPixels(_emergencyWarning, _font);
+          var textContainerWidth =
+            _width -
+            _emergencyWarningIconWidth -
+            _paddingLeftRightEmergencyWarningText * 2;
 
-        bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+          _emergencyWarningContentWidth =
+            _emergencyWarningIconWidth +
+            _paddingLeftRightEmergencyWarningText +
+            textWidth;
 
-        if (_textHeight <= _height) {
-          bufferedDc.drawText(
-            _width / 2,
-            _textHeight / 2,
-            font,
-            fitText,
-            Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
-          );
-        } else {
-          bufferedDc.drawText(
-            _width / 2,
-            0,
-            font,
-            fitText,
-            Gfx.TEXT_JUSTIFY_CENTER
-          );
+          _emergencyWarningText = new ScrollingText({
+            :text => _emergencyWarning,
+            :containerWidth => textContainerWidth,
+            :containerHeight => _emergencyWarningHeight,
+            :font => Gfx.FONT_XTINY,
+            :color => Gfx.COLOR_BLACK,
+            :backgroundColor => Gfx.COLOR_WHITE,
+            :yAlignment => Y_ALIGN_CENTER,
+            :xAlignment => X_ALIGN_LEFT,
+          });
         }
-      }
 
-      if (_textHeight > _height) {
-        dc.setClip(x0, y0, _width, _height);
-        dc.drawBitmap(x0, y0 + _textOffset, _bufferedBitmapText);
-        dc.clearClip();
-      } else {
-        dc.drawBitmap(
-          x0,
-          y0 + _height / 2 - _textHeight / 2,
-          _bufferedBitmapText
+        var textX0 = x0;
+        if (_emergencyWarningContentWidth < _width) {
+          textX0 = x0 + (_width - _emergencyWarningContentWidth) / 2;
+        }
+
+        dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
+        dc.fillRectangle(x0, y0, _width, _emergencyWarningHeight);
+
+        dc.drawBitmap(textX0, y0, _emergencyWarningIcon);
+
+        _emergencyWarningText.draw(
+          dc,
+          textX0 +
+            _emergencyWarningIconWidth +
+            _paddingLeftRightEmergencyWarningText,
+          y0
         );
-      }
-    }
 
-    function calcTextOffset() as Void {
-      var atBottom = _textOffset < _height - _textHeight;
-      if (atBottom) {
-        _ticksAtBottom += 1;
-      } else if (_textOffset == 0 && _ticksAtTop < TICKS_AT_TOP_BOTTOM) {
-        _ticksAtTop += 1;
-      } else {
-        _ticksAtTop = 0;
-        _textOffset -= 1; // bump size determines speed
+        y0 += _paddingTopBottom + _emergencyWarningHeight;
       }
 
-      if (atBottom && _ticksAtBottom > TICKS_AT_TOP_BOTTOM) {
-        _textOffset = 0;
-        _ticksAtBottom = 0;
+      if (_mainText == null) {
+        var containerHeight = _height - _paddingTopBottom * 2;
+        if (_emergencyWarningHeight > 0) {
+          containerHeight -= _emergencyWarningHeight + _paddingTopBottom;
+        }
+
+        _mainText = new ScrollingText({
+          :text => _text,
+          :containerWidth => _width,
+          :containerHeight => containerHeight,
+          :font => Gfx.FONT_SYSTEM_XTINY,
+          :scrollDirection => SCROLL_DIRECTION_VERTICAL,
+        });
       }
+
+      _mainText.draw(dc, x0, y0);
     }
   }
 }
