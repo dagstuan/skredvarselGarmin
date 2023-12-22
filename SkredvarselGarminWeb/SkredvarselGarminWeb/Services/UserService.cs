@@ -11,6 +11,18 @@ public class UserService(
     SkredvarselDbContext dbContext,
     IDateTimeNowProvider dateTimeNowProvider) : IUserService
 {
+    public async Task<User> GetUserOrRegisterLogin(ClaimsPrincipal principal)
+    {
+        var user = dbContext.GetUserOrNull(principal);
+
+        if (user == null)
+        {
+            await RegisterLogin(principal);
+        }
+
+        return dbContext.GetUserOrThrow(principal);
+    }
+
     public async Task RegisterLogin(ClaimsPrincipal user)
     {
         var dateNow = DateOnly.FromDateTime(dateTimeNowProvider.Now);

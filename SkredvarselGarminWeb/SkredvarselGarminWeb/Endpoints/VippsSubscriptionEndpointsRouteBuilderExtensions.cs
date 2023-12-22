@@ -24,10 +24,11 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
         app.MapGet("/createVippsAgreement", async (
             HttpContext ctx,
             IVippsApiClient vippsApiClient,
+            IUserService userService,
             SkredvarselDbContext dbContext,
             IDateTimeNowProvider dateTimeNowProvider) =>
         {
-            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+            var user = await userService.GetUserOrRegisterLogin(ctx.User);
 
             var userId = user.Id;
 
@@ -152,7 +153,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
             INtfyApiClient ntifyApiClient,
             SkredvarselDbContext dbContext) =>
         {
-            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+            var user = dbContext.GetUserOrThrow(ctx.User);
 
             var agreementInDb = dbContext.Agreements
                 .Where(a => a.Status == AgreementStatus.ACTIVE)
@@ -183,7 +184,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
             INtfyApiClient ntifyApiClient,
             SkredvarselDbContext dbContext) =>
         {
-            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+            var user = dbContext.GetUserOrThrow(ctx.User);
 
             var agreementInDb = dbContext.Agreements
                 .Where(a => a.Status == AgreementStatus.UNSUBSCRIBED)

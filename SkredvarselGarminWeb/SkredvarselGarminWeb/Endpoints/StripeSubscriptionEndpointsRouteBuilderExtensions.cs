@@ -17,10 +17,12 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
         app.MapGet("/createStripeSubscription", async (
             HttpContext ctx,
             SkredvarselDbContext dbContext,
+            IUserService userService,
             IStripeClient stripeClient,
             IOptions<StripeOptions> stripeOptions) =>
         {
-            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+            var user = await userService.GetUserOrRegisterLogin(ctx.User);
+
             var baseUrl = ctx.GetBaseUrl();
 
             var userHasActiveStripeSubscriptions = dbContext.StripeSubscriptions
@@ -79,7 +81,7 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
             IStripeClient stripeClient,
             SkredvarselDbContext dbContext) =>
         {
-            var user = dbContext.GetUserOrThrow(ctx.User.Identity);
+            var user = dbContext.GetUserOrThrow(ctx.User);
             var baseUrl = ctx.GetBaseUrl();
 
             var options = new Stripe.BillingPortal.SessionCreateOptions
