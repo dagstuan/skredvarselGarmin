@@ -46,11 +46,10 @@ public class DetailedForecastElements {
     _warning = settings[:warning];
     _fullWidth = settings[:fullWidth];
 
-    var height = settings[:height];
     _areaWidth = Math.ceil(_fullWidth * 0.82);
-    _areaHeight = height * 0.9;
+    _areaHeight = settings[:height];
     _x0 = _fullWidth / 2 - _areaWidth / 2;
-    _y0 = settings[:locY] + (height / 2 - _areaHeight / 2);
+    _y0 = settings[:locY];
 
     _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
 
@@ -172,6 +171,7 @@ public class DetailedForecastElements {
         if (i == 0) {
           _elements[i] = new AvalancheUi.MainText({
             :text => getMainText(),
+            :emergencyWarning => _warning["emergencyWarning"],
             :width => _areaWidth,
             :height => _areaHeight,
           });
@@ -210,13 +210,16 @@ public class DetailedForecastElements {
     if (length > 0) {
       var lastChar = mainText.substring(length - 1, length);
 
-      mainText = Lang.format("$1$$2$ $3$", [
+      mainText = Lang.format("$1$$2$", [
         mainText,
         lastChar.equals(".") || lastChar.equals("!") || lastChar.equals("?")
           ? ""
           : ".",
-        _seeFullForecastText,
       ]);
+
+      if (!_warning["isTendency"] && _warning["dangerLevel"] > 0) {
+        mainText = Lang.format("$1$ $2$", [mainText, _seeFullForecastText]);
+      }
     }
 
     return mainText;
