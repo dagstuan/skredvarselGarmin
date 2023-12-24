@@ -47,6 +47,7 @@ builder.Services.AddTransient<IGarminAuthenticationService, GarminAuthentication
 builder.Services.AddTransient<IVippsAgreementService, VippsAgreementService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IStripeService, StripeService>();
+builder.Services.AddTransient<INotificationService, NotificationService>();
 
 builder.Services.SetupAuthentication(vippsOptions!, authOptions!, googleOptions!, facebookOptions!);
 builder.Services.AddRefitClients(vippsOptions!);

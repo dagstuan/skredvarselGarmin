@@ -117,30 +117,48 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
             SkredvarselDbContext dbContext,
             IVippsApiClient vippsApiClient,
             IVippsAgreementService subscriptionService,
-            INtfyApiClient ntifyApiClient,
+            INotificationService notificationService,
             IBackgroundJobClient backgroundJobClient,
-            IDateTimeNowProvider dateTimeNowProvider) =>
+            IDateTimeNowProvider dateTimeNowProvider,
+            ILoggerFactory loggerFactory) =>
         {
+            var logger = loggerFactory.CreateLogger("vipps-subscribe-callback");
+
             var pendingAgreements = dbContext.GetPendingAgreements();
-            foreach (var agreement in pendingAgreements)
+
+            var tasks = pendingAgreements.Select(async agreement =>
             {
+                var retries = 0;
                 var agreementInVipps = await vippsApiClient.GetAgreement(agreement.Id);
 
-                if (agreementInVipps.Status == VippsAgreementStatus.Stopped)
+                while (agreementInVipps.Status == VippsAgreementStatus.Pending && retries < 5)
+                {
+                    retries++;
+
+                    await Task.Delay(750);
+
+                    agreementInVipps = await vippsApiClient.GetAgreement(agreement.Id);
+                }
+
+                if (agreementInVipps.Status == VippsAgreementStatus.Stopped ||
+                    agreementInVipps.Status == VippsAgreementStatus.Expired)
                 {
                     dbContext.Remove(agreement);
                 }
                 else if (agreementInVipps.Status == VippsAgreementStatus.Active)
                 {
-                    _ = Task.Run(() => ntifyApiClient.SendNotification(
-                        "New subscription!",
-                        "A new user subscribed to Skredvarsel!"
-                    ));
+                    _ = Task.Run(notificationService.NotifyUserSubscribed);
 
                     agreement.SetAsActive();
                     backgroundJobClient.Enqueue(() => subscriptionService.UpdateAgreementCharges(agreement.Id));
                 }
-            }
+                else if (agreementInVipps.Status == VippsAgreementStatus.Pending)
+                {
+                    logger.LogInformation("Subscription was still pending after 5 retries. Returning.");
+                }
+            });
+
+            await Task.WhenAll(tasks);
 
             dbContext.SaveChanges();
 
@@ -150,7 +168,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
         app.MapDelete("/api/vippsAgreement", async (
             HttpContext ctx,
             IVippsAgreementService subscriptionService,
-            INtfyApiClient ntifyApiClient,
+            INotificationService notificationService,
             SkredvarselDbContext dbContext) =>
         {
             var user = dbContext.GetUserOrThrow(ctx.User);
@@ -166,13 +184,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
 
             await subscriptionService.DeactivateAgreement(agreementInDb.Id);
 
-            _ = Task.Run(() =>
-            {
-                ntifyApiClient.SendNotification(
-                    "Subscription deactivated",
-                    "A user deactivated their subscription to Skredvarsel"
-                );
-            });
+            _ = Task.Run(notificationService.NotifyUserDeactivated);
 
             return Results.Ok();
 
@@ -181,7 +193,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
         app.MapPut("/api/vippsAgreement/reactivate", async (
             HttpContext ctx,
             IVippsAgreementService subscriptionService,
-            INtfyApiClient ntifyApiClient,
+            INotificationService notificationService,
             SkredvarselDbContext dbContext) =>
         {
             var user = dbContext.GetUserOrThrow(ctx.User);
@@ -197,13 +209,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
 
             await subscriptionService.ReactivateAgreement(agreementInDb.Id);
 
-            _ = Task.Run(() =>
-            {
-                ntifyApiClient.SendNotification(
-                    "Subscription reactivated!",
-                    "A user reactivated their subscription to Skredvarsel"
-                );
-            });
+            _ = Task.Run(notificationService.NotifyUserReactivated);
 
             return Results.Ok();
         }).RequireAuthorization();

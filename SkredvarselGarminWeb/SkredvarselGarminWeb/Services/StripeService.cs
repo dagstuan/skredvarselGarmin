@@ -10,6 +10,7 @@ namespace SkredvarselGarminWeb.Services;
 
 public class StripeService(
     SkredvarselDbContext dbContext,
+    INotificationService notificationService,
     IDateTimeNowProvider dateTimeNowProvider,
     ILogger<StripeService> logger) : IStripeService
 {
@@ -63,14 +64,22 @@ public class StripeService(
 
         var stripeSubscription = GetStripeSubscription(session.SubscriptionId);
 
+        var status = stripeSubscription.ToStripeSubscriptionStatus();
+
+        if (status == StripeSubscriptionStatus.ACTIVE)
+        {
+            _ = Task.Run(notificationService.NotifyUserSubscribed);
+        }
+
         dbContext.StripeSubscriptions.Add(new StripeSubscription
         {
             Created = dateTimeNowProvider.Now.ToUniversalTime(),
             SubscriptionId = session.SubscriptionId,
             UserId = user.Id,
-            Status = stripeSubscription.ToStripeSubscriptionStatus(),
+            Status = status,
             NextChargeDate = DateOnly.FromDateTime(stripeSubscription.CurrentPeriodEnd)
         });
+
         dbContext.SaveChanges();
 
         transaction.Commit();
