@@ -16,20 +16,19 @@ import { PersonalInfo } from "./PersonalInfo";
 import { Subscription } from "./Subscription";
 import { Watches } from "./Watches";
 import { Link as RouterLink } from "react-router-dom";
+import { LoginModal } from "../LoginModal";
 
 export const MyPage = () => {
-  const { data: user, isLoading } = useUser();
+  const { data: user } = useUser();
 
   const navigate = useNavigate();
   const location = useLocation();
 
   const isOnMinSide = location.pathname.toLowerCase() == "/minside";
 
-  if (isOnMinSide && !isLoading && !user) {
-    setTimeout(() => {
-      window.location.href = "/vipps-login?returnUrl=/minSide";
-    }, 0);
-    return null;
+  if (isOnMinSide && !user) {
+    console.log(user);
+    return <LoginModal isOpen={true} onClose={() => navigate("/")} />;
   }
 
   return (
