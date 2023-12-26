@@ -111,6 +111,23 @@ class DetailedForecastView extends Ui.View {
     _dangerLevelBitmap = null;
   }
 
+  public function onLayout(dc as Gfx.Dc) {
+    _width = dc.getWidth();
+    _height = dc.getHeight();
+
+    _headerHeight = _height * 0.18;
+    setupHeader(dc);
+
+    _dangerLevelHeight = _height * 0.17; // 20% of screen
+    setupDangerLevel(dc);
+
+    _mainContentHeight = _height * 0.48;
+    setupMainContent(dc);
+
+    _footerHeight = _height * 0.17; // 15% of screen
+    setupFooter(dc);
+  }
+
   public function onUpdate(dc as Gfx.Dc) as Void {
     if (
       _header == null ||
@@ -118,7 +135,7 @@ class DetailedForecastView extends Ui.View {
       _mainContent == null ||
       _footer == null
     ) {
-      setupUiElements(dc);
+      onLayout(dc);
     }
 
     dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
@@ -146,23 +163,6 @@ class DetailedForecastView extends Ui.View {
     _pageIndicator.draw(dc, _numWarnings, _index);
 
     _forecastElementsIndicator.draw(dc, _currentElement);
-  }
-
-  private function setupUiElements(dc as Gfx.Dc) {
-    _width = dc.getWidth();
-    _height = dc.getHeight();
-
-    _headerHeight = _height * 0.18;
-    setupHeader(dc);
-
-    _dangerLevelHeight = _height * 0.17; // 20% of screen
-    setupDangerLevel(dc);
-
-    _mainContentHeight = _height * 0.48;
-    setupMainContent(dc);
-
-    _footerHeight = _height * 0.17; // 15% of screen
-    setupFooter(dc);
   }
 
   private function setupHeader(dc as Gfx.Dc) {
