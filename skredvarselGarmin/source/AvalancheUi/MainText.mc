@@ -6,6 +6,7 @@ using Toybox.Math;
 
 module AvalancheUi {
   typedef MainTextSettings as {
+    :dc as Gfx.Dc,
     :text as String,
     :emergencyWarning as String?,
     :width as Numeric,
@@ -33,6 +34,7 @@ module AvalancheUi {
     private var _mainText as AvalancheUi.ScrollingText?;
 
     public function initialize(settings as MainTextSettings) {
+      var dc = settings[:dc];
       _text = settings[:text];
       _emergencyWarning = settings[:emergencyWarning];
       _hasEmergencyWarning = _emergencyWarning != null;
@@ -40,6 +42,8 @@ module AvalancheUi {
       _height = settings[:height];
       _paddingLeftRightEmergencyWarningText = _width * 0.02;
       _paddingTopBottom = _height * 0.05;
+
+      setupBufferedBitmaps(dc);
     }
 
     public function onShow() as Void {
@@ -72,47 +76,64 @@ module AvalancheUi {
       }
     }
 
+    private function setupBufferedBitmaps(dc as Gfx.Dc) {
+      if (_hasEmergencyWarning) {
+        _emergencyWarningIcon =
+          Ui.loadResource($.Rez.Drawables.EmergencyWarningIcon) as
+          Ui.BitmapResource;
+
+        _emergencyWarningIconWidth = _emergencyWarningIcon.getWidth();
+
+        var iconHeight = _emergencyWarningIcon.getHeight();
+        if (_fontHeight > iconHeight) {
+          _emergencyWarningHeight = _fontHeight;
+        } else {
+          _emergencyWarningHeight = iconHeight;
+        }
+
+        var textWidth = dc.getTextWidthInPixels(_emergencyWarning, _font);
+        var textContainerWidth =
+          _width -
+          _emergencyWarningIconWidth -
+          _paddingLeftRightEmergencyWarningText * 2;
+
+        _emergencyWarningContentWidth =
+          _emergencyWarningIconWidth +
+          _paddingLeftRightEmergencyWarningText +
+          textWidth;
+
+        _emergencyWarningText = new ScrollingText({
+          :dc => dc,
+          :text => _emergencyWarning,
+          :containerWidth => textContainerWidth,
+          :containerHeight => _emergencyWarningHeight,
+          :font => Gfx.FONT_XTINY,
+          :color => Gfx.COLOR_BLACK,
+          :backgroundColor => Gfx.COLOR_WHITE,
+          :yAlignment => Y_ALIGN_CENTER,
+          :xAlignment => X_ALIGN_LEFT,
+        });
+      }
+
+      var containerHeight = _height - _paddingTopBottom * 2;
+      if (_emergencyWarningHeight > 0) {
+        containerHeight -= _emergencyWarningHeight + _paddingTopBottom;
+      }
+
+      _mainText = new ScrollingText({
+        :dc => dc,
+        :text => _text,
+        :containerWidth => _width,
+        :containerHeight => containerHeight,
+        :font => Gfx.FONT_SYSTEM_XTINY,
+        :scrollDirection => SCROLL_DIRECTION_VERTICAL,
+      });
+    }
+
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
       y0 += _paddingTopBottom;
 
       if (_hasEmergencyWarning) {
-        if (_emergencyWarningIcon == null || _emergencyWarningText == null) {
-          _emergencyWarningIcon =
-            Ui.loadResource($.Rez.Drawables.EmergencyWarningIcon) as
-            Ui.BitmapResource;
-
-          _emergencyWarningIconWidth = _emergencyWarningIcon.getWidth();
-
-          var iconHeight = _emergencyWarningIcon.getHeight();
-          if (_fontHeight > iconHeight) {
-            _emergencyWarningHeight = _fontHeight;
-          } else {
-            _emergencyWarningHeight = iconHeight;
-          }
-
-          var textWidth = dc.getTextWidthInPixels(_emergencyWarning, _font);
-          var textContainerWidth =
-            _width -
-            _emergencyWarningIconWidth -
-            _paddingLeftRightEmergencyWarningText * 2;
-
-          _emergencyWarningContentWidth =
-            _emergencyWarningIconWidth +
-            _paddingLeftRightEmergencyWarningText +
-            textWidth;
-
-          _emergencyWarningText = new ScrollingText({
-            :text => _emergencyWarning,
-            :containerWidth => textContainerWidth,
-            :containerHeight => _emergencyWarningHeight,
-            :font => Gfx.FONT_XTINY,
-            :color => Gfx.COLOR_BLACK,
-            :backgroundColor => Gfx.COLOR_WHITE,
-            :yAlignment => Y_ALIGN_CENTER,
-            :xAlignment => X_ALIGN_LEFT,
-          });
-        }
-
         var textX0 = x0;
         if (_emergencyWarningContentWidth < _width) {
           textX0 = x0 + (_width - _emergencyWarningContentWidth) / 2;
@@ -132,21 +153,6 @@ module AvalancheUi {
         );
 
         y0 += _paddingTopBottom + _emergencyWarningHeight;
-      }
-
-      if (_mainText == null) {
-        var containerHeight = _height - _paddingTopBottom * 2;
-        if (_emergencyWarningHeight > 0) {
-          containerHeight -= _emergencyWarningHeight + _paddingTopBottom;
-        }
-
-        _mainText = new ScrollingText({
-          :text => _text,
-          :containerWidth => _width,
-          :containerHeight => containerHeight,
-          :font => Gfx.FONT_SYSTEM_XTINY,
-          :scrollDirection => SCROLL_DIRECTION_VERTICAL,
-        });
       }
 
       _mainText.draw(dc, x0, y0);

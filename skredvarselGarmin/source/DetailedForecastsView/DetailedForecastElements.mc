@@ -13,6 +13,7 @@ typedef AvalancheForecastElement as interface {
 };
 
 typedef DetailedForecastElementsSettings as {
+  :dc as Gfx.Dc,
   :warning as DetailedAvalancheWarning,
   :locY as Numeric,
   :height as Numeric,
@@ -30,7 +31,6 @@ public class DetailedForecastElements {
   private var _areaWidth as Numeric;
   private var _areaHeight as Numeric;
   private var _x0 as Numeric;
-  private var _y0 as Numeric;
 
   public var animationTime = 0;
   private var _animating = false;
@@ -40,7 +40,10 @@ public class DetailedForecastElements {
 
   private var _elements as Array<AvalancheForecastElement?>;
 
-  private var _seeFullForecastText as String;
+  private var _seeFullForecastText as String =
+    $.getForecastLanguage() == 1
+      ? "Se komplett varsel på varsom.no"
+      : "See complete forecast at varsom.no";
 
   public function initialize(settings as DetailedForecastElementsSettings) {
     _warning = settings[:warning];
@@ -49,17 +52,10 @@ public class DetailedForecastElements {
     _areaWidth = Math.ceil(_fullWidth * 0.82);
     _areaHeight = settings[:height];
     _x0 = _fullWidth / 2 - _areaWidth / 2;
-    _y0 = settings[:locY];
 
     _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
-
-    var forecastLanguage = $.getForecastLanguage();
-    _seeFullForecastText =
-      forecastLanguage == 1
-        ? "Se komplett varsel på varsom.no"
-        : "See complete forecast at varsom.no";
-
     _elements = new [_numElements];
+    setupElements(settings[:dc]);
   }
 
   public function onHide() {
@@ -141,9 +137,36 @@ public class DetailedForecastElements {
     Ui.requestUpdate();
   }
 
-  public function draw(dc as Gfx.Dc) {
+  private function setupElements(dc as Gfx.Dc) {
+    var avalancheProblems = _warning["avalancheProblems"] as Array;
+
+    for (var i = 0; i < _elements.size(); i++) {
+      if (i == 0) {
+        var mainText = new AvalancheUi.MainText({
+          :dc => dc,
+          :text => getMainText(),
+          :emergencyWarning => _warning["emergencyWarning"],
+          :width => _areaWidth,
+          :height => _areaHeight,
+        });
+
+        _elements[i] = mainText;
+      } else {
+        var problemUi = new AvalancheUi.AvalancheProblemUi({
+          :dc => dc,
+          :problem => avalancheProblems[i - 1],
+          :width => _areaWidth,
+          :height => _areaHeight,
+        });
+
+        _elements[i] = problemUi;
+      }
+    }
+  }
+
+  public function draw(dc as Gfx.Dc, y0 as Numeric) {
     if ($.DrawOutlines) {
-      $.drawOutline(dc, _x0, _y0, _areaWidth, _areaHeight);
+      $.drawOutline(dc, _x0, y0, _areaWidth, _areaHeight);
     }
 
     var xOffset = -(_currentPage * _fullWidth);
@@ -163,29 +186,9 @@ public class DetailedForecastElements {
       }
     }
 
-    var avalancheProblems = _warning["avalancheProblems"] as Array;
-
     for (var i = 0; i < _elements.size(); i++) {
-      var wasNull = _elements[i] == null;
-      if (wasNull) {
-        if (i == 0) {
-          _elements[i] = new AvalancheUi.MainText({
-            :text => getMainText(),
-            :emergencyWarning => _warning["emergencyWarning"],
-            :width => _areaWidth,
-            :height => _areaHeight,
-          });
-        } else {
-          _elements[i] = new AvalancheUi.AvalancheProblemUi({
-            :problem => avalancheProblems[i - 1],
-            :width => _areaWidth,
-            :height => _areaHeight,
-          });
-        }
-      }
-
-      _elements[i].draw(dc, _x0 + xOffset, _y0);
-      if (wasNull && _currentPage == i) {
+      _elements[i].draw(dc, _x0 + xOffset, y0);
+      if (_currentPage == i) {
         _elements[i].onShow();
       }
       xOffset += _fullWidth;

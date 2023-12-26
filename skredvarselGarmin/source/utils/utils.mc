@@ -259,6 +259,17 @@ function min(a as Numeric, b as Numeric) {
   return a < b ? a : b;
 }
 
+function max(arr as Array<Numeric>) {
+  var max = arr[0];
+  for (var i = 0; i < arr.size(); i++) {
+    if (arr[i] > max) {
+      max = arr[i];
+    }
+  }
+
+  return max;
+}
+
 (:background)
 public function getDangerLevelToday(
   forecast as SimpleAvalancheForecast

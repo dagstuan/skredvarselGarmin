@@ -30,13 +30,15 @@ module AvalancheUi {
       _height = settings[:height];
       _color = settings[:color];
       _direction = settings[:direction];
+
+      createBufferedBitmap();
+    }
+
+    public function getWidth() {
+      return _width;
     }
 
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
-      if (_bufferedBitmap == null) {
-        createBufferedBitmap();
-      }
-
       dc.drawBitmap(x0, y0, _bufferedBitmap);
     }
 

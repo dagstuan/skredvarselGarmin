@@ -16,12 +16,11 @@ typedef DetailedForecastFooterSettings as {
 public class DetailedForecastFooter {
   private var _publishedTime as String?;
   private var _locX as Numeric;
-  private var _locY as Numeric;
   private var _width as Numeric;
   private var _height as Numeric;
 
   private var _font = Gfx.FONT_XTINY;
-  private var _fontHeight as Number;
+  private var _fontHeight as Number = Gfx.getFontHeight(_font);
 
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
   private var _bufferedBitmapWidth as Numeric?;
@@ -30,20 +29,14 @@ public class DetailedForecastFooter {
   private var _isLoading as Boolean;
   private var _loadingSpinner as AvalancheUi.LoadingSpinner?;
 
-  private var _deviceScreenWidth as Number;
+  private var _deviceScreenWidth as Number = $.getDeviceScreenWidth();
 
   public function initialize(settings as DetailedForecastFooterSettings) {
     _publishedTime = settings[:publishedTime];
-
     _locX = settings[:locX];
-    _locY = settings[:locY];
     _width = settings[:width];
     _height = settings[:height];
     _isLoading = settings[:isLoading];
-
-    _fontHeight = Gfx.getFontHeight(_font);
-
-    _deviceScreenWidth = $.getDeviceScreenWidth();
   }
 
   public function onTick() {
@@ -52,12 +45,12 @@ public class DetailedForecastFooter {
     }
   }
 
-  public function draw(dc as Gfx.Dc) {
+  public function draw(dc as Gfx.Dc, y0 as Numeric) {
     if (_isLoading) {
       if (_loadingSpinner == null) {
         _loadingSpinner = new AvalancheUi.LoadingSpinner({
           :locX => _locX + _width / 2.0,
-          :locY => _locY + _height / 2.0,
+          :locY => y0 + _height / 2.0,
           :radius => _fontHeight / 2.0,
         });
       }
@@ -110,7 +103,7 @@ public class DetailedForecastFooter {
     if (_bufferedBitmap != null) {
       var textX0 = _locX + _width / 2.0 - _bufferedBitmapWidth / 2.0;
       var textY0 =
-        _deviceScreenWidth > 240 ? _locY + _bufferedBitmapHeight / 2.0 : _locY;
+        _deviceScreenWidth > 240 ? y0 + _bufferedBitmapHeight / 2.0 : y0;
 
       dc.drawBitmap(textX0, textY0, _bufferedBitmap);
     }
