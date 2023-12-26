@@ -13,49 +13,36 @@ module AvalancheUi {
   };
 
   public class ValidExpositions {
-    private var _validExpositions as Array<Char>;
     private var _radius as Numeric;
+    private var _font as Ui.Resource = Ui.loadResource($.Rez.Fonts.roboto);
+    private var _fontHeight as Number = Gfx.getFontHeight(_font);
 
-    private var _font as Ui.Resource;
-    private var _fontHeight as Number;
-
-    private var _dangerFillColor as Gfx.ColorType;
-    private var _nonDangerFillColor as Gfx.ColorType;
-
-    private var _bufferedBitmap as Gfx.BufferedBitmap?;
+    private var _bufferedBitmap as Gfx.BufferedBitmap;
 
     public function initialize(settings as ValidExpositionsSettings) {
-      _validExpositions = settings[:validExpositions].toCharArray();
-      _radius = settings[:radius] as Numeric;
-      _dangerFillColor = settings[:dangerFillColor];
-      _nonDangerFillColor = settings[:nonDangerFillColor];
+      _radius = settings[:radius];
 
-      _font = WatchUi.loadResource($.Rez.Fonts.roboto);
-      _fontHeight = Gfx.getFontHeight(_font);
+      _bufferedBitmap = createBufferedBitmap(settings);
+    }
 
-      var numChars = _validExpositions.size();
+    private function createBufferedBitmap(
+      settings as ValidExpositionsSettings
+    ) as Gfx.BufferedBitmap {
+      var validExpositions = settings[:validExpositions].toCharArray();
+      var numChars = validExpositions.size();
       if (numChars != 8) {
         throw new SkredvarselGarminException(
           "Invalid char array for valid expositions."
         );
       }
-    }
-
-    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
-      if (_bufferedBitmap == null) {
-        createBufferedBitmap();
-      }
-
-      dc.drawBitmap(x0 - _radius, y0 - _radius - _fontHeight, _bufferedBitmap);
-    }
-
-    private function createBufferedBitmap() {
-      _bufferedBitmap = $.newBufferedBitmap({
+      var dangerFillColor = settings[:dangerFillColor];
+      var nonDangerFillColor = settings[:nonDangerFillColor];
+      var bufferedBitmap = $.newBufferedBitmap({
         :width => _radius * 2,
         :height => _radius * 2 + _fontHeight,
       });
 
-      var bufferedDc = _bufferedBitmap.getDc();
+      var bufferedDc = bufferedBitmap.getDc();
 
       bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
       bufferedDc.drawText(
@@ -82,14 +69,14 @@ module AvalancheUi {
 
       // Draw cake slices
       for (var i = 0; i < 8; i++) {
-        var currChar = _validExpositions[i];
+        var currChar = validExpositions[i];
 
         var endAngle = (startAngle - anglePerChar) % 360;
 
         if (currChar == '0') {
-          bufferedDc.setColor(_nonDangerFillColor, _nonDangerFillColor);
+          bufferedDc.setColor(nonDangerFillColor, nonDangerFillColor);
         } else {
-          bufferedDc.setColor(_dangerFillColor, _dangerFillColor);
+          bufferedDc.setColor(dangerFillColor, dangerFillColor);
         }
 
         bufferedDc.drawArc(
@@ -119,6 +106,18 @@ module AvalancheUi {
         bufferedDc.drawLine(start[0], start[1], end[0], end[1]);
         startAngle = (startAngle + 45) % 360;
       }
+
+      return bufferedBitmap;
+    }
+
+    public function getSize() {
+      return _radius * 2;
+    }
+
+    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
+      var Y0 = y0 - _fontHeight;
+
+      dc.drawBitmap(x0, Y0, _bufferedBitmap);
     }
   }
 

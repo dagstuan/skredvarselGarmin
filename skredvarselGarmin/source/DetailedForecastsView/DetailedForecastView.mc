@@ -19,7 +19,7 @@ class DetailedForecastView extends Ui.View {
   private const TICK_DURATION = 100;
 
   private var _warning as DetailedAvalancheWarning?;
-  private var _isLoading as Boolean;
+  private var _isLoading as Boolean = false;
   private var _index as Number = 0;
   private var _numWarnings as Number = 0;
   private var _regionId as String;
@@ -27,11 +27,17 @@ class DetailedForecastView extends Ui.View {
   private var _width as Numeric?;
   private var _height as Numeric?;
 
-  private var _elements as DetailedForecastElements?;
+  private var _headerHeight as Numeric = 0;
+  private var _dangerLevelHeight as Numeric = 0;
+  private var _mainContentHeight as Numeric = 0;
+  private var _footerHeight as Numeric = 0;
+
+  private var _mainContent as DetailedForecastElements?;
   private var _currentElement as Number = 0;
   private var _numElements as Number?;
 
-  private var _pageIndicator as AvalancheUi.PageIndicator;
+  private var _pageIndicator as AvalancheUi.PageIndicator =
+    new AvalancheUi.PageIndicator();
   private var _ticksBeforeAnimatePageIndicator = 25;
 
   private var _forecastElementsIndicator as
@@ -49,7 +55,6 @@ class DetailedForecastView extends Ui.View {
     View.initialize();
 
     _regionId = settings[:regionId];
-    _isLoading = false;
 
     setWarning(
       settings[:index],
@@ -57,13 +62,6 @@ class DetailedForecastView extends Ui.View {
       settings[:warning],
       settings[:fetchedTime]
     );
-
-    _pageIndicator = new AvalancheUi.PageIndicator();
-  }
-
-  public function onLayout(dc as Gfx.Dc) {
-    _width = dc.getWidth();
-    _height = dc.getHeight();
   }
 
   public function onShow() {
@@ -75,8 +73,8 @@ class DetailedForecastView extends Ui.View {
     if (_footer != null) {
       _footer.onTick();
     }
-    if (_elements != null) {
-      _elements.onTick();
+    if (_mainContent != null) {
+      _mainContent.onTick();
     }
 
     if (_ticksBeforeAnimatePageIndicator > 0) {
@@ -104,9 +102,9 @@ class DetailedForecastView extends Ui.View {
       _updateTimer.stop();
       _updateTimer = null;
     }
-    if (_elements != null) {
-      _elements.onHide();
-      _elements = null;
+    if (_mainContent != null) {
+      _mainContent.onHide();
+      _mainContent = null;
     }
 
     _footer = null;
@@ -114,154 +112,148 @@ class DetailedForecastView extends Ui.View {
   }
 
   public function onUpdate(dc as Gfx.Dc) as Void {
+    if (
+      _header == null ||
+      _dangerLevelBitmap == null ||
+      _mainContent == null ||
+      _footer == null
+    ) {
+      setupUiElements(dc);
+    }
+
     dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
     dc.clear();
 
-    var headerY0 = 0;
-    var headerHeight = _height * 0.18; // 15% of screen
-    drawHeader(dc, headerY0, headerHeight);
+    _header.draw(dc);
 
-    var dangerLevelY0 = headerY0 + headerHeight;
-    var dangerLevelHeight = _height * 0.17; // 20% of screen
+    var dangerLevelY0 = _headerHeight;
+    if ($.DrawOutlines) {
+      $.drawOutline(dc, 0, dangerLevelY0, _width, _dangerLevelHeight);
+    }
 
-    drawDangerLevel(dc, dangerLevelY0, dangerLevelHeight);
+    dc.drawBitmap(
+      _width / 2 - _dangerLevelBitmapWidth / 2,
+      dangerLevelY0,
+      _dangerLevelBitmap
+    );
 
-    var mainContentY0 = dangerLevelY0 + dangerLevelHeight;
-    var mainContentHeight = _height * 0.48; // Half screen
+    var mainContentY0 = dangerLevelY0 + _dangerLevelHeight;
+    _mainContent.draw(dc, mainContentY0);
 
-    drawMainContent(dc, mainContentY0, mainContentHeight);
-
-    var footerY0 = mainContentY0 + mainContentHeight;
-    var footerHeight = _height * 0.17; // 15% of screen
-
-    drawFooter(dc, footerY0, footerHeight);
+    var footerY0 = mainContentY0 + _mainContentHeight;
+    _footer.draw(dc, footerY0);
 
     _pageIndicator.draw(dc, _numWarnings, _index);
 
     _forecastElementsIndicator.draw(dc, _currentElement);
   }
 
-  public function drawHeader(dc as Gfx.Dc, y0 as Numeric, height as Numeric) {
-    if (_header == null) {
-      var startValidity = (_warning["validity"] as Array)[0];
-      var validityDate = $.parseDate(startValidity);
+  private function setupUiElements(dc as Gfx.Dc) {
+    _width = dc.getWidth();
+    _height = dc.getHeight();
 
-      _header = new DetailedForecastHeader({
-        :regionName => $.getRegionName(_regionId),
-        :validityDate => $.getHumanReadableDateText(validityDate),
-        :locY => y0,
-        :locX => 0,
-        :width => _width,
-        :height => height,
-      });
-    }
+    _headerHeight = _height * 0.18;
+    setupHeader(dc);
 
-    _header.draw(dc);
+    _dangerLevelHeight = _height * 0.17; // 20% of screen
+    setupDangerLevel(dc);
+
+    _mainContentHeight = _height * 0.48;
+    setupMainContent(dc);
+
+    _footerHeight = _height * 0.17; // 15% of screen
+    setupFooter(dc);
   }
 
-  private function drawDangerLevel(
-    dc as Gfx.Dc,
-    y0 as Numeric,
-    height as Numeric
-  ) {
-    if ($.DrawOutlines) {
-      $.drawOutline(dc, 0, y0, _width, height);
-    }
+  private function setupHeader(dc as Gfx.Dc) {
+    var startValidity = (_warning["validity"] as Array)[0];
+    var validityDate = $.parseDate(startValidity);
 
-    if (_dangerLevelBitmap == null) {
-      var dangerLevel = _warning["dangerLevel"];
-      var font = Gfx.FONT_MEDIUM;
-      var paddingBetween = _width * 0.02;
-      var iconResource = $.getIconResourceForDangerLevel(dangerLevel);
-      var icon = WatchUi.loadResource(iconResource);
-      var iconWidth = icon.getWidth();
-      var iconHeight = icon.getHeight();
+    _header = new DetailedForecastHeader({
+      :dc => dc,
+      :regionName => $.getRegionName(_regionId),
+      :validityDate => $.getHumanReadableDateText(validityDate),
+      :locY => 0,
+      :locX => 0,
+      :width => _width,
+      :height => _headerHeight,
+    });
+  }
 
-      var levelText = $.getOrLoadResourceString("Faregrad", :Level);
-      var text = Lang.format("$1$ $2$", [levelText, dangerLevel]);
+  private function setupDangerLevel(dc as Gfx.Dc) {
+    var dangerLevel = _warning["dangerLevel"];
+    var font = Gfx.FONT_MEDIUM;
+    var paddingBetween = _width * 0.02;
+    var iconResource = $.getIconResourceForDangerLevel(dangerLevel);
+    var icon = WatchUi.loadResource(iconResource);
+    var iconWidth = icon.getWidth();
+    var iconHeight = icon.getHeight();
 
-      var textWidth = dc.getTextWidthInPixels(text, font);
-      var centerY0 = height / 2;
+    var levelText = $.getOrLoadResourceString("Faregrad", :Level);
+    var text = Lang.format("$1$ $2$", [levelText, dangerLevel]);
 
-      _dangerLevelBitmapWidth = iconWidth + paddingBetween + textWidth;
-      _dangerLevelBitmap = $.newBufferedBitmap({
-        :width => _dangerLevelBitmapWidth,
-        :height => height,
-      });
-      var bufferedDc = _dangerLevelBitmap.getDc();
+    var textWidth = dc.getTextWidthInPixels(text, font);
+    var centerY0 = _dangerLevelHeight / 2;
 
-      var color = colorize(_warning["dangerLevel"]);
-      bufferedDc.setColor(color, Gfx.COLOR_TRANSPARENT);
-      bufferedDc.drawText(
-        0,
-        centerY0,
-        font,
-        text,
-        Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
-      );
-      bufferedDc.drawBitmap(
-        textWidth + paddingBetween,
-        centerY0 - iconHeight / 2,
-        icon
-      );
-    }
+    _dangerLevelBitmapWidth = iconWidth + paddingBetween + textWidth;
+    _dangerLevelBitmap = $.newBufferedBitmap({
+      :width => _dangerLevelBitmapWidth,
+      :height => _dangerLevelHeight,
+    });
+    var bufferedDc = _dangerLevelBitmap.getDc();
 
-    dc.drawBitmap(
-      _width / 2 - _dangerLevelBitmapWidth / 2,
-      y0,
-      _dangerLevelBitmap
+    var color = colorize(_warning["dangerLevel"]);
+    bufferedDc.setColor(color, Gfx.COLOR_TRANSPARENT);
+    bufferedDc.drawText(
+      0,
+      centerY0,
+      font,
+      text,
+      Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
+    );
+    bufferedDc.drawBitmap(
+      textWidth + paddingBetween,
+      centerY0 - iconHeight / 2,
+      icon
     );
   }
 
-  private function drawMainContent(
-    dc as Gfx.Dc,
-    y0 as Numeric,
-    height as Numeric
-  ) {
-    if (_elements == null) {
-      _elements = new DetailedForecastElements({
-        :warning => _warning,
-        :locY => y0,
-        :height => height,
-        :fullWidth => _width,
-      });
-    }
-
-    _elements.draw(dc);
+  private function setupMainContent(dc as Gfx.Dc) {
+    _mainContent = new DetailedForecastElements({
+      :dc => dc,
+      :warning => _warning,
+      :height => _mainContentHeight,
+      :fullWidth => _width,
+    });
   }
 
-  public function drawFooter(dc as Gfx.Dc, y0 as Numeric, height as Numeric) {
-    if (_footer == null) {
-      _footer = new DetailedForecastFooter({
-        :publishedTime => _warning["dangerLevel"] > 0
-          ? _warning["published"]
-          : null,
-        :locY => y0,
-        :locX => 0,
-        :width => _width,
-        :height => height,
-        :isLoading => _isLoading,
-      });
-    }
-
-    _footer.draw(dc);
+  public function setupFooter(dc as Gfx.Dc) {
+    _footer = new DetailedForecastFooter({
+      :publishedTime => _warning["dangerLevel"] > 0
+        ? _warning["published"]
+        : null,
+      :locX => 0,
+      :width => _width,
+      :height => _footerHeight,
+      :isLoading => _isLoading,
+    });
   }
 
   public function goToNextVisibleElement() {
-    if (_elements != null) {
-      _currentElement = _elements.goToNextElement();
+    if (_mainContent != null) {
+      _currentElement = _mainContent.goToNextElement();
     }
   }
 
   public function goToPreviousVisibleElement() {
-    if (_elements != null) {
-      _currentElement = _elements.goToPreviousElement();
+    if (_mainContent != null) {
+      _currentElement = _mainContent.goToPreviousElement();
     }
   }
 
   public function toggleVisibleElement() {
-    if (_elements != null) {
-      _currentElement = _elements.toggleVisibleElement();
+    if (_mainContent != null) {
+      _currentElement = _mainContent.toggleVisibleElement();
     }
   }
 
@@ -288,13 +280,14 @@ class DetailedForecastView extends Ui.View {
     _header = null;
     _dangerLevelBitmap = null;
     _dangerLevelBitmapWidth = null;
-    _elements = null;
+    _mainContent = null;
     _footer = null;
 
     _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
     _forecastElementsIndicator = new AvalancheUi.ForecastElementsIndicator(
       _numElements
     );
+
     _currentElement = 0;
   }
 }

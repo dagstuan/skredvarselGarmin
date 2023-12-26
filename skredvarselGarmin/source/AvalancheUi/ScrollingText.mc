@@ -9,6 +9,7 @@ module AvalancheUi {
   }
 
   typedef ScrollingTextSettings as {
+    :dc as Gfx.Dc,
     :text as String,
     :containerWidth as Numeric,
     :containerHeight as Numeric,
@@ -79,6 +80,8 @@ module AvalancheUi {
         _horizontalTextYOffset = _containerHeight - _fontHeight;
       }
 
+      setupBitmap(settings[:dc]);
+
       _isVisible = false;
     }
 
@@ -96,11 +99,75 @@ module AvalancheUi {
       }
     }
 
-    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
-      if ($.DrawOutlines) {
-        $.drawOutline(dc, x0, y0, _containerWidth, _containerHeight);
-      }
+    public function getWidth() {
+      return $.min(_textWidth, _containerWidth);
+    }
 
+    private function setupBitmap(dc as Gfx.Dc) {
+      if (_scrollDirection == SCROLL_DIRECTION_HORIZONTAL) {
+        setupHorizontal(dc);
+      } else {
+        setupVertical(dc);
+      }
+    }
+
+    private function setupHorizontal(dc as Gfx.Dc) {
+      _textWidth = dc.getTextWidthInPixels(_text, _font);
+
+      _bufferedBitmapText = $.newBufferedBitmap({
+        :width => _textWidth,
+        :height => _fontHeight,
+      });
+      var bufferedDc = _bufferedBitmapText.getDc();
+
+      bufferedDc.setAntiAlias(true);
+      bufferedDc.setColor(_color, _backgroundColor);
+      bufferedDc.drawText(0, 0, _font, _text, Gfx.TEXT_JUSTIFY_LEFT);
+    }
+
+    private function setupVertical(dc as Gfx.Dc) {
+      var fitText = Gfx.fitTextToArea(
+        _text,
+        _font,
+        _containerWidth,
+        _containerHeight * 5,
+        false
+      );
+
+      var fitTextDimensions = dc.getTextDimensions(fitText, _font);
+      _textWidth = fitTextDimensions[0];
+      _textHeight = fitTextDimensions[1];
+
+      _bufferedBitmapText = $.newBufferedBitmap({
+        :width => _containerWidth,
+        :height => _textHeight,
+      });
+
+      var bufferedDc = _bufferedBitmapText.getDc();
+
+      bufferedDc.setAntiAlias(true);
+      bufferedDc.setColor(_color, _backgroundColor);
+
+      if (_textHeight <= _containerHeight) {
+        bufferedDc.drawText(
+          _containerWidth / 2,
+          _textHeight / 2,
+          _font,
+          fitText,
+          Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
+        );
+      } else {
+        bufferedDc.drawText(
+          _containerWidth / 2,
+          0,
+          _font,
+          fitText,
+          Gfx.TEXT_JUSTIFY_CENTER
+        );
+      }
+    }
+
+    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
       if (_scrollDirection == SCROLL_DIRECTION_HORIZONTAL) {
         drawHorizontal(dc, x0, y0);
       } else {
@@ -113,20 +180,6 @@ module AvalancheUi {
       x0 as Numeric,
       y0 as Numeric
     ) as Void {
-      if (_bufferedBitmapText == null) {
-        _textWidth = dc.getTextWidthInPixels(_text, _font);
-
-        _bufferedBitmapText = $.newBufferedBitmap({
-          :width => _textWidth,
-          :height => _fontHeight,
-        });
-        var bufferedDc = _bufferedBitmapText.getDc();
-
-        bufferedDc.setAntiAlias(true);
-        bufferedDc.setColor(_color, _backgroundColor);
-        bufferedDc.drawText(0, 0, _font, _text, Gfx.TEXT_JUSTIFY_LEFT);
-      }
-
       if (_textWidth > _containerWidth) {
         dc.setClip(
           x0,
@@ -159,47 +212,6 @@ module AvalancheUi {
       x0 as Numeric,
       y0 as Numeric
     ) as Void {
-      if (_bufferedBitmapText == null) {
-        var fitText = Gfx.fitTextToArea(
-          _text,
-          _font,
-          _containerWidth,
-          _containerHeight * 5,
-          false
-        );
-
-        var fitTextDimensions = dc.getTextDimensions(fitText, _font);
-        _textHeight = fitTextDimensions[1];
-
-        _bufferedBitmapText = $.newBufferedBitmap({
-          :width => _containerWidth,
-          :height => _textHeight,
-        });
-
-        var bufferedDc = _bufferedBitmapText.getDc();
-
-        bufferedDc.setAntiAlias(true);
-        bufferedDc.setColor(_color, _backgroundColor);
-
-        if (_textHeight <= _containerHeight) {
-          bufferedDc.drawText(
-            _containerWidth / 2,
-            _textHeight / 2,
-            _font,
-            fitText,
-            Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
-          );
-        } else {
-          bufferedDc.drawText(
-            _containerWidth / 2,
-            0,
-            _font,
-            fitText,
-            Gfx.TEXT_JUSTIFY_CENTER
-          );
-        }
-      }
-
       if (_textHeight > _containerHeight) {
         dc.setClip(x0, y0, _containerWidth, _containerHeight);
         dc.drawBitmap(x0, y0 + _textOffset, _bufferedBitmapText);

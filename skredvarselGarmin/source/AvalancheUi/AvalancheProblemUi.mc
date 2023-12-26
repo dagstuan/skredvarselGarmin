@@ -25,17 +25,21 @@ module AvalancheUi {
     private var _dangerFillColor as Gfx.ColorType;
     private var _nonDangerFillColor as Gfx.ColorType;
 
-    private var _elemWidth as Number;
-    private var _elemHeight as Number;
+    private var _elemMaxWidth as Number;
+    private var _elemMaxHeight as Number;
     private var _paddingLeftRight as Number = 0;
-    private var _paddingBetween as Number;
+    private var _paddingBetweenElements as Number = 0;
 
     private var _dangerLevelWidth = 4;
 
     private var _problemText as AvalancheUi.ScrollingText?;
+
     private var _validExpositionsUi as AvalancheUi.ValidExpositions?;
+    private var _validExpositionsUiSize as Numeric = 0;
     private var _exposedHeightUi as AvalancheUi.ExposedHeight?;
+    private var _exposedHeightUiSize as Numeric = 0;
     private var _exposedHeightTextUi as AvalancheUi.ExposedHeightText?;
+    private var _exposedHeightTextUiWidth as Numeric = 0;
 
     public function initialize(settings as AvalancheProblemSettings) {
       var problem = settings[:problem];
@@ -53,18 +57,17 @@ module AvalancheUi {
         _paddingLeftRight = (_width * 0.08).toNumber();
       }
 
-      _paddingBetween = (_width * 0.04).toNumber();
-      _elemHeight = (_height * 0.75).toNumber();
-      _elemWidth = (
-        (_width -
-          _dangerLevelWidth -
-          _paddingLeftRight * 2 -
-          _paddingBetween * 3) /
+      var minPaddingBetweenElements = (_width * 0.04).toNumber();
+      _elemMaxHeight = (_height * 0.75).toNumber();
+      _elemMaxWidth = (
+        (_width - _paddingLeftRight * 2 - minPaddingBetweenElements * 3) /
         3
       ).toNumber();
 
       _dangerFillColor = Gfx.COLOR_RED;
       _nonDangerFillColor = Gfx.COLOR_LT_GRAY;
+
+      setupUiElements(settings[:dc]);
     }
 
     public function onShow() as Void {
@@ -94,39 +97,86 @@ module AvalancheUi {
       }
     }
 
-    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
-      drawProblemText(dc, x0, y0);
+    private function setupUiElements(dc as Gfx.Dc) {
+      _problemText = new ScrollingText({
+        :dc => dc,
+        :text => _typeName,
+        :containerWidth => _width,
+        :containerHeight => _height * 0.25,
+        :font => Gfx.FONT_XTINY,
+      });
 
-      var elemX0 = x0 + _paddingLeftRight;
-      var elemY0 = y0 + _height - _elemHeight;
-      // x0 and y0 for expositions are the center of the circle.
-      drawExpositions(dc, elemX0, elemY0);
+      var maxSize = $.min(_elemMaxWidth, _elemMaxHeight);
 
-      elemX0 += _elemWidth + _paddingBetween;
-      drawExposedHeight(dc, elemX0, elemY0);
+      _validExpositionsUi = new AvalancheUi.ValidExpositions({
+        :validExpositions => _validExpositions,
+        :dangerFillColor => _dangerFillColor,
+        :nonDangerFillColor => _nonDangerFillColor,
+        :radius => maxSize / 2,
+      });
+      _validExpositionsUiSize = _validExpositionsUi.getSize();
 
-      elemX0 += _elemWidth + _paddingBetween;
-      drawExposedHeightText(dc, elemX0, elemY0);
+      _exposedHeightUi = new AvalancheUi.ExposedHeight({
+        :exposedHeight1 => _exposedHeights[0],
+        :exposedHeight2 => _exposedHeights[1],
+        :exposedHeightFill => _exposedHeights[2],
+        :dangerFillColor => _dangerFillColor,
+        :nonDangerFillColor => _nonDangerFillColor,
+        :size => maxSize * 0.9,
+      });
+      _exposedHeightUiSize = _exposedHeightUi.getSize();
 
-      elemX0 += _elemWidth + _paddingBetween;
-      drawDangerLevel(dc, elemX0, elemY0);
+      _exposedHeightTextUi = new AvalancheUi.ExposedHeightText({
+        :dc => dc,
+        :exposedHeight1 => _exposedHeights[0],
+        :exposedHeight2 => _exposedHeights[1],
+        :exposedHeightFill => _exposedHeights[2],
+        :dangerFillColor => _dangerFillColor,
+        :maxWidth => _elemMaxWidth,
+        :maxHeight => _elemMaxHeight,
+      });
+      _exposedHeightTextUiWidth = _exposedHeightTextUi.getWidth();
+
+      var totalElementWidth =
+        _validExpositionsUiSize +
+        _exposedHeightUiSize +
+        _exposedHeightTextUiWidth +
+        _dangerLevelWidth;
+
+      _paddingBetweenElements =
+        (_width - _paddingLeftRight * 2 - totalElementWidth) / 3;
     }
 
-    private function drawProblemText(
-      dc as Gfx.Dc,
-      x0 as Numeric,
-      y0 as Numeric
-    ) {
-      if (_problemText == null) {
-        _problemText = new ScrollingText({
-          :text => _typeName,
-          :containerWidth => _width,
-          :containerHeight => _height * 0.25,
-          :font => Gfx.FONT_XTINY,
-        });
+    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
+      _problemText.draw(dc, x0, y0);
+
+      var elemX0 = x0 + _paddingLeftRight;
+      var elemY0 = y0 + _height - _elemMaxHeight;
+
+      if ($.DrawOutlines) {
+        $.drawOutline(
+          dc,
+          elemX0,
+          elemY0,
+          _width - _paddingLeftRight * 2,
+          _elemMaxHeight
+        );
       }
 
-      _problemText.draw(dc, x0, y0);
+      // x0 and y0 for expositions are the center of the circle.
+      var validExpositionsUiShiftY =
+        _elemMaxHeight / 2 - _validExpositionsUiSize / 2;
+      _validExpositionsUi.draw(dc, elemX0, elemY0 + validExpositionsUiShiftY);
+
+      elemX0 += _validExpositionsUiSize + _paddingBetweenElements;
+      var exposedHeightUiShiftY = _elemMaxHeight / 2 - _exposedHeightUiSize / 2;
+      _exposedHeightUi.draw(dc, elemX0, elemY0 + exposedHeightUiShiftY);
+
+      elemX0 += _exposedHeightUiSize + _paddingBetweenElements;
+      _exposedHeightTextUi.draw(dc, elemX0, elemY0);
+
+      elemX0 += _exposedHeightTextUiWidth + _paddingBetweenElements;
+      drawDangerLevel(dc, elemX0, elemY0);
     }
 
     private function drawDangerLevel(
@@ -137,88 +187,14 @@ module AvalancheUi {
       var color = $.colorize(_dangerLevel);
       dc.setColor(color, Gfx.COLOR_TRANSPARENT);
 
-      var minSize = $.min(_elemWidth, _elemHeight);
+      var size = $.min(_elemMaxWidth, _elemMaxHeight);
 
-      dc.fillRectangle(x0, y0 + _elemHeight / 2 - minSize / 2, 4, minSize);
-    }
-
-    private function drawExpositions(
-      dc as Gfx.Dc,
-      x0 as Numeric,
-      y0 as Numeric
-    ) {
-      if (_validExpositionsUi == null) {
-        var minSize = $.min(_elemWidth, _elemHeight);
-
-        _validExpositionsUi = new AvalancheUi.ValidExpositions({
-          :validExpositions => _validExpositions,
-          :dangerFillColor => _dangerFillColor,
-          :nonDangerFillColor => _nonDangerFillColor,
-          :radius => minSize / 2,
-        });
-      }
-
-      if ($.DrawOutlines) {
-        $.drawOutline(dc, x0, y0, _elemWidth, _elemHeight);
-      }
-
-      var shiftX = _elemWidth / 2.0;
-      var shiftY = _elemHeight / 2.0;
-      _validExpositionsUi.draw(dc, x0 + shiftX, y0 + shiftY);
-    }
-
-    private function drawExposedHeight(
-      dc as Gfx.Dc,
-      x0 as Numeric,
-      y0 as Numeric
-    ) {
-      var minSize = $.min(_elemWidth, _elemHeight);
-
-      var sizeModifier = 0.9;
-      var exposedWidth = minSize * sizeModifier;
-
-      if (_exposedHeightUi == null) {
-        _exposedHeightUi = new AvalancheUi.ExposedHeight({
-          :exposedHeight1 => _exposedHeights[0],
-          :exposedHeight2 => _exposedHeights[1],
-          :exposedHeightFill => _exposedHeights[2],
-          :dangerFillColor => _dangerFillColor,
-          :nonDangerFillColor => _nonDangerFillColor,
-          :size => exposedWidth,
-        });
-      }
-
-      if ($.DrawOutlines) {
-        $.drawOutline(dc, x0, y0, _elemWidth, _elemHeight);
-      }
-
-      var shiftX = _elemWidth / 2.0 - exposedWidth / 2.0;
-      var shiftY = _elemHeight / 2.0 - exposedWidth / 2.0;
-
-      _exposedHeightUi.draw(dc, x0 + shiftX, y0 + shiftY);
-    }
-
-    private function drawExposedHeightText(
-      dc as Gfx.Dc,
-      x0 as Numeric,
-      y0 as Numeric
-    ) {
-      if (_exposedHeightTextUi == null) {
-        _exposedHeightTextUi = new AvalancheUi.ExposedHeightText({
-          :exposedHeight1 => _exposedHeights[0],
-          :exposedHeight2 => _exposedHeights[1],
-          :exposedHeightFill => _exposedHeights[2],
-          :dangerFillColor => _dangerFillColor,
-          :width => _elemWidth,
-          :height => _elemHeight,
-        });
-      }
-
-      if ($.DrawOutlines) {
-        $.drawOutline(dc, x0, y0, _elemWidth, _elemHeight);
-      }
-
-      _exposedHeightTextUi.draw(dc, x0, y0);
+      dc.fillRectangle(
+        x0,
+        y0 + _elemMaxHeight / 2 - size / 2,
+        _dangerLevelWidth,
+        size
+      );
     }
   }
 }
