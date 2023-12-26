@@ -27,7 +27,6 @@ export const MyPage = () => {
   const isOnMinSide = location.pathname.toLowerCase() == "/minside";
 
   if (isOnMinSide && !user) {
-    console.log(user);
     return <LoginModal isOpen={true} onClose={() => navigate("/")} />;
   }
 
