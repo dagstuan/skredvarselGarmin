@@ -11,7 +11,6 @@ import {
   Button,
   Icon,
   HStack,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { Features } from "./Features";
 
@@ -22,11 +21,8 @@ import { useScrollPosition } from "../hooks/useScrollPosition";
 import { ChevronIcon } from "./Icons/ChevronIcon";
 import {
   FaApplePay,
-  FaCcMastercard,
-  FaCcVisa,
   FaCreditCard,
   FaGooglePay,
-  FaRegCreditCard,
   FaSkiing,
   FaSkiingNordic,
 } from "react-icons/fa";
@@ -41,19 +37,13 @@ export const FrontPage = () => {
   const { data: user } = useUser();
   const navigate = useNavigate();
 
-  const {
-    isOpen: isLoginOpen,
-    onOpen: onLoginOpen,
-    onClose: onLoginClose,
-  } = useDisclosure();
-
   const onBuyClick = useCallback(() => {
     if (user) {
       navigate("/minSide");
     } else {
-      onLoginOpen();
+      navigate("/subscribe");
     }
-  }, [navigate, user, onLoginOpen]);
+  }, [navigate, user]);
 
   return (
     <>
@@ -179,7 +169,7 @@ export const FrontPage = () => {
       </Flex>
       <Features />
       <MyPage />
-      <BuySubscriptionModal isOpen={isLoginOpen} onClose={onLoginClose} />
+      <BuySubscriptionModal />
     </>
   );
 };
