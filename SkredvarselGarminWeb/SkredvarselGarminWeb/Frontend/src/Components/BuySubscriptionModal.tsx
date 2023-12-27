@@ -17,24 +17,17 @@ import { VippsButton } from "./Buttons/VippsButton";
 import { FacebookButton } from "./Buttons/FacebookButton";
 import { GoogleButton } from "./Buttons/GoogleButton";
 import { VippsIcon } from "./Icons/VippsIcon";
-import {
-  FaApplePay,
-  FaCcMastercard,
-  FaCcVisa,
-  FaCreditCard,
-  FaGooglePay,
-} from "react-icons/fa";
+import { FaApplePay, FaCreditCard, FaGooglePay } from "react-icons/fa";
+import { useNavigate, useLocation } from "react-router-dom";
 
-export type BuySubscriptionModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-};
+export const BuySubscriptionModal = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
-  const { isOpen, onClose } = props;
+  const isOnSubscibePage = location.pathname.toLowerCase() == "/subscribe";
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered>
+    <Modal isOpen={isOnSubscibePage} onClose={() => navigate("/")} isCentered>
       <ModalOverlay />
       <ModalContent alignItems="center">
         <ModalHeader>Kjøp abonnement</ModalHeader>

@@ -24,17 +24,20 @@ export const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
-    path: "/",
     element: <App />,
     errorElement: <ErrorPage />,
     children: [
       {
+        path: "/",
         element: <FrontPage />,
-        index: true,
-      },
-      {
-        path: "minSide",
-        element: <FrontPage />,
+        children: [
+          {
+            path: "minSide",
+          },
+          {
+            path: "subscribe",
+          },
+        ],
       },
       {
         path: "faq",
