@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { Features } from "./Features";
 
-import bg from "../assets/bg.jpg";
+import bg from "../assets/bg.jpg?format=webp&as=source&imagetools";
 import { MyPage } from "./MyPage/MyPage";
 import { CiqStoreButton } from "./CiqStoreButton";
 import { useScrollPosition } from "../hooks/useScrollPosition";
