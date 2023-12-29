@@ -37,7 +37,13 @@ export const Nav = () => {
         >
           <Link style={{ textDecoration: "none" }} as={RouterLink} to="/">
             <Flex gap={3} alignItems={"center"}>
-              <Image h={10} src={avalancheIcon} alt="Avalanche icon" />
+              <Image
+                h={10}
+                src={avalancheIcon}
+                htmlWidth={40}
+                htmlHeight={40}
+                alt="Avalanche icon"
+              />
               <Heading
                 as="h1"
                 size={useBreakpointValue({
