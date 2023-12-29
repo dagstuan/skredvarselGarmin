@@ -16,7 +16,7 @@ import {
   Image,
 } from "@chakra-ui/react";
 
-import problemsHelpImage from "../assets/problems_help.png?format=webp&imagetools";
+import problemsHelpImage from "../assets/problems_help.png?format=webp&as=meta:width;height;src&imagetools";
 
 export const FaqPage = () => {
   return (
@@ -96,7 +96,11 @@ export const FaqPage = () => {
               flexDir={useBreakpointValue({ base: "column", sm: "row" })}
             >
               <Box flexBasis={useBreakpointValue({ base: "50%", sm: "40%" })}>
-                <Image src={problemsHelpImage} />
+                <Image
+                  src={problemsHelpImage.src}
+                  htmlWidth={problemsHelpImage.width}
+                  htmlHeight={problemsHelpImage.height}
+                />
               </Box>
               <Box flexBasis={useBreakpointValue({ base: "50%" })}>
                 <Text mb={2}>Rødt markerer området som er mest utsatt.</Text>
