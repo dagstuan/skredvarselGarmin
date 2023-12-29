@@ -6,12 +6,7 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
 import ErrorPage from "./Components/ErrorPage";
-import { FaqPage } from "./Components/FaqPage";
 import { FrontPage } from "./Components/FrontPage";
-import { PrivacyPolicy } from "./Components/PrivacyPolicy";
-import { SalesConditions } from "./Components/SalesConditions";
-import { RequireAdmin } from "./Components/Admin/RequireAdmin";
-import { AdminPage } from "./Components/Admin/AdminPage";
 
 // Remove facebook oauth redirect hash.
 if (window.location.hash === "#_=_") {
@@ -41,23 +36,19 @@ const router = createBrowserRouter([
       },
       {
         path: "faq",
-        element: <FaqPage />,
+        lazy: () => import("./Pages/FaqPage"),
       },
       {
         path: "salgsbetingelser",
-        element: <SalesConditions />,
+        lazy: () => import("./Pages/SalesConditionsPage"),
       },
       {
         path: "personvern",
-        element: <PrivacyPolicy />,
+        lazy: () => import("./Pages/PrivacyPolicyPage"),
       },
       {
         path: "admin",
-        element: (
-          <RequireAdmin>
-            <AdminPage />
-          </RequireAdmin>
-        ),
+        lazy: () => import("./Pages/AdminPage"),
       },
     ],
   },
