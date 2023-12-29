@@ -10,17 +10,18 @@ import {
 import { FacebookButton } from "./Buttons/FacebookButton";
 import { GoogleButton } from "./Buttons/GoogleButton";
 import { VippsButton } from "./Buttons/VippsButton";
+import { useLocation } from "react-router-dom";
+import { useNavigateOnClose } from "../hooks/useNavigateOnClose";
 
-type LoginModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-};
+export const LoginModal = () => {
+  const location = useLocation();
 
-export const LoginModal = (props: LoginModalProps) => {
-  const { isOpen, onClose } = props;
+  const isOnLoginPage = location.pathname.toLowerCase() == "/login";
+
+  const { isClosing, onClose } = useNavigateOnClose("/");
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered>
+    <Modal isOpen={isOnLoginPage && !isClosing} onClose={onClose} isCentered>
       <ModalOverlay />
       <ModalContent alignItems="center">
         <ModalHeader>Logg inn</ModalHeader>

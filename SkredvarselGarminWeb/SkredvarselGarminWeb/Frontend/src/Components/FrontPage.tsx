@@ -15,7 +15,6 @@ import {
 import { Features } from "./Features";
 
 import bg from "../assets/bg.jpg?format=webp&as=source&imagetools";
-import { MyPage } from "./MyPage/MyPage";
 import { CiqStoreButton } from "./CiqStoreButton";
 import { useScrollPosition } from "../hooks/useScrollPosition";
 import { ChevronIcon } from "./Icons/ChevronIcon";
@@ -27,10 +26,9 @@ import {
   FaSkiingNordic,
 } from "react-icons/fa";
 import { VippsIcon } from "./Icons/VippsIcon";
-import { BuySubscriptionModal } from "./BuySubscriptionModal";
 import { useUser } from "../hooks/useUser";
 import { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
 export const FrontPage = () => {
   const scrollPosition = useScrollPosition();
@@ -168,8 +166,7 @@ export const FrontPage = () => {
         </Box>
       </Flex>
       <Features />
-      <MyPage />
-      <BuySubscriptionModal />
+      <Outlet />
     </>
   );
 };

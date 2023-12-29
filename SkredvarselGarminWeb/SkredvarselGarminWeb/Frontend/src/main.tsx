@@ -6,7 +6,6 @@ import { ReactQueryDevtools } from "react-query/devtools";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import App from "./App";
 import ErrorPage from "./Components/ErrorPage";
-import { FrontPage } from "./Components/FrontPage";
 
 // Remove facebook oauth redirect hash.
 if (window.location.hash === "#_=_") {
@@ -24,13 +23,19 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <FrontPage />,
+        lazy: () => import("./Pages/FrontPage"),
         children: [
           {
             path: "minSide",
+            lazy: () => import("./Pages/MyPage"),
           },
           {
             path: "subscribe",
+            lazy: () => import("./Pages/BuySubscriptionModalPage"),
+          },
+          {
+            path: "login",
+            lazy: () => import("./Pages/LoginModalPage"),
           },
         ],
       },

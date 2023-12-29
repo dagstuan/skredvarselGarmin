@@ -18,16 +18,18 @@ import { FacebookButton } from "./Buttons/FacebookButton";
 import { GoogleButton } from "./Buttons/GoogleButton";
 import { VippsIcon } from "./Icons/VippsIcon";
 import { FaApplePay, FaCreditCard, FaGooglePay } from "react-icons/fa";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { useNavigateOnClose } from "../hooks/useNavigateOnClose";
 
 export const BuySubscriptionModal = () => {
-  const navigate = useNavigate();
   const location = useLocation();
 
   const isOnSubscibePage = location.pathname.toLowerCase() == "/subscribe";
 
+  const { isClosing, onClose } = useNavigateOnClose("/");
+
   return (
-    <Modal isOpen={isOnSubscibePage} onClose={() => navigate("/")} isCentered>
+    <Modal isOpen={isOnSubscibePage && !isClosing} onClose={onClose} isCentered>
       <ModalOverlay />
       <ModalContent alignItems="center">
         <ModalHeader>Kjøp abonnement</ModalHeader>
