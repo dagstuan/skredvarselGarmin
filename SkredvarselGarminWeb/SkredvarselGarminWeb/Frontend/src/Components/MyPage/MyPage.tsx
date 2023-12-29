@@ -16,22 +16,24 @@ import { PersonalInfo } from "./PersonalInfo";
 import { Subscription } from "./Subscription";
 import { Watches } from "./Watches";
 import { Link as RouterLink } from "react-router-dom";
-import { LoginModal } from "../LoginModal";
+import { useNavigateOnClose } from "../../hooks/useNavigateOnClose";
 
 export const MyPage = () => {
   const { data: user } = useUser();
 
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const { isClosing, onClose } = useNavigateOnClose("/");
 
   const isOnMinSide = location.pathname.toLowerCase() == "/minside";
 
   if (isOnMinSide && !user) {
-    return <LoginModal isOpen={true} onClose={() => navigate("/")} />;
+    navigate("/login");
   }
 
   return (
-    <Drawer isOpen={isOnMinSide} onClose={() => navigate("/")} size="md">
+    <Drawer isOpen={isOnMinSide && !isClosing} onClose={onClose} size="md">
       <DrawerOverlay />
       <DrawerContent>
         <DrawerCloseButton />

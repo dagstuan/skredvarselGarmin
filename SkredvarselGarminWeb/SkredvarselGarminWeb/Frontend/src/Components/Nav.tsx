@@ -8,22 +8,15 @@ import {
   Spinner,
   useBreakpointValue,
   HStack,
-  useDisclosure,
 } from "@chakra-ui/react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 import avalancheIcon from "../assets/avalanche_icon.svg";
 import { useUser } from "../hooks/useUser";
-import { LoginModal } from "./LoginModal";
 
 export const Nav = () => {
   const { data: user, isLoading } = useUser();
-
-  const {
-    isOpen: isLoginOpen,
-    onOpen: onLoginOpen,
-    onClose: onLoginClose,
-  } = useDisclosure();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -66,7 +59,7 @@ export const Nav = () => {
             ) : !user ? (
               <>
                 <Button
-                  onClick={onLoginOpen}
+                  onClick={() => navigate("/login")}
                   color={"white"}
                   colorScheme="blue"
                   borderRadius={4}
@@ -101,7 +94,6 @@ export const Nav = () => {
           </Box>
         </Flex>
       </Flex>
-      <LoginModal isOpen={isLoginOpen} onClose={onLoginClose} />
     </>
   );
 };
