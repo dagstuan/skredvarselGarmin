@@ -13,12 +13,10 @@ import {
   useBreakpointValue,
   Text,
   UnorderedList,
-  Wrap,
-  WrapItem,
   Image,
 } from "@chakra-ui/react";
 
-import problemsHelpImage from "../assets/problems_help.png";
+import problemsHelpImage from "../assets/problems_help.png?format=webp&imagetools";
 
 export const FaqPage = () => {
   return (

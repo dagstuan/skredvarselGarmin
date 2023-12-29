@@ -1,19 +1,11 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
+import { imagetools } from "vite-imagetools";
 import https from "https";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    ViteImageOptimizer({
-      jpeg: {
-        // https://sharp.pixelplumbing.com/api-output#jpeg
-        quality: 80,
-      },
-    }),
-  ],
+  plugins: [react(), imagetools()],
   server: {
     proxy: {
       "^/(vipps|google|facebook|logout|stripe).*": {

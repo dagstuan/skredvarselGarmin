@@ -1,6 +1,6 @@
 import { Button, ButtonProps, Flex, Text } from "@chakra-ui/react";
 
-import ciqLogo from "../assets/ciq_logo.png";
+import ciqLogo from "../assets/ciq_logo.png?format=webp&imagetools";
 
 type CiqStoreButtonProps = Pick<ButtonProps, "size">;
 

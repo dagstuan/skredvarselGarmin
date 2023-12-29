@@ -9,11 +9,11 @@ import {
 } from "@chakra-ui/react";
 import { Feature } from "./Feature";
 
-import glanceImage from "../assets/glance.png";
-import timelinesImage from "../assets/timelines.png";
-import mainTextImage from "../assets/maintext.png";
-import problemsImage from "../assets/problems.png";
-import offlineImage from "../assets/offline.jpg";
+import glanceImage from "../assets/glance.png?format=webp&quality=60&imagetools";
+import timelinesImage from "../assets/timelines.png?format=webp&quality=60&imagetools";
+import mainTextImage from "../assets/maintext.png?format=webp&quality=60&imagetools";
+import problemsImage from "../assets/problems.png?format=webp&quality=60&imagetools";
+import offlineImage from "../assets/offline.jpg?w=800&type=webp&imagetools";
 
 export const Features = () => (
   <Flex
