@@ -11,11 +11,19 @@ import {
 
 type FeatureProps = {
   imgUrl: string;
+  imgWidth: number;
+  imgHeight: number;
   heading: string;
   text: string;
 };
 
-export const Feature = ({ imgUrl, heading, text }: FeatureProps) => {
+export const Feature = ({
+  imgUrl,
+  imgWidth,
+  imgHeight,
+  heading,
+  text,
+}: FeatureProps) => {
   return (
     <Center py={6}>
       <Box
@@ -27,7 +35,14 @@ export const Feature = ({ imgUrl, heading, text }: FeatureProps) => {
         overflow={"hidden"}
       >
         <Box bg={"gray.100"} mt={-6} mx={-6} mb={6} pos={"relative"}>
-          <Image w={"full"} objectFit={"cover"} src={imgUrl} />
+          <Image
+            w={"full"}
+            objectFit={"cover"}
+            htmlWidth={imgWidth}
+            htmlHeight={imgHeight}
+            src={imgUrl}
+            alt={text}
+          />
         </Box>
         <Stack>
           <Heading
@@ -37,7 +52,7 @@ export const Feature = ({ imgUrl, heading, text }: FeatureProps) => {
           >
             {heading}
           </Heading>
-          <Text color={"gray.500"}>{text}</Text>
+          <Text color={"gray.600"}>{text}</Text>
         </Stack>
       </Box>
     </Center>

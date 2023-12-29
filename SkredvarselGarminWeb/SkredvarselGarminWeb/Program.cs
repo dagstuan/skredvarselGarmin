@@ -125,7 +125,16 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseStaticFiles();
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        OnPrepareResponse = ctx =>
+        {
+            if (!ctx.File.Name.EndsWith(".html"))
+            {
+                ctx.Context.Response.Headers.Append("Cache-Control", $"public, max-age=31536000");
+            }
+        },
+    });
     app.MapFallbackToFile("index.html");
 }
 

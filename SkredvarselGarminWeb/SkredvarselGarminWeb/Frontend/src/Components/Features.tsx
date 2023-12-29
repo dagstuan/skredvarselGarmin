@@ -9,11 +9,11 @@ import {
 } from "@chakra-ui/react";
 import { Feature } from "./Feature";
 
-import glanceImage from "../assets/glance.png?format=webp&quality=60&imagetools";
-import timelinesImage from "../assets/timelines.png?format=webp&quality=60&imagetools";
-import mainTextImage from "../assets/maintext.png?format=webp&quality=60&imagetools";
-import problemsImage from "../assets/problems.png?format=webp&quality=60&imagetools";
-import offlineImage from "../assets/offline.jpg?w=800&type=webp&imagetools";
+import glanceImage from "../assets/glance.png?format=webp&quality=60&as=meta:width;height;src&imagetools";
+import timelinesImage from "../assets/timelines.png?format=webp&quality=60&as=meta:width;height;src&imagetools";
+import mainTextImage from "../assets/maintext.png?format=webp&quality=60&as=meta:width;height;src&imagetools";
+import problemsImage from "../assets/problems.png?format=webp&quality=60&as=meta:width;height;src&imagetools";
+import offlineImage from "../assets/offline.jpg?w=800&type=webp&as=meta:width;height;src&imagetools";
 
 export const Features = () => (
   <Flex
@@ -33,22 +33,30 @@ export const Features = () => (
       flexWrap="wrap"
     >
       <Feature
-        imgUrl={glanceImage}
+        imgUrl={glanceImage.src}
+        imgWidth={glanceImage.width}
+        imgHeight={glanceImage.height}
         heading="Glance"
         text="Se tidslinje med faregrader for en enkel region sammen med andre widgets."
       />
       <Feature
-        imgUrl={timelinesImage}
+        imgUrl={timelinesImage.src}
+        imgWidth={timelinesImage.width}
+        imgHeight={timelinesImage.height}
         heading="Tidslinjer"
         text="Tidslinjer med farenivåer over tid for dine valgte regioner."
       />
       <Feature
-        imgUrl={mainTextImage}
+        imgUrl={mainTextImage.src}
+        imgWidth={mainTextImage.width}
+        imgHeight={mainTextImage.height}
         heading="Tekstvarsel"
         text="Tekstvarsel med nærmere informasjon om farenivået på aktuell dag."
       />
       <Feature
-        imgUrl={problemsImage}
+        imgUrl={problemsImage.src}
+        imgWidth={problemsImage.width}
+        imgHeight={problemsImage.height}
         heading="Skredproblemer"
         text="Visning av alle skredproblemer meldt på en gitt dag."
       />
@@ -65,7 +73,9 @@ export const Features = () => (
       <Image
         objectFit="cover"
         maxW={{ base: "100%", sm: "200px" }}
-        src={offlineImage}
+        src={offlineImage.src}
+        htmlWidth={offlineImage.width}
+        htmlHeight={offlineImage.height}
         alt="Skredvarsel for Garmin"
       />
 

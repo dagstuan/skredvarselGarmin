@@ -1,6 +1,6 @@
 import { Button, ButtonProps, Flex, Text } from "@chakra-ui/react";
 
-import ciqLogo from "../assets/ciq_logo.png?format=webp&imagetools";
+import ciqLogo from "../assets/ciq_logo.png?format=webp&as=meta:width;height;src&imagetools";
 
 type CiqStoreButtonProps = Pick<ButtonProps, "size">;
 
@@ -19,7 +19,13 @@ export const CiqStoreButton = (props: CiqStoreButtonProps) => {
       _hover={{ bg: "#0a1f2e" }}
     >
       <Flex gap={2} h="inherit" p={1} alignItems="center">
-        <img style={{ width: "auto", height: "100%" }} src={ciqLogo} />
+        <img
+          style={{ width: "auto", height: "100%" }}
+          src={ciqLogo.src}
+          width={ciqLogo.width}
+          height={ciqLogo.height}
+          alt=""
+        />
         <Flex direction="column">
           <Text fontSize="xs">Last ned på</Text>
           <Text>Connect IQ Store</Text>
