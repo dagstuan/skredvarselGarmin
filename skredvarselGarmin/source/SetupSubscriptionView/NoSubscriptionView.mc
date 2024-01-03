@@ -17,7 +17,8 @@ class NoSubscriptionView extends Ui.View {
     startTimer();
     _text = text;
 
-    Comm.openWebPage("https://skredvarsel.app/minSide", null, null);
+    Comm.openWebPage("https://skredvarsel.app/subscribe", null, null);
+    // Comm.openWebPage("http://localhost:5173/subscribe", null, null);
   }
 
   function onLayout(dc as Gfx.Dc) {
