@@ -42,7 +42,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
 
             if (existingAgreementsForUser.Any(x => x.Status == AgreementStatus.ACTIVE))
             {
-                return Results.Redirect($"{baseUrl}/minSide");
+                return Results.Redirect($"{baseUrl}/account");
             }
 
             var pendingAgreementForUser = existingAgreementsForUser.FirstOrDefault(x => x.Status == AgreementStatus.PENDING);
@@ -83,7 +83,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                     Description = "Skredvarsel for Garmin"
                 },
                 ProductName = "Skredvarsel for Garmin",
-                MerchantAgreementUrl = $"{baseUrl}/minSide",
+                MerchantAgreementUrl = $"{baseUrl}/account",
                 MerchantRedirectUrl = $"{baseUrl}/vipps-subscribe-callback"
             };
 
@@ -162,7 +162,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
 
             dbContext.SaveChanges();
 
-            return Results.Redirect("/minSide");
+            return Results.Redirect("/account");
         }).RequireAuthorization();
 
         app.MapDelete("/api/vippsAgreement", async (

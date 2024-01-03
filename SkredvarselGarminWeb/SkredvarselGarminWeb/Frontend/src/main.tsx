@@ -26,8 +26,8 @@ const router = createBrowserRouter([
         lazy: () => import("./Pages/FrontPage"),
         children: [
           {
-            path: "minSide",
-            lazy: () => import("./Pages/MyPage"),
+            path: "account",
+            lazy: () => import("./Pages/AccountPage"),
           },
           {
             path: "subscribe",
@@ -44,11 +44,11 @@ const router = createBrowserRouter([
         lazy: () => import("./Pages/FaqPage"),
       },
       {
-        path: "salgsbetingelser",
+        path: "salesconditions",
         lazy: () => import("./Pages/SalesConditionsPage"),
       },
       {
-        path: "personvern",
+        path: "privacy",
         lazy: () => import("./Pages/PrivacyPolicyPage"),
       },
       {

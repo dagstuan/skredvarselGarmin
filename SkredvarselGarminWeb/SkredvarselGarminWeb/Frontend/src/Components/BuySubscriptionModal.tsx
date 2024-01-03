@@ -18,13 +18,20 @@ import { FacebookButton } from "./Buttons/FacebookButton";
 import { GoogleButton } from "./Buttons/GoogleButton";
 import { VippsIcon } from "./Icons/VippsIcon";
 import { FaApplePay, FaCreditCard, FaGooglePay } from "react-icons/fa";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useNavigateOnClose } from "../hooks/useNavigateOnClose";
+import { useUser } from "../hooks/useUser";
 
 export const BuySubscriptionModal = () => {
+  const { data: user, isLoading: isLoadingUser } = useUser();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isOnSubscibePage = location.pathname.toLowerCase() == "/subscribe";
+
+  if (isOnSubscibePage && user != null && !isLoadingUser) {
+    navigate("/account");
+  }
 
   const { isClosing, onClose } = useNavigateOnClose("/");
 
@@ -58,8 +65,8 @@ export const BuySubscriptionModal = () => {
                   Eller
                 </AbsoluteCenter>
               </Box>
-              <GoogleButton link="/google-login?returnUrl=/minSide" />
-              <FacebookButton link="/facebook-login?returnUrl=/minSide" />
+              <GoogleButton link="/google-login?returnUrl=/account" />
+              <FacebookButton link="/facebook-login?returnUrl=/account" />
             </VStack>
           </VStack>
         </ModalBody>

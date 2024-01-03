@@ -66,7 +66,7 @@ public static class TestEndpointsRouteBuilderExtensions
                         Description = "Første uke"
                     },
                     ProductName = "Skredvarsel for Garmin",
-                    MerchantAgreementUrl = $"{baseUrl}/minSide/",
+                    MerchantAgreementUrl = $"{baseUrl}/account",
                     MerchantRedirectUrl = $"{baseUrl}/"
                 };
 

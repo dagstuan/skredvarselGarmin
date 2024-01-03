@@ -71,7 +71,7 @@ export const FaqPage = () => {
               </ListItem>
               <ListItem>
                 Gå til{" "}
-                <Link color="blue.600" href="https://skredvarsel.app/minSide">
+                <Link color="blue.600" href="https://skredvarsel.app/account">
                   Min side
                 </Link>{" "}
                 og skriv inn koden som står på klokka.

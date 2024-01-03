@@ -29,11 +29,11 @@ export const LoginModal = () => {
         <ModalBody w="100%" pb={9} maxW="sm">
           <VStack gap={5} alignItems="stretch">
             <VippsButton
-              link="/vipps-login?returnUrl=/minSide"
+              link="/vipps-login?returnUrl=/account"
               text="Fortsett med"
             />
-            <GoogleButton link="/google-login?returnUrl=/minSide" />
-            <FacebookButton link="/facebook-login?returnUrl=/minSide" />
+            <GoogleButton link="/google-login?returnUrl=/account" />
+            <FacebookButton link="/facebook-login?returnUrl=/account" />
           </VStack>
         </ModalBody>
       </ModalContent>

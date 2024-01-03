@@ -82,7 +82,7 @@ export const Nav = () => {
                 )}
                 <Button
                   as={RouterLink}
-                  to="/minSide"
+                  to="/account"
                   isLoading={isLoading}
                   colorScheme="blue"
                   borderRadius={4}

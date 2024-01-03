@@ -18,7 +18,7 @@ import { Watches } from "./Watches";
 import { Link as RouterLink } from "react-router-dom";
 import { useNavigateOnClose } from "../../hooks/useNavigateOnClose";
 
-export const MyPage = () => {
+export const AccountPage = () => {
   const { data: user } = useUser();
 
   const location = useLocation();
@@ -26,14 +26,14 @@ export const MyPage = () => {
 
   const { isClosing, onClose } = useNavigateOnClose("/");
 
-  const isOnMinSide = location.pathname.toLowerCase() == "/minside";
+  const isOnAccountPage = location.pathname.toLowerCase() == "/account";
 
-  if (isOnMinSide && !user) {
+  if (isOnAccountPage && !user) {
     navigate("/login");
   }
 
   return (
-    <Drawer isOpen={isOnMinSide && !isClosing} onClose={onClose} size="md">
+    <Drawer isOpen={isOnAccountPage && !isClosing} onClose={onClose} size="md">
       <DrawerOverlay />
       <DrawerContent>
         <DrawerCloseButton />

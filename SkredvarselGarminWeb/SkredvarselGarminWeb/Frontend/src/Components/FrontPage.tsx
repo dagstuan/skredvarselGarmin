@@ -37,7 +37,7 @@ export const FrontPage = () => {
 
   const onBuyClick = useCallback(() => {
     if (user) {
-      navigate("/minSide");
+      navigate("/account");
     } else {
       navigate("/subscribe");
     }

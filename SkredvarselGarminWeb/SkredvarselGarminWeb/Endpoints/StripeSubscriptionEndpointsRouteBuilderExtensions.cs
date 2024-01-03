@@ -38,7 +38,7 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
             var options = new SessionCreateOptions
             {
                 SuccessUrl = $"{baseUrl}/stripe-subscribe-callback?session_id={{CHECKOUT_SESSION_ID}}",
-                CancelUrl = $"{baseUrl}/minSide",
+                CancelUrl = $"{baseUrl}/account",
                 Mode = "subscription",
                 CustomerEmail = user.StripeCustomerId.IsNullOrEmpty() ? user.Email : null,
                 Customer = user.StripeCustomerId,
@@ -73,7 +73,7 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
 
             stripeService.StoreNewSubscriptionIfNotExists(session);
 
-            return Results.Redirect("/minSide");
+            return Results.Redirect("/account");
         }).RequireAuthorization();
 
         app.MapGet("/stripe-customer-portal", async (
@@ -87,7 +87,7 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
             var options = new Stripe.BillingPortal.SessionCreateOptions
             {
                 Customer = user.StripeCustomerId,
-                ReturnUrl = $"{baseUrl}/minSide",
+                ReturnUrl = $"{baseUrl}/account",
             };
 
             var service = new Stripe.BillingPortal.SessionService(stripeClient);
