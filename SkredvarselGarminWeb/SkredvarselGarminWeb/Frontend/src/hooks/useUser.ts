@@ -10,7 +10,7 @@ const config = {
 
 const fetchUser = async () => {
   const res = await api.get("/api/user", config);
-  return res.data as User;
+  return res.data ? (res.data as User) : null;
 };
 
 export const useUser = () =>

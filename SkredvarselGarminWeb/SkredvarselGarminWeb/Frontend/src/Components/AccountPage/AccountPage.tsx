@@ -10,30 +10,30 @@ import {
   Text,
   Link,
 } from "@chakra-ui/react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
 import { PersonalInfo } from "./PersonalInfo";
 import { Subscription } from "./Subscription";
 import { Watches } from "./Watches";
 import { Link as RouterLink } from "react-router-dom";
 import { useNavigateOnClose } from "../../hooks/useNavigateOnClose";
+import { useEffect } from "react";
 
 export const AccountPage = () => {
-  const { data: user } = useUser();
+  const { data: user, isLoading: isLoadingUser } = useUser();
 
-  const location = useLocation();
   const navigate = useNavigate();
 
   const { isClosing, onClose } = useNavigateOnClose("/");
 
-  const isOnAccountPage = location.pathname.toLowerCase() == "/account";
-
-  if (isOnAccountPage && !user) {
-    navigate("/login");
-  }
+  useEffect(() => {
+    if (!user && !isLoadingUser) {
+      navigate("/login");
+    }
+  }, [user, isLoadingUser]);
 
   return (
-    <Drawer isOpen={isOnAccountPage && !isClosing} onClose={onClose} size="md">
+    <Drawer isOpen={!!user && !isClosing} onClose={onClose} size="md">
       <DrawerOverlay />
       <DrawerContent>
         <DrawerCloseButton />

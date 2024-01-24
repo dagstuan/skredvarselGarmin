@@ -4,8 +4,10 @@ using Toybox.Communications;
 using Toybox.Time;
 using Toybox.Application.Storage;
 
-const BaseApiUrl = "https://skredvarsel.app/api";
-// const BaseApiUrl = "https://localhost:8080/api";
+//const FrontendBaseUrl = "http://localhost:5173";
+//const ApiBaseUrl = "https://localhost:8080/api";
+const FrontendBaseUrl = "https://skredvarsel.app";
+const ApiBaseUrl = "https://skredvarsel.app/api";
 
 typedef WebRequestCallbackData as Null or Dictionary or String;
 typedef WebRequestCallback as (Method
@@ -55,7 +57,7 @@ class WebRequestDelegate {
     $.log(Lang.format("Fetching: $1$", [_path]));
 
     Communications.makeWebRequest(
-      $.BaseApiUrl + _path,
+      $.ApiBaseUrl + _path,
       null,
       {
         :method => Communications.HTTP_REQUEST_METHOD_GET,
@@ -82,7 +84,7 @@ class WebRequestDelegate {
     } else if (responseCode == 401) {
       $.log("Api responded with 401. No subscription for user.");
 
-      $.setHasSubscription(false);
+      $.setHasSubscriptionFalseAndSwitchToSetupSubscriptionView();
     } else {
       $.log(Lang.format("Failed request. Response code: $1$", [responseCode]));
     }

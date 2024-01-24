@@ -34,6 +34,10 @@ const router = createBrowserRouter([
             lazy: () => import("./Pages/BuySubscriptionModalPage"),
           },
           {
+            path: "addwatch",
+            lazy: () => import("./Pages/AddWatchModalPage"),
+          },
+          {
             path: "login",
             lazy: () => import("./Pages/LoginModalPage"),
           },

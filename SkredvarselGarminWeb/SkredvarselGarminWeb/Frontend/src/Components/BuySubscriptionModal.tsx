@@ -18,25 +18,19 @@ import { FacebookButton } from "./Buttons/FacebookButton";
 import { GoogleButton } from "./Buttons/GoogleButton";
 import { VippsIcon } from "./Icons/VippsIcon";
 import { FaApplePay, FaCreditCard, FaGooglePay } from "react-icons/fa";
-import { useLocation, useNavigate } from "react-router-dom";
 import { useNavigateOnClose } from "../hooks/useNavigateOnClose";
 import { useUser } from "../hooks/useUser";
+import { useNavigateToAccountIfLoggedIn } from "../hooks/useNavigateToAccountIfLoggedIn";
 
 export const BuySubscriptionModal = () => {
   const { data: user, isLoading: isLoadingUser } = useUser();
-  const location = useLocation();
-  const navigate = useNavigate();
 
-  const isOnSubscibePage = location.pathname.toLowerCase() == "/subscribe";
-
-  if (isOnSubscibePage && user != null && !isLoadingUser) {
-    navigate("/account");
-  }
+  useNavigateToAccountIfLoggedIn(user, isLoadingUser);
 
   const { isClosing, onClose } = useNavigateOnClose("/");
 
   return (
-    <Modal isOpen={isOnSubscibePage && !isClosing} onClose={onClose} isCentered>
+    <Modal isOpen={!isLoadingUser && !isClosing} onClose={onClose} isCentered>
       <ModalOverlay />
       <ModalContent alignItems="center">
         <ModalHeader>Kjøp abonnement</ModalHeader>

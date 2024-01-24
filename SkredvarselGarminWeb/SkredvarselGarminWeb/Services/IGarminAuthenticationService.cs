@@ -1,6 +1,9 @@
+using SkredvarselGarminWeb.Entities;
+
 namespace SkredvarselGarminWeb.Services;
 
 public interface IGarminAuthenticationService
 {
-    bool DoesWatchHaveActiveAgreement(string watchId);
+    User? GetUserForWatchOrNull(string watchId);
+    bool DoesWatchHaveActiveSubscription(string watchId);
 }

@@ -5,25 +5,32 @@ using Toybox.WatchUi as Ui;
 using Toybox.Timer;
 using Toybox.Communications as Comm;
 
-class NoSubscriptionView extends Ui.View {
+class AddWatchView extends Ui.View {
   private var _textArea as Ui.TextArea?;
-  private var _checkSubscriptionTimer as Timer.Timer?;
-  private var _text as String;
+  private var _checkAddWatchTimer as Timer.Timer?;
+  private var _addWatchKey as String;
   private var _numRetries as Number = 0;
   private var _maxRetries = 120;
 
-  function initialize(text as String) {
+  function initialize(addWatchKey as String) {
     View.initialize();
     startTimer();
-    _text = text;
+    _addWatchKey = addWatchKey;
 
-    Comm.openWebPage("https://skredvarsel.app/subscribe", null, null);
-    // Comm.openWebPage("http://localhost:5173/subscribe", null, null);
+    Comm.openWebPage($.FrontendBaseUrl + "/addwatch", null, null);
   }
 
   function onLayout(dc as Gfx.Dc) {
+    var text = Lang.format("$1$\n\n$2$", [
+      $.getOrLoadResourceString(
+        "Logg inn på skredvarsel.app på mobilen, og legg til klokken med koden:",
+        :NewWatch
+      ),
+      _addWatchKey,
+    ]);
+
     _textArea = new Ui.TextArea({
-      :text => _text,
+      :text => text,
       :color => Gfx.COLOR_WHITE,
       :font => [Gfx.FONT_MEDIUM, Gfx.FONT_SMALL, Gfx.FONT_XTINY],
       :locX => Ui.LAYOUT_HALIGN_CENTER,
@@ -43,28 +50,24 @@ class NoSubscriptionView extends Ui.View {
   }
 
   function onHide() {
-    if (_checkSubscriptionTimer != null) {
-      _checkSubscriptionTimer.stop();
+    if (_checkAddWatchTimer != null) {
+      _checkAddWatchTimer.stop();
     }
 
-    _checkSubscriptionTimer = null;
+    _checkAddWatchTimer = null;
   }
 
   function startTimer() {
-    if (_checkSubscriptionTimer == null) {
-      _checkSubscriptionTimer = new Timer.Timer();
+    if (_checkAddWatchTimer == null) {
+      _checkAddWatchTimer = new Timer.Timer();
     }
 
-    _checkSubscriptionTimer.start(
-      method(:onTimerTrigged),
-      5000 /* ms */,
-      false
-    );
+    _checkAddWatchTimer.start(method(:onTimerTrigged), 5000 /* ms */, false);
   }
 
   function onTimerTrigged() as Void {
     Comm.makeWebRequest(
-      $.BaseApiUrl + "/watch/checkSubscription",
+      $.ApiBaseUrl + "/watch/checkAddWatch",
       null,
       {
         :method => Comm.HTTP_REQUEST_METHOD_GET,
@@ -74,31 +77,27 @@ class NoSubscriptionView extends Ui.View {
           ]),
         },
       },
-      method(:onCheckSubscriptionResponse)
+      method(:onCheckAddWatchResponse)
     );
   }
 
-  function onCheckSubscriptionResponse(
+  function onCheckAddWatchResponse(
     responseCode as Number,
     data as WebRequestCallbackData
   ) as Void {
     if (responseCode == 200) {
-      $.setHasSubscription(true);
+      var response = data as SetupSubscriptionResponse;
+      var status = response["status"];
 
-      $.switchToInitialView(Ui.SLIDE_BLINK);
+      if (status.equals("ACTIVE_SUBSCRIPTION")) {
+        $.setHasSubscriptionAndSwitchToInitialView();
+      } else {
+        $.switchToInactiveSubscriptionView();
+      }
     } else if (responseCode == 401) {
       _numRetries += 1;
       if (_numRetries >= _maxRetries) {
-        Ui.switchToView(
-          new TextAreaView(
-            $.getOrLoadResourceString(
-              "Fikk ikke til å sette opp abonnement. Avslutt appen og prøv på nytt.",
-              :FailedToSetupSubscription
-            )
-          ),
-          new TextAreaViewDelegate(),
-          Ui.SLIDE_BLINK
-        );
+        $.switchedToFailedSubscriptionSetupView();
       } else {
         startTimer();
       }

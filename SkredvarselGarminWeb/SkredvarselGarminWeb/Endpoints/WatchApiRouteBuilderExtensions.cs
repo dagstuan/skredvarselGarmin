@@ -1,9 +1,13 @@
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using SkredvarselGarminWeb.Configuration;
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Endpoints.Mappers;
 using SkredvarselGarminWeb.Endpoints.Models;
 using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Helpers;
+using SkredvarselGarminWeb.Services;
 using WatchEntityModel = SkredvarselGarminWeb.Entities.Watch;
 
 namespace SkredvarselGarminWeb.Endpoints;
@@ -22,7 +26,7 @@ public static class WatchApiRouteBuilderExtensions
 
             if (existingWatch != null)
             {
-                var doesUserHaveActiveAgreement = dbContext.DoesUserHaveActiveAgreement(existingWatch.UserId);
+                var doesUserHaveActiveAgreement = dbContext.DoesUserHaveActiveSubscription(existingWatch.UserId);
 
                 return Results.Ok(new SetupSubscriptionResponse
                 {
@@ -61,6 +65,39 @@ public static class WatchApiRouteBuilderExtensions
         });
 
         app.MapGet("/api/watch/checkSubscription", () => Results.Ok()).RequireAuthorization("Garmin");
+
+        app.MapGet("/api/watch/checkAddWatch", (
+            [FromHeader(Name = "Authorization")] string authorizationHeader,
+            IGarminAuthenticationService garminAuthenticationService) =>
+        {
+            if (authorizationHeader.IsNullOrEmpty())
+            {
+                return Results.Unauthorized();
+            }
+
+            var tokenMatch = GarminAuthenticationStatics.GarminAuthenticationHeader().Match(authorizationHeader);
+            if (!tokenMatch.Success)
+            {
+                return Results.Unauthorized();
+            }
+
+            var watchId = tokenMatch.Groups["token"].Value;
+
+            var user = garminAuthenticationService.GetUserForWatchOrNull(watchId);
+            if (user == null)
+            {
+                return Results.Unauthorized();
+            }
+
+            var activeAgreement = garminAuthenticationService.DoesWatchHaveActiveSubscription(watchId);
+
+            return Results.Ok(new CheckAddWatchResponse
+            {
+                Status = activeAgreement == true
+                    ? CheckAddWatchStatus.ACTIVE_SUBSCRIPTION
+                    : CheckAddWatchStatus.INACTIVE_SUBSCRIPTION
+            });
+        });
 
         app.MapGet("/api/watches", (HttpContext ctx, SkredvarselDbContext dbContext) =>
         {

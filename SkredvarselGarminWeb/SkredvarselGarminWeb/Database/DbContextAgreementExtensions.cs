@@ -11,7 +11,7 @@ public static class DbContextAgreementExtensions
     public static List<Agreement> GetPendingAgreements(this SkredvarselDbContext dbContext) =>
         [.. dbContext.Agreements.Where(a => a.Status == AgreementStatus.PENDING)];
 
-    public static bool DoesUserHaveActiveAgreement(this SkredvarselDbContext dbContext, string userId)
+    public static bool DoesUserHaveActiveSubscription(this SkredvarselDbContext dbContext, string userId)
     {
         var activeOrUnsubbedVippsAgreements = dbContext.Agreements
             .Where(a => a.UserId == userId)

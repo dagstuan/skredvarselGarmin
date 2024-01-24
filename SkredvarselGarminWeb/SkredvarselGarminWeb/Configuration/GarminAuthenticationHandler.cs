@@ -9,7 +9,13 @@ using SkredvarselGarminWeb.Services;
 
 namespace SkredvarselGarminWeb.Configuration;
 
-public partial class GarminAuthenticationHandler : AuthenticationHandler<GarminAuthenticationSchemeOptions>
+public static partial class GarminAuthenticationStatics
+{
+    [GeneratedRegex("Garmin (?<token>.*)")]
+    public static partial Regex GarminAuthenticationHeader();
+}
+
+public class GarminAuthenticationHandler : AuthenticationHandler<GarminAuthenticationSchemeOptions>
 {
     public GarminAuthenticationHandler(
         IOptionsMonitor<GarminAuthenticationSchemeOptions> options,
@@ -26,14 +32,14 @@ public partial class GarminAuthenticationHandler : AuthenticationHandler<GarminA
         }
 
         var header = value.ToString();
-        var tokenMatch = GarminAuthenticationHeader().Match(header);
+        var tokenMatch = GarminAuthenticationStatics.GarminAuthenticationHeader().Match(header);
 
         if (tokenMatch.Success)
         {
             var watchId = tokenMatch.Groups["token"].Value;
 
             var garminAuthenticationService = Request.HttpContext.RequestServices.GetRequiredService<IGarminAuthenticationService>();
-            var activeAgreement = garminAuthenticationService.DoesWatchHaveActiveAgreement(watchId);
+            var activeAgreement = garminAuthenticationService.DoesWatchHaveActiveSubscription(watchId);
             if (activeAgreement)
             {
                 var claims = Array.Empty<Claim>();
@@ -48,6 +54,5 @@ public partial class GarminAuthenticationHandler : AuthenticationHandler<GarminA
         return Task.FromResult(AuthenticateResult.Fail($"Did not find active agreement for watch {header}."));
     }
 
-    [GeneratedRegex("Garmin (?<token>.*)")]
-    private static partial Regex GarminAuthenticationHeader();
+
 }
