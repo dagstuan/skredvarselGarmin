@@ -21,7 +21,8 @@ public class SkredvarselDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.Entity<Agreement>()
             .HasOne(a => a.User)
             .WithMany(u => u.Agreements)
-            .HasForeignKey(a => a.UserId);
+            .HasForeignKey(a => a.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Watch>()
             .HasOne(a => a.User)
@@ -31,6 +32,7 @@ public class SkredvarselDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.Entity<StripeSubscription>()
             .HasOne(ss => ss.User)
             .WithMany(u => u.StripeSubscriptions)
-            .HasForeignKey(ss => ss.UserId);
+            .HasForeignKey(ss => ss.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
