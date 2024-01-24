@@ -49,6 +49,7 @@ public static class DbContextUserExtensions
     {
         return [.. dbContext.Users
             .Include(u => u.Agreements)
-            .Where(u => u.LastLoggedIn < DateOnly.FromDateTime(dateTimeNowProvider.UtcNow.AddMonths(-1)) && u.Agreements.Count == 0)];
+            .Include(u => u.StripeSubscriptions)
+            .Where(u => u.LastLoggedIn < DateOnly.FromDateTime(dateTimeNowProvider.UtcNow.AddMonths(-1)) && u.Agreements.Count == 0 && u.StripeSubscriptions.Count == 0)];
     }
 }
