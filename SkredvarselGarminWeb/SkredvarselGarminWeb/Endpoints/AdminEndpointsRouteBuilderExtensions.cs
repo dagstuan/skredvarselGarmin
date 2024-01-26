@@ -19,6 +19,9 @@ public static class AdminEndpointsRouteBuilderExtensions
             var unsubscribedStripeSubscriptions = dbContext.StripeSubscriptions.Count(a => a.Status == Entities.StripeSubscriptionStatus.UNSUBSCRIBED);
             var watches = dbContext.Watches.Count();
 
+            var totalActiveAgreements = activeAgreements + activeStripeSubscriptions;
+            var totalUnsubscribedAgreements = unsubscribedAgreements + unsubscribedStripeSubscriptions;
+
             return new AdminData
             {
                 StaleUsers = [.. staleUsers.Select(u => new AdminDataUser
@@ -27,9 +30,9 @@ public static class AdminEndpointsRouteBuilderExtensions
                     Name = u.Name
                 })],
                 NumUsers = numUsers,
-                ActiveAgreements = activeAgreements + activeStripeSubscriptions,
-                UnsubscribedAgreements = unsubscribedAgreements + unsubscribedStripeSubscriptions,
-                ActiveOrUnsubscribedAgreements = activeAgreements + unsubscribedAgreements,
+                ActiveAgreements = totalActiveAgreements,
+                UnsubscribedAgreements = totalUnsubscribedAgreements,
+                ActiveOrUnsubscribedAgreements = totalActiveAgreements + totalUnsubscribedAgreements,
                 Watches = watches
             };
         }).RequireAuthorization("Admin");
