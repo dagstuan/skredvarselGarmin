@@ -19,7 +19,8 @@ public static class DatabaseConfiguration
         };
 
         serviceCollection.AddDbContext<SkredvarselDbContext>(options =>
-            options.UseNpgsql(connectionStringBuilder.ToString())
+            options.UseNpgsql(connectionStringBuilder.ToString(), o =>
+                    o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery))
                 .UseSnakeCaseNamingConvention());
     }
 }
