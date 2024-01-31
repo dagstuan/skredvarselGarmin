@@ -29,3 +29,7 @@ typedef SetupSubscriptionResponse as {
   "status" as String,
   "addWatchKey" as String?,
 };
+
+typedef CheckAddWatchResponse as {
+  "status" as String,
+};

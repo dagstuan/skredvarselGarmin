@@ -3,7 +3,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import App from "./App";
 import ErrorPage from "./Components/ErrorPage";
 
@@ -26,12 +30,20 @@ const router = createBrowserRouter([
         lazy: () => import("./Pages/FrontPage"),
         children: [
           {
+            path: "account",
+            lazy: () => import("./Pages/AccountPage"),
+          },
+          {
             path: "minSide",
-            lazy: () => import("./Pages/MyPage"),
+            element: <Navigate to="/account" replace />,
           },
           {
             path: "subscribe",
             lazy: () => import("./Pages/BuySubscriptionModalPage"),
+          },
+          {
+            path: "addwatch",
+            lazy: () => import("./Pages/AddWatchModalPage"),
           },
           {
             path: "login",
@@ -44,11 +56,11 @@ const router = createBrowserRouter([
         lazy: () => import("./Pages/FaqPage"),
       },
       {
-        path: "salgsbetingelser",
+        path: "salesconditions",
         lazy: () => import("./Pages/SalesConditionsPage"),
       },
       {
-        path: "personvern",
+        path: "privacy",
         lazy: () => import("./Pages/PrivacyPolicyPage"),
       },
       {

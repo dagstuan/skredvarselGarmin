@@ -12,7 +12,7 @@ function setupSubscription(callback as WebRequestCallback) {
   var deviceSettings = Sys.getDeviceSettings();
 
   Comm.makeWebRequest(
-    $.BaseApiUrl + "/watch/setupSubscription",
+    $.ApiBaseUrl + "/watch/setupSubscription",
     {
       "watchId" => deviceSettings.uniqueIdentifier,
       "partNumber" => deviceSettings.partNumber,
@@ -39,7 +39,6 @@ class SetupSubscriptionView extends Ui.View {
 
   function initialize() {
     View.initialize();
-
     _requestFailed = false;
   }
 
@@ -115,31 +114,12 @@ class SetupSubscriptionView extends Ui.View {
       var status = response["status"];
 
       if (status.equals("SEEN_WATCH_ACTIVE_SUBSCRIPTION")) {
-        $.setHasSubscription(true);
-
-        $.switchToInitialView(Ui.SLIDE_BLINK);
+        $.setHasSubscriptionAndSwitchToInitialView();
       } else if (status.equals("SEEN_WATCH_INACTIVE_SUBSCRIPTION")) {
-        Ui.switchToView(
-          new NoSubscriptionView(
-            $.getOrLoadResourceString(
-              "Gå til skredvarsel.app på mobil for å tegne abonnement til appen.",
-              :SeenWatchInactiveSubscription
-            )
-          ),
-          null,
-          Ui.SLIDE_BLINK
-        );
+        $.switchToInactiveSubscriptionView();
       } else if (status.equals("NEW_WATCH")) {
         Ui.switchToView(
-          new NoSubscriptionView(
-            Lang.format("$1$\n\n$2$", [
-              $.getOrLoadResourceString(
-                "Logg inn på skredvarsel.app på mobilen, og legg til klokken med koden:",
-                :NewWatch
-              ),
-              response["addWatchKey"],
-            ])
-          ),
+          new AddWatchView(response["addWatchKey"]),
           null,
           Ui.SLIDE_BLINK
         );
@@ -147,16 +127,7 @@ class SetupSubscriptionView extends Ui.View {
     } else {
       _numRetries++;
       if (_numRetries >= _maxRetries) {
-        Ui.switchToView(
-          new TextAreaView(
-            $.getOrLoadResourceString(
-              "Fikk ikke til å sette opp abonnement. Avslutt appen og prøv på nytt.",
-              :FailedToSetupSubscription
-            )
-          ),
-          new TextAreaViewDelegate(),
-          Ui.SLIDE_BLINK
-        );
+        $.switchedToFailedSubscriptionSetupView();
       } else {
         _requestFailed = true;
         startRetryTimer();

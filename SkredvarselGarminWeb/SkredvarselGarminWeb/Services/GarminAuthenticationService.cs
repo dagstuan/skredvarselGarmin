@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Caching.Memory;
 using SkredvarselGarminWeb.Database;
+using SkredvarselGarminWeb.Entities;
 
 namespace SkredvarselGarminWeb.Services;
 
@@ -7,7 +8,9 @@ public class GarminAuthenticationService(
     SkredvarselDbContext dbContext,
     IMemoryCache memoryCache) : IGarminAuthenticationService
 {
-    public bool DoesWatchHaveActiveAgreement(string watchId)
+    public User? GetUserForWatchOrNull(string watchId) => dbContext.GetUserForWatchOrNull(watchId);
+
+    public bool DoesWatchHaveActiveSubscription(string watchId)
     {
         var cacheKey = $"DoesWatchHaveActiveAgreement_{watchId}";
 
@@ -18,7 +21,7 @@ public class GarminAuthenticationService(
 
         var userForWatch = dbContext.GetUserForWatchOrNull(watchId);
 
-        if (userForWatch != null && dbContext.DoesUserHaveActiveAgreement(userForWatch.Id))
+        if (userForWatch != null && dbContext.DoesUserHaveActiveSubscription(userForWatch.Id))
         {
             var cacheEntryOptions = new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromHours(3));

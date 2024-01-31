@@ -25,6 +25,13 @@ class ServiceDelegate extends System.ServiceDelegate {
       "Temporal event triggered. Reloading region data and updating complication."
     );
 
+    if ($.getHasSubscription() == false) {
+      $.log("No subscription detected. Not reloading.");
+
+      Background.exit(false);
+      return;
+    }
+
     $.updateComplicationIfExists();
 
     if ($.canMakeWebRequest() == false) {
@@ -46,6 +53,7 @@ class ServiceDelegate extends System.ServiceDelegate {
           monkeyVersion
         )
       );
+      Background.exit(false);
       return;
     }
 

@@ -5,6 +5,53 @@ import Toybox.System;
 using Toybox.WatchUi as Ui;
 using Toybox.Background;
 using Toybox.Time.Gregorian;
+using Toybox.Time;
+
+(:glance)
+function registerTemporalEvent() {
+  if ($.getHasSubscription() == false) {
+    $.log("No subscription detected. Removing temporal event.");
+    Background.deleteTemporalEvent();
+    return;
+  }
+
+  var lastRunTime = Background.getLastTemporalEventTime();
+
+  if (lastRunTime == null) {
+    $.log("Background refresh never done. Running immediately.");
+
+    var now = new Time.Moment(Time.now().value());
+    Background.registerForTemporalEvent(now);
+  } else {
+    var today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+
+    var refreshIntervalSeconds =
+      today.month > 5 && today.month < 12
+        ? Gregorian.SECONDS_PER_HOUR * 12
+        : Gregorian.SECONDS_PER_HOUR;
+
+    var refreshInterval = new Time.Duration(refreshIntervalSeconds);
+    var registeredEvent = Background.getTemporalEventRegisteredTime();
+    if (
+      registeredEvent == null ||
+      registeredEvent.value() != refreshInterval.value()
+    ) {
+      $.log(
+        Lang.format("Registering temporal event in $1$ seconds", [
+          refreshInterval.value(),
+        ])
+      );
+
+      Background.registerForTemporalEvent(refreshInterval);
+    } else {
+      $.log(
+        Lang.format("Temporal event already registered in $1$ seconds", [
+          refreshInterval.value(),
+        ])
+      );
+    }
+  }
+}
 
 function getInitialViewAndDelegate() as Array<Ui.Views or Ui.InputDelegates> {
   var deviceSettings = System.getDeviceSettings();
@@ -27,6 +74,8 @@ function getInitialViewAndDelegate() as Array<Ui.Views or Ui.InputDelegates> {
 }
 
 function switchToInitialView(transition as Ui.SlideType) {
+  $.registerTemporalEvent();
+
   var initialViewAndDelegate = $.getInitialViewAndDelegate();
 
   var view = initialViewAndDelegate[0];
@@ -47,49 +96,14 @@ class skredvarselGarminApp extends Application.AppBase {
     $.updateComplicationIfExists();
   }
 
-  (:glance)
-  private function registerTemporalEvent() {
-    var lastRunTime = Background.getLastTemporalEventTime();
-
-    if (lastRunTime == null) {
-      $.log("Background refresh never done. Running immediately.");
-
-      var now = new Time.Moment(Time.now().value());
-      Background.registerForTemporalEvent(now);
-    } else {
-      var today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-
-      var refreshIntervalSeconds =
-        today.month > 5 && today.month < 12
-          ? Gregorian.SECONDS_PER_HOUR * 12
-          : Gregorian.SECONDS_PER_HOUR;
-
-      var refreshInterval = new Time.Duration(refreshIntervalSeconds);
-      var registeredEvent = Background.getTemporalEventRegisteredTime();
-      if (
-        registeredEvent == null ||
-        registeredEvent.value() != refreshInterval.value()
-      ) {
-        $.log(
-          Lang.format("Registering temporal event in $1$ seconds", [
-            refreshInterval.value(),
-          ])
-        );
-
-        Background.registerForTemporalEvent(refreshInterval);
-      }
-    }
-  }
-
   // Return the initial view of your application here
   function getInitialView() as Array<Ui.Views or Ui.InputDelegates>? {
-    registerTemporalEvent();
-
     if ($.getHasSubscription() == false) {
       $.log("No subscription detected.");
       return [new SetupSubscriptionView(), new SetupSubscriptionViewDelegate()];
     }
 
+    $.registerTemporalEvent();
     return $.getInitialViewAndDelegate();
   }
 
@@ -97,8 +111,7 @@ class skredvarselGarminApp extends Application.AppBase {
   public function getGlanceView() as Lang.Array<
     Ui.GlanceView or Ui.GlanceViewDelegate
   >? {
-    registerTemporalEvent();
-
+    $.registerTemporalEvent();
     return [new GlanceView()];
   }
 
@@ -117,7 +130,7 @@ class skredvarselGarminApp extends Application.AppBase {
       Ui.requestUpdate();
     }
 
-    registerTemporalEvent();
+    $.registerTemporalEvent();
   }
 }
 

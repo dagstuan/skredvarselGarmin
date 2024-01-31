@@ -66,13 +66,13 @@ function resetStorageCacheIfRequired() {
       if ($.Debug) {
         ex.printStackTrace();
       }
-      throw new Exception();
+      throw ex;
     } catch (ex) {
       $.log("Failed to reset storage cache for some reason.");
       if ($.Debug) {
         ex.printStackTrace();
       }
-      throw new Exception();
+      throw ex;
     }
     setSelectedRegionIdsInStorage(selectedRegionIds);
     $.setHasSubscription(hasSubscription);

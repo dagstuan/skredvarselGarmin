@@ -3,9 +3,12 @@ import Toybox.Lang;
 using Toybox.Communications;
 using Toybox.Time;
 using Toybox.Application.Storage;
+using Toybox.WatchUi as Ui;
 
-const BaseApiUrl = "https://skredvarsel.app/api";
-// const BaseApiUrl = "https://localhost:8080/api";
+//const FrontendBaseUrl = "http://localhost:5173";
+//const ApiBaseUrl = "https://localhost:8080/api";
+const FrontendBaseUrl = "https://skredvarsel.app";
+const ApiBaseUrl = "https://skredvarsel.app/api";
 
 typedef WebRequestCallbackData as Null or Dictionary or String;
 typedef WebRequestCallback as (Method
@@ -16,6 +19,24 @@ typedef WebRequestDelegateCallbackData as WebRequestCallbackData or Array;
 typedef WebRequestDelegateCallback as (Method
   (responseCode as Number, data as WebRequestDelegateCallbackData) as Void
 );
+
+(:background)
+function makeGetRequestWithAuthorization(
+  url as String,
+  callback as WebRequestCallback
+) {
+  Communications.makeWebRequest(
+    url,
+    null,
+    {
+      :method => Communications.HTTP_REQUEST_METHOD_GET,
+      :headers => {
+        "Authorization" => Lang.format("Garmin $1$", [$.getDeviceIdentifier()]),
+      },
+    },
+    callback
+  );
+}
 
 (:background)
 function makeApiRequest(
@@ -54,19 +75,7 @@ class WebRequestDelegate {
   function makeRequest() {
     $.log(Lang.format("Fetching: $1$", [_path]));
 
-    Communications.makeWebRequest(
-      $.BaseApiUrl + _path,
-      null,
-      {
-        :method => Communications.HTTP_REQUEST_METHOD_GET,
-        :headers => {
-          "Authorization" => Lang.format("Garmin $1$", [
-            $.getDeviceIdentifier(),
-          ]),
-        },
-      },
-      method(:onReceive)
-    );
+    $.makeGetRequestWithAuthorization($.ApiBaseUrl + _path, method(:onReceive));
   }
 
   function onReceive(
@@ -83,6 +92,21 @@ class WebRequestDelegate {
       $.log("Api responded with 401. No subscription for user.");
 
       $.setHasSubscription(false);
+
+      try {
+        Ui.switchToView(
+          new SetupSubscriptionView(),
+          new SetupSubscriptionViewDelegate(),
+          Ui.SLIDE_BLINK
+        );
+      } catch (ex) {
+        $.log(
+          "Failed to switch to setupSubscriptionView after API returned 401."
+        );
+      }
+
+      // Make sure we dont invoke the callback if API returned 401.
+      return;
     } else {
       $.log(Lang.format("Failed request. Response code: $1$", [responseCode]));
     }
