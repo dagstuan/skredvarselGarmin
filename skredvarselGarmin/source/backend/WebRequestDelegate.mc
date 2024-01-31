@@ -21,6 +21,24 @@ typedef WebRequestDelegateCallback as (Method
 );
 
 (:background)
+function makeGetRequestWithAuthorization(
+  url as String,
+  callback as WebRequestCallback
+) {
+  Communications.makeWebRequest(
+    url,
+    null,
+    {
+      :method => Communications.HTTP_REQUEST_METHOD_GET,
+      :headers => {
+        "Authorization" => Lang.format("Garmin $1$", [$.getDeviceIdentifier()]),
+      },
+    },
+    callback
+  );
+}
+
+(:background)
 function makeApiRequest(
   path as String,
   storageKey as String,
@@ -57,19 +75,7 @@ class WebRequestDelegate {
   function makeRequest() {
     $.log(Lang.format("Fetching: $1$", [_path]));
 
-    Communications.makeWebRequest(
-      $.ApiBaseUrl + _path,
-      null,
-      {
-        :method => Communications.HTTP_REQUEST_METHOD_GET,
-        :headers => {
-          "Authorization" => Lang.format("Garmin $1$", [
-            $.getDeviceIdentifier(),
-          ]),
-        },
-      },
-      method(:onReceive)
-    );
+    $.makeGetRequestWithAuthorization($.ApiBaseUrl + _path, method(:onReceive));
   }
 
   function onReceive(

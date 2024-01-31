@@ -66,17 +66,8 @@ class AddWatchView extends Ui.View {
   }
 
   function onTimerTrigged() as Void {
-    Comm.makeWebRequest(
+    $.makeGetRequestWithAuthorization(
       $.ApiBaseUrl + "/watch/checkAddWatch",
-      null,
-      {
-        :method => Comm.HTTP_REQUEST_METHOD_GET,
-        :headers => {
-          "Authorization" => Lang.format("Garmin $1$", [
-            $.getDeviceIdentifier(),
-          ]),
-        },
-      },
       method(:onCheckAddWatchResponse)
     );
   }

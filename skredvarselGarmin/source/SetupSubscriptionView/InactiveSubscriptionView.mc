@@ -65,17 +65,8 @@ class InactiveSubscriptionView extends Ui.View {
   }
 
   function onTimerTrigged() as Void {
-    Comm.makeWebRequest(
+    $.makeGetRequestWithAuthorization(
       $.ApiBaseUrl + "/watch/checkSubscription",
-      null,
-      {
-        :method => Comm.HTTP_REQUEST_METHOD_GET,
-        :headers => {
-          "Authorization" => Lang.format("Garmin $1$", [
-            $.getDeviceIdentifier(),
-          ]),
-        },
-      },
       method(:onCheckSubscriptionResponse)
     );
   }
