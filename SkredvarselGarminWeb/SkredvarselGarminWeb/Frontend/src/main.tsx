@@ -3,7 +3,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 import App from "./App";
 import ErrorPage from "./Components/ErrorPage";
 
@@ -28,6 +32,10 @@ const router = createBrowserRouter([
           {
             path: "account",
             lazy: () => import("./Pages/AccountPage"),
+          },
+          {
+            path: "minSide",
+            element: <Navigate to="/account" replace />,
           },
           {
             path: "subscribe",
