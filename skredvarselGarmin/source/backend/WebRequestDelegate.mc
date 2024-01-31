@@ -92,21 +92,6 @@ class WebRequestDelegate {
       $.log("Api responded with 401. No subscription for user.");
 
       $.setHasSubscription(false);
-
-      try {
-        Ui.switchToView(
-          new SetupSubscriptionView(),
-          new SetupSubscriptionViewDelegate(),
-          Ui.SLIDE_BLINK
-        );
-      } catch (ex) {
-        $.log(
-          "Failed to switch to setupSubscriptionView after API returned 401."
-        );
-      }
-
-      // Make sure we dont invoke the callback if API returned 401.
-      return;
     } else {
       $.log(Lang.format("Failed request. Response code: $1$", [responseCode]));
     }
