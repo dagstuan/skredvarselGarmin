@@ -86,7 +86,7 @@ class AddWatchView extends Ui.View {
     data as WebRequestCallbackData
   ) as Void {
     if (responseCode == 200) {
-      var response = data as SetupSubscriptionResponse;
+      var response = data as CheckAddWatchResponse;
       var status = response["status"];
 
       if (status.equals("ACTIVE_SUBSCRIPTION")) {
