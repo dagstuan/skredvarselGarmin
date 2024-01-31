@@ -5,15 +5,6 @@ function setHasSubscriptionAndSwitchToInitialView() {
   $.switchToInitialView(Ui.SLIDE_BLINK);
 }
 
-function setHasSubscriptionFalseAndSwitchToSetupSubscriptionView() {
-  $.setHasSubscription(false);
-  Ui.switchToView(
-    new SetupSubscriptionView(),
-    new SetupSubscriptionViewDelegate(),
-    Ui.SLIDE_BLINK
-  );
-}
-
 function switchToInactiveSubscriptionView() {
   Ui.switchToView(new InactiveSubscriptionView(), null, Ui.SLIDE_BLINK);
 }
