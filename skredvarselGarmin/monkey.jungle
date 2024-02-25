@@ -37,6 +37,7 @@ fr645m.excludeAnnotations=hasComplication
 fr745.excludeAnnotations=hasComplication
 fr945.excludeAnnotations=hasComplication
 fr945lte.excludeAnnotations=hasComplication
+fr55.excludeAnnotations=hasComplication
 marqadventurer.excludeAnnotations=hasComplication
 marqathlete.excludeAnnotations=hasComplication
 marqaviator.excludeAnnotations=hasComplication
