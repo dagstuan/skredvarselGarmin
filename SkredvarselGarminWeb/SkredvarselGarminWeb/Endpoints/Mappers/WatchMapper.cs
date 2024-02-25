@@ -73,6 +73,8 @@ public static class WatchMapper
         "006-B4341-00" => "fēnix® 7X",
         "006-B4376-00" => "fēnix® 7X Pro",
         "006-B4596-00" => "fēnix® 7X Pro",
+        "006-B4432-00" => "Forerunner® 165",
+        "006-B4433-00" => "Forerunner® 165 Music",
         "006-B3076-00" => "Forerunner® 245",
         "006-B3145-00" => "Forerunner® 245",
         "006-B3914-00" => "Forerunner® 245",
