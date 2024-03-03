@@ -18,9 +18,14 @@ public static class DatabaseConfiguration
             Database = databaseOptions.Database,
         };
 
+        var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionStringBuilder.ToString());
+        dataSourceBuilder.UseNetTopologySuite();
+        var dataSource = dataSourceBuilder.Build();
+
         serviceCollection.AddDbContext<SkredvarselDbContext>(options =>
-            options.UseNpgsql(connectionStringBuilder.ToString(), o =>
-                    o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery))
+            options.UseNpgsql(dataSource, o =>
+                    o.UseQuerySplittingBehavior(QuerySplittingBehavior.SingleQuery)
+                     .UseNetTopologySuite())
                 .UseSnakeCaseNamingConvention());
     }
 }

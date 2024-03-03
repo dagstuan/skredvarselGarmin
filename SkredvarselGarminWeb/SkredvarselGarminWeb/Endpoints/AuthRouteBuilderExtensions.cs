@@ -38,6 +38,6 @@ public static class AuthRouteBuilderExtensions
 
             ctx.Request.Query.TryGetValue("returnUrl", out StringValues returnUrl);
             return Results.Redirect(returnUrl.FirstOrDefault() ?? "/");
-        });
+        }).ExcludeFromDescription();
     }
 }

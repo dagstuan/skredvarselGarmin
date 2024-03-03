@@ -10,6 +10,9 @@ using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Stripe;
+using NetTopologySuite.IO.Converters;
+using Microsoft.OpenApi.Models;
+using SkredvarselGarminWeb.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,9 +51,16 @@ builder.Services.AddTransient<IVippsAgreementService, VippsAgreementService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IStripeService, StripeService>();
 builder.Services.AddTransient<INotificationService, NotificationService>();
+builder.Services.AddTransient<IForecastAreaService, ForecastAreaService>();
 
 builder.Services.SetupAuthentication(vippsOptions!, authOptions!, googleOptions!, facebookOptions!);
 builder.Services.AddRefitClients(vippsOptions!);
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "SkredvarselGarminWeb", Version = "v1" });
+});
 
 var app = builder.Build();
 
@@ -84,8 +94,13 @@ app.MapVippsSubscriptionEndpoints();
 app.MapSubscriptionApiEndpoints();
 app.MapWatchApiEndpoints();
 app.MapAdminEndpoints();
+app.MapForecastAreaEndpoints();
 
 app.MapHangfireDashboard();
+
+app.UseMiddleware<SwaggerOAuthMiddleware>();
+app.UseSwagger();
+app.UseSwaggerUI();
 
 using (var scope = app.Services.CreateScope())
 {
