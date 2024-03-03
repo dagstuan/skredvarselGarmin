@@ -2,7 +2,7 @@ version: '3.8'
 services:
   db:
     container_name: skredvarsel-garmin-db
-    image: postgres
+    image: imresamu/postgis
     restart: always
     environment:
       POSTGRES_PASSWORD: dev

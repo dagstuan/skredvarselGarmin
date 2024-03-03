@@ -10,9 +10,12 @@ public class SkredvarselDbContext(DbContextOptions options) : DbContext(options)
     public virtual DbSet<Watch> Watches => Set<Watch>();
     public virtual DbSet<WatchAddRequest> WatchAddRequests => Set<WatchAddRequest>();
     public virtual DbSet<StripeSubscription> StripeSubscriptions => Set<StripeSubscription>();
+    public virtual DbSet<ForecastArea> ForecastAreas => Set<ForecastArea>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresExtension("postgis");
+
         modelBuilder.Entity<User>()
             .HasIndex(x => x.StripeCustomerId)
             .IsUnique()

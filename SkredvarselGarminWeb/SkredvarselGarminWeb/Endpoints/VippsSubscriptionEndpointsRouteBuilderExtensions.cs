@@ -4,7 +4,6 @@ using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.Extensions;
 using SkredvarselGarminWeb.Helpers;
-using SkredvarselGarminWeb.NtfyApi;
 using SkredvarselGarminWeb.Services;
 using SkredvarselGarminWeb.VippsApi;
 using SkredvarselGarminWeb.VippsApi.Models;

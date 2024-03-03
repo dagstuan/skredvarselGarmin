@@ -2,8 +2,8 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SkredvarselGarminWeb.Database;
 
@@ -12,9 +12,11 @@ using SkredvarselGarminWeb.Database;
 namespace SkredvarselGarminWeb.Migrations
 {
     [DbContext(typeof(SkredvarselDbContext))]
-    partial class SkredvarselDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240228175617_Postgis")]
+    partial class Postgis
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,35 +68,6 @@ namespace SkredvarselGarminWeb.Migrations
                         .HasDatabaseName("ix_agreements_user_id");
 
                     b.ToTable("agreements", (string)null);
-                });
-
-            modelBuilder.Entity("SkredvarselGarminWeb.Entities.ForecastArea", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<Polygon>("Area")
-                        .IsRequired()
-                        .HasColumnType("geometry (polygon, 25833)")
-                        .HasColumnName("area");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<char>("RegionType")
-                        .HasColumnType("character(1)")
-                        .HasColumnName("region_type");
-
-                    b.HasKey("Id")
-                        .HasName("pk_forecast_areas");
-
-                    b.ToTable("forecast_areas", (string)null);
                 });
 
             modelBuilder.Entity("SkredvarselGarminWeb.Entities.StripeSubscription", b =>
