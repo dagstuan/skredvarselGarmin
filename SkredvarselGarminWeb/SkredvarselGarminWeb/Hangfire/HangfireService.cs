@@ -92,7 +92,7 @@ public class HangfireService(
 
     public void PopulateNextChargeAmount()
     {
-        var agreements = dbContext.Agreements.Where(a => a.NextChargeAmount != null).ToList();
+        var agreements = dbContext.Agreements.Where(a => a.NextChargeId != null).ToList();
 
         foreach (var agreement in agreements)
         {

@@ -226,6 +226,8 @@ public class VippsAgreementService(
 
         var charge = await CreateChargeInVipps(agreementId, nextChargeDate, amount);
 
+        agreementInDb.NextChargeDate = nextChargeDate;
+        agreementInDb.NextChargeAmount = amount;
         agreementInDb.NextChargeId = charge.ChargeId;
         agreementInDb.SetAsActive();
         dbContext.SaveChanges();
@@ -278,6 +280,7 @@ public class VippsAgreementService(
         var newCharge = await CreateChargeInVipps(agreement.Id, nextChargeDate, nextChargeAmount);
 
         agreement.NextChargeDate = nextChargeDate;
+        agreement.NextChargeAmount = nextChargeAmount;
         agreement.NextChargeId = newCharge.ChargeId;
 
         dbContext.SaveChanges();
