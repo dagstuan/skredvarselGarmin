@@ -233,6 +233,27 @@ public class VippsAgreementService(
         transaction.Commit();
     }
 
+    [DisableConcurrentExecution(10)]
+    public async Task PopulateNextChargeAmount(string agreementId)
+    {
+        using var transaction = dbContext.Database.BeginTransaction();
+
+        var agreement = dbContext.Agreements
+            .Single(a => a.Id == agreementId);
+
+        if (agreement.NextChargeId == null)
+        {
+            throw new Exception("This should not happen.");
+        }
+
+        var nextCharge = await vippsApiClient.GetCharge(agreement.Id, agreement.NextChargeId);
+
+        agreement.NextChargeAmount = nextCharge.Amount;
+        dbContext.SaveChanges();
+
+        transaction.Commit();
+    }
+
     private async Task<bool> StopAgreementInVipps(string agreementId)
     {
         logger.LogInformation("Stopping agreement {agreementId} in Vipps", agreementId);
