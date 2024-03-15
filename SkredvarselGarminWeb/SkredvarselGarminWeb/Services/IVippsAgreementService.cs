@@ -5,4 +5,5 @@ public interface IVippsAgreementService
     Task UpdateAgreementCharges(string agreementId);
     Task DeactivateAgreement(string agreementId);
     Task ReactivateAgreement(string agreementId);
+    Task PopulateNextChargeAmount(string agreementId);
 }

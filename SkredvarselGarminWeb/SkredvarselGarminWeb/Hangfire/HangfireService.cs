@@ -89,4 +89,14 @@ public class HangfireService(
 
         dbContext.SaveChanges();
     }
+
+    public void PopulateNextChargeAmount()
+    {
+        var agreements = dbContext.Agreements.Where(a => a.NextChargeAmount != null).ToList();
+
+        foreach (var agreement in agreements)
+        {
+            backgroundJobClient.Enqueue(() => subscriptionService.PopulateNextChargeAmount(agreement.Id));
+        }
+    }
 }

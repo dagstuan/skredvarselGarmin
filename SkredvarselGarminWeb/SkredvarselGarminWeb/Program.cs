@@ -110,6 +110,7 @@ using (var scope = app.Services.CreateScope())
     recurringJobManager.AddOrUpdate<HangfireService>("UpdateAgreementCharges", s => s.UpdateAgreementCharges(), "5 * * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("RemoveStaleWatchAddRequests", s => s.RemoveStaleWatchAddRequests(), "*/5 * * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("RemoveStaleUsers", s => s.RemoveStaleUsers(), "0 3 * * *");
+    recurringJobManager.AddOrUpdate<HangfireService>("PopulateNextChargeAmount", s => s.PopulateNextChargeAmount(), Cron.Never);
 }
 
 if (app.Environment.IsDevelopment())
