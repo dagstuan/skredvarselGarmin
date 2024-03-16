@@ -100,25 +100,10 @@ public class HangfireService(
         dbContext.SaveChanges();
     }
 
-    public void PopulateNextChargeAmount()
-    {
-        var agreements = dbContext.Agreements.Where(a =>
-            a.NextChargeAmount == null
-            && (
-                a.Status == Entities.AgreementStatus.ACTIVE ||
-                a.Status == Entities.AgreementStatus.UNSUBSCRIBED
-            )).ToList();
-
-        foreach (var agreement in agreements)
-        {
-            backgroundJobClient.Enqueue(() => subscriptionService.PopulateNextChargeAmount(agreement.Id));
-        }
-    }
-
     public void RemoveChargesOlderThan180Days()
     {
         var activeAgreementsInDb = dbContext.Agreements
-            .Where(a => a.Status == Entities.AgreementStatus.ACTIVE)
+            .Where(a => a.Status == Entities.AgreementStatus.ACTIVE && a.NextChargeId != null)
             .ToList();
 
         foreach (var agreement in activeAgreementsInDb)

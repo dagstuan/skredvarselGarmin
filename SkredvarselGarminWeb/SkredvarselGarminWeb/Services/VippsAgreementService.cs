@@ -295,35 +295,6 @@ public class VippsAgreementService(
     }
 
     [DisableConcurrentExecution(10)]
-    public async Task PopulateNextChargeAmount(string agreementId)
-    {
-        using var transaction = dbContext.Database.BeginTransaction();
-
-        var agreement = dbContext.Agreements
-            .Single(a => a.Id == agreementId);
-
-        if (agreement.NextChargeId != null)
-        {
-            var nextCharge = await vippsApiClient.GetCharge(agreement.Id, agreement.NextChargeId);
-
-            agreement.NextChargeAmount = nextCharge.Amount;
-            dbContext.SaveChanges();
-        }
-        else if (agreement.Status == EntityAgreementStatus.UNSUBSCRIBED)
-        {
-            agreement.NextChargeAmount = 3000;
-            dbContext.SaveChanges();
-            logger.LogInformation("Agreement {agreementId} is unsubscribed. Will not populate next charge amount.", agreementId);
-        }
-        else
-        {
-            throw new Exception("This should not happen.");
-        }
-
-        transaction.Commit();
-    }
-
-    [DisableConcurrentExecution(10)]
     public async Task RemoveNextChargeOlderThan180Days(string agreementId)
     {
         using var transaction = dbContext.Database.BeginTransaction();
@@ -340,10 +311,13 @@ public class VippsAgreementService(
         {
             var nextCharge = await vippsApiClient.GetCharge(agreementId, nextChargeId);
             var created = nextCharge.History.First(h => h.Event == ChargeEventEvent.CREATE).Occurred;
+            var due = nextCharge.Due;
 
-            if (created < dateTimeNowProvider.Now.AddDays(-180))
+            var daysBetweenDueAndCreated = (due - created).Days;
+
+            if (daysBetweenDueAndCreated > 180)
             {
-                logger.LogInformation("Next charge for agreement {agreementId} is older than 180 days. Removing.", agreementId);
+                logger.LogInformation("Next charge for agreement {agreementId} will be older than 180 days when due. Removing.", agreementId);
                 var result = await vippsApiClient.CancelCharge(agreementInDb.Id, nextChargeId, Guid.NewGuid());
 
                 if (result.IsSuccessStatusCode)
