@@ -99,16 +99,4 @@ public class HangfireService(
 
         dbContext.SaveChanges();
     }
-
-    public void RemoveChargesOlderThan180Days()
-    {
-        var activeAgreementsInDb = dbContext.Agreements
-            .Where(a => a.Status == Entities.AgreementStatus.ACTIVE && a.NextChargeId != null)
-            .ToList();
-
-        foreach (var agreement in activeAgreementsInDb)
-        {
-            backgroundJobClient.Enqueue(() => subscriptionService.RemoveNextChargeOlderThan180Days(agreement.Id));
-        }
-    }
 }

@@ -67,10 +67,5 @@ public static class AdminEndpointsRouteBuilderExtensions
         {
             await subscriptionService.UpdateAgreementCharges(agreementId);
         }).RequireAuthorization("Admin");
-
-        app.MapPost("/api/admin/agreements/{agreementId}/remove-old-charges", async (string agreementId, IVippsAgreementService subscriptionService) =>
-        {
-            await subscriptionService.RemoveNextChargeOlderThan180Days(agreementId);
-        }).RequireAuthorization("Admin");
     }
 }
