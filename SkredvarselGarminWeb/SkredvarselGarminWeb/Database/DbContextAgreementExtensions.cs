@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Helpers;
 
@@ -8,11 +9,28 @@ public static class DbContextAgreementExtensions
     public static List<Agreement> GetAgreementsThatAreDue(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider) =>
         [.. dbContext.Agreements.Where(a => DateOnly.FromDateTime(dateTimeNowProvider.UtcNow) >= a.NextChargeDate)];
 
-    public static List<Agreement> GetAgreementsDueInLessThan30Days(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider) =>
-        [.. dbContext.Agreements.Where(a => a.NextChargeDate.GetValueOrDefault().DayNumber - DateOnly.FromDateTime(dateTimeNowProvider.UtcNow).DayNumber <= 30)];
+    public static List<Agreement> GetAgreementsDueInLessThan30Days(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider)
+    {
+        var agreements = dbContext.Agreements.Where(a =>
+            a.Status == AgreementStatus.ACTIVE || a.Status == AgreementStatus.UNSUBSCRIBED)
+            .ToList();
 
-    public static List<Agreement> GetAgreementsDueInLessThan30DaysWithoutNextChargeId(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider) =>
-        [.. dbContext.Agreements.Where(a => a.NextChargeId == null && a.NextChargeDate.GetValueOrDefault().DayNumber - DateOnly.FromDateTime(dateTimeNowProvider.UtcNow).DayNumber <= 30)];
+        // TODO: Do this in DB
+        return agreements.Where(a =>
+            a.NextChargeDate.GetValueOrDefault().DayNumber - DateOnly.FromDateTime(dateTimeNowProvider.UtcNow).DayNumber <= 30).ToList();
+    }
+
+    public static List<Agreement> GetAgreementsDueInLessThan30DaysWithoutNextChargeId(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider)
+    {
+        var agreements = dbContext.Agreements.Where(a =>
+            a.NextChargeId == null &&
+            a.Status == AgreementStatus.ACTIVE || a.Status == AgreementStatus.UNSUBSCRIBED)
+            .ToList();
+
+        // TODO: Do this in DB
+        return agreements.Where(a =>
+            a.NextChargeDate.GetValueOrDefault().DayNumber - DateOnly.FromDateTime(dateTimeNowProvider.UtcNow).DayNumber <= 30).ToList();
+    }
 
     public static List<Agreement> GetPendingAgreements(this SkredvarselDbContext dbContext) =>
         [.. dbContext.Agreements.Where(a => a.Status == AgreementStatus.PENDING)];
