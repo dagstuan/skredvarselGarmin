@@ -1,6 +1,7 @@
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Endpoints.Models;
 using SkredvarselGarminWeb.Helpers;
+using SkredvarselGarminWeb.Services;
 
 namespace SkredvarselGarminWeb.Endpoints;
 
@@ -35,6 +36,36 @@ public static class AdminEndpointsRouteBuilderExtensions
                 ActiveOrUnsubscribedAgreements = totalActiveAgreements + totalUnsubscribedAgreements,
                 Watches = watches
             };
+        }).RequireAuthorization("Admin");
+
+        app.MapGet("/api/admin/agreements", (SkredvarselDbContext dbContext) =>
+        {
+            return dbContext.Agreements.ToList();
+        }).RequireAuthorization("Admin");
+
+        app.MapGet("/api/admin/agreements/due-in-less-than-30-days", (SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider) =>
+        {
+            return dbContext.GetAgreementsDueInLessThan30Days(dateTimeNowProvider).ToList();
+        }).RequireAuthorization("Admin");
+
+        app.MapGet("/api/admin/agreements/{agreementId}", (string agreementId, SkredvarselDbContext dbContext) =>
+        {
+            return dbContext.Agreements.Single(a => a.Id == agreementId);
+        }).RequireAuthorization("Admin");
+
+        app.MapPost("/api/admin/agreements/{agreementId}/create-next-charge", async (string agreementId, IVippsAgreementService subscriptionService) =>
+        {
+            await subscriptionService.CreateNextChargeForAgreement(agreementId);
+        }).RequireAuthorization("Admin");
+
+        app.MapPost("/api/admin/agreements/{agreementId}/update-agreement-charges", async (string agreementId, IVippsAgreementService subscriptionService) =>
+        {
+            await subscriptionService.UpdateAgreementCharges(agreementId);
+        }).RequireAuthorization("Admin");
+
+        app.MapPost("/api/admin/agreements/{agreementId}/remove-old-charges", async (string agreementId, IVippsAgreementService subscriptionService) =>
+        {
+            await subscriptionService.RemoveNextChargeOlderThan180Days(agreementId);
         }).RequireAuthorization("Admin");
     }
 }

@@ -67,6 +67,16 @@ public class HangfireService(
         }
     }
 
+    public void CreateNextChargeForAgreement()
+    {
+        var agreementsWithoutCharges = dbContext.GetAgreementsDueInLessThan30DaysWithoutNextChargeId(dateTimeNowProvider);
+
+        foreach (var agreement in agreementsWithoutCharges)
+        {
+            backgroundJobClient.Enqueue(() => subscriptionService.CreateNextChargeForAgreement(agreement.Id));
+        }
+    }
+
     public void RemoveStaleWatchAddRequests()
     {
         var staleWatchAddRequests = dbContext.WatchAddRequests
@@ -102,6 +112,18 @@ public class HangfireService(
         foreach (var agreement in agreements)
         {
             backgroundJobClient.Enqueue(() => subscriptionService.PopulateNextChargeAmount(agreement.Id));
+        }
+    }
+
+    public void RemoveChargesOlderThan180Days()
+    {
+        var activeAgreementsInDb = dbContext.Agreements
+            .Where(a => a.Status == Entities.AgreementStatus.ACTIVE)
+            .ToList();
+
+        foreach (var agreement in activeAgreementsInDb)
+        {
+            backgroundJobClient.Enqueue(() => subscriptionService.RemoveNextChargeOlderThan180Days(agreement.Id));
         }
     }
 }
