@@ -54,7 +54,8 @@ public class VippsAgreementService(
         }
 
         var nowDayNumber = DateOnly.FromDateTime(dateTimeNowProvider.Now).DayNumber;
-        if (agreement.NextChargeDate.Value.DayNumber - nowDayNumber > 30)
+        var dueInDays = agreement.NextChargeDate.Value.DayNumber - nowDayNumber;
+        if (dueInDays > 30)
         {
             // Not due for a charge
             logger.LogWarning("Job was triggered to create charge on an agreement that is not due for a charge within 30 days. Agreement ID: {agreementId}", agreementId);
@@ -65,6 +66,8 @@ public class VippsAgreementService(
 
         if (vippsAgreement.Status == VippsAgreementStatus.Active)
         {
+            logger.LogInformation("Agreement {agreementId} due for charge in {days} days. Creating charge.", agreement.Id, dueInDays);
+
             var newCharge = await CreateChargeInVipps(agreement.Id, agreement.NextChargeDate.Value, agreement.NextChargeAmount.Value);
 
             agreement.NextChargeId = newCharge.ChargeId;
