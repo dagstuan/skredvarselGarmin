@@ -350,6 +350,8 @@ public class VippsAgreementService(
                 }
             }
         }
+
+        transaction.Commit();
     }
 
     private async Task<bool> StopAgreementInVipps(string agreementId)
