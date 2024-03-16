@@ -341,13 +341,13 @@ public class VippsAgreementService(
             if (created < dateTimeNowProvider.Now.AddDays(-180))
             {
                 logger.LogInformation("Next charge for agreement {agreementId} is older than 180 days. Removing.", agreementId);
-                // var result = await vippsApiClient.CancelCharge(agreementInDb.Id, nextChargeId, Guid.NewGuid());
+                var result = await vippsApiClient.CancelCharge(agreementInDb.Id, nextChargeId, Guid.NewGuid());
 
-                // if (result.IsSuccessStatusCode)
-                // {
-                //     agreementInDb.NextChargeId = null;
-                //     dbContext.SaveChanges();
-                // }
+                if (result.IsSuccessStatusCode)
+                {
+                    agreementInDb.NextChargeId = null;
+                    dbContext.SaveChanges();
+                }
             }
         }
     }
