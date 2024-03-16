@@ -294,43 +294,6 @@ public class VippsAgreementService(
         transaction.Commit();
     }
 
-    [DisableConcurrentExecution(10)]
-    public async Task RemoveNextChargeOlderThan180Days(string agreementId)
-    {
-        using var transaction = dbContext.Database.BeginTransaction();
-
-        var agreementInDb = dbContext.Agreements.First(a => a.Id == agreementId);
-
-        if (agreementInDb.Status != EntityAgreementStatus.ACTIVE)
-        {
-            throw new Exception("Invalid state for agreement attempting to be deactivated.");
-        }
-
-        var nextChargeId = agreementInDb.NextChargeId;
-        if (nextChargeId != null)
-        {
-            var nextCharge = await vippsApiClient.GetCharge(agreementId, nextChargeId);
-            var created = nextCharge.History.First(h => h.Event == ChargeEventEvent.CREATE).Occurred;
-            var due = nextCharge.Due;
-
-            var daysBetweenDueAndCreated = (due - created).Days;
-
-            if (daysBetweenDueAndCreated > 180)
-            {
-                logger.LogInformation("Next charge for agreement {agreementId} will be older than 180 days when due. Removing.", agreementId);
-                var result = await vippsApiClient.CancelCharge(agreementInDb.Id, nextChargeId, Guid.NewGuid());
-
-                if (result.IsSuccessStatusCode)
-                {
-                    agreementInDb.NextChargeId = null;
-                    dbContext.SaveChanges();
-                }
-            }
-        }
-
-        transaction.Commit();
-    }
-
     private async Task<bool> StopAgreementInVipps(string agreementId)
     {
         logger.LogInformation("Stopping agreement {agreementId} in Vipps", agreementId);
