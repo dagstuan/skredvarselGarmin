@@ -12,6 +12,7 @@ public static class AgreementExtensions
     {
         agreement.Status = AgreementStatus.STOPPED;
         agreement.NextChargeDate = null;
+        agreement.NextChargeAmount = null;
         agreement.NextChargeId = null;
     }
 }

@@ -16,7 +16,7 @@ public class Agreement
     public required DateOnly Start { get; set; }
 
     public string? NextChargeId { get; set; }
-    public DateOnly? NextChargeDate { get; set; }
+    public required DateOnly? NextChargeDate { get; set; }
     public int? NextChargeAmount { get; set; }
 
     public required string UserId { get; set; }

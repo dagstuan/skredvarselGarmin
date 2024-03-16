@@ -10,7 +10,6 @@ using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Services;
 using Microsoft.AspNetCore.DataProtection;
 using Stripe;
-using NetTopologySuite.IO.Converters;
 using Microsoft.OpenApi.Models;
 using SkredvarselGarminWeb.Middlewares;
 
@@ -59,6 +58,7 @@ builder.Services.AddRefitClients(vippsOptions!);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
+    c.CustomSchemaIds(type => type.ToString());
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "SkredvarselGarminWeb", Version = "v1" });
 });
 
@@ -111,6 +111,8 @@ using (var scope = app.Services.CreateScope())
     recurringJobManager.AddOrUpdate<HangfireService>("RemoveStaleWatchAddRequests", s => s.RemoveStaleWatchAddRequests(), "*/5 * * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("RemoveStaleUsers", s => s.RemoveStaleUsers(), "0 3 * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("PopulateNextChargeAmount", s => s.PopulateNextChargeAmount(), Cron.Never);
+    recurringJobManager.AddOrUpdate<HangfireService>("RemoveChargesOlderThan180Days", s => s.RemoveChargesOlderThan180Days(), Cron.Never);
+    recurringJobManager.AddOrUpdate<HangfireService>("CreateNextChargeForAgreement", s => s.CreateNextChargeForAgreement(), Cron.Hourly);
 }
 
 if (app.Environment.IsDevelopment())
