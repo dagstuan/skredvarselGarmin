@@ -11,25 +11,24 @@ public static class DbContextAgreementExtensions
 
     public static List<Agreement> GetAgreementsDueInLessThan30Days(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider)
     {
-        var agreements = dbContext.Agreements.Where(a =>
-            a.Status == AgreementStatus.ACTIVE || a.Status == AgreementStatus.UNSUBSCRIBED)
+        return dbContext.Agreements.Where(a =>
+            (a.Status == AgreementStatus.ACTIVE ||
+             a.Status == AgreementStatus.UNSUBSCRIBED) &&
+            ((a.NextChargeDate.HasValue
+                ? a.NextChargeDate.Value.ToDateTime(TimeOnly.MinValue)
+                : DateTime.MaxValue) - dateTimeNowProvider.Now).Days <= 30)
             .ToList();
-
-        // TODO: Do this in DB
-        return agreements.Where(a =>
-            a.NextChargeDate.GetValueOrDefault().DayNumber - DateOnly.FromDateTime(dateTimeNowProvider.UtcNow).DayNumber <= 30).ToList();
     }
 
     public static List<Agreement> GetAgreementsDueInLessThan30DaysWithoutNextChargeId(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider)
     {
-        var agreements = dbContext.Agreements.Where(a =>
+        return dbContext.Agreements.Where(a =>
             a.NextChargeId == null &&
-            a.Status == AgreementStatus.ACTIVE || a.Status == AgreementStatus.UNSUBSCRIBED)
-            .ToList();
-
-        // TODO: Do this in DB
-        return agreements.Where(a =>
-            a.NextChargeDate.GetValueOrDefault().DayNumber - DateOnly.FromDateTime(dateTimeNowProvider.UtcNow).DayNumber <= 30).ToList();
+            (a.Status == AgreementStatus.ACTIVE || a.Status == AgreementStatus.UNSUBSCRIBED) &&
+            ((a.NextChargeDate.HasValue
+                ? a.NextChargeDate.Value.ToDateTime(TimeOnly.MinValue)
+                : DateTime.MaxValue) - dateTimeNowProvider.Now).Days <= 30
+            ).ToList();
     }
 
     public static List<Agreement> GetPendingAgreements(this SkredvarselDbContext dbContext) =>
