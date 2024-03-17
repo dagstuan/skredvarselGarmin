@@ -67,7 +67,7 @@ public class HangfireService(
         }
     }
 
-    public void CreateNextChargeForAgreement()
+    public void CreateNextChargeForAgreements()
     {
         var agreementsWithoutCharges = dbContext.GetAgreementsDueInLessThan30DaysWithoutNextChargeId(dateTimeNowProvider);
 
