@@ -54,10 +54,10 @@ public class VippsAgreementService(
         }
 
         var dueInDays = (agreement.NextChargeDate.Value.ToDateTime(TimeOnly.MinValue) - dateTimeNowProvider.Now).TotalDays;
-        if (dueInDays > 30)
+        if (dueInDays > 31)
         {
             // Not due for a charge
-            logger.LogWarning("Job was triggered to create charge on an agreement that is not due for a charge within 30 days. Agreement ID: {agreementId}", agreementId);
+            logger.LogWarning("Job was triggered to create charge on an agreement that is not due for a charge within 30 days. Agreement ID: {agreementId}. Agreement is due in {dueInDays} days.", agreementId, dueInDays);
             return;
         }
 
