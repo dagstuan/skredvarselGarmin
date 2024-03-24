@@ -53,8 +53,7 @@ public class VippsAgreementService(
             throw new Exception("Failed to create charge for agreement. Next charge amount was not set. This should never happen.");
         }
 
-        var nowDayNumber = DateOnly.FromDateTime(dateTimeNowProvider.Now).DayNumber;
-        var dueInDays = agreement.NextChargeDate.Value.DayNumber - nowDayNumber;
+        var dueInDays = (agreement.NextChargeDate.Value.ToDateTime(TimeOnly.MinValue) - dateTimeNowProvider.Now).TotalDays;
         if (dueInDays > 30)
         {
             // Not due for a charge
