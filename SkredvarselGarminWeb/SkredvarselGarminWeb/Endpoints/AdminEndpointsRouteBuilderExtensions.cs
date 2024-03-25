@@ -50,7 +50,7 @@ public static class AdminEndpointsRouteBuilderExtensions
 
         app.MapGet("/api/admin/agreements/due-in-less-than-30-days-without-next-charge-id", (SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider) =>
         {
-            return dbContext.GetAgreementsDueInLessThan30DaysWithoutNextChargeId(dateTimeNowProvider).ToList();
+            return dbContext.GetActiveAgreementsDueInLessThan30DaysWithoutNextChargeId(dateTimeNowProvider).ToList();
         }).RequireAuthorization("Admin");
 
         app.MapGet("/api/admin/agreements/{agreementId}", (string agreementId, SkredvarselDbContext dbContext) =>

@@ -69,7 +69,7 @@ public class HangfireService(
 
     public void CreateNextChargeForAgreements()
     {
-        var agreementsWithoutCharges = dbContext.GetAgreementsDueInLessThan30DaysWithoutNextChargeId(dateTimeNowProvider);
+        var agreementsWithoutCharges = dbContext.GetActiveAgreementsDueInLessThan30DaysWithoutNextChargeId(dateTimeNowProvider);
 
         foreach (var agreement in agreementsWithoutCharges)
         {

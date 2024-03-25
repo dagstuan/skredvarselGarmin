@@ -20,11 +20,11 @@ public static class DbContextAgreementExtensions
             .ToList();
     }
 
-    public static List<Agreement> GetAgreementsDueInLessThan30DaysWithoutNextChargeId(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider)
+    public static List<Agreement> GetActiveAgreementsDueInLessThan30DaysWithoutNextChargeId(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider)
     {
         return dbContext.Agreements.Where(a =>
             a.NextChargeId == null &&
-            (a.Status == AgreementStatus.ACTIVE || a.Status == AgreementStatus.UNSUBSCRIBED) &&
+            a.Status == AgreementStatus.ACTIVE &&
             ((a.NextChargeDate.HasValue
                 ? a.NextChargeDate.Value.ToDateTime(TimeOnly.MinValue)
                 : DateTime.MaxValue) - dateTimeNowProvider.Now).Days <= 30
