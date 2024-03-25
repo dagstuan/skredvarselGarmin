@@ -19,7 +19,7 @@
     "@emotion/styled": "^11.11.0",
     "axios": "^1.6.8",
     "date-fns": "^3.6.0",
-    "framer-motion": "^11.0.14",
+    "framer-motion": "^11.0.20",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
@@ -27,15 +27,15 @@
     "react-router-dom": "^6.22.2"
   },
   "devDependencies": {
-    "@types/react": "^18.2.67",
+    "@types/react": "^18.2.70",
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^4.2.1",
     "concurrently": "^8.2.2",
     "prettier": "3.2.5",
-    "sharp": "^0.33.2",
+    "sharp": "^0.33.3",
     "svgo": "^3.2.0",
-    "typescript": "^5.4.2",
-    "vite": "^5.1.4",
+    "typescript": "^5.4.3",
+    "vite": "^5.2.6",
     "vite-imagetools": "^6.2.9"
   },
   "overrides": {
