@@ -194,7 +194,7 @@ public class ForecastMenu extends Ui.CustomMenu {
   }
 }
 
-function getIconResourceForForecastMenu() as Symbol {
+function getIconResourceForForecastMenu() as ResourceId {
   var favoriteRegionId = $.getFavoriteRegionId();
 
   if (favoriteRegionId != null) {

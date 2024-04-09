@@ -240,7 +240,7 @@ module AvalancheUi {
 
     private static function drawPoly(
       dc as Gfx.Dc,
-      points as Array<Array<Numeric> >,
+      points as Array<Gfx.Point2D>,
       color as Gfx.ColorType,
       size as Numeric
     ) {
@@ -249,9 +249,9 @@ module AvalancheUi {
     }
 
     private static function calcPoints(
-      points as Array<Array<Numeric> >,
+      points as Array<Gfx.Point2D>,
       size as Numeric
-    ) as Array<Array<Numeric> > {
+    ) as Array<Gfx.Point2D> {
       var numPoints = points.size();
       var ret = new [numPoints];
       for (var i = 0; i < points.size(); i++) {
