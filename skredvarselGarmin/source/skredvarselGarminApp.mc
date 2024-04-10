@@ -53,7 +53,7 @@ function registerTemporalEvent() {
   }
 }
 
-function getInitialViewAndDelegate() as Array<Ui.Views or Ui.InputDelegates> {
+function getInitialViewAndDelegate() as [ Ui.Views, Ui.InputDelegates? ] {
   var deviceSettings = System.getDeviceSettings();
   if (
     deviceSettings has :isGlanceModeEnabled &&
@@ -64,7 +64,7 @@ function getInitialViewAndDelegate() as Array<Ui.Views or Ui.InputDelegates> {
     if (monkeyVersion[0] < 4) {
       // CIQ less than 4 does not support having a menu as
       // a main view. Need to use an intermediate view.
-      return [new IntermediateBaseView()];
+      return [new IntermediateBaseView(), null];
     }
 
     return [new ForecastMenu(), new ForecastMenuDelegate()];
@@ -78,11 +78,7 @@ function switchToInitialView(transition as Ui.SlideType) {
 
   var initialViewAndDelegate = $.getInitialViewAndDelegate();
 
-  var view = initialViewAndDelegate[0];
-  var delegate =
-    initialViewAndDelegate.size() > 1 ? initialViewAndDelegate[1] : null;
-
-  Ui.switchToView(view, delegate, transition);
+  Ui.switchToView(initialViewAndDelegate[0], initialViewAndDelegate[1], transition);
 }
 
 (:background)
@@ -97,25 +93,30 @@ class skredvarselGarminApp extends Application.AppBase {
   }
 
   // Return the initial view of your application here
-  function getInitialView() as Array<Ui.Views or Ui.InputDelegates>? {
+  function getInitialView() as [ Ui.Views ] or [ Ui.Views, Ui.InputDelegates ] {
     if ($.getHasSubscription() == false) {
       $.log("No subscription detected.");
       return [new SetupSubscriptionView(), new SetupSubscriptionViewDelegate()];
     }
 
     $.registerTemporalEvent();
-    return $.getInitialViewAndDelegate();
+
+    var initialViewAndDelegate = $.getInitialViewAndDelegate();
+
+    if (initialViewAndDelegate[1] != null) {
+      return initialViewAndDelegate;
+    } else {
+      return [initialViewAndDelegate[0]];
+    }
   }
 
   (:glance)
-  public function getGlanceView() as Lang.Array<
-    Ui.GlanceView or Ui.GlanceViewDelegate
-  >? {
+  public function getGlanceView() {
     $.registerTemporalEvent();
     return [new GlanceView()];
   }
 
-  function getServiceDelegate() as Array<System.ServiceDelegate> {
+  function getServiceDelegate() {
     return [new ServiceDelegate()];
   }
 
