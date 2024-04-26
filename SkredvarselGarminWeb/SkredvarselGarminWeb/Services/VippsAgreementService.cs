@@ -19,7 +19,7 @@ public class VippsAgreementService(
     IDateTimeNowProvider dateTimeNowProvider,
     ILogger<VippsAgreementService> logger) : IVippsAgreementService
 {
-    private readonly TimeSpan ChargeRetryDays = TimeSpan.FromDays(3);
+    private readonly TimeSpan ChargeRetryDays = TimeSpan.FromDays(6);
     private const string ChargeText = "Abonnement på Skredvarsel for Garmin";
 
     public async Task CreateNextChargeForAgreement(string agreementId)
