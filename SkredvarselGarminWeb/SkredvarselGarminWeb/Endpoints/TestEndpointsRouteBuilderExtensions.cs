@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+
 using Refit;
+
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.Extensions;

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Primitives;
+
 using SkredvarselGarminWeb.Services;
 
 namespace SkredvarselGarminWeb.Endpoints;

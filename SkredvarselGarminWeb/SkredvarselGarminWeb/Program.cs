@@ -1,17 +1,22 @@
+using Hangfire;
+
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+
+using Resend;
+
 using SkredvarselGarminWeb.Configuration;
 using SkredvarselGarminWeb.Database;
-using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.Endpoints;
-using Hangfire;
 using SkredvarselGarminWeb.Hangfire;
 using SkredvarselGarminWeb.Helpers;
-using SkredvarselGarminWeb.Services;
-using Microsoft.AspNetCore.DataProtection;
-using Stripe;
-using Microsoft.OpenApi.Models;
 using SkredvarselGarminWeb.Middlewares;
+using SkredvarselGarminWeb.Options;
+using SkredvarselGarminWeb.Services;
+
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,4 +1,5 @@
 using System.Reflection;
+
 using Refit;
 
 namespace SkredvarselGarminWeb.VarsomApi;

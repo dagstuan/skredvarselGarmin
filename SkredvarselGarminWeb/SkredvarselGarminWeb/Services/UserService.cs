@@ -1,5 +1,7 @@
 using System.Security.Claims;
+
 using Microsoft.EntityFrameworkCore;
+
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Extensions;

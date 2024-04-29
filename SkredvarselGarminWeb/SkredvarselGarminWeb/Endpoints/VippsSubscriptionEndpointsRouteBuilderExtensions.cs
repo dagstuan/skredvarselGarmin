@@ -1,5 +1,7 @@
 using Hangfire;
+
 using Refit;
+
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.Extensions;
@@ -7,6 +9,7 @@ using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Services;
 using SkredvarselGarminWeb.VippsApi;
 using SkredvarselGarminWeb.VippsApi.Models;
+
 using AgreementStatus = SkredvarselGarminWeb.Entities.AgreementStatus;
 using VippsAgreementStatus = SkredvarselGarminWeb.VippsApi.Models.AgreementStatus;
 

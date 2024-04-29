@@ -1,7 +1,9 @@
 using Polly;
 using Polly.Extensions.Http;
 using Polly.Timeout;
+
 using Refit;
+
 using SkredvarselGarminWeb.NtfyApi;
 using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.VarsomApi;

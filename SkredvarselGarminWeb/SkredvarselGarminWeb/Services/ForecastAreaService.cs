@@ -1,7 +1,9 @@
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+
 using ProjNet.CoordinateSystems;
 using ProjNet.CoordinateSystems.Transformations;
+
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities;
 

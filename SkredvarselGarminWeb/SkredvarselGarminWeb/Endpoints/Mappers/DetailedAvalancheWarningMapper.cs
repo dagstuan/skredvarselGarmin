@@ -28,10 +28,10 @@ public static class DetailedAvalancheWarningMapper
         {
             TypeName = problem.AvalancheProblemTypeName,
             ExposedHeights = [
-                    problem.ExposedHeight1,
-                    problem.ExposedHeight2,
-                    problem.ExposedHeightFill,
-                ],
+                problem.ExposedHeight1,
+                problem.ExposedHeight2,
+                problem.ExposedHeightFill,
+            ],
             ValidExpositions = problem.ValidExpositions,
             DangerLevel = problem.DangerLevel,
         }).OrderByDescending(x => x.DangerLevel),

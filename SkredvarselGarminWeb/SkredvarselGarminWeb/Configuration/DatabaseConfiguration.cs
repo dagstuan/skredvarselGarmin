@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+
 using Npgsql;
+
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Options;
 

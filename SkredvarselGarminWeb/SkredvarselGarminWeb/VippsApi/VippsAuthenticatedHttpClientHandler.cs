@@ -1,6 +1,8 @@
 using System.Net.Http.Headers;
-using Microsoft.Extensions.Options;
 using System.Text.Json;
+
+using Microsoft.Extensions.Options;
+
 using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.VippsApi.Models;
 

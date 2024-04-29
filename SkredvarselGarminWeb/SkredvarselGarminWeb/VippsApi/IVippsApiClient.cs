@@ -1,4 +1,5 @@
 using Refit;
+
 using SkredvarselGarminWeb.VippsApi.Models;
 
 namespace SkredvarselGarminWeb.VippsApi;

@@ -1,30 +1,38 @@
+using System.Net;
+
 using AutoFixture;
+
+using FluentAssertions;
+
 using Hangfire;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Logging;
+
 using NSubstitute;
+
+using Refit;
+
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities;
+using SkredvarselGarminWeb.Helpers;
+using SkredvarselGarminWeb.Services;
 using SkredvarselGarminWeb.VippsApi;
+
 using VippsAgreement = SkredvarselGarminWeb.VippsApi.Models.Agreement;
-using VippsAgreementStatus = SkredvarselGarminWeb.VippsApi.Models.AgreementStatus;
 using VippsAgreementCampaign = SkredvarselGarminWeb.VippsApi.Models.AgreementCampaign;
+using VippsAgreementStatus = SkredvarselGarminWeb.VippsApi.Models.AgreementStatus;
 using VippsCampaignType = SkredvarselGarminWeb.VippsApi.Models.CampaignType;
-using VippsPeriod = SkredvarselGarminWeb.VippsApi.Models.Period;
-using VippsPeriodUnit = SkredvarselGarminWeb.VippsApi.Models.PeriodUnit;
+using VippsCaptureChargeRequest = SkredvarselGarminWeb.VippsApi.Models.CaptureChargeRequest;
 using VippsCharge = SkredvarselGarminWeb.VippsApi.Models.Charge;
 using VippsChargeStatus = SkredvarselGarminWeb.VippsApi.Models.ChargeStatus;
-using VippsCaptureChargeRequest = SkredvarselGarminWeb.VippsApi.Models.CaptureChargeRequest;
 using VippsCreateChargeRequest = SkredvarselGarminWeb.VippsApi.Models.CreateChargeRequest;
 using VippsCreateChargeResponse = SkredvarselGarminWeb.VippsApi.Models.CreateChargeResponse;
 using VippsPatchAgreementRequest = SkredvarselGarminWeb.VippsApi.Models.PatchAgreementRequest;
 using VippsPatchAgreementStatus = SkredvarselGarminWeb.VippsApi.Models.PatchAgreementStatus;
-using Refit;
-using System.Net;
-using SkredvarselGarminWeb.Helpers;
-using FluentAssertions;
-using SkredvarselGarminWeb.Services;
+using VippsPeriod = SkredvarselGarminWeb.VippsApi.Models.Period;
+using VippsPeriodUnit = SkredvarselGarminWeb.VippsApi.Models.PeriodUnit;
 
 namespace SkredvarselGarminWeb.Tests;
 

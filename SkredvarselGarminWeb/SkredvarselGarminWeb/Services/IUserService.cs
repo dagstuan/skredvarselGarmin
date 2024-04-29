@@ -1,4 +1,5 @@
 using System.Security.Claims;
+
 using SkredvarselGarminWeb.Entities;
 
 namespace SkredvarselGarminWeb.Services;

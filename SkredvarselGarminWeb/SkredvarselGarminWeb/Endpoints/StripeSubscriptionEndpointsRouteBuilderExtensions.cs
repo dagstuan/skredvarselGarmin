@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Extensions;
 using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.Services;
+
 using Stripe;
 using Stripe.Checkout;
 
@@ -44,7 +46,8 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
                 Customer = user.StripeCustomerId,
                 ClientReferenceId = user.Id,
                 LineItems = [
-                    new SessionLineItemOptions {
+                    new SessionLineItemOptions
+                    {
                         Price = stripeOptions.Value.PriceId,
                         Quantity = 1,
                     }

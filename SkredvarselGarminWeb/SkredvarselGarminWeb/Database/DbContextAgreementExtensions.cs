@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+
 using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Helpers;
 
