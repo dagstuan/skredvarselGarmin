@@ -44,3 +44,20 @@ public function loadSimpleForecastForRegion(
 
   $.makeApiRequest(path, storageKey, callback, useQueue);
 }
+
+(:background)
+function getSimpleWarningsPathForLocation(
+  latitude as Double,
+  longitude as Double,
+  language as Number,
+  formattedStartDate as String,
+  formattedEndDate as String
+) as String {
+  return Lang.format("/simpleWarningsByLocation/$1$/$2$/$3$/$4$/$5$", [
+    latitude,
+    longitude,
+    language,
+    formattedStartDate,
+    formattedEndDate,
+  ]);
+}

@@ -6,6 +6,7 @@ using Toybox.WatchUi as Ui;
 using Toybox.Background;
 using Toybox.Time.Gregorian;
 using Toybox.Time;
+using Toybox.Position;
 
 (:glance)
 function registerTemporalEvent() {
@@ -99,6 +100,11 @@ class skredvarselGarminApp extends Application.AppBase {
       return [new SetupSubscriptionView(), new SetupSubscriptionViewDelegate()];
     }
 
+    Position.enableLocationEvents(
+      Position.LOCATION_CONTINUOUS,
+      method(:posCallback)
+    );
+
     $.registerTemporalEvent();
 
     var initialViewAndDelegate = $.getInitialViewAndDelegate();
@@ -110,9 +116,20 @@ class skredvarselGarminApp extends Application.AppBase {
     }
   }
 
+  public function posCallback(info as Position.Info) as Void {
+    var latLon = info.position.toDegrees();
+    $.log("got new position. lat: " + latLon[0] + ", lon: " + latLon[1]);
+  }
+
   (:glance)
   public function getGlanceView() {
     $.registerTemporalEvent();
+
+    Position.enableLocationEvents(
+      Position.LOCATION_ONE_SHOT,
+      method(:posCallback)
+    );
+
     return [new GlanceView()];
   }
 

@@ -28,11 +28,11 @@ public class ForecastMenu extends Ui.CustomMenu {
   }
 
   function onShow() {
-    var regionIds = $.getSelectedRegionIds();
-    var numRegions = regionIds.size();
+    var selectedRegionIds = $.getSelectedRegionIds();
+    var numRegions = selectedRegionIds.size();
 
     if (numRegions == 0) {
-      _existingRegionIds = regionIds;
+      _existingRegionIds = selectedRegionIds;
       deleteAllItems();
       addItem(new ForecastMenuEditMenuItem(_editItemId));
       redrawTitleAndFooter();
@@ -43,8 +43,8 @@ public class ForecastMenu extends Ui.CustomMenu {
     if (numRegions != _existingRegionIds.size()) {
       regionsChanged = true;
     } else {
-      for (var i = 0; i < regionIds.size(); i++) {
-        if (!regionIds[i].equals(_existingRegionIds[i])) {
+      for (var i = 0; i < selectedRegionIds.size(); i++) {
+        if (!selectedRegionIds[i].equals(_existingRegionIds[i])) {
           regionsChanged = true;
           break;
         }
@@ -53,8 +53,14 @@ public class ForecastMenu extends Ui.CustomMenu {
 
     if (regionsChanged) {
       deleteAllItems();
-      for (var i = 0; i < regionIds.size(); i++) {
-        addItem(new ForecastMenuItem(self, regionIds[i]));
+      for (var i = 0; i < selectedRegionIds.size(); i++) {
+        addItem(
+          new ForecastMenuItem({
+            :menu => self,
+            :regionId => selectedRegionIds[i],
+            :isLocationWarning => false,
+          })
+        );
       }
 
       addItem(new ForecastMenuEditMenuItem(_editItemId));
@@ -62,7 +68,7 @@ public class ForecastMenu extends Ui.CustomMenu {
       redrawTitleAndFooter();
     }
 
-    _existingRegionIds = regionIds;
+    _existingRegionIds = selectedRegionIds;
   }
 
   function drawTitle(dc as Gfx.Dc) {

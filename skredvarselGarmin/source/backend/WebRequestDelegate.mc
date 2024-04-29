@@ -5,10 +5,10 @@ using Toybox.Time;
 using Toybox.Application.Storage;
 using Toybox.WatchUi as Ui;
 
-//const FrontendBaseUrl = "http://localhost:5173";
-//const ApiBaseUrl = "https://localhost:8080/api";
-const FrontendBaseUrl = "https://skredvarsel.app";
-const ApiBaseUrl = "https://skredvarsel.app/api";
+const FrontendBaseUrl = "http://localhost:5173";
+const ApiBaseUrl = "https://localhost:8080/api";
+// const FrontendBaseUrl = "https://skredvarsel.app";
+// const ApiBaseUrl = "https://skredvarsel.app/api";
 
 typedef WebRequestCallbackData as Null or Dictionary or String;
 typedef WebRequestCallback as (Method

@@ -5,9 +5,17 @@ using Toybox.Graphics as Gfx;
 
 using AvalancheUi;
 
+typedef ForecastMenuItemSettings as {
+  :menu as ForecastMenu,
+  :regionId as String,
+  :isLocationWarning as Boolean,
+};
+
 public class ForecastMenuItem extends Ui.CustomMenuItem {
   public var regionId as String;
   private var _menu as ForecastMenu;
+  private var _isLocationWarning as Boolean;
+
   private var _forecast as SimpleAvalancheForecast?;
   private var _dataAge as Number?;
 
@@ -15,11 +23,13 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
 
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
 
-  public function initialize(menu as ForecastMenu, regionId as String) {
+  public function initialize(settings as ForecastMenuItemSettings) {
+    regionId = settings[:regionId];
+
     CustomMenuItem.initialize(regionId, {});
 
-    self.regionId = regionId;
-    _menu = menu;
+    _menu = settings[:menu];
+    _isLocationWarning = settings[:isLocationWarning] || false;
 
     _loadingText = $.getOrLoadResourceString("Laster...", :Loading);
 

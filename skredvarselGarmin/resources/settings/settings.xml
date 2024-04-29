@@ -2,6 +2,9 @@
 	<setting propertyKey="@Properties.appVersion" title="@Strings.AppVersionTitle">
 		<settingConfig type="alphaNumeric" readonly="true" />
 	</setting>
+	<setting propertyKey="@Properties.useLocation" title="@Strings.UseLocation">
+		<settingConfig type="boolean" />
+	</setting>
 	<setting propertyKey="@Properties.useWatchLanguage" title="@Strings.UseWatchLanguage">
 		<settingConfig type="boolean" />
 	</setting>
