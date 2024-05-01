@@ -23,7 +23,7 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
             IStripeClient stripeClient,
             IOptions<StripeOptions> stripeOptions) =>
         {
-            var user = await userService.GetUserOrRegisterLogin(ctx.User);
+            var user = userService.GetUserOrRegisterLogin(ctx.User);
 
             var baseUrl = ctx.GetBaseUrl();
 

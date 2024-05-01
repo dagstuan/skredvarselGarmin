@@ -21,6 +21,7 @@ import { FaApplePay, FaCreditCard, FaGooglePay } from "react-icons/fa";
 import { useNavigateOnClose } from "../hooks/useNavigateOnClose";
 import { useUser } from "../hooks/useUser";
 import { useNavigateToAccountIfLoggedIn } from "../hooks/useNavigateToAccountIfLoggedIn";
+import { OrDivider } from "./OrDivider";
 
 export const BuySubscriptionModal = () => {
   const { data: user, isLoading: isLoadingUser } = useUser();
@@ -53,12 +54,7 @@ export const BuySubscriptionModal = () => {
 
             <VStack w="100%" maxW="sm" gap={5} alignItems="stretch">
               <VippsButton />
-              <Box mb={2} mt={2} position="relative">
-                <Divider />
-                <AbsoluteCenter bg="white" px="4">
-                  Eller
-                </AbsoluteCenter>
-              </Box>
+              <OrDivider text="Eller logg inn for alternativer" />
               <GoogleButton link="/google-login?returnUrl=/account" />
               <FacebookButton link="/facebook-login?returnUrl=/account" />
             </VStack>

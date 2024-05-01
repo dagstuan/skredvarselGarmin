@@ -208,7 +208,16 @@ public class VippsAgreementService(
         }
     }
 
-    public async Task StopAgreement(EntityAgreement agreement, VippsAgreement vippsAgreement)
+    public async Task StopAgreement(string agreementId)
+    {
+        var agreement = dbContext.Agreements.First(a => a.Id == agreementId);
+
+        var vippsAgreement = await vippsApiClient.GetAgreement(agreementId);
+
+        await StopAgreement(agreement, vippsAgreement);
+    }
+
+    private async Task StopAgreement(EntityAgreement agreement, VippsAgreement vippsAgreement)
     {
         logger.LogInformation("Stopping agreement in vipps and setting as stopped.");
 

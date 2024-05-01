@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using SkredvarselGarminWeb.Database;
 namespace SkredvarselGarminWeb.Migrations
 {
     [DbContext(typeof(SkredvarselDbContext))]
-    partial class SkredvarselDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240512104730_NullableUserIdForAgreement")]
+    partial class NullableUserIdForAgreement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,10 +32,6 @@ namespace SkredvarselGarminWeb.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text")
                         .HasColumnName("id");
-
-                    b.Property<Guid?>("CallbackId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("callback_id");
 
                     b.Property<string>("ConfirmationUrl")
                         .HasColumnType("text")

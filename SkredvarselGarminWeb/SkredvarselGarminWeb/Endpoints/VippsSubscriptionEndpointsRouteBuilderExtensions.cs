@@ -1,4 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
+
 using Hangfire;
+
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 using Refit;
 
@@ -18,7 +26,6 @@ namespace SkredvarselGarminWeb.Endpoints;
 
 public static class VippsSubscriptionEndpointsRouteBuilderExtensions
 {
-    private const int CampaignPrice = 100;
     private const int FullPrice = 3000;
 
     public static void MapVippsSubscriptionEndpoints(this IEndpointRouteBuilder app)
@@ -30,32 +37,35 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
             SkredvarselDbContext dbContext,
             IDateTimeNowProvider dateTimeNowProvider) =>
         {
-            var user = await userService.GetUserOrRegisterLogin(ctx.User);
-
-            var userId = user.Id;
-
-            var existingAgreementsForUser = dbContext.Agreements
-                .Where(a => a.UserId == userId)
-                .ToList();
-
-            var isNewCustomer = existingAgreementsForUser.Count == 0;
-
             var baseUrl = ctx.GetBaseUrl();
+            string? userId = null;
 
-            if (existingAgreementsForUser.Any(x => x.Status == AgreementStatus.ACTIVE))
-            {
-                return Results.Redirect($"{baseUrl}/account");
-            }
+            var callbackId = Guid.NewGuid();
 
-            var pendingAgreementForUser = existingAgreementsForUser.FirstOrDefault(x => x.Status == AgreementStatus.PENDING);
-            if (pendingAgreementForUser != null && pendingAgreementForUser.ConfirmationUrl != null)
+            if (ctx.User.Identity?.IsAuthenticated ?? false)
             {
-                return Results.Redirect(pendingAgreementForUser.ConfirmationUrl);
+                var user = userService.GetUserOrThrow(ctx.User);
+
+                userId = user.Id;
+
+                var existingAgreementsForUser = dbContext.Agreements
+                    .Where(a => a.UserId == userId)
+                    .ToList();
+
+                if (existingAgreementsForUser.Any(x => x.Status == AgreementStatus.ACTIVE))
+                {
+                    return Results.Redirect($"{baseUrl}/account");
+                }
+
+                var pendingAgreementForUser = existingAgreementsForUser.FirstOrDefault(x => x.Status == AgreementStatus.PENDING);
+                if (pendingAgreementForUser != null && pendingAgreementForUser.ConfirmationUrl != null)
+                {
+                    return Results.Redirect(pendingAgreementForUser.ConfirmationUrl);
+                }
             }
 
             var request = new DraftAgreementRequest
             {
-                CustomerPhoneNumber = ctx.User.Claims.GetClaimValueOrNull("phone_number"),
                 Pricing = new()
                 {
                     Amount = FullPrice,
@@ -65,28 +75,15 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                     Count = 1,
                     Unit = PeriodUnit.Year
                 },
-                Campaign = isNewCustomer ? new()
-                {
-                    Price = CampaignPrice,
-                    Type = CampaignType.PeriodCampaign,
-                    Period = new()
-                    {
-                        Count = 1,
-                        Unit = PeriodUnit.Week
-                    }
-                } : null,
-                InitialCharge = isNewCustomer ? new()
-                {
-                    Amount = 100,
-                    Description = "Første uke"
-                } : new()
+                InitialCharge = new()
                 {
                     Amount = FullPrice,
                     Description = "Skredvarsel for Garmin"
                 },
                 ProductName = "Skredvarsel for Garmin",
                 MerchantAgreementUrl = $"{baseUrl}/account",
-                MerchantRedirectUrl = $"{baseUrl}/vipps-subscribe-callback"
+                MerchantRedirectUrl = $"{baseUrl}/vipps-subscribe-callback?callbackId={callbackId}",
+                Scope = "name email"
             };
 
             try
@@ -96,6 +93,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                 dbContext.Add(new Entities.Agreement
                 {
                     Id = createdAgreement.AgreementId,
+                    CallbackId = callbackId,
                     Created = dateTimeNowProvider.Now.ToUniversalTime(),
                     UserId = userId,
                     Status = AgreementStatus.PENDING,
@@ -112,13 +110,17 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
             {
                 return Results.BadRequest(e.Content);
             }
-        }).RequireAuthorization();
+        }).AllowAnonymous();
 
         app.MapGet("/vipps-subscribe-callback", async (
+            [FromQuery]
+            [BindRequired]
+            Guid callbackId,
             HttpContext ctx,
             SkredvarselDbContext dbContext,
             IVippsApiClient vippsApiClient,
             IVippsAgreementService subscriptionService,
+            IUserService userService,
             INotificationService notificationService,
             IBackgroundJobClient backgroundJobClient,
             IDateTimeNowProvider dateTimeNowProvider,
@@ -126,46 +128,82 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
         {
             var logger = loggerFactory.CreateLogger("vipps-subscribe-callback");
 
-            var pendingAgreements = dbContext.GetPendingAgreements();
+            using var transaction = dbContext.Database.BeginTransaction();
 
-            var tasks = pendingAgreements.Select(async agreement =>
+            var agreement = dbContext.GetAgreementWithCallbackId(callbackId);
+
+            if (agreement != null)
             {
                 var retries = 0;
-                var agreementInVipps = await vippsApiClient.GetAgreement(agreement.Id);
+                var vippsAgreement = await vippsApiClient.GetAgreement(agreement.Id);
 
-                while (agreementInVipps.Status == VippsAgreementStatus.Pending && retries < 5)
+                while (vippsAgreement.Status == VippsAgreementStatus.Pending && retries < 5)
                 {
                     retries++;
 
                     await Task.Delay(750);
 
-                    agreementInVipps = await vippsApiClient.GetAgreement(agreement.Id);
+                    vippsAgreement = await vippsApiClient.GetAgreement(agreement.Id);
                 }
 
-                if (agreementInVipps.Status == VippsAgreementStatus.Stopped ||
-                    agreementInVipps.Status == VippsAgreementStatus.Expired)
+                if (vippsAgreement.Status == VippsAgreementStatus.Stopped ||
+                    vippsAgreement.Status == VippsAgreementStatus.Expired)
                 {
                     dbContext.Remove(agreement);
                 }
-                else if (agreementInVipps.Status == VippsAgreementStatus.Active)
+                else if (vippsAgreement.Status == VippsAgreementStatus.Active)
                 {
+                    if (string.IsNullOrEmpty(agreement.UserId))
+                    {
+                        var existingUser = dbContext.Users.FirstOrDefault(u => u.Id == vippsAgreement.Sub);
+
+                        if (existingUser != null)
+                        {
+                            var existingActiveAgreementsForUser = dbContext.Agreements
+                                .Where(a => a.UserId == existingUser.Id)
+                                .Where(a => a.Status == AgreementStatus.ACTIVE)
+                                .Select(a => a.Id)
+                                .ToList();
+
+                            foreach (var existingAgreement in existingActiveAgreementsForUser)
+                            {
+                                await subscriptionService.StopAgreement(existingAgreement);
+                            }
+                        }
+
+                        var userInfo = await vippsApiClient.GetUserInfo(vippsAgreement.Sub);
+
+                        var principal = new ClaimsPrincipal(new ClaimsIdentity(
+                        [
+                            new("name", userInfo.Name),
+                            new("email", userInfo.Email),
+                            new("sub", vippsAgreement.Sub)
+                        ], CookieAuthenticationDefaults.AuthenticationScheme));
+
+                        await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+                        userService.RegisterLogin(principal);
+
+                        agreement.SetUserIdAndRemoveCallbackId(vippsAgreement.Sub);
+                    }
+
                     _ = Task.Run(notificationService.NotifyUserSubscribed);
 
                     agreement.SetAsActive();
                     backgroundJobClient.Enqueue(() => subscriptionService.UpdateAgreementCharges(agreement.Id));
                 }
-                else if (agreementInVipps.Status == VippsAgreementStatus.Pending)
+                else if (vippsAgreement.Status == VippsAgreementStatus.Pending)
                 {
                     logger.LogInformation("Subscription was still pending after 5 retries. Returning.");
                 }
-            });
-
-            await Task.WhenAll(tasks);
+            }
 
             dbContext.SaveChanges();
 
+            transaction.Commit();
+
             return Results.Redirect("/account");
-        }).RequireAuthorization();
+        }).AllowAnonymous();
 
         app.MapDelete("/api/vippsAgreement", async (
             HttpContext ctx,

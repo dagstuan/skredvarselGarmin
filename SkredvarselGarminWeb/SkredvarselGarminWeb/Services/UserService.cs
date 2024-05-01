@@ -1,7 +1,5 @@
 using System.Security.Claims;
 
-using Microsoft.EntityFrameworkCore;
-
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Extensions;
@@ -13,27 +11,32 @@ public class UserService(
     SkredvarselDbContext dbContext,
     IDateTimeNowProvider dateTimeNowProvider) : IUserService
 {
-    public async Task<User> GetUserOrRegisterLogin(ClaimsPrincipal principal)
+    public User GetUserOrThrow(ClaimsPrincipal principal)
+    {
+        return dbContext.GetUserOrThrow(principal);
+    }
+
+    public User GetUserOrRegisterLogin(ClaimsPrincipal principal)
     {
         var user = dbContext.GetUserOrNull(principal);
 
         if (user == null)
         {
-            await RegisterLogin(principal);
+            RegisterLogin(principal);
         }
 
         return dbContext.GetUserOrThrow(principal);
     }
 
-    public async Task RegisterLogin(ClaimsPrincipal user)
+    public void RegisterLogin(ClaimsPrincipal user)
     {
         var dateNow = DateOnly.FromDateTime(dateTimeNowProvider.Now);
 
         var id = user.Claims.GetClaimValue("sub");
-        var name = user.Claims.GetClaimValue("name");
+        var name = user.Claims.GetClaimValueOrNull("name");
         var email = user.Claims.GetClaimValue("email");
 
-        var dbUser = await dbContext.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
+        var dbUser = dbContext.GetUserByEmailOrNull(email);
         if (dbUser == null)
         {
             dbUser = new User
@@ -52,6 +55,6 @@ public class UserService(
         dbUser.Email = email;
         dbUser.LastLoggedIn = dateNow;
 
-        await dbContext.SaveChangesAsync();
+        dbContext.SaveChanges();
     }
 }

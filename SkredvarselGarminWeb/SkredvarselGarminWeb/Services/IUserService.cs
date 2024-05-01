@@ -6,7 +6,9 @@ namespace SkredvarselGarminWeb.Services;
 
 public interface IUserService
 {
-    Task<User> GetUserOrRegisterLogin(ClaimsPrincipal principal);
+    User GetUserOrThrow(ClaimsPrincipal principal);
 
-    Task RegisterLogin(ClaimsPrincipal user);
+    User GetUserOrRegisterLogin(ClaimsPrincipal principal);
+
+    void RegisterLogin(ClaimsPrincipal user);
 }

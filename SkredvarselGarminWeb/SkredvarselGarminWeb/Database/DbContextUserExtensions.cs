@@ -40,6 +40,16 @@ public static class DbContextUserExtensions
             ?? throw new Exception("Unable to find user for principal.");
     }
 
+    public static User? GetUserByIdOrNull(this SkredvarselDbContext dbContext, string id)
+    {
+        return dbContext.Users.FirstOrDefault(u => u.Id == id);
+    }
+
+    public static User? GetUserByEmailOrNull(this SkredvarselDbContext dbContext, string email)
+    {
+        return dbContext.Users.FirstOrDefault(u => u.Email == email);
+    }
+
     public static User? GetUserForWatchOrNull(this SkredvarselDbContext dbContext, string watchId)
     {
         return dbContext.Watches

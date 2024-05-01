@@ -14,7 +14,7 @@ export const PersonalInfo = () => {
 
   return (
     <UnorderedList listStyleType={"none"} marginInlineStart={0}>
-      <ListItem>{user.name}</ListItem>
+      {user.name && <ListItem>{user.name}</ListItem>}
       <ListItem>{user.email}</ListItem>
     </UnorderedList>
   );

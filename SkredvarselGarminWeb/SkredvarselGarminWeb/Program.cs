@@ -12,6 +12,7 @@ using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Endpoints;
 using SkredvarselGarminWeb.Hangfire;
 using SkredvarselGarminWeb.Helpers;
+using SkredvarselGarminWeb.MagicLink;
 using SkredvarselGarminWeb.Middlewares;
 using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.Services;
@@ -29,6 +30,8 @@ builder.Services.AddHttpContextAccessor();
 var dataProtectionPath = builder.Configuration.GetValue<string>("DataProtectionPath");
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath!));
+
+builder.Services.Configure<AppOptions>(builder.Configuration.GetSection("App"));
 
 var databaseOptions = builder.Configuration.GetSection("Database").Get<DatabaseOptions>()!;
 builder.Services.ConfigureDatabase(databaseOptions);
@@ -66,6 +69,14 @@ builder.Services.AddSwaggerGen(c =>
     c.CustomSchemaIds(type => type.ToString());
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "SkredvarselGarminWeb", Version = "v1" });
 });
+
+builder.Services.AddHttpClient<ResendClient>();
+builder.Services.Configure<ResendClientOptions>(
+    o => o.ApiToken = "re_HYBP3fqv_96jb8eUXygqNzNF3DmRNtgyt");
+builder.Services.AddTransient<IResend, ResendClient>();
+builder.Services.AddTransient<IEmailService, EmailService>();
+
+builder.Services.AddTransient<IMagicLinkTokenDataFormat, MagicLinkTokenDataFormat>();
 
 var app = builder.Build();
 
@@ -132,7 +143,7 @@ if (app.Environment.IsDevelopment())
         if (endpoint == null)
         {
             var redirectUrl = UriHelper.BuildAbsolute(
-                "http",
+                "https",
                 new HostString("localhost:5173"),
                 context.Request.PathBase,
                 context.Request.Path,
