@@ -1,15 +1,16 @@
+using Hangfire;
+
 using SkredvarselGarminWeb.Database;
+using SkredvarselGarminWeb.Entities.Extensions;
+using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.VippsApi;
 using SkredvarselGarminWeb.VippsApi.Models;
 
-using VippsAgreementStatus = SkredvarselGarminWeb.VippsApi.Models.AgreementStatus;
-using VippsAgreement = SkredvarselGarminWeb.VippsApi.Models.Agreement;
-using VippsCampaignType = SkredvarselGarminWeb.VippsApi.Models.CampaignType;
 using EntityAgreement = SkredvarselGarminWeb.Entities.Agreement;
 using EntityAgreementStatus = SkredvarselGarminWeb.Entities.AgreementStatus;
-using SkredvarselGarminWeb.Helpers;
-using SkredvarselGarminWeb.Entities.Extensions;
-using Hangfire;
+using VippsAgreement = SkredvarselGarminWeb.VippsApi.Models.Agreement;
+using VippsAgreementStatus = SkredvarselGarminWeb.VippsApi.Models.AgreementStatus;
+using VippsCampaignType = SkredvarselGarminWeb.VippsApi.Models.CampaignType;
 
 namespace SkredvarselGarminWeb.Services;
 
@@ -207,7 +208,16 @@ public class VippsAgreementService(
         }
     }
 
-    public async Task StopAgreement(EntityAgreement agreement, VippsAgreement vippsAgreement)
+    public async Task StopAgreement(string agreementId)
+    {
+        var agreement = dbContext.Agreements.First(a => a.Id == agreementId);
+
+        var vippsAgreement = await vippsApiClient.GetAgreement(agreementId);
+
+        await StopAgreement(agreement, vippsAgreement);
+    }
+
+    private async Task StopAgreement(EntityAgreement agreement, VippsAgreement vippsAgreement)
     {
         logger.LogInformation("Stopping agreement in vipps and setting as stopped.");
 

@@ -1,11 +1,12 @@
-using SkredvarselGarminWeb.Database;
-using SkredvarselGarminWeb.VippsApi;
 using Hangfire;
 
-using VippsAgreementStatus = SkredvarselGarminWeb.VippsApi.Models.AgreementStatus;
-using SkredvarselGarminWeb.Helpers;
+using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities.Extensions;
+using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Services;
+using SkredvarselGarminWeb.VippsApi;
+
+using VippsAgreementStatus = SkredvarselGarminWeb.VippsApi.Models.AgreementStatus;
 
 namespace SkredvarselGarminWeb.Hangfire;
 

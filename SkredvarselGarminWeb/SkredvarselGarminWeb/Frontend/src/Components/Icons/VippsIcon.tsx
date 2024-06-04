@@ -1,4 +1,4 @@
-import { Icon, createIcon } from "@chakra-ui/react";
+import { Icon } from "@chakra-ui/react";
 import { ComponentProps } from "react";
 
 export const VippsIcon = ({

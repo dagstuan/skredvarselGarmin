@@ -1,4 +1,5 @@
 using Refit;
+
 using SkredvarselGarminWeb.VippsApi.Models;
 
 namespace SkredvarselGarminWeb.VippsApi;
@@ -34,4 +35,7 @@ public interface IVippsApiClient
 
     [Post("/recurring/v3/agreements/{agreementId}/charges/{chargeId}/refund")]
     Task<IApiResponse> RefundCharge([AliasAs("agreementId")] string agreementId, [AliasAs("chargeId")] string chargeId, [Header("Idempotency-Key")] Guid idempotencyKey);
+
+    [Get("/vipps-userinfo-api/userinfo/{sub}")]
+    Task<UserInfo> GetUserInfo([AliasAs("sub")] string sub);
 }

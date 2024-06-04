@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Caching.Memory;
+
 using SkredvarselGarminWeb.Endpoints.Mappers;
 using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.VarsomApi;

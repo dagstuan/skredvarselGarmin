@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Endpoints.Models;
 

@@ -1,3 +1,3 @@
-import { LoginModal } from "../Components/LoginModal";
+import { LoginModal } from "../Components/LoginModal/LoginModal";
 
 export const Component = LoginModal;

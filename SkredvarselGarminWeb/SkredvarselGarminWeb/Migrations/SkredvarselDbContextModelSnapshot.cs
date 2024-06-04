@@ -18,7 +18,7 @@ namespace SkredvarselGarminWeb.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.2")
+                .HasAnnotation("ProductVersion", "8.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
@@ -29,6 +29,10 @@ namespace SkredvarselGarminWeb.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text")
                         .HasColumnName("id");
+
+                    b.Property<Guid?>("CallbackId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("callback_id");
 
                     b.Property<string>("ConfirmationUrl")
                         .HasColumnType("text")
@@ -59,7 +63,6 @@ namespace SkredvarselGarminWeb.Migrations
                         .HasColumnName("status");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("user_id");
 
@@ -153,7 +156,6 @@ namespace SkredvarselGarminWeb.Migrations
                         .HasColumnName("last_logged_in");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
 
@@ -230,7 +232,6 @@ namespace SkredvarselGarminWeb.Migrations
                         .WithMany("Agreements")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
                         .HasConstraintName("fk_agreements_users_user_id");
 
                     b.Navigation("User");

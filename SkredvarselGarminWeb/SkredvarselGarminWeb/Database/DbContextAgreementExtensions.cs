@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Helpers;
 
@@ -30,6 +29,9 @@ public static class DbContextAgreementExtensions
                 : DateTime.MaxValue) - dateTimeNowProvider.Now).Days <= 30
             ).ToList();
     }
+
+    public static Agreement? GetAgreementWithCallbackId(this SkredvarselDbContext dbContext, Guid callbackId) =>
+        dbContext.Agreements.SingleOrDefault(a => a.CallbackId == callbackId);
 
     public static List<Agreement> GetPendingAgreements(this SkredvarselDbContext dbContext) =>
         [.. dbContext.Agreements.Where(a => a.Status == AgreementStatus.PENDING)];

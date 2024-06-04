@@ -1,6 +1,8 @@
 using System.Net;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+
 using SkredvarselGarminWeb.Configuration;
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Endpoints.Mappers;
@@ -8,6 +10,7 @@ using SkredvarselGarminWeb.Endpoints.Models;
 using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Services;
+
 using WatchEntityModel = SkredvarselGarminWeb.Entities.Watch;
 
 namespace SkredvarselGarminWeb.Endpoints;

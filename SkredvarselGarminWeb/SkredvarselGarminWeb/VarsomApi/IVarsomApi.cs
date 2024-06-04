@@ -1,4 +1,5 @@
 using Refit;
+
 using SkredvarselGarminWeb.VarsomApi.Models;
 
 namespace SkredvarselGarminWeb.VarsomApi;

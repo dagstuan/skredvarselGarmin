@@ -29,7 +29,7 @@ export type Subscription<TType extends SubscriptionType> = {
 };
 
 export type User = {
-  name: string;
+  name: string | undefined;
   email: string;
   phoneNumber: string;
   isAdmin: boolean;

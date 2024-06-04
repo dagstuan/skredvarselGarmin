@@ -1,10 +1,11 @@
 using Hangfire;
+
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Endpoints.Models;
 using SkredvarselGarminWeb.Entities.Extensions;
-using SkredvarselGarminWeb.NtfyApi;
 using SkredvarselGarminWeb.Services;
 using SkredvarselGarminWeb.VippsApi;
+
 using AgreementStatus = SkredvarselGarminWeb.Entities.AgreementStatus;
 using VippsAgreementStatus = SkredvarselGarminWeb.VippsApi.Models.AgreementStatus;
 

@@ -3,7 +3,7 @@ namespace SkredvarselGarminWeb.Endpoints.Models;
 public class AdminDataUser
 {
     public required string Id { get; set; }
-    public required string Name { get; set; }
+    public required string? Name { get; set; }
 }
 
 public class AdminData

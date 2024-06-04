@@ -38,8 +38,5 @@ public class Agreement
     public required string MerchantAgreementUrl { get; init; }
 
     [JsonPropertyName("sub")]
-    public string? Sub { get; init; }
-
-    [JsonPropertyName("userinfoUrl")]
-    public string? UserinfoUrl { get; init; }
+    public required string Sub { get; init; }
 }

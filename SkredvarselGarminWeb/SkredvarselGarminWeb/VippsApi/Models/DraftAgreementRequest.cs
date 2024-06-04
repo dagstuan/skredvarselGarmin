@@ -27,4 +27,7 @@ public class DraftAgreementRequest
 
     [JsonPropertyName("initialCharge")]
     public DraftAgreementCharge? InitialCharge { get; init; }
+
+    [JsonPropertyName("scope")]
+    public string? Scope { get; init; }
 }

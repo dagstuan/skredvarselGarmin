@@ -1,9 +1,17 @@
+using System.Security.Claims;
+
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+
 using Refit;
+
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.Extensions;
+using SkredvarselGarminWeb.MagicLink;
 using SkredvarselGarminWeb.NtfyApi;
+using SkredvarselGarminWeb.Services;
 using SkredvarselGarminWeb.VippsApi;
 using SkredvarselGarminWeb.VippsApi.Models;
 
@@ -184,6 +192,34 @@ public static class TestEndpointsRouteBuilderExtensions
             await ntifyApiClient.SendNotification("lol", "kek");
 
             return Results.Ok();
+        });
+
+        app.MapGet("/api/test/testEmail", async (IEmailService emailService) => await emailService.SendLoginEmail("d.stuan@gmail.com", "token"));
+
+        app.MapGet("/api/test/testLogin", async (HttpContext ctx) =>
+        {
+            await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Name, "Foo")], CookieAuthenticationDefaults.AuthenticationScheme)));
+
+            return Results.Ok();
+        }).AllowAnonymous();
+
+        app.MapGet("/api/test/magicToken", (IMagicLinkTokenDataFormat dataFormat) =>
+        {
+            var magicLinkToken = new MagicLinkToken
+            {
+                Email = "foo@bar.com",
+                UserId = "123",
+                ReturnUrl = "https://skredvarsel.app"
+            };
+
+            string token = dataFormat.Protect(magicLinkToken);
+            return Results.Ok(token);
+        });
+
+        app.MapGet("/api/test/magicTokenUnprotect", (string protectedToken, IMagicLinkTokenDataFormat dataFormat) =>
+        {
+            var unprotected = dataFormat.Unprotect(protectedToken);
+            return Results.Ok(unprotected);
         });
     }
 }
