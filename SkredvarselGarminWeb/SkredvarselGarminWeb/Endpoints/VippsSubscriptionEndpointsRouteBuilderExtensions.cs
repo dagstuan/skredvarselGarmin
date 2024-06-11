@@ -21,7 +21,6 @@ using SkredvarselGarminWeb.VippsApi.Models;
 using AgreementStatus = SkredvarselGarminWeb.Entities.AgreementStatus;
 using VippsAgreementStatus = SkredvarselGarminWeb.VippsApi.Models.AgreementStatus;
 
-
 namespace SkredvarselGarminWeb.Endpoints;
 
 public static class VippsSubscriptionEndpointsRouteBuilderExtensions

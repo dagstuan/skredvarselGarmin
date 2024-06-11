@@ -56,10 +56,6 @@ export const LoginContent = (props: LoginContentProps) => {
       )}
 
       <VStack gap={5} alignItems="stretch">
-        <VippsButton
-          link="/vipps-login?returnUrl=/account"
-          text="Fortsett med"
-        />
         <GoogleButton link="/google-login?returnUrl=/account" />
         <FacebookButton link="/facebook-login?returnUrl=/account" />
       </VStack>

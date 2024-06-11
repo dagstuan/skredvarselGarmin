@@ -15,7 +15,7 @@ export const RequireAdmin = ({ children }: RequireAdminProps) => {
 
   if (!user) {
     setTimeout(() => {
-      window.location.href = "/vipps-login?returnUrl=/admin";
+      window.location.href = "/google-login?returnUrl=/admin";
     }, 0);
     return null;
   }

@@ -46,7 +46,6 @@ public static class AuthRouteBuilderExtensions
 
     public static void MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapLoginEndpoint("/vipps-login", OpenIdConnectDefaults.AuthenticationScheme);
         app.MapLoginEndpoint("/google-login", GoogleDefaults.AuthenticationScheme);
         app.MapLoginEndpoint("/facebook-login", FacebookDefaults.AuthenticationScheme);
 

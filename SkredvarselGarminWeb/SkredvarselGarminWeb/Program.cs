@@ -60,7 +60,7 @@ builder.Services.AddTransient<IStripeService, StripeService>();
 builder.Services.AddTransient<INotificationService, NotificationService>();
 builder.Services.AddTransient<IForecastAreaService, ForecastAreaService>();
 
-builder.Services.SetupAuthentication(vippsOptions!, authOptions!, googleOptions!, facebookOptions!);
+builder.Services.SetupAuthentication(authOptions!, googleOptions!, facebookOptions!);
 builder.Services.AddRefitClients(vippsOptions!);
 
 builder.Services.AddEndpointsApiExplorer();
