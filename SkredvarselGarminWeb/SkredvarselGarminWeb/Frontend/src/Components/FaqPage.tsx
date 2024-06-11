@@ -17,8 +17,25 @@ import {
 } from "@chakra-ui/react";
 
 import problemsHelpImage from "../assets/problems_help.png?format=webp&as=meta:width;height;src&imagetools";
+import { useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 
 export const FaqPage = () => {
+  const location = useLocation();
+
+  const isVippsLoginHash = location.hash === "#vippslogin";
+
+  const vippsLoginRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isVippsLoginHash && vippsLoginRef.current) {
+      const curr = vippsLoginRef.current;
+      setTimeout(() => {
+        curr.scrollIntoView();
+      }, 0);
+    }
+  }, []);
+
   return (
     <Flex
       m="0 auto"
@@ -32,7 +49,10 @@ export const FaqPage = () => {
         Ofte stilte spørsmål
       </Heading>
 
-      <Accordion allowMultiple>
+      <Accordion
+        allowMultiple
+        defaultIndex={isVippsLoginHash ? [12] : undefined}
+      >
         <AccordionItem>
           <h2>
             <AccordionButton>
@@ -353,6 +373,26 @@ export const FaqPage = () => {
               Github
             </Link>
             .
+          </AccordionPanel>
+        </AccordionItem>
+
+        <AccordionItem ref={vippsLoginRef}>
+          <h2>
+            <AccordionButton>
+              <Box as="span" flex="1" textAlign="left">
+                Hvorfor kan jeg ikke logge inn med Vipps lenger?
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={4}>
+            Vipps har endret vilkårene sine, og "Logg inn med Vipps" er nå et{" "}
+            <Link href="https://vippsmobilepay.com/no/priser/logg-inn">
+              betalt produkt.
+            </Link>{" "}
+            Jeg syns prisen Vipps har valgt å ta er urimelig høy, og har derfor
+            erstattet "Logg inn med Vipps" med innlogging med e-post. Hvis du
+            har problemer med å logge inn, ikke nøl med å ta kontakt!
           </AccordionPanel>
         </AccordionItem>
 

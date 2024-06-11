@@ -5,14 +5,16 @@ import {
   FormErrorMessage,
   Button,
   Text,
+  Center,
+  Link,
 } from "@chakra-ui/react";
 import { FacebookButton } from "../Buttons/FacebookButton";
 import { GoogleButton } from "../Buttons/GoogleButton";
-import { VippsButton } from "../Buttons/VippsButton";
 import { OrDivider } from "../OrDivider";
 import { useState } from "react";
 import { useMutation } from "react-query";
 import { sendLoginEmail } from "../../hooks/useEmailLogin";
+import { Link as RouterLink } from "react-router-dom";
 
 type LoginContentProps = {
   loginText?: string;
@@ -81,6 +83,11 @@ export const LoginContent = (props: LoginContentProps) => {
           Send innloggingslenke
         </Button>
       </form>
+      <Center>
+        <Link as={RouterLink} to="/faq#vippslogin">
+          Hvorfor kan jeg ikke logge inn med Vipps?
+        </Link>
+      </Center>
     </VStack>
   );
 };
