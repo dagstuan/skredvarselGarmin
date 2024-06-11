@@ -673,7 +673,7 @@ public class SubscriptionServiceTests
     }
 
     [Fact]
-    public async void Should_create_new_charge_for_agreement_if_next_charge_date_is_within_30_days()
+    public async Task Should_create_new_charge_for_agreement_if_next_charge_date_is_within_30_days()
     {
         var fixture = new Fixture();
         fixture.Customize<DateOnly>(composer => composer.FromFactory<DateTime>(DateOnly.FromDateTime));
@@ -720,7 +720,7 @@ public class SubscriptionServiceTests
     }
 
     [Fact]
-    public async void Should_create_new_charge_for_agreement_if_next_charge_date_is_in_the_past()
+    public async Task Should_create_new_charge_for_agreement_if_next_charge_date_is_in_the_past()
     {
         var fixture = new Fixture();
         fixture.Customize<DateOnly>(composer => composer.FromFactory<DateTime>(DateOnly.FromDateTime));
@@ -767,7 +767,7 @@ public class SubscriptionServiceTests
     }
 
     [Fact]
-    public async void Should_not_do_anything_if_more_than_30_days_until_nextChargeDate()
+    public async Task Should_not_do_anything_if_more_than_30_days_until_nextChargeDate()
     {
         var fixture = new Fixture();
         fixture.Customize<DateOnly>(composer => composer.FromFactory<DateTime>(DateOnly.FromDateTime));
