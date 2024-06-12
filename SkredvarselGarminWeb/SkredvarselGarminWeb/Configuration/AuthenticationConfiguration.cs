@@ -13,7 +13,6 @@ public static class AuthenticationConfiguration
 {
     public static void SetupAuthentication(
         this IServiceCollection serviceCollection,
-        VippsOptions vippsOptions,
         AuthOptions authOptions,
         GoogleOptions googleOptions,
         FacebookOptions facebookOptions)
@@ -25,11 +24,8 @@ public static class AuthenticationConfiguration
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
             })
-            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-            {
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-            })
-            .AddVipps(vippsOptions)
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options
+                => options.ExpireTimeSpan = TimeSpan.FromMinutes(60))
             .AddScheme<GarminAuthenticationSchemeOptions, GarminAuthenticationHandler>("Garmin", options => { })
             .AddGoogle(options =>
             {
@@ -57,46 +53,5 @@ public static class AuthenticationConfiguration
                 policy.AuthenticationSchemes.Add("Garmin");
                 policy.RequireAuthenticatedUser();
             });
-    }
-
-    public static AuthenticationBuilder AddVipps(this AuthenticationBuilder builder, VippsOptions vippsOptions)
-    {
-        return builder.AddOpenIdConnect(options =>
-        {
-            options.Authority = vippsOptions?.Authority;
-            options.ClientId = vippsOptions?.ClientId;
-            options.ClientSecret = vippsOptions?.ClientSecret;
-            options.ResponseType = "code";
-            options.CallbackPath = "/signin-oidc";
-            options.AccessDeniedPath = "/";
-
-            options.GetClaimsFromUserInfoEndpoint = true;
-
-            options.Scope.Clear();
-            options.Scope.Add("openid");
-            options.Scope.Add("name");
-            options.Scope.Add("email");
-            options.Scope.Add("phoneNumber");
-
-            options.ClaimActions.MapJsonKey("sub", "sub");
-            options.ClaimActions.MapUniqueJsonKey("name", "name");
-            options.ClaimActions.MapUniqueJsonKey("email", "email");
-            options.ClaimActions.MapUniqueJsonKey("phone_number", "phone_number");
-
-            options.Events.OnRedirectToIdentityProvider = (ctx) =>
-            {
-                if (ctx.Request.Path.StartsWithSegments("/api"))
-                {
-                    if (ctx.Response.StatusCode == (int)HttpStatusCode.OK)
-                    {
-                        ctx.Response.StatusCode = 401;
-                    }
-
-                    ctx.HandleResponse();
-                }
-
-                return Task.CompletedTask;
-            };
-        });
     }
 }
