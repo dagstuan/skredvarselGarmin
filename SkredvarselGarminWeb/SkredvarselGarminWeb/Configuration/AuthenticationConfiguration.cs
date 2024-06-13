@@ -1,11 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using GoogleOptions = SkredvarselGarminWeb.Options.GoogleOptions;
 
 using SkredvarselGarminWeb.Options;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace SkredvarselGarminWeb.Configuration;
 
@@ -22,7 +22,7 @@ public static class AuthenticationConfiguration
         serviceCollection.AddAuthentication(options =>
             {
                 options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
             })
             .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options
                 => options.ExpireTimeSpan = TimeSpan.FromMinutes(60))
