@@ -13,7 +13,7 @@ import glanceImage from "../assets/glance.png?format=webp&quality=60&as=meta:wid
 import timelinesImage from "../assets/timelines.png?format=webp&quality=60&as=meta:width;height;src&imagetools";
 import mainTextImage from "../assets/maintext.png?format=webp&quality=60&as=meta:width;height;src&imagetools";
 import problemsImage from "../assets/problems.png?format=webp&quality=60&as=meta:width;height;src&imagetools";
-import offlineImage from "../assets/offline.jpg?w=800&type=webp&as=meta:width;height;src&imagetools";
+import offlineImage from "../assets/offline.jpg?w=800&format=webp&as=meta:width;height;src&imagetools";
 
 export const Features = () => (
   <Flex
