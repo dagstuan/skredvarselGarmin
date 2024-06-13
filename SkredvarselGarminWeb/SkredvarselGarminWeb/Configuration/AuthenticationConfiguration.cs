@@ -46,7 +46,7 @@ public static class AuthenticationConfiguration
 
         serviceCollection.AddAuthorizationBuilder()
             .AddPolicy("Admin", policy =>
-                policy.RequireClaim("sub", authOptions.AdminSub))
+                policy.RequireClaim("email", authOptions.AdminEmail))
             .AddPolicy("Garmin", policy =>
             {
                 policy.AuthenticationSchemes.Clear();
