@@ -89,7 +89,13 @@ public class VippsAgreementService(
 
     private async Task UpdateAgreementChargesInternal(string agreementId)
     {
-        var agreement = dbContext.Agreements.Single(a => a.Id == agreementId);
+        var agreement = dbContext.Agreements.SingleOrDefault(a => a.Id == agreementId);
+
+        if (agreement == null)
+        {
+            logger.LogWarning("Job to update agreement charges for agreement was triggered on non-existing agreement. Agreement ID: {agreementId}", agreementId);
+            return;
+        }
 
         if (agreement.Status != EntityAgreementStatus.ACTIVE &&
             agreement.Status != EntityAgreementStatus.UNSUBSCRIBED)
