@@ -51,10 +51,10 @@ export const Footer = () => {
             <Link as={RouterLink} to="faq">
               Ofte stilte spørsmål
             </Link>
-            <Link as={RouterLink} to="personvern">
+            <Link as={RouterLink} to="privacy">
               Personvern og informasjonskapsler
             </Link>
-            <Link as={RouterLink} to="salgsbetingelser">
+            <Link as={RouterLink} to="salesconditions">
               Salgsbetingelser
             </Link>
             <Link href="https://github.com/dagstuan/skredvarselGarmin/">

@@ -56,8 +56,16 @@ const router = createBrowserRouter([
         lazy: () => import("./Pages/FaqPage"),
       },
       {
+        path: "salgsbetingelser",
+        element: <Navigate to="/privacy" replace />,
+      },
+      {
         path: "salesconditions",
         lazy: () => import("./Pages/SalesConditionsPage"),
+      },
+      {
+        path: "personvern",
+        element: <Navigate to="/privacy" replace />,
       },
       {
         path: "privacy",
