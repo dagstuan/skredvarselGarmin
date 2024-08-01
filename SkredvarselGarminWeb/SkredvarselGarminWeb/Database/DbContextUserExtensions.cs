@@ -47,7 +47,7 @@ public static class DbContextUserExtensions
 
     public static User? GetUserByEmailOrNull(this SkredvarselDbContext dbContext, string email)
     {
-        return dbContext.Users.FirstOrDefault(u => u.Email == email);
+        return dbContext.Users.FirstOrDefault(u => EF.Functions.ILike(u.Email, email));
     }
 
     public static User? GetUserForWatchOrNull(this SkredvarselDbContext dbContext, string watchId)
