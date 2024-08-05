@@ -39,8 +39,8 @@
     <PackageReference Include="Refit" Version="7.1.2" />
     <PackageReference Include="Refit.HttpClientFactory" Version="7.1.2" />
     <PackageReference Include="Resend" Version="0.0.7" />
-    <PackageReference Include="Stripe.net" Version="45.5.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Stripe.net" Version="45.6.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.0" />
   </ItemGroup>
   <ItemGroup>
     <!-- Don't publish the SPA source files, but do show them in the project files list -->
