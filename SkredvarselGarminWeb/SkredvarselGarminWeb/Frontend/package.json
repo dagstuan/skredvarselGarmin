@@ -17,14 +17,14 @@
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
-    "axios": "^1.7.2",
+    "axios": "^1.7.3",
     "date-fns": "^3.6.0",
-    "framer-motion": "^11.3.19",
+    "framer-motion": "^11.3.24",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.2.1",
     "react-query": "^3.39.3",
-    "react-router-dom": "^6.25.1"
+    "react-router-dom": "^6.26.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
@@ -35,7 +35,7 @@
     "sharp": "^0.33.4",
     "svgo": "^3.3.2",
     "typescript": "^5.5.4",
-    "vite": "^5.3.5",
+    "vite": "^5.4.0",
     "vite-imagetools": "^7.0.4"
   },
   "overrides": {
