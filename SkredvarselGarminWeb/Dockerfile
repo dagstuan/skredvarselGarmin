@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0.303-bookworm-slim AS base
+FROM mcr.microsoft.com/dotnet/sdk:8.0.401-bookworm-slim AS base
 RUN apt-get update
 RUN apt-get install -y ca-certificates curl gnupg
 RUN mkdir -p /etc/apt/keyrings
@@ -16,7 +16,7 @@ COPY . .
 RUN dotnet test
 RUN dotnet publish SkredvarselGarminWeb -c Release -o publish
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0.303-bookworm-slim
+FROM mcr.microsoft.com/dotnet/sdk:8.0.401-bookworm-slim
 EXPOSE 8080
 WORKDIR /app
 COPY --from=builder /app/publish ./
