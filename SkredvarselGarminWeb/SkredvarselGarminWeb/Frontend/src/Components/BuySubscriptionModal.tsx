@@ -27,7 +27,23 @@ import { OrDivider } from "./OrDivider";
 import { useEmailLogin } from "../hooks/useEmailLogin";
 import { EmailLoginForm } from "./EmailLoginForm/EmailLoginForm";
 
-export const BuySubscriptionModal = () => {
+type BuySubscriptionModalProps = {
+  headerText?: string;
+  informationElement?: JSX.Element;
+};
+
+export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
+  const {
+    headerText = "Kjøp abonnement",
+    informationElement = (
+      <>
+        Abonnement kan kjøpes direkte med Vipps,
+        <br />
+        eller logg inn for andre alternativer.
+      </>
+    ),
+  } = props;
+
   const { data: user, isLoading: isLoadingUser } = useUser();
 
   useNavigateToAccountIfLoggedIn(user, isLoadingUser);
@@ -47,30 +63,39 @@ export const BuySubscriptionModal = () => {
     <Modal isOpen={!isLoadingUser && !isClosing} onClose={onClose} isCentered>
       <ModalOverlay />
       <ModalContent alignItems="center" overflow="hidden">
-        <ModalHeader>Kjøp abonnement</ModalHeader>
+        <ModalHeader>{headerText}</ModalHeader>
         <ModalCloseButton />
         <ModalBody w="100%" p={0}>
           {!showSentEmail && (
             <VStack gap={8} w="100%" alignItems="center">
-              <VStack gap={5} w="80%" alignItems="center">
-                <Text fontSize="md" align="center">
-                  Abonnement kan kjøpes direkte med Vipps,
-                  <br />
-                  eller logg inn for andre alternativer.
-                </Text>
+              <VStack
+                gap={5}
+                w={{ base: "90%", md: "80%" }}
+                alignItems="center"
+              >
+                <Box w="100%" p={3} boxShadow="xs" rounded="sm" bg="gray.50">
+                  <Text fontSize="md" align="left">
+                    {informationElement}
+                  </Text>
+                </Box>
 
                 <VStack w="100%" alignItems="stretch">
                   <VippsButton />
                 </VStack>
               </VStack>
 
-              <Center w="100%" bg="gray.100" pt={4} pb={6}>
-                <VStack w="80%" maxW="sm" gap={5} alignItems="stretch">
+              <Center w="100%" bg="gray.100" pt={4} pb={8}>
+                <VStack
+                  w={{ base: "90%", md: "80%" }}
+                  maxW="sm"
+                  gap={5}
+                  alignItems="stretch"
+                >
                   <Heading
                     textAlign="center"
                     as="header"
                     size="sm"
-                    fontWeight="normal"
+                    fontWeight="bold"
                   >
                     Logg inn / registrer deg
                   </Heading>
