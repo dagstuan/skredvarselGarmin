@@ -16,6 +16,7 @@ import { useState } from "react";
 import { LoginContent } from "./LoginContent";
 
 import { FaPaperPlane } from "react-icons/fa";
+import { useEmailLogin } from "../../hooks/useEmailLogin";
 
 type LoginModalProps = {
   loginText?: string;
@@ -26,7 +27,14 @@ export const LoginModal = (props: LoginModalProps) => {
 
   const { isClosing, onClose } = useNavigateOnClose("/");
 
-  const [showSentEmail, setShowSentEmail] = useState(false);
+  const {
+    email,
+    showSentEmail,
+    error,
+    handleEmailInputChange,
+    handleSubmit,
+    isLoading,
+  } = useEmailLogin();
 
   return (
     <Modal isOpen={!isClosing} onClose={onClose} isCentered>
@@ -40,7 +48,11 @@ export const LoginModal = (props: LoginModalProps) => {
           {!showSentEmail && (
             <LoginContent
               loginText={loginText}
-              onSentEmail={() => setShowSentEmail(true)}
+              email={email}
+              handleEmailInputChange={handleEmailInputChange}
+              handleSubmit={handleSubmit}
+              error={error}
+              isLoading={isLoading}
             />
           )}
           {showSentEmail && (

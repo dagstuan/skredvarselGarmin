@@ -1,53 +1,28 @@
-import {
-  VStack,
-  FormControl,
-  Input,
-  FormErrorMessage,
-  Button,
-  Text,
-  Center,
-  Link,
-} from "@chakra-ui/react";
+import { VStack, Text, Center, Link } from "@chakra-ui/react";
 import { FacebookButton } from "../Buttons/FacebookButton";
 import { GoogleButton } from "../Buttons/GoogleButton";
 import { OrDivider } from "../OrDivider";
-import { useState } from "react";
-import { useMutation } from "react-query";
-import { sendLoginEmail } from "../../hooks/useEmailLogin";
 import { Link as RouterLink } from "react-router-dom";
+import { EmailLoginForm } from "../EmailLoginForm/EmailLoginForm";
 
 type LoginContentProps = {
   loginText?: string;
-  onSentEmail: () => void;
+  email: string | undefined;
+  handleEmailInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  error: string | undefined;
+  isLoading: boolean;
 };
 
 export const LoginContent = (props: LoginContentProps) => {
-  const { loginText, onSentEmail } = props;
-
-  const [email, setEmail] = useState<string | undefined>(undefined);
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (value !== undefined && value !== null) {
-      setEmail(value);
-    }
-  };
-  const [error, setError] = useState<string | undefined>();
-
-  const { mutate, isLoading } = useMutation(sendLoginEmail, {
-    onSuccess: () => {
-      onSentEmail();
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!email) {
-      setError("Du må skrive en e-postadresse.");
-    } else {
-      mutate(email);
-    }
-  };
+  const {
+    loginText,
+    email,
+    handleEmailInputChange,
+    handleSubmit,
+    error,
+    isLoading,
+  } = props;
 
   return (
     <VStack gap={7} alignItems="stretch">
@@ -62,27 +37,13 @@ export const LoginContent = (props: LoginContentProps) => {
         <FacebookButton link="/facebook-login?returnUrl=/account" />
       </VStack>
       <OrDivider text="Eller logg inn med e-post" />
-      <form onSubmit={handleSubmit}>
-        <FormControl isInvalid={!!error}>
-          <Input
-            type="email"
-            bg="white"
-            placeholder="E-post"
-            value={email}
-            onChange={handleInputChange}
-          />
-          <FormErrorMessage>{error}</FormErrorMessage>
-        </FormControl>
-        <Button
-          mt={4}
-          w="100%"
-          colorScheme="green"
-          isLoading={isLoading}
-          type="submit"
-        >
-          Send innloggingslenke
-        </Button>
-      </form>
+      <EmailLoginForm
+        email={email}
+        handleEmailInputChange={handleEmailInputChange}
+        handleSubmit={handleSubmit}
+        error={error}
+        isLoading={isLoading}
+      />
       <Center>
         <Link as={RouterLink} to="/faq#vippslogin">
           Hvorfor kan jeg ikke logge inn med Vipps?
