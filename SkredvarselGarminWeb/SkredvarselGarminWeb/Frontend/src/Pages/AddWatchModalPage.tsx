@@ -1,5 +1,3 @@
-import { LoginModal } from "../Components/LoginModal/LoginModal";
+import { BuySubscriptionModal } from "../Components/BuySubscriptionModal";
 
-export const Component = () => (
-  <LoginModal loginText="Du må være logget inn for å legge til klokken din." />
-);
+export const Component = () => <BuySubscriptionModal />;
