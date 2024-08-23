@@ -115,7 +115,7 @@ public static class WatchApiRouteBuilderExtensions
         {
             var user = dbContext.GetUserOrThrow(ctx.User);
 
-            var watchAddRequest = dbContext.WatchAddRequests.FirstOrDefault(r => r.Key == watchAddKey);
+            var watchAddRequest = dbContext.WatchAddRequests.FirstOrDefault(r => r.Key.Equals(watchAddKey, StringComparison.CurrentCultureIgnoreCase));
 
             if (watchAddRequest == null)
             {
