@@ -11,6 +11,7 @@ export const GoogleButton = ({ link }: GoogleButtonProps) => {
       as="a"
       href={link}
       rounded={"full"}
+      borderColor="black"
       borderRadius={4}
       colorScheme="gray"
       variant="outline"

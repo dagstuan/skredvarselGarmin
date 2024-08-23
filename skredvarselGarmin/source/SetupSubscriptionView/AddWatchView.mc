@@ -17,7 +17,7 @@ class AddWatchView extends Ui.View {
     startTimer();
     _addWatchKey = addWatchKey;
 
-    Comm.openWebPage($.FrontendBaseUrl + "/addwatch", null, null);
+    Comm.openWebPage($.FrontendBaseUrl + "/subscribe", null, null);
   }
 
   function onLayout(dc as Gfx.Dc) {
