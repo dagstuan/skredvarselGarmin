@@ -71,8 +71,12 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddHttpClient<ResendClient>();
+
+var resendOptionsSection = builder.Configuration.GetSection("Resend");
+var resendOptions = resendOptionsSection.Get<ResendOptions>();
+
 builder.Services.Configure<ResendClientOptions>(
-    o => o.ApiToken = "re_HYBP3fqv_96jb8eUXygqNzNF3DmRNtgyt");
+    o => o.ApiToken = resendOptions!.ApiToken);
 builder.Services.AddTransient<IResend, ResendClient>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 
