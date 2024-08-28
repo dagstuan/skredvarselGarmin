@@ -1,0 +1,9 @@
+<drawables>
+	<bitmap id="Level1" filename="level_1_h30.png" />
+	<bitmap id="Level2" filename="level_2_h30.png" />
+	<bitmap id="Level3" filename="level_3_h30.png" />
+	<bitmap id="Level4_5" filename="level_4_5_h30.png" />
+	<bitmap id="NoLevel" filename="no_level_h30.png" />
+	<bitmap id="UpdatedIcon" filename="updated_icon_12x12.png" />
+	<bitmap id="EmergencyWarningIcon" filename="emergency_warning_icon_18x18.png" />
+</drawables>
