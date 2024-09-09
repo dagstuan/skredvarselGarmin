@@ -1,6 +1,7 @@
 using System.Net;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 using SkredvarselGarminWeb.Configuration;
@@ -115,7 +116,7 @@ public static class WatchApiRouteBuilderExtensions
         {
             var user = dbContext.GetUserOrThrow(ctx.User);
 
-            var watchAddRequest = dbContext.WatchAddRequests.FirstOrDefault(r => r.Key.Equals(watchAddKey, StringComparison.CurrentCultureIgnoreCase));
+            var watchAddRequest = dbContext.WatchAddRequests.FirstOrDefault(r => EF.Functions.ILike(r.Key, watchAddKey));
 
             if (watchAddRequest == null)
             {
