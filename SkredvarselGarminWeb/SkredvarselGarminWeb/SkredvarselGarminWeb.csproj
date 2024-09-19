@@ -36,10 +36,10 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="8.0.4" />
     <PackageReference Include="Polly" Version="8.4.1" />
     <PackageReference Include="ProjNet4GeoAPI" Version="1.4.1" />
-    <PackageReference Include="Refit" Version="7.1.2" />
-    <PackageReference Include="Refit.HttpClientFactory" Version="7.1.2" />
+    <PackageReference Include="Refit" Version="7.2.0" />
+    <PackageReference Include="Refit.HttpClientFactory" Version="7.2.0" />
     <PackageReference Include="Resend" Version="0.0.7" />
-    <PackageReference Include="Stripe.net" Version="45.10.0" />
+    <PackageReference Include="Stripe.net" Version="45.13.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
   </ItemGroup>
   <ItemGroup>
