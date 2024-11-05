@@ -14,7 +14,7 @@
     "check": "concurrently npm:check:*"
   },
   "dependencies": {
-    "@chakra-ui/react": "^2.8.2",
+    "@chakra-ui/react": "^3.1.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "axios": "^1.7.7",
