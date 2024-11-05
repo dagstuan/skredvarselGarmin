@@ -28,16 +28,16 @@ public class StripeService(
 
 
         // Handle the event
-        if (stripeEvent.Type == Events.CheckoutSessionCompleted)
+        if (stripeEvent.Type == EventTypes.CheckoutSessionCompleted)
         {
             var session = (Session)stripeEvent.Data.Object;
             StoreNewSubscriptionIfNotExists(session);
         }
         else if (
-            stripeEvent.Type == Events.CustomerSubscriptionUpdated ||
-            stripeEvent.Type == Events.CustomerSubscriptionDeleted ||
-            stripeEvent.Type == Events.CustomerSubscriptionPaused ||
-            stripeEvent.Type == Events.CustomerSubscriptionResumed)
+            stripeEvent.Type == EventTypes.CustomerSubscriptionUpdated ||
+            stripeEvent.Type == EventTypes.CustomerSubscriptionDeleted ||
+            stripeEvent.Type == EventTypes.CustomerSubscriptionPaused ||
+            stripeEvent.Type == EventTypes.CustomerSubscriptionResumed)
         {
             var subscription = (Subscription)stripeEvent.Data.Object;
             HandleSubscriptionUpdated(subscription);
