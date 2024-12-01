@@ -154,36 +154,48 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                 {
                     if (string.IsNullOrEmpty(agreement.UserId))
                     {
-                        var existingUser = dbContext.Users.FirstOrDefault(u => u.Id == vippsAgreement.Sub);
-
-                        if (existingUser != null)
+                        var signedInUser = dbContext.GetUserOrNull(ctx.User);
+                        if (signedInUser != null)
                         {
-                            var existingActiveAgreementsForUser = dbContext.Agreements
-                                .Where(a => a.UserId == existingUser.Id)
-                                .Where(a => a.Status == AgreementStatus.ACTIVE)
-                                .Select(a => a.Id)
-                                .ToList();
-
-                            foreach (var existingAgreement in existingActiveAgreementsForUser)
-                            {
-                                await subscriptionService.StopAgreement(existingAgreement);
-                            }
+                            // User is already signed in. Associate agreement with logged in user instead of vipps-sub.
+                            agreement.SetUserIdAndRemoveCallbackId(signedInUser.Id);
                         }
+                        else
+                        {
+                            // User is not already signed in. First attempt to find and existing user with the
+                            // same sub, and if found, stop all active agreements for that user. Then login using
+                            // the sub from the vipps agreement.
+                            var existingUser = dbContext.Users.FirstOrDefault(u => u.Id == vippsAgreement.Sub);
 
-                        var userInfo = await vippsApiClient.GetUserInfo(vippsAgreement.Sub);
+                            if (existingUser != null)
+                            {
+                                var existingActiveAgreementsForUser = dbContext.Agreements
+                                    .Where(a => a.UserId == existingUser.Id)
+                                    .Where(a => a.Status == AgreementStatus.ACTIVE)
+                                    .Select(a => a.Id)
+                                    .ToList();
 
-                        var principal = new ClaimsPrincipal(new ClaimsIdentity(
-                        [
-                            new("name", userInfo.Name),
-                            new("email", userInfo.Email),
-                            new("sub", vippsAgreement.Sub)
-                        ], CookieAuthenticationDefaults.AuthenticationScheme));
+                                foreach (var existingAgreement in existingActiveAgreementsForUser)
+                                {
+                                    await subscriptionService.StopAgreement(existingAgreement);
+                                }
+                            }
 
-                        await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                            var userInfo = await vippsApiClient.GetUserInfo(vippsAgreement.Sub);
 
-                        userService.RegisterLogin(principal);
+                            var principal = new ClaimsPrincipal(new ClaimsIdentity(
+                            [
+                                new("name", userInfo.Name),
+                                new("email", userInfo.Email),
+                                new("sub", vippsAgreement.Sub)
+                            ], CookieAuthenticationDefaults.AuthenticationScheme));
 
-                        agreement.SetUserIdAndRemoveCallbackId(vippsAgreement.Sub);
+                            await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+                            userService.RegisterLogin(principal);
+
+                            agreement.SetUserIdAndRemoveCallbackId(vippsAgreement.Sub);
+                        }
                     }
 
                     _ = Task.Run(notificationService.NotifyUserSubscribed);
