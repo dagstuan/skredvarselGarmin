@@ -26,12 +26,9 @@ public static class ForecastAreaEndpointsRouteBuilderExtensions
 
             var geometry = serializer.Deserialize<FeatureCollection>(jsonReader);
 
-            if (geometry == null)
-            {
-                return Results.BadRequest("Invalid GeoJSON");
-            }
-
-            return Results.Ok(forecastAreaService.ReplaceForecastAreas(geometry));
+            return geometry == null ?
+                Results.BadRequest("Invalid GeoJSON") :
+                Results.Ok(forecastAreaService.ReplaceForecastAreas(geometry));
         }).DisableAntiforgery().RequireAuthorization("Admin");
     }
 }

@@ -42,7 +42,7 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
                 SuccessUrl = $"{baseUrl}/stripe-subscribe-callback?session_id={{CHECKOUT_SESSION_ID}}",
                 CancelUrl = $"{baseUrl}/account",
                 Mode = "subscription",
-                CustomerEmail = user.StripeCustomerId.IsNullOrEmpty() ? user.Email : null,
+                CustomerEmail = user.StripeCustomerId is { Length: > 0 } ? user.Email : null,
                 Customer = user.StripeCustomerId,
                 ClientReferenceId = user.Id,
                 LineItems = [

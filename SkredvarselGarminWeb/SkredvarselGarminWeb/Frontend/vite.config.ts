@@ -22,7 +22,10 @@ const keyFilePath = path.join(baseFolder, `${certificateName}.key`);
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => {
-  if (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath)) {
+  if (
+    process.env.NODE_ENV !== "production" &&
+    (!fs.existsSync(certFilePath) || !fs.existsSync(keyFilePath))
+  ) {
     // Wait for the certificate to be generated
     await new Promise<void>((resolve) => {
       spawn(

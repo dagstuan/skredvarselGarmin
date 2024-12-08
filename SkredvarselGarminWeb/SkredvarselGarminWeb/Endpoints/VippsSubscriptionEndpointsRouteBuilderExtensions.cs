@@ -145,14 +145,15 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                     vippsAgreement = await vippsApiClient.GetAgreement(agreement.Id);
                 }
 
-                if (vippsAgreement.Status == VippsAgreementStatus.Stopped ||
-                    vippsAgreement.Status == VippsAgreementStatus.Expired)
+                if (vippsAgreement.Status is
+                    VippsAgreementStatus.Stopped or
+                    VippsAgreementStatus.Expired)
                 {
                     dbContext.Remove(agreement);
                 }
                 else if (vippsAgreement.Status == VippsAgreementStatus.Active)
                 {
-                    if (string.IsNullOrEmpty(agreement.UserId))
+                    if (agreement.UserId is { Length: > 0 })
                     {
                         var signedInUser = dbContext.GetUserOrNull(ctx.User);
                         if (signedInUser != null)

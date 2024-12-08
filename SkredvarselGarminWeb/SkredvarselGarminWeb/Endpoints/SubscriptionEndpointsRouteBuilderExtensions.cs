@@ -71,17 +71,14 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
             var activeStripeSubscription = stripeSubscriptionsInDb
                 .FirstOrDefault(ss => ss.Status == Entities.StripeSubscriptionStatus.ACTIVE
                     || ss.Status == Entities.StripeSubscriptionStatus.UNSUBSCRIBED);
-            if (activeStripeSubscription != null)
-            {
-                return Results.Ok(new SubscriptionResponse
+            return activeStripeSubscription != null
+                ? Results.Ok(new SubscriptionResponse
                 {
                     SubscriptionType = SubscriptionType.Stripe,
                     StripeSubscriptionStatus = activeStripeSubscription.Status,
                     NextChargeDate = activeStripeSubscription.NextChargeDate,
-                });
-            }
-
-            return Results.NoContent();
+                })
+                : Results.NoContent();
         }).RequireAuthorization();
     }
 }
