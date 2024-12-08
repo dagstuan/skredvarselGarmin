@@ -47,8 +47,9 @@ public class HangfireService(
         {
             var vippsAgreement = await vippsApiClient.GetAgreement(agreement.Id);
 
-            if (vippsAgreement.Status == VippsAgreementStatus.Expired ||
-                vippsAgreement.Status == VippsAgreementStatus.Stopped)
+            if (vippsAgreement.Status is
+                VippsAgreementStatus.Expired or
+                VippsAgreementStatus.Stopped)
             {
                 logger.LogInformation("Deleting stale agreement {agreementId} since it was expired in Vipps.", agreement.Id);
                 dbContext.Remove(agreement);

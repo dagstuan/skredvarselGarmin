@@ -349,7 +349,7 @@ public class VippsAgreementService(
         {
             var campaign = vippsAgreement.Campaign;
 
-            if (campaign.Type == VippsCampaignType.PeriodCampaign)
+            if (campaign.Type is VippsCampaignType.PeriodCampaign)
             {
                 var periodEndDate = GetNextChargeDate(DateOnly.FromDateTime(vippsAgreement.Start!.Value), campaign.Period!.Unit, campaign.Period!.Count);
 
@@ -365,7 +365,7 @@ public class VippsAgreementService(
                     return charge;
                 }
             }
-            else if (campaign.Type == VippsCampaignType.PriceCampaign && now < campaign.End)
+            else if (campaign.Type is VippsCampaignType.PriceCampaign && now < campaign.End)
             {
                 var nextChargeDate = DateOnly.FromDateTime(now) < previousChargeDate ? previousChargeDate : GetNextChargeDate(previousChargeDate, vippsAgreement.Interval.Unit, vippsAgreement.Interval.Count);
 
@@ -379,7 +379,7 @@ public class VippsAgreementService(
 
                 return charge;
             }
-            else if (campaign.Type == VippsCampaignType.EventCampaign || campaign.Type == VippsCampaignType.FullFlexCampaign)
+            else if (campaign.Type is VippsCampaignType.EventCampaign or VippsCampaignType.FullFlexCampaign)
             {
                 throw new Exception("Unsupported campaign type");
             }

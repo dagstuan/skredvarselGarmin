@@ -34,10 +34,11 @@ public class StripeService(
             StoreNewSubscriptionIfNotExists(session);
         }
         else if (
-            stripeEvent.Type == EventTypes.CustomerSubscriptionUpdated ||
-            stripeEvent.Type == EventTypes.CustomerSubscriptionDeleted ||
-            stripeEvent.Type == EventTypes.CustomerSubscriptionPaused ||
-            stripeEvent.Type == EventTypes.CustomerSubscriptionResumed)
+            stripeEvent.Type is
+                EventTypes.CustomerSubscriptionUpdated or
+                EventTypes.CustomerSubscriptionDeleted or
+                EventTypes.CustomerSubscriptionPaused or
+                EventTypes.CustomerSubscriptionResumed)
         {
             var subscription = (Subscription)stripeEvent.Data.Object;
             HandleSubscriptionUpdated(subscription);
