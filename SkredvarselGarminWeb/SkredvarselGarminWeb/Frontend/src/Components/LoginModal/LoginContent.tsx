@@ -11,7 +11,7 @@ type LoginContentProps = {
   handleEmailInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   error: string | undefined;
-  isLoading: boolean;
+  isPending: boolean;
 };
 
 export const LoginContent = (props: LoginContentProps) => {
@@ -21,7 +21,7 @@ export const LoginContent = (props: LoginContentProps) => {
     handleEmailInputChange,
     handleSubmit,
     error,
-    isLoading,
+    isPending: isLoading,
   } = props;
 
   return (

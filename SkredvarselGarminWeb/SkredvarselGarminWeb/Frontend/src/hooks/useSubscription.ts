@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../api";
 import { queryClient } from "../main";
 import { Subscription } from "../types";
@@ -10,8 +10,13 @@ const fetchSubscription = async () =>
       res.data ? (res.data as Subscription<"Vipps" | "Stripe">) : null,
     );
 
+const queryKey = ["subscription"];
+
 export const useSubscription = () =>
-  useQuery(["subscription"], async () => fetchSubscription());
+  useQuery({
+    queryKey,
+    queryFn: async () => fetchSubscription(),
+  });
 
 const stopVippsAgreement = async () => api.delete("/api/vippsAgreement");
 
@@ -19,7 +24,7 @@ export const useStopVippsAgreement = () =>
   useMutation({
     mutationFn: stopVippsAgreement,
     onSuccess: () => {
-      queryClient.invalidateQueries("subscription");
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 
@@ -30,6 +35,6 @@ export const useReactivateVippsAgreement = () =>
   useMutation({
     mutationFn: reactivateVippsAgreement,
     onSuccess: () => {
-      queryClient.invalidateQueries("subscription");
+      queryClient.invalidateQueries({ queryKey });
     },
   });

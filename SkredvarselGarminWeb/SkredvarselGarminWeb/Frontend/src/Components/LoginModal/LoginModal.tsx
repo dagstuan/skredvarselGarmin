@@ -33,7 +33,7 @@ export const LoginModal = (props: LoginModalProps) => {
     error,
     handleEmailInputChange,
     handleSubmit,
-    isLoading,
+    isPending,
   } = useEmailLogin();
 
   return (
@@ -52,7 +52,7 @@ export const LoginModal = (props: LoginModalProps) => {
               handleEmailInputChange={handleEmailInputChange}
               handleSubmit={handleSubmit}
               error={error}
-              isLoading={isLoading}
+              isPending={isPending}
             />
           )}
           {showSentEmail && (

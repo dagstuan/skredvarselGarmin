@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../api";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 
 export const sendLoginEmail = async (email: string) =>
   api.post(`/email-login-send?email=${email}&returnUrl=/account`);
@@ -17,7 +17,8 @@ export const useEmailLogin = () => {
   };
   const [error, setError] = useState<string | undefined>();
 
-  const { mutate, isLoading } = useMutation(sendLoginEmail, {
+  const { mutate, isPending } = useMutation({
+    mutationFn: sendLoginEmail,
     onSuccess: () => {
       setShowSentEmail(true);
     },
@@ -37,7 +38,7 @@ export const useEmailLogin = () => {
     email,
     handleEmailInputChange,
     error,
-    isLoading,
+    isPending,
     handleSubmit,
     showSentEmail,
   };

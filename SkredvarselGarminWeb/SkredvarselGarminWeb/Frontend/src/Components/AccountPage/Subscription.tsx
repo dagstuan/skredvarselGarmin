@@ -96,7 +96,7 @@ export const Subscription = () => {
         <Button
           colorScheme="green"
           borderRadius={4}
-          isDisabled={reactivateSubscription.isLoading}
+          isDisabled={reactivateSubscription.isPending}
           onClick={() => reactivateSubscription.mutate()}
         >
           Re-aktiver abonnement
@@ -135,7 +135,7 @@ export const Subscription = () => {
             <Button
               colorScheme="gray"
               borderRadius={4}
-              isDisabled={stopSubscription.isLoading}
+              isDisabled={stopSubscription.isPending}
               onClick={() => stopSubscription.mutate()}
             >
               Avslutt abonnement
