@@ -12,8 +12,13 @@ export const FacebookButton = ({ link }: FacebookButtonProps) => {
       href={link}
       rounded={"full"}
       borderRadius={4}
-      colorScheme="facebook"
       size={"md"}
+      bg="#385898"
+      color="#ffffff"
+      _hover={{ bg: "#314E89" }}
+      _active={{
+        bg: "#314E89",
+      }}
     >
       <Flex gap={2} alignItems="center">
         <Icon as={SiFacebook} w={6} h={6} />
