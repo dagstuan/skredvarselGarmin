@@ -101,7 +101,7 @@ export const Watches = () => {
               <Button
                 colorScheme="blue"
                 type="submit"
-                isDisabled={addWatch.isLoading}
+                isDisabled={addWatch.isPending}
               >
                 Legg til
               </Button>

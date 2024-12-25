@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "preinstall": "npx only-allow pnpm",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -15,32 +16,42 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
-    "axios": "^1.7.7",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@tanstack/react-query": "^5.62.10",
+    "@tanstack/react-query-devtools": "^5.62.10",
+    "@types/node": "^22.10.2",
+    "axios": "^1.7.9",
     "date-fns": "^4.1.0",
-    "framer-motion": "^11.11.11",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-icons": "^5.3.0",
-    "react-query": "^3.39.3",
-    "react-router-dom": "^6.27.0"
+    "framer-motion": "^11.15.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-icons": "^5.4.0",
+    "react-router-dom": "^7.1.1"
   },
   "devDependencies": {
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.3",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.0",
-    "prettier": "3.3.3",
+    "prettier": "3.4.2",
     "sharp": "^0.33.5",
     "svgo": "^3.3.2",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.10",
-    "vite-imagetools": "^7.0.4"
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5",
+    "vite-imagetools": "^7.0.5"
   },
-  "overrides": {
-    "vite": {
-      "rollup": "npm:@rollup/wasm-node@^4.12.1"
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowAny": [
+        "react",
+        "react-dom"
+      ]
+    },
+    "overrides": {
+      "@types/react": "^19.0.0",
+      "@types/react-dom": "^19.0.0"
     }
-  }
+  },
+  "packageManager": "pnpm@9.15.1+sha256.9e534e70afef06374f6126b44bda5760947135ce16a30aef1010e965fb7e3e3e"
 }

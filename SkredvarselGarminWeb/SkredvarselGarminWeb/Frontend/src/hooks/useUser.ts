@@ -1,4 +1,4 @@
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "../api";
 import { User } from "../types";
 
@@ -14,8 +14,10 @@ const fetchUser = async () => {
 };
 
 export const useUser = () =>
-  useQuery(["user"], fetchUser, {
+  useQuery({
+    queryKey: ["user"],
+    queryFn: fetchUser,
     staleTime: Infinity,
-    cacheTime: Infinity,
+    gcTime: Infinity,
     retry: false,
   });

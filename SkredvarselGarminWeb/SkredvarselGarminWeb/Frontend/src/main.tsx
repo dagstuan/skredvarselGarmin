@@ -1,8 +1,7 @@
 import { ChakraProvider } from "@chakra-ui/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { ReactQueryDevtools } from "react-query/devtools";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   createBrowserRouter,
   Navigate,
@@ -10,6 +9,7 @@ import {
 } from "react-router-dom";
 import App from "./App";
 import ErrorPage from "./Components/ErrorPage";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 // Remove facebook oauth redirect hash.
 if (window.location.hash === "#_=_") {

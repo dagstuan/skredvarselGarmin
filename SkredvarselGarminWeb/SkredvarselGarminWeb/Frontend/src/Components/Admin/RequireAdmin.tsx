@@ -1,9 +1,10 @@
 import { Navigate } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
 import { Spinner } from "@chakra-ui/react";
+import { ReactElement } from "react";
 
 type RequireAdminProps = {
-  children: JSX.Element;
+  children: ReactElement;
 };
 
 export const RequireAdmin = ({ children }: RequireAdminProps) => {

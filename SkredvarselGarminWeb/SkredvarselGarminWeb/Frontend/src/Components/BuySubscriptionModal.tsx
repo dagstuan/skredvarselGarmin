@@ -24,10 +24,11 @@ import { useNavigateToAccountIfLoggedIn } from "../hooks/useNavigateToAccountIfL
 import { OrDivider } from "./OrDivider";
 import { useEmailLogin } from "../hooks/useEmailLogin";
 import { EmailLoginForm } from "./EmailLoginForm/EmailLoginForm";
+import { ReactElement } from "react";
 
 type BuySubscriptionModalProps = {
   headerText?: string;
-  informationElement?: JSX.Element;
+  informationElement?: ReactElement;
 };
 
 export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
@@ -58,7 +59,7 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
     error,
     handleEmailInputChange,
     handleSubmit,
-    isLoading,
+    isPending,
   } = useEmailLogin();
 
   return (
@@ -114,7 +115,7 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
                         handleEmailInputChange={handleEmailInputChange}
                         handleSubmit={handleSubmit}
                         error={error}
-                        isLoading={isLoading}
+                        isLoading={isPending}
                       />
                     </VStack>
                     <Center>
