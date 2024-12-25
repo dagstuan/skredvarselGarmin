@@ -6,6 +6,7 @@ using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Services;
 using SkredvarselGarminWeb.VippsApi;
 
+using EntityAgreementStatus = SkredvarselGarminWeb.Entities.AgreementStatus;
 using VippsAgreementStatus = SkredvarselGarminWeb.VippsApi.Models.AgreementStatus;
 
 namespace SkredvarselGarminWeb.Hangfire;
@@ -15,12 +16,15 @@ public class HangfireService(
     IVippsApiClient vippsApiClient,
     IBackgroundJobClient backgroundJobClient,
     IDateTimeNowProvider dateTimeNowProvider,
-    IVippsAgreementService subscriptionService,
+    IVippsAgreementService vippsAgreementService,
     ILogger<HangfireService> logger)
 {
     public async Task UpdatePendingAgreements()
     {
-        var pendingAgreementsInDb = dbContext.GetPendingAgreements();
+        var pendingAgreementsInDb = dbContext.Agreements
+            .Where(a => a.Status == EntityAgreementStatus.PENDING)
+            .Where(a => a.CallbackId != null)
+            .ToList();
 
         foreach (var agreement in pendingAgreementsInDb)
         {
@@ -39,8 +43,8 @@ public class HangfireService(
     public async Task RemoveStalePendingAgreements()
     {
         var pendingAgreementsInDb = dbContext.Agreements
-            .Where(a => a.Status == Entities.AgreementStatus.PENDING)
-            .Where(a => a.Created < dateTimeNowProvider.UtcNow.AddMinutes(-10))
+            .Where(a => a.Status == EntityAgreementStatus.PENDING)
+            .Where(a => a.Created < dateTimeNowProvider.UtcNow.AddMinutes(-15))
             .ToList();
 
         foreach (var agreement in pendingAgreementsInDb)
@@ -54,6 +58,20 @@ public class HangfireService(
                 logger.LogInformation("Deleting stale agreement {agreementId} since it was expired in Vipps.", agreement.Id);
                 dbContext.Remove(agreement);
             }
+            else if (vippsAgreement.Status == VippsAgreementStatus.Active)
+            {
+                logger.LogInformation("Agreement {agreementId} in vipps was active but no callback was received for 10 minutes. Stopping agreement.", agreement.Id);
+
+                try
+                {
+                    await vippsAgreementService.StopAgreement(agreement.Id);
+                    agreement.SetAsStopped();
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Failed to stop agreement {agreementId} in Vipps. Hangfire will retry.", agreement.Id);
+                }
+            }
         }
 
         dbContext.SaveChanges();
@@ -65,7 +83,7 @@ public class HangfireService(
 
         foreach (var agreement in agreementsThatAreDue)
         {
-            backgroundJobClient.Enqueue(() => subscriptionService.UpdateAgreementCharges(agreement.Id));
+            backgroundJobClient.Enqueue(() => vippsAgreementService.UpdateAgreementCharges(agreement.Id));
         }
     }
 
@@ -75,7 +93,7 @@ public class HangfireService(
 
         foreach (var agreement in agreementsWithoutCharges)
         {
-            backgroundJobClient.Enqueue(() => subscriptionService.CreateNextChargeForAgreement(agreement.Id));
+            backgroundJobClient.Enqueue(() => vippsAgreementService.CreateNextChargeForAgreement(agreement.Id));
         }
     }
 
