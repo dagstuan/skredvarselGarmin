@@ -17,7 +17,7 @@ export const FacebookButton = ({ link }: FacebookButtonProps) => {
     >
       <Flex gap={2} alignItems="center">
         <Icon as={SiFacebook} w={6} h={6} />
-        <Text>Fortsett med Facebook</Text>
+        <Text>Logg inn med Facebook</Text>
       </Flex>
     </Button>
   );

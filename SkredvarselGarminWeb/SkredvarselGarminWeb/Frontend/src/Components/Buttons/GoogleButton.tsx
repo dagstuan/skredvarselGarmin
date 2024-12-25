@@ -19,7 +19,7 @@ export const GoogleButton = ({ link }: GoogleButtonProps) => {
     >
       <Flex gap={2} alignItems="center">
         <Icon as={FcGoogle} w={6} h={6} />
-        <Text>Fortsett med Google</Text>
+        <Text>Logg inn med Google</Text>
       </Flex>
     </Button>
   );

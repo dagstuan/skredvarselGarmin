@@ -31,7 +31,7 @@ export const EmailLoginForm = (props: EmailLoginFormProps) => {
         isLoading={isLoading}
         type="submit"
       >
-        Send innloggingslenke
+        Logg inn med e-post
       </Button>
     </form>
   );

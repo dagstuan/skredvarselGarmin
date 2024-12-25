@@ -9,13 +9,11 @@ import {
   VStack,
   Box,
   Icon,
-  Button,
-  FormControl,
-  FormErrorMessage,
-  Input,
   Center,
   Heading,
+  Link,
 } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 import { VippsButton } from "./Buttons/VippsButton";
 import { FacebookButton } from "./Buttons/FacebookButton";
 import { GoogleButton } from "./Buttons/GoogleButton";
@@ -40,6 +38,10 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
         Abonnement kan kjøpes direkte med Vipps,
         <br />
         eller logg inn for andre alternativer.
+        <br />
+        <br />
+        Hvis du allerede har et abonnement kan du logge inn nedenfor for å endre
+        det.
       </>
     ),
   } = props;
@@ -80,7 +82,7 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
                 </Box>
 
                 <VStack w="100%" alignItems="stretch">
-                  <VippsButton />
+                  <VippsButton text="Kjøp abonnement med" />
                 </VStack>
               </VStack>
 
@@ -115,6 +117,11 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
                         isLoading={isLoading}
                       />
                     </VStack>
+                    <Center>
+                      <Link as={RouterLink} to="/faq#vippslogin">
+                        Hvorfor kan jeg ikke logge inn med Vipps?
+                      </Link>
+                    </Center>
                   </VStack>
                 </VStack>
               </Center>
