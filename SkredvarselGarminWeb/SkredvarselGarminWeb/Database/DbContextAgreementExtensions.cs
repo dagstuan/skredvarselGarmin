@@ -33,9 +33,6 @@ public static class DbContextAgreementExtensions
     public static Agreement? GetAgreementWithCallbackId(this SkredvarselDbContext dbContext, Guid callbackId) =>
         dbContext.Agreements.SingleOrDefault(a => a.CallbackId == callbackId);
 
-    public static List<Agreement> GetPendingAgreements(this SkredvarselDbContext dbContext) =>
-        [.. dbContext.Agreements.Where(a => a.Status == AgreementStatus.PENDING)];
-
     public static bool DoesUserHaveActiveSubscription(this SkredvarselDbContext dbContext, string userId)
     {
         var activeOrUnsubbedVippsAgreements = dbContext.Agreements
