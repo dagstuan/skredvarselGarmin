@@ -74,7 +74,7 @@ public static class WatchApiRouteBuilderExtensions
             [FromHeader(Name = "Authorization")] string authorizationHeader,
             IGarminAuthenticationService garminAuthenticationService) =>
         {
-            if (authorizationHeader is { Length: > 0 })
+            if (string.IsNullOrEmpty(authorizationHeader))
             {
                 return Results.Unauthorized();
             }
