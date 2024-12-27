@@ -153,7 +153,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                 }
                 else if (vippsAgreement.Status == VippsAgreementStatus.Active)
                 {
-                    if (agreement.UserId is { Length: > 0 })
+                    if (string.IsNullOrEmpty(agreement.UserId))
                     {
                         var signedInUser = dbContext.GetUserOrNull(ctx.User);
                         if (signedInUser != null)
