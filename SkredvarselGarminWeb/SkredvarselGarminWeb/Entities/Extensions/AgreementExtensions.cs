@@ -2,9 +2,13 @@ namespace SkredvarselGarminWeb.Entities.Extensions;
 
 public static class AgreementExtensions
 {
-    public static void SetUserIdAndRemoveCallbackId(this Agreement agreement, string userId)
+    public static void SetUserId(this Agreement agreement, string userId)
     {
         agreement.UserId = userId;
+    }
+
+    public static void RemoveCallbackId(this Agreement agreement)
+    {
         agreement.CallbackId = null;
     }
 
