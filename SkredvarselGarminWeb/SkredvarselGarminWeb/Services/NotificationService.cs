@@ -35,4 +35,12 @@ public class NotificationService(INtfyApiClient ntfyApiClient) : INotificationSe
             "Failed to activate Vipps subscription to Skredvarsel"
         );
     }
+
+    public async Task NotifyChargeFailed()
+    {
+        await ntfyApiClient.SendNotification(
+            "Charge failed!",
+            "Failed to charge user for Skredvarsel subscription"
+        );
+    }
 }

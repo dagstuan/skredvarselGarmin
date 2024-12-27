@@ -6,4 +6,5 @@ public interface INotificationService
     Task NotifyUserDeactivated();
     Task NotifyUserReactivated();
     Task NotifyActivationFailed();
+    Task NotifyChargeFailed();
 }

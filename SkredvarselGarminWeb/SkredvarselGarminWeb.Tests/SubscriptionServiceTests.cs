@@ -62,10 +62,12 @@ public class SubscriptionServiceTests
         _vippsApiClient = Substitute.For<IVippsApiClient>();
         _dateTimeNowProvider = Substitute.For<IDateTimeNowProvider>();
 
+
         _subscriptionService = new VippsAgreementService(
             _dbContext,
             _vippsApiClient,
             _dateTimeNowProvider,
+            Substitute.For<INotificationService>(),
             Substitute.For<ILogger<VippsAgreementService>>());
     }
 

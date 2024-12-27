@@ -18,6 +18,7 @@ public class VippsAgreementService(
     SkredvarselDbContext dbContext,
     IVippsApiClient vippsApiClient,
     IDateTimeNowProvider dateTimeNowProvider,
+    INotificationService notificationService,
     ILogger<VippsAgreementService> logger) : IVippsAgreementService
 {
     private readonly TimeSpan ChargeRetryDays = TimeSpan.FromDays(6);
@@ -195,7 +196,9 @@ public class VippsAgreementService(
                     }
                     else
                     {
-                        logger.LogError(response.Error, response.Error?.Content);
+                        _ = Task.Run(notificationService.NotifyChargeFailed);
+
+                        logger.LogError(response.Error, "Failed to capture charge. Response content: {responseContent}", response.Error?.Content);
                         throw new Exception($"Failed to capture charge {nextCharge.Id}.");
                     }
                 }
