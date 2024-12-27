@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 using Hangfire;
@@ -26,6 +25,52 @@ namespace SkredvarselGarminWeb.Endpoints;
 public static class VippsSubscriptionEndpointsRouteBuilderExtensions
 {
     private const int FullPrice = 3000;
+
+    private static async Task<Agreement> GetVippsAgreementRetryIfPending(IVippsApiClient vippsApiClient, string agreementId)
+    {
+        var retries = 0;
+        var vippsAgreement = await vippsApiClient.GetAgreement(agreementId);
+
+        while (vippsAgreement.Status == VippsAgreementStatus.Pending && retries < 5)
+        {
+            retries++;
+
+            await Task.Delay(750);
+
+            vippsAgreement = await vippsApiClient.GetAgreement(agreementId);
+        }
+
+        return vippsAgreement;
+    }
+
+    private static async Task StopOldAgreementsForUser(
+        Entities.User user,
+        SkredvarselDbContext dbContext,
+        IVippsAgreementService subscriptionService)
+    {
+        var existingActiveAgreementsForUser = dbContext.Agreements
+            .Where(a => a.UserId == user.Id)
+            .Where(a => a.Status == AgreementStatus.ACTIVE)
+            .Select(a => a.Id)
+            .ToList();
+
+        foreach (var existingAgreement in existingActiveAgreementsForUser)
+        {
+            await subscriptionService.StopAgreement(existingAgreement);
+        }
+    }
+
+    private static async Task<ClaimsPrincipal> GetVippsAgreementPrincipal(string userId, IVippsApiClient vippsApiClient)
+    {
+        var userInfo = await vippsApiClient.GetUserInfo(userId);
+
+        return new ClaimsPrincipal(new ClaimsIdentity(
+        [
+            new("name", userInfo.Name),
+            new("email", userInfo.Email),
+            new("sub", userId),
+        ], CookieAuthenticationDefaults.AuthenticationScheme));
+    }
 
     public static void MapVippsSubscriptionEndpoints(this IEndpointRouteBuilder app)
     {
@@ -133,80 +178,78 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
 
             if (agreement != null)
             {
-                var retries = 0;
-                var vippsAgreement = await vippsApiClient.GetAgreement(agreement.Id);
-
-                while (vippsAgreement.Status == VippsAgreementStatus.Pending && retries < 5)
-                {
-                    retries++;
-
-                    await Task.Delay(750);
-
-                    vippsAgreement = await vippsApiClient.GetAgreement(agreement.Id);
-                }
-
+                var vippsAgreement = await GetVippsAgreementRetryIfPending(vippsApiClient, agreement.Id);
                 if (vippsAgreement.Status is
                     VippsAgreementStatus.Stopped or
                     VippsAgreementStatus.Expired)
                 {
+                    logger.LogInformation("Agreement {agreementId} was stopped or expired in Vipps. Deleting.", agreement.Id);
                     dbContext.Remove(agreement);
                 }
                 else if (vippsAgreement.Status == VippsAgreementStatus.Active)
                 {
-                    if (string.IsNullOrEmpty(agreement.UserId))
+                    try
                     {
-                        var signedInUser = dbContext.GetUserOrNull(ctx.User);
-                        if (signedInUser != null)
+                        if (string.IsNullOrEmpty(agreement.UserId))
                         {
-                            // User is already signed in. Associate agreement with logged in user instead of vipps-sub.
-                            agreement.SetUserIdAndRemoveCallbackId(signedInUser.Id);
-                        }
-                        else
-                        {
-                            // User is not already signed in. First attempt to find and existing user with the
-                            // same sub, and if found, stop all active agreements for that user. Then login using
-                            // the sub from the vipps agreement.
-                            var existingUser = dbContext.Users.FirstOrDefault(u => u.Id == vippsAgreement.Sub);
-
-                            if (existingUser != null)
+                            var signedInUser = dbContext.GetUserOrNull(ctx.User);
+                            if (signedInUser != null)
                             {
-                                var existingActiveAgreementsForUser = dbContext.Agreements
-                                    .Where(a => a.UserId == existingUser.Id)
-                                    .Where(a => a.Status == AgreementStatus.ACTIVE)
-                                    .Select(a => a.Id)
-                                    .ToList();
-
-                                foreach (var existingAgreement in existingActiveAgreementsForUser)
-                                {
-                                    await subscriptionService.StopAgreement(existingAgreement);
-                                }
+                                // User is already signed in. Associate agreement with logged in user instead of vipps-sub.
+                                agreement.SetUserId(signedInUser.Id);
                             }
+                            else
+                            {
+                                // User is not already signed in. First attempt to find and existing user with the
+                                // same sub, and if found, stop all active agreements for that user. Then login using
+                                // the sub from the vipps agreement.
+                                var existingUser = dbContext.Users.FirstOrDefault(u => u.Id == vippsAgreement.Sub);
 
-                            var userInfo = await vippsApiClient.GetUserInfo(vippsAgreement.Sub);
+                                if (existingUser != null)
+                                {
+                                    try
+                                    {
+                                        await StopOldAgreementsForUser(existingUser, dbContext, subscriptionService);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        logger.LogError(e, "Failed to stop old agreements for user {userId}.", existingUser.Id);
+                                        _ = Task.Run(notificationService.NotifyActivationFailed);
+                                    }
+                                }
 
-                            var principal = new ClaimsPrincipal(new ClaimsIdentity(
-                            [
-                                new("name", userInfo.Name),
-                                new("email", userInfo.Email),
-                                new("sub", vippsAgreement.Sub)
-                            ], CookieAuthenticationDefaults.AuthenticationScheme));
+                                var userId = vippsAgreement.Sub;
+                                agreement.SetUserId(userId);
 
-                            await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-                            userService.RegisterLogin(principal);
-
-                            agreement.SetUserIdAndRemoveCallbackId(vippsAgreement.Sub);
+                                var principal = await GetVippsAgreementPrincipal(userId, vippsApiClient);
+                                await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+                                userService.RegisterLogin(principal);
+                            }
                         }
+
+                        if (string.IsNullOrEmpty(agreement.UserId))
+                        {
+                            // This should not be possible at this stage.
+                            throw new Exception("Failed to associate agreement with user.");
+                        }
+
+                        _ = Task.Run(notificationService.NotifyUserSubscribed);
+
+                        agreement.SetAsActive();
+                        agreement.RemoveCallbackId();
+
+                        backgroundJobClient.Enqueue(() => subscriptionService.UpdateAgreementCharges(agreement.Id));
                     }
-
-                    _ = Task.Run(notificationService.NotifyUserSubscribed);
-
-                    agreement.SetAsActive();
-                    backgroundJobClient.Enqueue(() => subscriptionService.UpdateAgreementCharges(agreement.Id));
+                    catch (Exception e)
+                    {
+                        logger.LogError(e, "Failed to activate agreement {agreementId}.", agreement.Id);
+                        _ = Task.Run(notificationService.NotifyActivationFailed);
+                    }
                 }
                 else if (vippsAgreement.Status == VippsAgreementStatus.Pending)
                 {
                     logger.LogInformation("Subscription was still pending after 5 retries. Returning.");
+                    await notificationService.NotifyActivationFailed();
                 }
             }
 
