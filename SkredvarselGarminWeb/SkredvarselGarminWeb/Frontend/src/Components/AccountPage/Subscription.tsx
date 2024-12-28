@@ -44,7 +44,7 @@ export const Subscription = () => {
         <Text mb={2}>Du har ikke registrert et abonnement på appen.</Text>
 
         <VStack gap={5} alignItems="stretch">
-          <VippsButton />
+          <VippsButton text="Kjøp abonnement med" />
           <Box position="relative">
             <Divider />
             <AbsoluteCenter bg="white" px="4">

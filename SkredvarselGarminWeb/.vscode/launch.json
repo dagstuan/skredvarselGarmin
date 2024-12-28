@@ -10,7 +10,7 @@
       "request": "launch",
       "preLaunchTask": "build",
       // If you have changed target frameworks, make sure to update the program path.
-      "program": "${workspaceFolder}/SkredvarselGarminWeb/bin/Debug/net7.0/SkredvarselGarminWeb.dll",
+      "program": "${workspaceFolder}/SkredvarselGarminWeb/bin/Debug/net9.0/SkredvarselGarminWeb.dll",
       "args": [],
       "cwd": "${workspaceFolder}/SkredvarselGarminWeb",
       "stopAtEntry": false,

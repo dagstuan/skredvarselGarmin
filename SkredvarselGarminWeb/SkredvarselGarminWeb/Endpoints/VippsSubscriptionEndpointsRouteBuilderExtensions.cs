@@ -238,7 +238,15 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                         agreement.SetAsActive();
                         agreement.RemoveCallbackId();
 
-                        backgroundJobClient.Enqueue(() => subscriptionService.UpdateAgreementCharges(agreement.Id));
+                        try
+                        {
+                            await subscriptionService.UpdateAgreementCharges(agreement.Id);
+                        }
+                        catch (Exception e)
+                        {
+                            logger.LogError(e, "Failed to update agreement charges for agreement {agreementId}. Retrying via Hangfire.", agreement.Id);
+                            backgroundJobClient.Enqueue(() => subscriptionService.UpdateAgreementCharges(agreement.Id));
+                        }
                     }
                     catch (Exception e)
                     {
