@@ -81,11 +81,20 @@ public class VippsAgreementService(
     [DisableConcurrentExecution(10)]
     public async Task UpdateAgreementCharges(string agreementId)
     {
-        using var transaction = dbContext.Database.BeginTransaction();
+        var isExistingTransaction = dbContext.Database.CurrentTransaction != null;
 
-        await UpdateAgreementChargesInternal(agreementId);
+        if (!isExistingTransaction)
+        {
+            using var transaction = dbContext.Database.BeginTransaction();
 
-        transaction.Commit();
+            await UpdateAgreementChargesInternal(agreementId);
+
+            transaction.Commit();
+        }
+        else
+        {
+            await UpdateAgreementChargesInternal(agreementId);
+        }
     }
 
     private async Task UpdateAgreementChargesInternal(string agreementId)
