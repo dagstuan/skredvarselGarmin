@@ -36,7 +36,7 @@
     <PackageReference Include="ProjNet4GeoAPI" Version="1.4.1" />
     <PackageReference Include="Refit" Version="8.0.0" />
     <PackageReference Include="Refit.HttpClientFactory" Version="8.0.0" />
-    <PackageReference Include="Resend" Version="0.0.10" />
+    <PackageReference Include="Resend" Version="0.0.12" />
     <PackageReference Include="Stripe.net" Version="47.2.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
   </ItemGroup>
