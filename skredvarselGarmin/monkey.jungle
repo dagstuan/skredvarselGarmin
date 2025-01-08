@@ -33,6 +33,8 @@ fr165.resourcePath = $(base.resourcePath);resources-complications;resources-h54
 fr165m.resourcePath = $(base.resourcePath);resources-complications;resources-h54
 vivoactive4s.resourcePath = $(base.resourcePath);resources-h30
 vivoactive4.resourcePath = $(base.resourcePath);resources-h35
+instinct3amoled45mm.resourcePath = $(base.resourcePath);resources-h60
+instinct3amoled50mm.resourcePath = $(base.resourcePath);resources-h60
 
 descentmk2.excludeAnnotations=hasComplication
 descentmk2s.excludeAnnotations=hasComplication
