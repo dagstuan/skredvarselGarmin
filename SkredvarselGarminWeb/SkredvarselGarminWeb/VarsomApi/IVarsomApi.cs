@@ -7,5 +7,5 @@ namespace SkredvarselGarminWeb.VarsomApi;
 public interface IVarsomApi
 {
     [Get("/avalancheWarningByRegion/Detail/{regionId}/{langKey}/{from}/{to}")]
-    Task<IEnumerable<VarsomDetailedAvalancheWarning>> GetDetailedWarningsByRegion(string regionId, string langKey, DateOnly from, DateOnly to);
+    Task<IEnumerable<VarsomDetailedAvalancheWarning>> GetDetailedWarningsByRegion(int regionId, string langKey, DateOnly from, DateOnly to);
 }
