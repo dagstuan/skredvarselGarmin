@@ -15,6 +15,9 @@ function getDetailedWarningsCacheKeyForRegion(regionId as String) {
 }
 
 (:background)
+const simpleForecastCacheKeyForLocation = "location_simple_forecast";
+
+(:background)
 function getSelectedRegionIds() as Array<String> {
   var valueFromStorage = Storage.getValue($.SelectedRegionIdsStorageKey);
 

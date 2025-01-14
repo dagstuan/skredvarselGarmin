@@ -12,11 +12,13 @@ module AvalancheUi {
     :regionId as String,
     :regionName as String,
     :forecast as SimpleAvalancheForecast,
+    :isLocationForecast as Boolean,
   };
 
   (:glance)
   class ForecastTimeline {
     private var _forecast as SimpleAvalancheForecast;
+    private var _isLocationForecast as Boolean;
 
     private var _numWarnings;
 
@@ -44,6 +46,8 @@ module AvalancheUi {
 
     private var _regionName as String?;
 
+    private var _navigationIcon as AvalancheUi.NavigationIcon?;
+
     public function initialize(settings as ForecastTimelineSettings) {
       _locX = settings[:locX];
       _locY = settings[:locY];
@@ -60,6 +64,14 @@ module AvalancheUi {
         :currentTimeType => Time.CURRENT_TIME_DEFAULT,
       });
       _earlyCutoffTime = $.subtractDays(now, 2);
+      _isLocationForecast =
+        settings[:isLocationForecast] != null
+          ? settings[:isLocationForecast]
+          : false;
+
+      if (_isLocationForecast) {
+        _navigationIcon = new AvalancheUi.NavigationIcon();
+      }
     }
 
     public function draw(dc as Gfx.Dc) {
@@ -151,6 +163,11 @@ module AvalancheUi {
     private function drawTitle(dc as Gfx.Dc, x0 as Number, y0 as Number) {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
 
+      var textDimensions = dc.getTextDimensions(
+        _regionName,
+        Graphics.FONT_GLANCE
+      );
+
       dc.drawText(
         x0,
         y0,
@@ -158,6 +175,14 @@ module AvalancheUi {
         _regionName,
         Graphics.TEXT_JUSTIFY_LEFT
       );
+
+      if (_navigationIcon != null) {
+        var spacingX = 4;
+        var minX = textDimensions[0] + spacingX;
+        var minY = textDimensions[1] / 2 - _navigationIcon.size / 2;
+
+        _navigationIcon.draw(dc, x0 + minX, y0 + minY);
+      }
     }
 
     private function drawMarker(

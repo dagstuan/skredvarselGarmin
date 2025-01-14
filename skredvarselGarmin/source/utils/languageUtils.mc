@@ -9,7 +9,8 @@ var useWatchLanguage as Boolean?;
 (:glance)
 function getUseWatchLanguage() as Boolean {
   if ($.useWatchLanguage == null) {
-    $.useWatchLanguage = Properties.getValue("useWatchLanguage");
+    $.useWatchLanguage =
+      Properties.getValue("useWatchLanguage") as Lang.Boolean;
   }
 
   return $.useWatchLanguage;

@@ -28,12 +28,20 @@ public class ForecastMenu extends Ui.CustomMenu {
   }
 
   function onShow() {
-    var regionIds = $.getSelectedRegionIds();
-    var numRegions = regionIds.size();
+    var selectedRegionIds = $.getSelectedRegionIds();
+    var numRegions = selectedRegionIds.size();
 
     if (numRegions == 0) {
-      _existingRegionIds = regionIds;
+      _existingRegionIds = selectedRegionIds;
       deleteAllItems();
+
+      var useLocation = $.getUseLocation();
+      if (useLocation) {
+        addItem(
+          new ForecastMenuItem({ :menu => self, :isLocationForecast => true })
+        );
+      }
+
       addItem(new ForecastMenuEditMenuItem(_editItemId));
       redrawTitleAndFooter();
       return;
@@ -43,8 +51,8 @@ public class ForecastMenu extends Ui.CustomMenu {
     if (numRegions != _existingRegionIds.size()) {
       regionsChanged = true;
     } else {
-      for (var i = 0; i < regionIds.size(); i++) {
-        if (!regionIds[i].equals(_existingRegionIds[i])) {
+      for (var i = 0; i < selectedRegionIds.size(); i++) {
+        if (!selectedRegionIds[i].equals(_existingRegionIds[i])) {
           regionsChanged = true;
           break;
         }
@@ -53,8 +61,21 @@ public class ForecastMenu extends Ui.CustomMenu {
 
     if (regionsChanged) {
       deleteAllItems();
-      for (var i = 0; i < regionIds.size(); i++) {
-        addItem(new ForecastMenuItem(self, regionIds[i]));
+
+      var useLocation = $.getUseLocation();
+      if (useLocation) {
+        addItem(
+          new ForecastMenuItem({ :menu => self, :isLocationForecast => true })
+        );
+      }
+
+      for (var i = 0; i < selectedRegionIds.size(); i++) {
+        addItem(
+          new ForecastMenuItem({
+            :menu => self,
+            :regionId => selectedRegionIds[i],
+          })
+        );
       }
 
       addItem(new ForecastMenuEditMenuItem(_editItemId));
@@ -62,7 +83,7 @@ public class ForecastMenu extends Ui.CustomMenu {
       redrawTitleAndFooter();
     }
 
-    _existingRegionIds = regionIds;
+    _existingRegionIds = selectedRegionIds;
   }
 
   function drawTitle(dc as Gfx.Dc) {
