@@ -4,7 +4,7 @@ using Toybox.Application.Storage;
 
 const SelectedRegionIdsStorageKey = "selectedRegionIds";
 
-(:background)
+(:background,:glance)
 function getSimpleForecastCacheKeyForRegion(regionId as String) {
   return Lang.format("simple_$1$", [regionId]);
 }
@@ -13,6 +13,9 @@ function getSimpleForecastCacheKeyForRegion(regionId as String) {
 function getDetailedWarningsCacheKeyForRegion(regionId as String) {
   return Lang.format("detailed_$1$", [regionId]);
 }
+
+(:background,:glance)
+const simpleForecastCacheKeyForLocation = "location_simple_forecast";
 
 (:background)
 function getSelectedRegionIds() as Array<String> {

@@ -56,7 +56,7 @@ class GlanceView extends Ui.GlanceView {
   private var _hasSubscription as Boolean?;
   private var _favoriteRegionId as String?;
 
-  private var _forecast as SimpleAvalancheForecast?;
+  private var _forecastData as SimpleForecastData?;
   private var _dataAge as Number?;
 
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
@@ -66,6 +66,8 @@ class GlanceView extends Ui.GlanceView {
   private var _height as Number?;
 
   private var _appNameText as Ui.Resource?;
+
+  private var _useLocation as Boolean = false;
 
   function initialize() {
     GlanceView.initialize();
@@ -81,6 +83,7 @@ class GlanceView extends Ui.GlanceView {
   function onShow() {
     _hasSubscription = $.getHasSubscription();
     _favoriteRegionId = $.getFavoriteRegionId();
+    _useLocation = $.getUseLocation();
     _appNameText = $.getOrLoadResourceString("Skredvarsel", :AppName);
   }
 
@@ -90,14 +93,18 @@ class GlanceView extends Ui.GlanceView {
   }
 
   function onUpdate(dc as Gfx.Dc) {
-    if (_hasSubscription && _favoriteRegionId != null && _forecast == null) {
+    if (
+      _hasSubscription &&
+      (_favoriteRegionId != null || _useLocation) &&
+      _forecastData == null
+    ) {
       setForecastDataFromStorage();
     }
 
     if (
       _hasSubscription == false ||
       _favoriteRegionId == null ||
-      _forecast == null ||
+      _forecastData == null ||
       _dataAge > $.TIME_TO_SHOW_LOADING
     ) {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
@@ -133,15 +140,22 @@ class GlanceView extends Ui.GlanceView {
   }
 
   function drawTimeline(dc as Gfx.Dc) {
-    var regionName = $.getRegionName(_favoriteRegionId);
+    var regionId = _useLocation
+      ? (_forecastData as LocationAvalancheForecast)["regionId"]
+      : _favoriteRegionId;
+
+    var forecast = _useLocation
+      ? (_forecastData as LocationAvalancheForecast)["warnings"]
+      : _forecastData;
 
     var forecastTimeline = new AvalancheUi.ForecastTimeline({
       :locX => 0,
       :locY => 0,
       :width => _width,
       :height => _height,
-      :regionName => regionName,
-      :forecast => _forecast,
+      :regionName => $.getRegionName(regionId),
+      :forecast => forecast,
+      :isLocationForecast => _useLocation,
     });
 
     forecastTimeline.draw(dc);
@@ -153,11 +167,13 @@ class GlanceView extends Ui.GlanceView {
   }
 
   private function setForecastDataFromStorage() as Void {
-    var data = $.getSimpleForecastForRegion(_favoriteRegionId);
+    var data = _useLocation
+      ? $.getSimpleForecastForLocation()
+      : $.getSimpleForecastForRegion(_favoriteRegionId);
 
     if (data != null) {
       _bufferedBitmap = null;
-      _forecast = data[0];
+      _forecastData = data[0];
       _dataAge = $.getStorageDataAge(data);
     }
   }

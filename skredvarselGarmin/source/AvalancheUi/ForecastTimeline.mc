@@ -12,11 +12,13 @@ module AvalancheUi {
     :regionId as String,
     :regionName as String,
     :forecast as SimpleAvalancheForecast,
+    :isLocationForecast as Boolean,
   };
 
   (:glance)
   class ForecastTimeline {
     private var _forecast as SimpleAvalancheForecast;
+    private var _isLocationForecast as Boolean;
 
     private var _numWarnings;
 
@@ -26,8 +28,10 @@ module AvalancheUi {
     private var _lineHeight = 8;
 
     private var _markerWidth = 3;
-    private var _markerHeight = 18;
+    private var _markerHeight = 16;
     private var _strokeOffset = 4;
+
+    private var _navigationIconGap = 4;
 
     private var _oneDayValue = $.dayDuration(1).value().toFloat();
 
@@ -43,6 +47,8 @@ module AvalancheUi {
     private var _dangerLevelFont = Gfx.FONT_GLANCE;
 
     private var _regionName as String?;
+
+    private var _navigationIcon as AvalancheUi.NavigationIcon?;
 
     public function initialize(settings as ForecastTimelineSettings) {
       _locX = settings[:locX];
@@ -60,6 +66,22 @@ module AvalancheUi {
         :currentTimeType => Time.CURRENT_TIME_DEFAULT,
       });
       _earlyCutoffTime = $.subtractDays(now, 2);
+      _isLocationForecast =
+        settings[:isLocationForecast] != null
+          ? settings[:isLocationForecast]
+          : false;
+
+      if (_isLocationForecast) {
+        var navigationIconSize = 13;
+
+        var screenWidth = $.getDeviceScreenWidth();
+        if (screenWidth > 260) {
+          navigationIconSize = 20;
+          _navigationIconGap = 6;
+        }
+
+        _navigationIcon = new AvalancheUi.NavigationIcon(navigationIconSize);
+      }
     }
 
     public function draw(dc as Gfx.Dc) {
@@ -151,6 +173,11 @@ module AvalancheUi {
     private function drawTitle(dc as Gfx.Dc, x0 as Number, y0 as Number) {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
 
+      var textDimensions = dc.getTextDimensions(
+        _regionName,
+        Graphics.FONT_GLANCE
+      );
+
       dc.drawText(
         x0,
         y0,
@@ -158,6 +185,13 @@ module AvalancheUi {
         _regionName,
         Graphics.TEXT_JUSTIFY_LEFT
       );
+
+      if (_navigationIcon != null) {
+        var minX = textDimensions[0] + _navigationIconGap;
+        var minY = textDimensions[1] / 2 - _navigationIcon.size / 2;
+
+        _navigationIcon.draw(dc, x0 + minX, y0 + minY);
+      }
     }
 
     private function drawMarker(
