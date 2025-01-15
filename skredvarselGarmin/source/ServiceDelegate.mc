@@ -1,10 +1,16 @@
 import Toybox.Lang;
 import Toybox.System;
 
+using Toybox.Application.Properties;
+
+typedef ReloadData as {
+  "path" as String,
+  "storageKey" as String,
+};
+
 (:background)
 class ServiceDelegate extends System.ServiceDelegate {
-  private var _simpleRegionsToReload as Array<String> = [];
-  private var _detailedRegionsToReload as Array<String> = [];
+  private var _dataToReload as Array<ReloadData> = [];
 
   private var _language as Number;
   private var _start as String;
@@ -57,9 +63,52 @@ class ServiceDelegate extends System.ServiceDelegate {
       return;
     }
 
+    if ($.getUseLocation()) {
+      var location = $.getLocation();
+
+      if (location == null) {
+        $.log("No location available. Not reloading location warning.");
+      } else {
+        _dataToReload.add({
+          :path => $.getSimpleWarningsPathForLocation(
+            location[0],
+            location[1],
+            _language,
+            _start,
+            _end
+          ),
+          :storageKey => $.simpleForecastCacheKeyForLocation,
+        });
+      }
+    }
+
     var selectedRegionIds = $.getSelectedRegionIds();
-    _simpleRegionsToReload = selectedRegionIds;
-    _detailedRegionsToReload = selectedRegionIds.slice(0, 2);
+
+    for (var i = 0; i < selectedRegionIds.size(); i++) {
+      var regionId = selectedRegionIds[i];
+
+      _dataToReload.add({
+        :path => $.getSimpleWarningsPathForRegion(
+          regionId,
+          _language,
+          _start,
+          _end
+        ),
+        :storageKey => $.getSimpleForecastCacheKeyForRegion(regionId),
+      });
+
+      if (i < 2) {
+        _dataToReload.add({
+          :path => $.getDetailedWarningsPathForRegion(
+            regionId,
+            _language,
+            _start,
+            _end
+          ),
+          :storageKey => $.getDetailedWarningsCacheKeyForRegion(regionId),
+        });
+      }
+    }
 
     reloadNextRegion();
   }
@@ -79,32 +128,16 @@ class ServiceDelegate extends System.ServiceDelegate {
   }
 
   private function reloadNextRegion() as Boolean {
-    if (_simpleRegionsToReload.size() > 0) {
-      var nextRegion = _simpleRegionsToReload[0];
-      _simpleRegionsToReload = _simpleRegionsToReload.slice(1, null);
+    if (_dataToReload.size() > 0) {
+      var nextData = _dataToReload[0];
+      _dataToReload = _dataToReload.slice(1, null);
 
-      var path = $.getSimpleWarningsPathForRegion(
-        nextRegion,
-        _language,
-        _start,
-        _end
+      $.makeApiRequest(
+        nextData[:path],
+        nextData[:storageKey],
+        method(:onReloadedRegion),
+        false
       );
-      var storageKey = $.getSimpleForecastCacheKeyForRegion(nextRegion);
-      $.makeApiRequest(path, storageKey, method(:onReloadedRegion), false);
-
-      return true;
-    } else if (_detailedRegionsToReload.size() > 0) {
-      var nextRegion = _detailedRegionsToReload[0];
-      _detailedRegionsToReload = _detailedRegionsToReload.slice(1, null);
-
-      var path = $.getDetailedWarningsPathForRegion(
-        nextRegion,
-        _language,
-        _start,
-        _end
-      );
-      var storageKey = $.getDetailedWarningsCacheKeyForRegion(nextRegion);
-      $.makeApiRequest(path, storageKey, method(:onReloadedRegion), false);
 
       return true;
     }
