@@ -60,7 +60,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
         }
     }
 
-    private static async ClaimsPrincipal GetVippsAgreementPrincipal(string userId, UserInfo userInfo)
+    private static ClaimsPrincipal GetVippsAgreementPrincipal(string userId, UserInfo userInfo)
     {
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
@@ -206,11 +206,8 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                                 var existingUser = dbContext.Users.FirstOrDefault(u => u.Id == vippsAgreement.Sub);
                                 var userInfo = await vippsApiClient.GetUserInfo(userId);
 
-                                if (existingUser == null)
-                                {
-                                    // Couldn't find user by sup. Attempt to find user by email.
-                                    existingUser = dbContext.Users.FirstOrDefault(u => u.Email == userInfo.Email);
-                                }
+                                // Couldn't find user by sup. Attempt to find user by email.
+                                existingUser ??= dbContext.Users.FirstOrDefault(u => u.Email == userInfo.Email);
 
                                 if (existingUser != null)
                                 {
