@@ -8,6 +8,14 @@ typedef SimpleAvalancheWarning as {
 
 typedef SimpleAvalancheForecast as Array<SimpleAvalancheWarning>;
 
+typedef LocationAvalancheForecast as {
+  "regionId" as Number,
+  "warnings" as SimpleAvalancheForecast,
+};
+
+typedef SimpleForecastData as SimpleAvalancheForecast or
+  LocationAvalancheForecast;
+
 typedef AvalancheProblem as {
   "typeName" as String,
   "exposedHeights" as Array<Number>,

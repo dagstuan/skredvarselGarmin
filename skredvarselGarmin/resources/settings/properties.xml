@@ -1,5 +1,6 @@
 <properties>
-    <property id="appVersion" type="string">1.3.0</property>
+    <property id="appVersion" type="string">2.0</property>
+    <property id="useLocation" type="boolean">true</property>
     <property id="forecastLanguage" type="number">1</property>
     <property id="useWatchLanguage" type="boolean">false</property>
 </properties>

@@ -5,38 +5,57 @@ using Toybox.Graphics as Gfx;
 
 using AvalancheUi;
 
+typedef ForecastMenuItemSettings as {
+  :menu as ForecastMenu,
+  :regionId as String?,
+  :isLocationForecast as Boolean?,
+};
+
 public class ForecastMenuItem extends Ui.CustomMenuItem {
-  public var regionId as String;
+  private var _regionId as String;
+  private var _isLocationForecast as Boolean;
   private var _menu as ForecastMenu;
-  private var _forecast as SimpleAvalancheForecast?;
+
+  private var _forecastData as SimpleForecastData?;
   private var _dataAge as Number?;
 
   private var _loadingText as Ui.Resource;
 
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
 
-  public function initialize(menu as ForecastMenu, regionId as String) {
-    CustomMenuItem.initialize(regionId, {});
+  public function initialize(settings as ForecastMenuItemSettings) {
+    if (settings[:regionId] == null && settings[:isLocationForecast] == null) {
+      throw new SkredvarselGarminException(
+        "No regionId provided for non-location ForecastMenuItem."
+      );
+    }
 
-    self.regionId = regionId;
-    _menu = menu;
+    _regionId = settings[:regionId];
+    _isLocationForecast = settings[:isLocationForecast];
+
+    var menuItemId = _isLocationForecast ? "location-forecast" : _regionId;
+    CustomMenuItem.initialize(menuItemId, {});
+
+    _menu = settings[:menu];
 
     _loadingText = $.getOrLoadResourceString("Laster...", :Loading);
 
     getForecastFromCache();
-    if (_forecast == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
+    if (_forecastData == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
       $.log(
         "Null or stale simple forecast for menu item, try to reload in background"
       );
 
-      $.loadSimpleForecastForRegion(regionId, method(:onReceive), true);
+      if (_isLocationForecast) {
+        $.loadSimpleForecastForLocation(method(:onReceive), false);
+      } else {
+        $.loadSimpleForecastForRegion(_regionId, method(:onReceive), false);
+      }
     }
   }
 
-  //! Draw the item string at the center of the item.
-  //! @param dc Device context
   public function draw(dc as Gfx.Dc) as Void {
-    if (_forecast != null && _dataAge < $.TIME_TO_SHOW_LOADING) {
+    if (_forecastData != null && _dataAge < $.TIME_TO_SHOW_LOADING) {
       drawTimeline(dc);
     } else {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
@@ -66,14 +85,18 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
       });
       var bufferedDc = _bufferedBitmap.getDc();
 
-      var regionName = $.getRegionName(regionId);
+      var forecast = _isLocationForecast
+        ? (_forecastData as LocationAvalancheForecast)["warnings"]
+        : _forecastData;
+
       var forecastTimeline = new AvalancheUi.ForecastTimeline({
         :locX => marginLeft,
         :locY => 0,
         :width => width - marginRight,
         :height => height,
-        :regionName => regionName,
-        :forecast => _forecast,
+        :regionName => $.getRegionName(getRegionId()),
+        :forecast => forecast,
+        :isLocationForecast => _isLocationForecast,
       });
 
       forecastTimeline.draw(bufferedDc);
@@ -83,12 +106,14 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   }
 
   private function getForecastFromCache() as Void {
-    var data = $.getSimpleForecastForRegion(regionId);
+    var data = _isLocationForecast
+      ? $.getSimpleForecastForLocation()
+      : $.getSimpleForecastForRegion(_regionId);
 
     if (data != null) {
       // Reset buffered bitmap when receiving new data
       _bufferedBitmap = null;
-      _forecast = data[0];
+      _forecastData = data[0];
       _dataAge = $.getStorageDataAge(data);
     }
   }
@@ -101,5 +126,11 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
       getForecastFromCache();
       _menu.redrawTitleAndFooter();
     }
+  }
+
+  public function getRegionId() {
+    return _isLocationForecast
+      ? (_forecastData as LocationAvalancheForecast)["regionId"]
+      : _regionId;
   }
 }

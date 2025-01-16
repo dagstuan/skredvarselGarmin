@@ -49,54 +49,58 @@ function getSortedRegionIds() as Array<String> {
 }
 
 (:glance)
-function getRegionName(regionId as String) as String {
-  if (regionId.equals("3003")) {
+function getRegionName(regionId as String or Number) as String {
+  if (regionId instanceof Lang.String) {
+    regionId = regionId.toNumber();
+  }
+
+  if (regionId == 3003) {
     return "Nordenskiöld Land";
-  } else if (regionId.equals("3006")) {
+  } else if (regionId == 3006) {
     return "Finnmarkskysten";
-  } else if (regionId.equals("3007")) {
+  } else if (regionId == 3007) {
     return "Vest-Finnmark";
-  } else if (regionId.equals("3009")) {
+  } else if (regionId == 3009) {
     return "Nord-Troms";
-  } else if (regionId.equals("3010")) {
+  } else if (regionId == 3010) {
     return "Lyngen";
-  } else if (regionId.equals("3011")) {
+  } else if (regionId == 3011) {
     return "Tromsø";
-  } else if (regionId.equals("3012")) {
+  } else if (regionId == 3012) {
     return "Sør-Troms";
-  } else if (regionId.equals("3013")) {
+  } else if (regionId == 3013) {
     return "Indre Troms";
-  } else if (regionId.equals("3014")) {
+  } else if (regionId == 3014) {
     return "Lofoten og Vesterålen";
-  } else if (regionId.equals("3015")) {
+  } else if (regionId == 3015) {
     return "Ofoten";
-  } else if (regionId.equals("3016")) {
+  } else if (regionId == 3016) {
     return "Salten";
-  } else if (regionId.equals("3017")) {
+  } else if (regionId == 3017) {
     return "Svartisen";
-  } else if (regionId.equals("3018")) {
+  } else if (regionId == 3018) {
     return "Helgeland";
-  } else if (regionId.equals("3022")) {
+  } else if (regionId == 3022) {
     return "Trollheimen";
-  } else if (regionId.equals("3023")) {
+  } else if (regionId == 3023) {
     return "Romsdal";
-  } else if (regionId.equals("3024")) {
+  } else if (regionId == 3024) {
     return "Sunnmøre";
-  } else if (regionId.equals("3027")) {
+  } else if (regionId == 3027) {
     return "Indre Fjordane";
-  } else if (regionId.equals("3028")) {
+  } else if (regionId == 3028) {
     return "Jotunheimen";
-  } else if (regionId.equals("3029")) {
+  } else if (regionId == 3029) {
     return "Indre Sogn";
-  } else if (regionId.equals("3031")) {
+  } else if (regionId == 3031) {
     return "Voss";
-  } else if (regionId.equals("3032")) {
+  } else if (regionId == 3032) {
     return "Hallingdal";
-  } else if (regionId.equals("3034")) {
+  } else if (regionId == 3034) {
     return "Hardanger";
-  } else if (regionId.equals("3035")) {
+  } else if (regionId == 3035) {
     return "Vest-Telemark";
-  } else if (regionId.equals("3037")) {
+  } else if (regionId == 3037) {
     return "Heiane";
   }
 
@@ -122,6 +126,7 @@ function getDeviceIdentifier() as String {
   return deviceSettings.uniqueIdentifier;
 }
 
+(:glance)
 function getDeviceScreenWidth() as Number {
   var deviceSettings = System.getDeviceSettings();
   return deviceSettings.screenWidth;

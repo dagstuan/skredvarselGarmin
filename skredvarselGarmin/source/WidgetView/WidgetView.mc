@@ -7,7 +7,7 @@ using AvalancheUi;
 
 public class WidgetView extends Ui.View {
   private var _regionId as String?;
-  private var _forecast as SimpleAvalancheForecast?;
+  private var _forecastData as SimpleForecastData?;
   private var _dataAge as Number?;
 
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
@@ -22,6 +22,8 @@ public class WidgetView extends Ui.View {
   private const _margin = 10;
   private const _forecastHeight = 80;
 
+  private var _useLocation as Boolean = false;
+
   public function initialize() {
     View.initialize();
   }
@@ -29,6 +31,7 @@ public class WidgetView extends Ui.View {
   function onShow() {
     _regionId = $.getFavoriteRegionId();
     _appNameText = $.getOrLoadResourceString("Skredvarsel", :AppName);
+    _useLocation = $.getUseLocation();
     _noRegionsSelectedText = $.getOrLoadResourceString(
       "Ingen regioner valgt.",
       :NoRegionsSelected
@@ -37,14 +40,18 @@ public class WidgetView extends Ui.View {
 
     setForecastDataFromStorage();
     if (
-      _regionId != null &&
-      (_forecast == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE)
+      (_regionId != null || _useLocation) &&
+      (_forecastData == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE)
     ) {
       $.log(
         "Null or stale simple forecast for widget, try to reload in background"
       );
 
-      $.loadSimpleForecastForRegion(_regionId, method(:onReceive), false);
+      if (_useLocation) {
+        $.loadSimpleForecastForLocation(method(:onReceive), false);
+      } else {
+        $.loadSimpleForecastForRegion(_regionId, method(:onReceive), false);
+      }
     }
   }
 
@@ -70,7 +77,7 @@ public class WidgetView extends Ui.View {
         Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
       );
     } else {
-      if (_forecast != null) {
+      if (_forecastData != null) {
         drawTimeline(dc);
       } else {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
@@ -96,14 +103,22 @@ public class WidgetView extends Ui.View {
       });
       var bufferedDc = _bufferedBitmap.getDc();
 
-      var regionName = $.getRegionName(_regionId);
+      var regionId = _useLocation
+        ? (_forecastData as LocationAvalancheForecast)["regionId"]
+        : _regionId;
+
+      var forecast = _useLocation
+        ? (_forecastData as LocationAvalancheForecast)["warnings"]
+        : _forecastData;
+
       var forecastTimeline = new AvalancheUi.ForecastTimeline({
         :locX => 0,
         :locY => 0,
         :width => forecastWidth,
         :height => _forecastHeight,
-        :regionName => regionName,
-        :forecast => _forecast,
+        :regionName => $.getRegionName(regionId),
+        :forecast => forecast,
+        :isLocationForecast => _useLocation,
       });
       forecastTimeline.draw(bufferedDc);
     }
@@ -122,10 +137,12 @@ public class WidgetView extends Ui.View {
   }
 
   private function setForecastDataFromStorage() as Void {
-    var data = $.getSimpleForecastForRegion(_regionId);
+    var data = _useLocation
+      ? $.getSimpleForecastForLocation()
+      : $.getSimpleForecastForRegion(_regionId);
 
     if (data != null) {
-      _forecast = data[0];
+      _forecastData = data[0];
       _dataAge = $.getStorageDataAge(data);
     }
   }
