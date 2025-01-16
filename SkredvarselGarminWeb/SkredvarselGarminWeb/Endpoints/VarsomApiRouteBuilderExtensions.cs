@@ -73,7 +73,7 @@ public static class VarsomApiRouteBuilderExtensions
 
             return new SimpleWarningsForLocationResponse
             {
-                LocationId = regionId,
+                RegionId = regionId,
                 Warnings = varsomWarnings.Select(vw => vw.ToSimpleAvalancheWarning())
             };
         });
