@@ -60,10 +60,8 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
         }
     }
 
-    private static async Task<ClaimsPrincipal> GetVippsAgreementPrincipal(string userId, IVippsApiClient vippsApiClient)
+    private static async ClaimsPrincipal GetVippsAgreementPrincipal(string userId, UserInfo userInfo)
     {
-        var userInfo = await vippsApiClient.GetUserInfo(userId);
-
         return new ClaimsPrincipal(new ClaimsIdentity(
         [
             new("name", userInfo.Name),
@@ -203,7 +201,16 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                                 // User is not already signed in. First attempt to find and existing user with the
                                 // same sub, and if found, stop all active agreements for that user. Then login using
                                 // the sub from the vipps agreement.
+                                var userId = vippsAgreement.Sub;
+
                                 var existingUser = dbContext.Users.FirstOrDefault(u => u.Id == vippsAgreement.Sub);
+                                var userInfo = await vippsApiClient.GetUserInfo(userId);
+
+                                if (existingUser == null)
+                                {
+                                    // Couldn't find user by sup. Attempt to find user by email.
+                                    existingUser = dbContext.Users.FirstOrDefault(u => u.Email == userInfo.Email);
+                                }
 
                                 if (existingUser != null)
                                 {
@@ -218,10 +225,9 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                                     }
                                 }
 
-                                var userId = vippsAgreement.Sub;
                                 agreement.SetUserId(userId);
 
-                                var principal = await GetVippsAgreementPrincipal(userId, vippsApiClient);
+                                var principal = GetVippsAgreementPrincipal(userId, userInfo);
                                 await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
                                 userService.RegisterLogin(principal);
                             }
