@@ -103,7 +103,7 @@ class GlanceView extends Ui.GlanceView {
 
     if (
       _hasSubscription == false ||
-      _favoriteRegionId == null ||
+      !(_favoriteRegionId != null || _useLocation) ||
       _forecastData == null ||
       _dataAge > $.TIME_TO_SHOW_LOADING
     ) {
