@@ -6,6 +6,7 @@ using Toybox.WatchUi as Ui;
 using Toybox.Background;
 using Toybox.Time.Gregorian;
 using Toybox.Time;
+using Toybox.Position;
 
 (:glance)
 function registerTemporalEvent() {
@@ -92,6 +93,27 @@ class skredvarselGarminApp extends Application.AppBase {
     $.updateComplicationIfExists();
   }
 
+  function onPosition(info as Position.Info) as Void {
+    var degrees = info.position.toDegrees();
+    $.saveLocation(degrees);
+  }
+
+   (:glance)
+  function fetchPositionIfStale() {
+    if ($.getUseLocation()) {
+      var lastLocationTime = $.getLastLocationTime();
+
+      var dataAge = Time.now().compare(new Time.Moment(lastLocationTime));
+      if (lastLocationTime == null || dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
+        $.log("Location is stale. Fetching new location.");
+        Position.enableLocationEvents(
+          Position.LOCATION_ONE_SHOT,
+          method(:onPosition)
+        );
+      }
+    }
+  }
+
   // Return the initial view of your application here
   function getInitialView() as [ Ui.Views ] or [ Ui.Views, Ui.InputDelegates ] {
     if ($.getHasSubscription() == false) {
@@ -101,6 +123,7 @@ class skredvarselGarminApp extends Application.AppBase {
 
     $.registerTemporalEvent();
 
+    fetchPositionIfStale();
     var initialViewAndDelegate = $.getInitialViewAndDelegate();
 
     if (initialViewAndDelegate[1] != null) {
@@ -113,6 +136,8 @@ class skredvarselGarminApp extends Application.AppBase {
   (:glance)
   public function getGlanceView() {
     $.registerTemporalEvent();
+    fetchPositionIfStale();
+
     return [new GlanceView()];
   }
 
