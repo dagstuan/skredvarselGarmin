@@ -41,7 +41,7 @@ public static class VarsomApiRouteBuilderExtensions
         {
             var varsomWarnings = await GetVarsomWarnings(regionId, langKey, from, to, varsomApi, memoryCache);
 
-            return varsomWarnings.Select(vw => vw.ToSimpleAvalancheWarning());
+            return varsomWarnings.Select(vw => vw.ToSimpleAvalancheWarning(langKey));
         });
 
         var detailedGet = app.MapGet("/api/detailedWarningsByRegion/{regionId}/{langKey}/{from}/{to}", async (
@@ -54,7 +54,7 @@ public static class VarsomApiRouteBuilderExtensions
         {
             var varsomWarnings = await GetVarsomWarnings(regionId, langKey, from, to, varsomApi, memoryCache);
 
-            return varsomWarnings.Select(vw => vw.ToDetailedAvalancheWarning());
+            return varsomWarnings.Select(vw => vw.ToDetailedAvalancheWarning(langKey));
         });
 
         var simpleGetByLocation = app.MapGet("/api/simpleWarningsByLocation/{latitude}/{longitude}/{langKey}/{from}/{to}", async (
@@ -74,7 +74,7 @@ public static class VarsomApiRouteBuilderExtensions
             return new SimpleWarningsForLocationResponse
             {
                 RegionId = regionId,
-                Warnings = varsomWarnings.Select(vw => vw.ToSimpleAvalancheWarning())
+                Warnings = varsomWarnings.Select(vw => vw.ToSimpleAvalancheWarning(langKey))
             };
         });
 

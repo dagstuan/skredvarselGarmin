@@ -5,17 +5,17 @@ namespace SkredvarselGarminWeb.Endpoints.Mappers;
 
 public static class DetailedAvalancheWarningMapper
 {
-    public static SimpleAvalancheWarning ToSimpleAvalancheWarning(this VarsomDetailedAvalancheWarning varsomWarning) => new()
+    public static SimpleAvalancheWarning ToSimpleAvalancheWarning(this VarsomDetailedAvalancheWarning varsomWarning, string langKey) => new()
     {
         DangerLevel = int.Parse(varsomWarning.DangerLevel),
         Validity = [
             varsomWarning.ValidFrom,
             varsomWarning.ValidTo,
         ],
-        HasEmergency = !string.IsNullOrWhiteSpace(varsomWarning.EmergencyWarning?.ToEmergencyWarning()),
+        HasEmergency = !string.IsNullOrWhiteSpace(varsomWarning.EmergencyWarning?.ToEmergencyWarning(langKey)),
     };
 
-    public static DetailedAvalancheWarning ToDetailedAvalancheWarning(this VarsomDetailedAvalancheWarning varsomWarning) => new()
+    public static DetailedAvalancheWarning ToDetailedAvalancheWarning(this VarsomDetailedAvalancheWarning varsomWarning, string langKey) => new()
     {
         Published = varsomWarning.PublishTime,
         DangerLevel = int.Parse(varsomWarning.DangerLevel),
@@ -36,12 +36,16 @@ public static class DetailedAvalancheWarningMapper
             DangerLevel = problem.DangerLevel,
         }).OrderByDescending(x => x.DangerLevel),
         IsTendency = varsomWarning.IsTendency,
-        EmergencyWarning = varsomWarning.EmergencyWarning?.ToEmergencyWarning()
+        EmergencyWarning = varsomWarning.EmergencyWarning?.ToEmergencyWarning(langKey)
     };
 
-    private static string? ToEmergencyWarning(this string emergencyWarning) =>
-        !string.IsNullOrWhiteSpace(emergencyWarning) &&
-        !emergencyWarning.Equals("ikke gitt", StringComparison.CurrentCultureIgnoreCase)
+    private static string? ToEmergencyWarning(this string emergencyWarning, string langKey)
+    {
+        var notGivenText = langKey == "1" ? "ikke gitt" : "not given";
+
+        return !string.IsNullOrWhiteSpace(emergencyWarning) &&
+            !emergencyWarning.Equals(notGivenText, StringComparison.CurrentCultureIgnoreCase)
             ? emergencyWarning
             : null;
+    }
 }
