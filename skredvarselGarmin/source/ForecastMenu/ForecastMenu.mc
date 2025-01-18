@@ -4,8 +4,6 @@ using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
 
 public class ForecastMenu extends Ui.CustomMenu {
-  private const _editItemId = "edit";
-
   private const _marginLeftRightPercent = 0.13;
 
   private var _existingRegionIds as Array<String> = new [0];
@@ -42,7 +40,7 @@ public class ForecastMenu extends Ui.CustomMenu {
         );
       }
 
-      addItem(new ForecastMenuEditMenuItem(_editItemId));
+      addItem(new ForecastMenuEditMenuItem("edit"));
       redrawTitleAndFooter();
       return;
     }
@@ -78,7 +76,7 @@ public class ForecastMenu extends Ui.CustomMenu {
         );
       }
 
-      addItem(new ForecastMenuEditMenuItem(_editItemId));
+      addItem(new ForecastMenuEditMenuItem("edit"));
       setFocus(0);
       redrawTitleAndFooter();
     }

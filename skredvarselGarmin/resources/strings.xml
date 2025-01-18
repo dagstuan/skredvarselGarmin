@@ -1,6 +1,7 @@
 <strings>
   <string id="AppName" scope="glance">Skredvarsel</string>
 	<string id="Loading" scope="glance">Loading...</string>
+	<string id="WaitingForLocation" scope="glance">Waiting for location...</string>
 	<string id="Edit">Edit</string>
 	<string id="Remove">Remove</string>
 	<string id="HitBackToExit">Hit back to exit.</string>

@@ -17,19 +17,27 @@ function getDetailedWarningsPathForRegion(
   formattedStartDate as String,
   formattedEndDate as String
 ) as String {
-  return Lang.format("/detailedWarningsByRegion/$1$/$2$/$3$/$4$", [
-    regionId,
-    language,
-    formattedStartDate,
-    formattedEndDate,
-  ]);
+  return (
+    "/detailedWarningsByRegion/" +
+    regionId +
+    "/" +
+    language +
+    "/" +
+    formattedStartDate +
+    "/" +
+    formattedEndDate
+  );
 }
 
+(:background)
 function loadDetailedWarningsForRegion(
   regionId as String?,
-  callback as WebRequestDelegateCallback
+  callback as WebRequestDelegateCallback,
+  useQueue as Boolean
 ) {
-  $.log(Lang.format("Loading detailed forecast for $1$", [regionId]));
+  if ($.Debug) {
+    $.log(Lang.format("Loading detailed forecast for $1$", [regionId]));
+  }
 
   var language = $.getForecastLanguage();
 
@@ -40,5 +48,5 @@ function loadDetailedWarningsForRegion(
   var path = $.getDetailedWarningsPathForRegion(regionId, language, start, end);
   var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);
 
-  $.makeApiRequest(path, storageKey, callback, true);
+  $.makeApiRequest(path, storageKey, callback, useQueue);
 }

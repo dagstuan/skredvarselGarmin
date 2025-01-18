@@ -22,10 +22,7 @@ function subtractDays(moment as Time.Moment, numDays as Number) {
 function getFormattedTimestamp(moment as Time.Moment) {
   var info = Gregorian.info(moment, Time.FORMAT_SHORT);
 
-  return Lang.format("$1$:$2$", [
-    info.hour.format("%02u"),
-    info.min.format("%02u"),
-  ]);
+  return info.hour.format("%02u") + ":" + info.min.format("%02u");
 }
 
 (:glance,:background)

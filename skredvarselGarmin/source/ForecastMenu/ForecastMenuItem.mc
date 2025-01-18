@@ -20,6 +20,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
   private var _dataAge as Number?;
 
   private var _loadingText as Ui.Resource;
+  private var _waitingForLocationText as Ui.Resource;
 
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
 
@@ -39,34 +40,54 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     _menu = settings[:menu];
 
     _loadingText = $.getOrLoadResourceString("Laster...", :Loading);
+    _waitingForLocationText = $.getOrLoadResourceString(
+      "Venter på posisjon...",
+      :WaitingForLocation
+    );
 
     getForecastFromCache();
     if (_forecastData == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
-      $.log(
-        "Null or stale simple forecast for menu item, try to reload in background"
-      );
+      if ($.Debug) {
+        $.log(
+          "Null or stale simple forecast for menu item, try to reload in background"
+        );
+      }
 
       if (_isLocationForecast) {
-        $.loadSimpleForecastForLocation(method(:onReceive), false);
+        $.loadSimpleForecastForLocation(method(:onReceive), true);
       } else {
-        $.loadSimpleForecastForRegion(_regionId, method(:onReceive), false);
+        $.loadSimpleForecastForRegion(_regionId, method(:onReceive), true);
       }
     }
   }
 
   public function draw(dc as Gfx.Dc) as Void {
+    if (_isLocationForecast && _forecastData == null) {
+      getForecastFromCache();
+    }
+
     if (_forecastData != null && _dataAge < $.TIME_TO_SHOW_LOADING) {
       drawTimeline(dc);
     } else {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
-      dc.drawText(
-        0,
-        dc.getHeight() / 2,
-        Graphics.FONT_GLANCE,
-        _loadingText,
-        Graphics.TEXT_JUSTIFY_LEFT
-      );
+      if (_isLocationForecast && $.getLocation() == null) {
+        dc.drawText(
+          0,
+          dc.getHeight() / 2,
+          Graphics.FONT_GLANCE,
+          _waitingForLocationText,
+          Graphics.TEXT_JUSTIFY_LEFT
+        );
+      } else {
+        dc.drawText(
+          0,
+          dc.getHeight() / 2,
+          Graphics.FONT_GLANCE,
+          _loadingText,
+          Graphics.TEXT_JUSTIFY_LEFT
+        );
+      }
     }
   }
 

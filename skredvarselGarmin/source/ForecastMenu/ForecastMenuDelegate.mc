@@ -32,7 +32,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
         _loadingView = new LoadingView();
         Ui.pushView(_loadingView, new LoadingViewDelegate(), Ui.SLIDE_BLINK);
 
-        $.loadDetailedWarningsForRegion(_regionId, method(:onReceive));
+        $.loadDetailedWarningsForRegion(_regionId, method(:onReceive), true);
       } else {
         var warnings = data[0];
         var fetchedTime = data[1];

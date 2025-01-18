@@ -6,9 +6,6 @@ using Toybox.Application.Storage;
 using Toybox.Application.Properties;
 using Toybox.Time;
 
-const LastLocationStorageKey = "last_location";
-const LastLocationTimeStorageKey = "last_location_time";
-
 (:glance,:background)
 var useLocation as Lang.Boolean?;
 
@@ -24,10 +21,13 @@ function getUseLocation() as Lang.Boolean {
 (:glance,:background)
 function getLocation() as [ Lang.Double, Lang.Double ]? {
   // Get Location from Garmin Weather
-  if (Toybox has :Weather && false) {
+  if (Toybox has :Weather) {
     var w = Weather.getCurrentConditions();
     if (w != null && w.observationLocationPosition != null) {
-      $.log("Location obtained from Weather");
+      if ($.Debug) {
+        $.log("Location obtained from Weather");
+      }
+
       var loc = w.observationLocationPosition.toDegrees();
       saveLocation(loc);
       return loc;
@@ -39,22 +39,31 @@ function getLocation() as [ Lang.Double, Lang.Double ]? {
   if (lastActivity != null) {
     var lastLocationTime = $.getLastLocationTime();
 
-    if (lastActivity.startTime != null && lastActivity.startTime.compare(new Time.Moment(lastLocationTime)) > 0) {
-      $.log("Location obtained from Activity");
+    if (
+      lastActivity.currentLocation != null &&
+      lastActivity.startTime != null &&
+      lastActivity.startTime.compare(new Time.Moment(lastLocationTime)) > 0
+    ) {
+      if ($.Debug) {
+        $.log("Location obtained from Activity");
+      }
+
       var loc = lastActivity.currentLocation.toDegrees();
       saveLocation(loc);
       return loc;
     }
   }
 
-  $.log("Location obtained from Storage.");
+  if ($.Debug) {
+    $.log("Location obtained from Storage.");
+  }
   // Get last known Location
-  return Storage.getValue(LastLocationStorageKey) as [ Lang.Double, Lang.Double ];
+  return Storage.getValue("last_location") as [ Lang.Double, Lang.Double ];
 }
 
 (:glance,:background)
 function getLastLocationTime() as Lang.Number {
-  var value = Storage.getValue(LastLocationTimeStorageKey) as Lang.Number?;
+  var value = Storage.getValue("last_location_time") as Lang.Number?;
 
   return value != null ? value : 0;
 }
@@ -62,7 +71,7 @@ function getLastLocationTime() as Lang.Number {
 (:glance,:background)
 function saveLocation(loc as [ Lang.Double, Lang.Double ]) {
   try {
-    Storage.setValue(LastLocationStorageKey, loc);
-    Storage.setValue(LastLocationTimeStorageKey, Time.now().value());
+    Storage.setValue("last_location", loc);
+    Storage.setValue("last_location_time", Time.now().value());
   } catch (ex) {}
 }

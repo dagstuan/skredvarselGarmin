@@ -140,25 +140,23 @@ class GlanceView extends Ui.GlanceView {
   }
 
   function drawTimeline(dc as Gfx.Dc) {
-    var regionId = _useLocation
-      ? (_forecastData as LocationAvalancheForecast)["regionId"]
-      : _favoriteRegionId;
-
-    var forecast = _useLocation
-      ? (_forecastData as LocationAvalancheForecast)["warnings"]
-      : _forecastData;
-
-    var forecastTimeline = new AvalancheUi.ForecastTimeline({
-      :locX => 0,
-      :locY => 0,
-      :width => _width,
-      :height => _height,
-      :regionName => $.getRegionName(regionId),
-      :forecast => forecast,
-      :isLocationForecast => _useLocation,
-    });
-
-    forecastTimeline.draw(dc);
+    (
+      new AvalancheUi.ForecastTimeline({
+        :locX => 0,
+        :locY => 0,
+        :width => _width,
+        :height => _height,
+        :regionName => $.getRegionName(
+          _useLocation
+            ? (_forecastData as LocationAvalancheForecast)["regionId"]
+            : _favoriteRegionId
+        ),
+        :forecast => _useLocation
+          ? (_forecastData as LocationAvalancheForecast)["warnings"]
+          : _forecastData,
+        :isLocationForecast => _useLocation,
+      })
+    ).draw(dc);
   }
 
   function onHide() {
