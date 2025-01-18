@@ -18,6 +18,7 @@ public class WidgetView extends Ui.View {
   private var _appNameText as Ui.Resource?;
   private var _noRegionsSelectedText as Ui.Resource?;
   private var _loadingText as Ui.Resource?;
+  private var _waitingForLocationText as Ui.Resource?;
 
   private const _margin = 10;
   private const _forecastHeight = 80;
@@ -37,15 +38,21 @@ public class WidgetView extends Ui.View {
       :NoRegionsSelected
     );
     _loadingText = $.getOrLoadResourceString("Laster...", :Loading);
+    _waitingForLocationText = $.getOrLoadResourceString(
+      "Venter på posisjon...",
+      :WaitingForLocation
+    );
 
     setForecastDataFromStorage();
     if (
       (_regionId != null || _useLocation) &&
       (_forecastData == null || _dataAge > $.TIME_TO_CONSIDER_DATA_STALE)
     ) {
-      $.log(
-        "Null or stale simple forecast for widget, try to reload in background"
-      );
+      if ($.Debug) {
+        $.log(
+          "Null or stale simple forecast for widget, try to reload in background"
+        );
+      }
 
       if (_useLocation) {
         $.loadSimpleForecastForLocation(method(:onReceive), false);
@@ -61,12 +68,16 @@ public class WidgetView extends Ui.View {
   }
 
   public function onUpdate(dc as Gfx.Dc) as Void {
+    if (_useLocation && _forecastData == null) {
+      setForecastDataFromStorage();
+    }
+
     dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
     dc.clear();
 
     drawTitle(dc);
 
-    if (_regionId == null) {
+    if (_regionId == null && !_useLocation) {
       dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
       dc.drawText(
@@ -82,13 +93,23 @@ public class WidgetView extends Ui.View {
       } else {
         dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
 
-        dc.drawText(
-          0,
-          dc.getHeight() / 2,
-          Graphics.FONT_GLANCE,
-          _loadingText,
-          Graphics.TEXT_JUSTIFY_LEFT
-        );
+        if (_useLocation && $.getLocation() == null) {
+          dc.drawText(
+            0,
+            dc.getHeight() / 2,
+            Graphics.FONT_GLANCE,
+            _waitingForLocationText,
+            Graphics.TEXT_JUSTIFY_LEFT
+          );
+        } else {
+          dc.drawText(
+            0,
+            dc.getHeight() / 2,
+            Graphics.FONT_GLANCE,
+            _loadingText,
+            Graphics.TEXT_JUSTIFY_LEFT
+          );
+        }
       }
     }
   }

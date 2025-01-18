@@ -31,10 +31,16 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
 
     var dataAge = Time.now().compare(_fetchedTime);
     if (dataAge > $.TIME_TO_CONSIDER_DATA_STALE && $.canMakeWebRequest()) {
-      $.log("Stale forecast, try to reload in background");
+      if ($.Debug) {
+        $.log("Stale forecast, try to reload in background");
+      }
 
       _view.setIsLoading(true);
-      $.loadDetailedWarningsForRegion(settings[:regionId], method(:onReceive));
+      $.loadDetailedWarningsForRegion(
+        settings[:regionId],
+        method(:onReceive),
+        true
+      );
     }
   }
 

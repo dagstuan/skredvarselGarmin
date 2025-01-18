@@ -29,18 +29,20 @@ public function updateSkredvarselComplication() {
       Toybox.Complications.updateComplication(0, {
         :value => newComplicationValue,
       });
-    } else {
+    } else if ($.Debug) {
       $.log("updateComplication method not found on complications.");
     }
   } catch (ex) {
-    $.log(
-      Lang.format("Failed to update complication. Error was: $1$", [
-        ex.getErrorMessage(),
-      ])
-    );
     if ($.Debug) {
+      $.log(
+        Lang.format("Failed to update complication. Error was: $1$", [
+          ex.getErrorMessage(),
+        ])
+      );
       ex.printStackTrace();
     }
   }
-  $.log("Done update complication");
+  if ($.Debug) {
+    $.log("Done update complication");
+  }
 }

@@ -11,7 +11,9 @@ using Toybox.Position;
 (:glance)
 function registerTemporalEvent() {
   if ($.getHasSubscription() == false) {
-    $.log("No subscription detected. Removing temporal event.");
+    if ($.Debug) {
+      $.log("No subscription detected. Removing temporal event.");
+    }
     Background.deleteTemporalEvent();
     return;
   }
@@ -19,7 +21,9 @@ function registerTemporalEvent() {
   var lastRunTime = Background.getLastTemporalEventTime();
 
   if (lastRunTime == null) {
-    $.log("Background refresh never done. Running immediately.");
+    if ($.Debug) {
+      $.log("Background refresh never done. Running immediately.");
+    }
 
     var now = new Time.Moment(Time.now().value());
     Background.registerForTemporalEvent(now);
@@ -37,14 +41,16 @@ function registerTemporalEvent() {
       registeredEvent == null ||
       registeredEvent.value() != refreshInterval.value()
     ) {
-      $.log(
-        Lang.format("Registering temporal event in $1$ seconds", [
-          refreshInterval.value(),
-        ])
-      );
+      if ($.Debug) {
+        $.log(
+          Lang.format("Registering temporal event in $1$ seconds", [
+            refreshInterval.value(),
+          ])
+        );
+      }
 
       Background.registerForTemporalEvent(refreshInterval);
-    } else {
+    } else if ($.Debug) {
       $.log(
         Lang.format("Temporal event already registered in $1$ seconds", [
           refreshInterval.value(),
@@ -88,24 +94,43 @@ class skredvarselGarminApp extends Application.AppBase {
     AppBase.initialize();
   }
 
-  function onStart(state) {
+  function onStart(state as Dictionary?) {
     $.resetStorageCacheIfRequired();
     $.updateComplicationIfExists();
   }
 
+  (:glance)
+  public function onReceive(
+    responseCode as Number,
+    data as WebRequestDelegateCallbackData
+  ) as Void {
+    if (responseCode == 200) {
+      if ($.Debug) {
+        $.log("Received location forecast from server.");
+      }
+      Ui.requestUpdate();
+    }
+  }
+
+  (:glance)
   function onPosition(info as Position.Info) as Void {
     var degrees = info.position.toDegrees();
     $.saveLocation(degrees);
+    $.loadSimpleForecastForLocation(method(:onReceive), false);
   }
 
-   (:glance)
+  (:glance)
   function fetchPositionIfStale() {
     if ($.getUseLocation()) {
+      var location = $.getLocation();
       var lastLocationTime = $.getLastLocationTime();
 
       var dataAge = Time.now().compare(new Time.Moment(lastLocationTime));
-      if (lastLocationTime == null || dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
-        $.log("Location is stale. Fetching new location.");
+      if (location == null || lastLocationTime == null || dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
+        if ($.Debug) {
+          $.log("Location is stale. Fetching new location.");
+        }
+
         Position.enableLocationEvents(
           Position.LOCATION_ONE_SHOT,
           method(:onPosition)
@@ -114,10 +139,12 @@ class skredvarselGarminApp extends Application.AppBase {
     }
   }
 
-  // Return the initial view of your application here
   function getInitialView() as [ Ui.Views ] or [ Ui.Views, Ui.InputDelegates ] {
     if ($.getHasSubscription() == false) {
-      $.log("No subscription detected.");
+      if ($.Debug) {
+        $.log("No subscription detected.");
+      }
+
       return [new SetupSubscriptionView(), new SetupSubscriptionViewDelegate()];
     }
 
@@ -148,9 +175,11 @@ class skredvarselGarminApp extends Application.AppBase {
   public function onBackgroundData(
     fetchedData as Application.PersistableType
   ) as Void {
-    $.log(
-      Lang.format("Exited background job. Fetched data: $1$", [fetchedData])
-    );
+    if ($.Debug) {
+      $.log(
+        Lang.format("Exited background job. Fetched data: $1$", [fetchedData])
+      );
+    }
 
     if (fetchedData == true) {
       Ui.requestUpdate();

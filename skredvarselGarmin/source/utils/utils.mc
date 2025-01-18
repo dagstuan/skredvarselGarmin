@@ -112,12 +112,9 @@ function canMakeWebRequest() as Boolean {
   var deviceSettings = System.getDeviceSettings();
   var connectionInfo = deviceSettings.connectionInfo;
 
-  var bluetoothState = connectionInfo[:bluetooth][:state];
-  if (bluetoothState.equals(System.CONNECTION_STATE_CONNECTED)) {
-    return true;
-  }
-
-  return false;
+  return connectionInfo[:bluetooth][:state].equals(
+    System.CONNECTION_STATE_CONNECTED
+  );
 }
 
 (:background)
@@ -196,7 +193,7 @@ public function minValue(arr as Array<Number>) {
 (:release)
 public function log(message as String) {}
 
-(:background,:debug)
+(:debug,:background)
 public function log(message as String) {
   var info = Gregorian.utcInfo(Time.now(), Time.FORMAT_MEDIUM);
 

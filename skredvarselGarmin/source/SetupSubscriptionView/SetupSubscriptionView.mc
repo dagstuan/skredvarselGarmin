@@ -98,14 +98,18 @@ class SetupSubscriptionView extends Ui.View {
     responseCode as Number,
     data as WebRequestCallbackData
   ) as Void {
-    $.log(Lang.format("Received response $1$", [responseCode]));
+    if ($.Debug) {
+      $.log(Lang.format("Received response $1$", [responseCode]));
+    }
 
     if (_loadingView != null) {
       try {
         Ui.popView(Ui.SLIDE_BLINK);
         _loadingView = null;
       } catch (ex) {
-        $.log("Failed to pop loading view on receive.");
+        if ($.Debug) {
+          $.log("Failed to pop loading view on receive.");
+        }
       }
     }
 

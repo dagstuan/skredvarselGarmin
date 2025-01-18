@@ -2,26 +2,26 @@ import Toybox.Lang;
 
 using Toybox.Application.Storage;
 
-const SelectedRegionIdsStorageKey = "selectedRegionIds";
-
 (:background,:glance)
 function getSimpleForecastCacheKeyForRegion(regionId as String) {
-  return Lang.format("simple_$1$", [regionId]);
+  return "simple_" + regionId;
 }
 
 (:background)
 function getDetailedWarningsCacheKeyForRegion(regionId as String) {
-  return Lang.format("detailed_$1$", [regionId]);
+  return "detailed_" + regionId;
 }
-
-(:background,:glance)
-const simpleForecastCacheKeyForLocation = "location_simple_forecast";
 
 (:background)
 function getSelectedRegionIds() as Array<String> {
-  var valueFromStorage = Storage.getValue($.SelectedRegionIdsStorageKey);
+  var valueFromStorage = Storage.getValue("selectedRegionIds");
 
   return valueFromStorage != null ? valueFromStorage : new [0];
+}
+
+(:background)
+function setSelectedRegionIdsInStorage(regionIds as Array<String>) {
+  Storage.setValue("selectedRegionIds", regionIds);
 }
 
 (:glance,:background)
@@ -52,27 +52,29 @@ function resetStorageCacheIfRequired() {
     storageVersion != STORAGE_VERSION ||
     cachedForecastsLanguage != forecastLanguageSetting
   ) {
-    $.log(
-      Lang.format("Resetting storage cache. storageVersion in Storage: $1$", [
-        storageVersion,
-      ])
-    );
+    if ($.Debug) {
+      $.log(
+        Lang.format("Resetting storage cache. storageVersion in Storage: $1$", [
+          storageVersion,
+        ])
+      );
+    }
 
     var hasSubscription = $.getHasSubscription();
     var selectedRegionIds = $.getSelectedRegionIds();
     try {
       Storage.clearValues();
     } catch (ex instanceof Toybox.Application.ObjectStoreAccessException) {
-      $.log(
-        "Failed to reset storage cache due to object store access exception."
-      );
       if ($.Debug) {
+        $.log(
+          "Failed to reset storage cache due to object store access exception."
+        );
         ex.printStackTrace();
       }
       throw ex;
     } catch (ex) {
-      $.log("Failed to reset storage cache for some reason.");
       if ($.Debug) {
+        $.log("Failed to reset storage cache for some reason.");
         ex.printStackTrace();
       }
       throw ex;
@@ -82,11 +84,6 @@ function resetStorageCacheIfRequired() {
     Storage.setValue("storageVersion", STORAGE_VERSION);
     Storage.setValue("cachedStorageLanguage", forecastLanguageSetting);
   }
-}
-
-(:background)
-function setSelectedRegionIdsInStorage(regionIds as Array<String>) {
-  Storage.setValue(SelectedRegionIdsStorageKey, regionIds);
 }
 
 public function toggleFavoriteRegion(regionId as String) as Void {

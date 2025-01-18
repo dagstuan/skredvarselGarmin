@@ -30,9 +30,7 @@ function getOrLoadResourceString(
 
 (:background)
 function getForecastLanguage() as Number {
-  try {
-    return Properties.getValue("forecastLanguage") as Number;
-  } catch (ex) {
-    return 1; // assume Norwegian if no value is found.
-  }
+  var language = Properties.getValue("forecastLanguage") as Number?;
+
+  return language != null ? language : 1; // assume Norwegian if no value is found.
 }

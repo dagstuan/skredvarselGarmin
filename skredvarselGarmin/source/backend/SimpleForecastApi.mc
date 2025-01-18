@@ -4,7 +4,7 @@ using Toybox.Time as Time;
 using Toybox.Application.Storage;
 
 // Returns [forecast, storedTime] array
-(:glance,:background)
+(:background)
 public function getSimpleForecastForRegion(regionId as String) as Array? {
   var storageKey = $.getSimpleForecastCacheKeyForRegion(regionId);
 
@@ -18,20 +18,27 @@ function getSimpleWarningsPathForRegion(
   formattedStartDate as String,
   formattedEndDate as String
 ) as String {
-  return Lang.format("/simpleWarningsByRegion/$1$/$2$/$3$/$4$", [
-    regionId,
-    language,
-    formattedStartDate,
-    formattedEndDate,
-  ]);
+  return (
+    "/simpleWarningsByRegion/" +
+    regionId +
+    "/" +
+    language +
+    "/" +
+    formattedStartDate +
+    "/" +
+    formattedEndDate
+  );
 }
 
+(:background)
 public function loadSimpleForecastForRegion(
   regionId as String?,
   callback as WebRequestDelegateCallback,
   useQueue as Boolean
 ) {
-  $.log(Lang.format("Loading simple forecast for $1$", [regionId]));
+  if ($.Debug) {
+    $.log(Lang.format("Loading simple forecast for $1$", [regionId]));
+  }
 
   var language = $.getForecastLanguage();
 
@@ -53,49 +60,56 @@ function getSimpleWarningsPathForLocation(
   formattedStartDate as String,
   formattedEndDate as String
 ) as String {
-  return Lang.format("/simpleWarningsByLocation/$1$/$2$/$3$/$4$/$5$", [
-    latitude,
-    longitude,
-    language,
-    formattedStartDate,
-    formattedEndDate,
-  ]);
+  return (
+    "/simpleWarningsByLocation/" +
+    latitude +
+    "/" +
+    longitude +
+    "/" +
+    language +
+    "/" +
+    formattedStartDate +
+    "/" +
+    formattedEndDate
+  );
 }
 
 // Returns [forecast, storedTime] array
-(:glance,:background)
+(:background)
 public function getSimpleForecastForLocation() as Array? {
-  var storageKey = $.simpleForecastCacheKeyForLocation;
-
-  return Storage.getValue(storageKey) as Array?;
+  return Storage.getValue("location_simple_forecast") as Array?;
 }
 
+(:background)
 public function loadSimpleForecastForLocation(
   callback as WebRequestDelegateCallback,
   useQueue as Boolean
 ) {
-  $.log("Loading simple forecast for location..");
+  if ($.Debug) {
+    $.log("Loading simple forecast for location..");
+  }
 
-  var language = $.getForecastLanguage();
   var location = $.getLocation();
 
   if (location == null) {
-    $.log("No location available. Not reloading location warning.");
+    if ($.Debug) {
+      $.log("No location available. Not reloading location warning.");
+    }
     return;
   }
 
   var now = Time.now();
-  var start = $.getFormattedDateForApiCall($.subtractDays(now, 2));
-  var end = $.getFormattedDateForApiCall($.addDays(now, 2));
 
-  var path = $.getSimpleWarningsPathForLocation(
-    location[0],
-    location[1],
-    language,
-    start,
-    end
+  $.makeApiRequest(
+    $.getSimpleWarningsPathForLocation(
+      location[0],
+      location[1],
+      $.getForecastLanguage(),
+      $.getFormattedDateForApiCall($.subtractDays(now, 2)),
+      $.getFormattedDateForApiCall($.addDays(now, 2))
+    ),
+    "location_simple_forecast",
+    callback,
+    useQueue
   );
-  var storageKey = $.simpleForecastCacheKeyForLocation;
-
-  $.makeApiRequest(path, storageKey, callback, useQueue);
 }
