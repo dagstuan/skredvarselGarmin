@@ -75,7 +75,7 @@ module AvalancheUi {
         var navigationIconSize = 13;
 
         var screenWidth = $.getDeviceScreenWidth();
-        if (screenWidth > 260) {
+        if (screenWidth > 280) {
           navigationIconSize = 20;
           _navigationIconGap = 6;
         }

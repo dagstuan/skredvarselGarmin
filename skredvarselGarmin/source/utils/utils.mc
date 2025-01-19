@@ -117,12 +117,6 @@ function canMakeWebRequest() as Boolean {
   );
 }
 
-(:background)
-function getDeviceIdentifier() as String {
-  var deviceSettings = System.getDeviceSettings();
-  return deviceSettings.uniqueIdentifier;
-}
-
 (:glance)
 function getDeviceScreenWidth() as Number {
   var deviceSettings = System.getDeviceSettings();
@@ -151,7 +145,6 @@ function colorize(dangerLevel as Number) as Graphics.ColorType {
   return 0xaaaaaa;
 }
 
-(:glance)
 function arrayContainsString(arr as Array<String>, str as String) {
   for (var i = 0; i < arr.size(); i++) {
     if (arr[i].equals(str)) {

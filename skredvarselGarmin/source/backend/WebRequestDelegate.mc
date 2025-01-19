@@ -4,6 +4,7 @@ using Toybox.Communications;
 using Toybox.Time;
 using Toybox.Application.Storage;
 using Toybox.WatchUi as Ui;
+using Toybox.System;
 
 // const FrontendBaseUrl = "http://localhost:5173";
 // const ApiBaseUrl = "https://localhost:8080/api";
@@ -25,13 +26,15 @@ function makeGetRequestWithAuthorization(
   url as String,
   callback as WebRequestCallback
 ) {
+  var deviceSettings = System.getDeviceSettings();
+
   Communications.makeWebRequest(
     url,
     null,
     {
       :method => Communications.HTTP_REQUEST_METHOD_GET,
       :headers => {
-        "Authorization" => "Garmin " + $.getDeviceIdentifier(),
+        "Authorization" => "Garmin " + deviceSettings.uniqueIdentifier,
       },
     },
     callback

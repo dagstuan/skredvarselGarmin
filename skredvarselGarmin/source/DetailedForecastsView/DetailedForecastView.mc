@@ -197,8 +197,8 @@ class DetailedForecastView extends Ui.View {
 
     _dangerLevelBitmapWidth = iconWidth + paddingBetween + textWidth;
     _dangerLevelBitmap = $.newBufferedBitmap({
-      :width => _dangerLevelBitmapWidth,
-      :height => _dangerLevelHeight,
+      :width => _dangerLevelBitmapWidth.toNumber(),
+      :height => _dangerLevelHeight.toNumber(),
     });
     var bufferedDc = _dangerLevelBitmap.getDc();
 
