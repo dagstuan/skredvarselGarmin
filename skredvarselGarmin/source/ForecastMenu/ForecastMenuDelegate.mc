@@ -24,24 +24,29 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
     } else {
       _regionId = (item as ForecastMenuItem).getRegionId();
 
-      var data = $.getDetailedWarningsForRegion(_regionId);
+      if (_regionId != null) {
+        var data = $.getDetailedWarningsForRegion(_regionId);
 
-      if (data == null || $.getStorageDataAge(data) > $.TIME_TO_SHOW_LOADING) {
-        // Data is very stale or non-existent, show loading.
+        if (
+          data == null ||
+          $.getStorageDataAge(data) > $.TIME_TO_SHOW_LOADING
+        ) {
+          // Data is very stale or non-existent, show loading.
 
-        _loadingView = new LoadingView();
-        Ui.pushView(_loadingView, new LoadingViewDelegate(), Ui.SLIDE_BLINK);
+          _loadingView = new LoadingView();
+          Ui.pushView(_loadingView, new LoadingViewDelegate(), Ui.SLIDE_BLINK);
 
-        $.loadDetailedWarningsForRegion(_regionId, method(:onReceive), true);
-      } else {
-        var warnings = data[0];
-        var fetchedTime = data[1];
+          $.loadDetailedWarningsForRegion(_regionId, method(:onReceive), true);
+        } else {
+          var warnings = data[0];
+          var fetchedTime = data[1];
 
-        pushDetailedForecastView(
-          _regionId,
-          warnings,
-          new Time.Moment(fetchedTime)
-        );
+          pushDetailedForecastView(
+            _regionId,
+            warnings,
+            new Time.Moment(fetchedTime)
+          );
+        }
       }
     }
 

@@ -149,9 +149,13 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     }
   }
 
-  public function getRegionId() {
-    return _isLocationForecast
-      ? (_forecastData as LocationAvalancheForecast)["regionId"]
-      : _regionId;
+  public function getRegionId() as String? {
+    if (_isLocationForecast) {
+      return _forecastData != null
+        ? (_forecastData as LocationAvalancheForecast)["regionId"]
+        : null;
+    }
+
+    return _regionId;
   }
 }
