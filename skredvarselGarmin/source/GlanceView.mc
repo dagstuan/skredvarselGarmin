@@ -1,83 +1,29 @@
-import Toybox.Lang;
-
+using Toybox.Lang as Lang;
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
 
 using AvalancheUi;
 
 (:glance)
-function getMemoryConstrainedDevices() {
-  return [
-    "006-B3258-00", // Descent Mk 2
-    "006-B3702-00", // Descent Mk 2
-    "006-B3542-00", // Descent Mk 2s
-    "006-B3930-00", // Descent Mk 2s
-    "006-B3290-00", // F6 Pro
-    "006-B3515-00", // F6 Pro
-    "006-B3782-00", // F6 Pro
-    "006-B3767-00", // F6 Pro
-    "006-B3771-00", // F6 Pro
-    "006-B3288-00", // F6S Pro
-    "006-B3513-00", // F6S Pro
-    "006-B3765-00", // F6S Pro
-    "006-B3769-00", // F6S Pro
-    "006-B3291-00", // F6X Pro
-    "006-B3516-00", // F6X Pro
-    "006-B3783-00", // F6X Pro
-    "006-B3589-00", // FR745
-    "006-B3794-00", // FR745
-    "006-B3113-00", // FR945
-    "006-B3441-00", // FR945
-    "006-B3652-00", // FR945 LTE
-    "006-B3077-00", // FR245 Music
-    "006-B3321-00", // FR245 Music
-    "006-B3913-00", // FR245 Music
-    "006-B3624-00", // Marq Adventurer
-    "006-B3648-00", // Marq Adventurer
-    "006-B3251-00", // Marq Athlete
-    "006-B3451-00", // Marq Athlete
-    "006-B3247-00", // Marq Aviator
-    "006-B3421-00", // Marq Aviator
-    "006-B3248-00", // Marq Captain
-    "006-B3448-00", // Marq Captain
-    "006-B3249-00", // Marq Commander
-    "006-B3449-00", // Marq Commander
-    "006-B3246-00", // Marq Driver
-    "006-B3420-00", // Marq Driver
-    "006-B3250-00", // Marq Expedition
-    "006-B3450-00", // Marq Expedition
-    "006-B3739-00", // Marq Golfer
-    "006-B3850-00", // Marq Golfer
-  ];
-}
-
-(:glance)
 class GlanceView extends Ui.GlanceView {
-  private var _hasSubscription as Boolean?;
-  private var _favoriteRegionId as String?;
+  private var _hasSubscription as Lang.Boolean?;
+  private var _favoriteRegionId as Lang.String?;
 
   private var _forecastData as SimpleForecastData?;
-  private var _dataAge as Number?;
+  private var _dataAge as Lang.Number?;
 
+  (:typecheck(false)) // Will be unused for watches that don't use buffered glances.
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
-  private var _useBufferedBitmap as Boolean = true;
 
-  private var _width as Number?;
-  private var _height as Number?;
+  private var _width as Lang.Number?;
+  private var _height as Lang.Number?;
 
   private var _appNameText as Ui.Resource?;
 
-  private var _useLocation as Boolean = false;
+  private var _useLocation as Lang.Boolean = false;
 
   function initialize() {
     GlanceView.initialize();
-
-    var deviceSettings = System.getDeviceSettings();
-    var partNumber = deviceSettings.partNumber;
-
-    if (arrayContainsString(getMemoryConstrainedDevices(), partNumber)) {
-      _useBufferedBitmap = false;
-    }
   }
 
   function onShow() {
@@ -118,13 +64,14 @@ class GlanceView extends Ui.GlanceView {
       return;
     }
 
-    if (_useBufferedBitmap) {
+    if (self has :drawTimelineBuffered) {
       drawTimelineBuffered(dc);
     } else {
       drawTimeline(dc);
     }
   }
 
+  (:useBufferedBitmapOnGlance)
   function drawTimelineBuffered(dc as Gfx.Dc) {
     if (_bufferedBitmap == null) {
       _bufferedBitmap = $.newBufferedBitmap({

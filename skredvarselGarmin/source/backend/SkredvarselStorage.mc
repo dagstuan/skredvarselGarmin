@@ -2,7 +2,7 @@ import Toybox.Lang;
 
 using Toybox.Application.Storage;
 
-(:background,:glance)
+(:background)
 function getSimpleForecastCacheKeyForRegion(regionId as String) {
   return "simple_" + regionId;
 }
@@ -14,7 +14,8 @@ function getDetailedWarningsCacheKeyForRegion(regionId as String) {
 
 (:background)
 function getSelectedRegionIds() as Array<String> {
-  var valueFromStorage = Storage.getValue("selectedRegionIds");
+  var valueFromStorage =
+    Storage.getValue("selectedRegionIds") as Array<String>?;
 
   return valueFromStorage != null ? valueFromStorage : new [0];
 }
@@ -24,7 +25,7 @@ function setSelectedRegionIdsInStorage(regionIds as Array<String>) {
   Storage.setValue("selectedRegionIds", regionIds);
 }
 
-(:glance,:background)
+(:background)
 function getFavoriteRegionId() as String? {
   var favoriteRegions = $.getSelectedRegionIds();
 

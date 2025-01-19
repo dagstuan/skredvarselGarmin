@@ -6,10 +6,10 @@ using Toybox.Application.Storage;
 using Toybox.Application.Properties;
 using Toybox.Time;
 
-(:glance,:background)
+(:background)
 var useLocation as Lang.Boolean?;
 
-(:glance,:background)
+(:background)
 function getUseLocation() as Lang.Boolean {
   if ($.useLocation == null) {
     $.useLocation = Properties.getValue("useLocation") as Lang.Boolean;
@@ -18,7 +18,7 @@ function getUseLocation() as Lang.Boolean {
   return $.useLocation;
 }
 
-(:glance,:background)
+(:background)
 function getLocation() as [ Lang.Double, Lang.Double ]? {
   // Get Location from Garmin Weather
   if (Toybox has :Weather) {
@@ -61,14 +61,14 @@ function getLocation() as [ Lang.Double, Lang.Double ]? {
   return Storage.getValue("last_location") as [ Lang.Double, Lang.Double ];
 }
 
-(:glance,:background)
+(:background)
 function getLastLocationTime() as Lang.Number {
   var value = Storage.getValue("last_location_time") as Lang.Number?;
 
   return value != null ? value : 0;
 }
 
-(:glance,:background)
+(:background)
 function saveLocation(loc as [ Lang.Double, Lang.Double ]) {
   try {
     Storage.setValue("last_location", loc);
