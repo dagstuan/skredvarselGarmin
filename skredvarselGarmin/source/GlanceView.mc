@@ -102,6 +102,7 @@ class GlanceView extends Ui.GlanceView {
           ? (_forecastData as LocationAvalancheForecast)["warnings"]
           : _forecastData,
         :isLocationForecast => _useLocation,
+        :alignLineCenter => true,
       })
     ).draw(dc);
   }

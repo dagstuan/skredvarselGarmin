@@ -13,6 +13,7 @@ module AvalancheUi {
     :regionName as String,
     :forecast as SimpleAvalancheForecast,
     :isLocationForecast as Boolean,
+    :alignLineCenter as Boolean?,
   };
 
   (:glance)
@@ -62,6 +63,10 @@ module AvalancheUi {
 
       _regionName = settings[:regionName];
       _forecast = settings[:forecast];
+
+      if (settings[:alignLineCenter]) {
+        _totalHeight += _gapY;
+      }
 
       _numWarnings = _forecast.size();
 
