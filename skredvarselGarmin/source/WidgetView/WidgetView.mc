@@ -78,36 +78,36 @@ public class WidgetView extends Ui.View {
     drawTitle(dc);
 
     if (_regionId == null && !_useLocation) {
-      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
 
       dc.drawText(
         dc.getWidth() / 2,
         dc.getHeight() / 2,
-        Graphics.FONT_SMALL,
+        Gfx.FONT_SMALL,
         _noRegionsSelectedText,
-        Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
+        Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
       );
     } else {
       if (_forecastData != null) {
         drawTimeline(dc);
       } else {
-        dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+        dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
 
         if (_useLocation && $.getLocation() == null) {
           dc.drawText(
             0,
             dc.getHeight() / 2,
-            Graphics.FONT_GLANCE,
+            Gfx.FONT_GLANCE,
             _waitingForLocationText,
-            Graphics.TEXT_JUSTIFY_LEFT
+            Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
           );
         } else {
           dc.drawText(
             0,
             dc.getHeight() / 2,
-            Graphics.FONT_GLANCE,
+            Gfx.FONT_GLANCE,
             _loadingText,
-            Graphics.TEXT_JUSTIFY_LEFT
+            Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
           );
         }
       }
@@ -179,7 +179,7 @@ public class WidgetView extends Ui.View {
   }
 
   function drawTitle(dc as Gfx.Dc) {
-    dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+    dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
     dc.clear();
 
     var iconResource = $.getIconResourceForForecastMenu();
@@ -190,12 +190,12 @@ public class WidgetView extends Ui.View {
     dc.drawText(
       _width / 2,
       _height * 0.25,
-      Graphics.FONT_XTINY,
+      Gfx.FONT_XTINY,
       _appNameText,
-      Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
+      Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
     );
 
-    dc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
+    dc.setColor(Gfx.COLOR_DK_GRAY, Gfx.COLOR_TRANSPARENT);
     dc.setPenWidth(1);
 
     var marginLeftRight = 35;

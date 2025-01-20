@@ -62,7 +62,7 @@ class ServiceDelegate extends System.ServiceDelegate {
       return;
     }
 
-    if ($.getUseLocation() && $.getLocation() != null) {
+    if ($.getUseLocation()) {
       _reloadQueue.add({
         :regionId => "location-region",
         :forecastType => "simple",
