@@ -69,23 +69,23 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
     if (_forecastData != null && _dataAge < $.TIME_TO_SHOW_LOADING) {
       drawTimeline(dc);
     } else {
-      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_BLACK);
+      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
 
       if (_isLocationForecast && $.getLocation() == null) {
         dc.drawText(
           0,
           dc.getHeight() / 2,
-          Graphics.FONT_GLANCE,
+          Gfx.FONT_GLANCE,
           _waitingForLocationText,
-          Graphics.TEXT_JUSTIFY_LEFT
+          Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
         );
       } else {
         dc.drawText(
           0,
           dc.getHeight() / 2,
-          Graphics.FONT_GLANCE,
+          Gfx.FONT_GLANCE,
           _loadingText,
-          Graphics.TEXT_JUSTIFY_LEFT
+          Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
         );
       }
     }

@@ -23,9 +23,14 @@ module AvalancheUi {
     private var _numWarnings;
 
     private var _daysToShow = 4;
-    private var _gap = 3;
+    private var _gapY = 4;
+    private var _gapX = 3;
     private var _numGaps = _daysToShow - 1;
     private var _lineHeight = 8;
+    private var _fontHeight = Gfx.getFontHeight(Gfx.FONT_GLANCE);
+    private var _dangerLevelGapY = -1;
+    private var _totalHeight =
+      _fontHeight + _gapY + _lineHeight + _dangerLevelGapY + _fontHeight;
 
     private var _markerWidth = 3;
     private var _markerHeight = 16;
@@ -44,8 +49,6 @@ module AvalancheUi {
 
     private var _lengthPerFullElem as Numeric;
 
-    private var _dangerLevelFont = Gfx.FONT_GLANCE;
-
     private var _regionName as String?;
 
     private var _navigationIcon as AvalancheUi.NavigationIcon?;
@@ -55,7 +58,7 @@ module AvalancheUi {
       _locY = settings[:locY];
       _width = settings[:width];
       _height = settings[:height];
-      _lengthPerFullElem = (_width - _numGaps * _gap) / _daysToShow;
+      _lengthPerFullElem = (_width - _numGaps * _gapX) / _daysToShow;
 
       _regionName = settings[:regionName];
       _forecast = settings[:forecast];
@@ -85,24 +88,37 @@ module AvalancheUi {
     }
 
     public function draw(dc as Gfx.Dc) {
-      drawTitle(dc, _locX, _locY);
+      if ($.DrawOutlines) {
+        $.drawOutline(dc, _locX, _locY, _width, _height);
+      }
+
+      var currYOffset = _locY + (_height / 2 - _totalHeight / 2);
+
+      drawTitle(dc, _locX, currYOffset);
+
+      currYOffset += _fontHeight + _gapY;
 
       var currXOffset = _locX;
-
       for (var i = 0; i < _numWarnings; i++) {
-        var lengthDrawn = drawWarning(dc, currXOffset, _forecast[i]);
+        var lengthDrawn = drawWarning(
+          dc,
+          currXOffset,
+          currYOffset,
+          _forecast[i]
+        );
 
         if (lengthDrawn > 0) {
-          currXOffset += lengthDrawn + _gap;
+          currXOffset += lengthDrawn + _gapX;
         }
       }
 
-      drawMarker(dc, _locX, _locY, _width, _height);
+      drawMarker(dc, _locX, currYOffset);
     }
 
     private function drawWarning(
       dc as Gfx.Dc,
       x0 as Numeric,
+      y0 as Numeric,
       warning as SimpleAvalancheWarning
     ) as Numeric {
       var validity = warning["validity"] as Array;
@@ -137,14 +153,9 @@ module AvalancheUi {
       }
 
       var color = colorize(dangerLevel);
-      dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+      dc.setColor(color, Gfx.COLOR_TRANSPARENT);
 
-      dc.fillRectangle(
-        x0,
-        _locY + (_height / 2 - _lineHeight / 2),
-        lengthThisElem,
-        _lineHeight
-      );
+      dc.fillRectangle(x0, y0, lengthThisElem, _lineHeight);
 
       var dangerLevelString = dangerLevel.toString();
 
@@ -154,16 +165,22 @@ module AvalancheUi {
 
       var textWidth = dc.getTextWidthInPixels(
         dangerLevelString,
-        _dangerLevelFont
+        Gfx.FONT_GLANCE
       );
       if (x0 > _locX && textWidth < lengthThisElem) {
-        dc.setColor(color, Graphics.COLOR_TRANSPARENT);
+        var textY0 = y0 + _dangerLevelGapY + _lineHeight;
+
+        if ($.DrawOutlines) {
+          $.drawOutline(dc, x0, textY0, textWidth, _fontHeight);
+        }
+
+        dc.setColor(color, Gfx.COLOR_TRANSPARENT);
         dc.drawText(
           x0,
-          _locY + _height / 2 + _height * 0.05,
-          _dangerLevelFont,
+          textY0,
+          Gfx.FONT_GLANCE,
           dangerLevelString,
-          Graphics.TEXT_JUSTIFY_LEFT
+          Gfx.TEXT_JUSTIFY_LEFT
         );
       }
 
@@ -171,20 +188,15 @@ module AvalancheUi {
     }
 
     private function drawTitle(dc as Gfx.Dc, x0 as Number, y0 as Number) {
-      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+      if ($.DrawOutlines) {
+        $.drawOutline(dc, x0, y0, _width, _fontHeight);
+      }
 
-      var textDimensions = dc.getTextDimensions(
-        _regionName,
-        Graphics.FONT_GLANCE
-      );
+      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
 
-      dc.drawText(
-        x0,
-        y0,
-        Graphics.FONT_GLANCE,
-        _regionName,
-        Graphics.TEXT_JUSTIFY_LEFT
-      );
+      var textDimensions = dc.getTextDimensions(_regionName, Gfx.FONT_GLANCE);
+
+      dc.drawText(x0, y0, Gfx.FONT_GLANCE, _regionName, Gfx.TEXT_JUSTIFY_LEFT);
 
       if (_navigationIcon != null) {
         var minX = textDimensions[0] + _navigationIconGap;
@@ -194,25 +206,19 @@ module AvalancheUi {
       }
     }
 
-    private function drawMarker(
-      dc as Gfx.Dc,
-      x0 as Number,
-      y0 as Number,
-      width as Number,
-      height as Number
-    ) {
-      var markerX = (x0 + width) / 2 - _markerWidth / 2;
-      var minY = height / 2 - _markerHeight / 2;
+    private function drawMarker(dc as Gfx.Dc, x0 as Number, y0 as Number) {
+      var markerX = (x0 + _width) / 2 - _markerWidth / 2;
+      var minY = y0 - _markerHeight / 4;
 
-      dc.setColor(Graphics.COLOR_BLACK, Graphics.COLOR_BLACK);
+      dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
       dc.fillRectangle(
         markerX - _strokeOffset / 2,
-        y0 + minY,
+        minY,
         _markerWidth + _strokeOffset,
         _markerHeight
       );
-      dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_WHITE);
-      dc.fillRectangle(markerX, y0 + minY, _markerWidth, _markerHeight);
+      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_WHITE);
+      dc.fillRectangle(markerX, minY, _markerWidth, _markerHeight);
     }
   }
 }
