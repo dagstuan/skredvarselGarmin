@@ -5,6 +5,8 @@ using Toybox.WatchUi as Ui;
 using Toybox.Timer;
 using Toybox.Communications as Comm;
 
+// This view is for when we have never seen the watch before.
+// Display a watchKey and redirect to web.
 class AddWatchView extends Ui.View {
   private var _textArea as Ui.TextArea?;
   private var _checkAddWatchTimer as Timer.Timer?;
@@ -17,7 +19,11 @@ class AddWatchView extends Ui.View {
     startTimer();
     _addWatchKey = addWatchKey;
 
-    Comm.openWebPage($.FrontendBaseUrl + "/addwatch", null, null);
+    Comm.openWebPage(
+      $.FrontendBaseUrl + "/addwatch?watchKey=" + addWatchKey,
+      null,
+      null
+    );
   }
 
   function onLayout(dc as Gfx.Dc) {

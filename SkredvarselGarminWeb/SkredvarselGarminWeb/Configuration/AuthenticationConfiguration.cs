@@ -25,7 +25,10 @@ public static class AuthenticationConfiguration
                 options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
             })
             .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options
-                => options.ExpireTimeSpan = TimeSpan.FromMinutes(60))
+                =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+            })
             .AddScheme<GarminAuthenticationSchemeOptions, GarminAuthenticationHandler>("Garmin", options => { })
             .AddGoogle(options =>
             {

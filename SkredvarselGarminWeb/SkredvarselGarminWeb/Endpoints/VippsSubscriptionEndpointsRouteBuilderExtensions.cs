@@ -73,6 +73,8 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
     public static void MapVippsSubscriptionEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/createVippsAgreement", async (
+            [FromQuery]
+            string? watchKey,
             HttpContext ctx,
             IVippsApiClient vippsApiClient,
             IUserService userService,
@@ -136,6 +138,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                 {
                     Id = createdAgreement.AgreementId,
                     CallbackId = callbackId,
+                    WatchKey = watchKey,
                     Created = dateTimeNowProvider.Now.ToUniversalTime(),
                     UserId = userId,
                     Status = AgreementStatus.PENDING,
@@ -163,6 +166,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
             IVippsApiClient vippsApiClient,
             IVippsAgreementService subscriptionService,
             IUserService userService,
+            IWatchService watchService,
             INotificationService notificationService,
             IBackgroundJobClient backgroundJobClient,
             IDateTimeNowProvider dateTimeNowProvider,
@@ -236,10 +240,24 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                             throw new Exception("Failed to associate agreement with user.");
                         }
 
+                        if (agreement.WatchKey != null)
+                        {
+                            var watchAddRequest = watchService.GetWatchAddRequest(agreement.WatchKey);
+
+                            if (watchAddRequest != null)
+                            {
+                                watchService.AddWatch(watchAddRequest, agreement.UserId);
+                            }
+                            else
+                            {
+                                logger.LogWarning("Failed to find watch add request with key {watchKey}.", agreement.WatchKey);
+                            }
+                        }
+
                         _ = Task.Run(notificationService.NotifyUserSubscribed);
 
                         agreement.SetAsActive();
-                        agreement.RemoveCallbackId();
+                        agreement.RemoveCallbackIdAndWatchKey();
 
                         try
                         {

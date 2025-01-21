@@ -9,6 +9,8 @@ public class Agreement
 
     public required Guid? CallbackId { get; set; }
 
+    public required string? WatchKey { get; set; }
+
     public required DateTime Created { get; set; }
 
     public required AgreementStatus Status { get; set; }

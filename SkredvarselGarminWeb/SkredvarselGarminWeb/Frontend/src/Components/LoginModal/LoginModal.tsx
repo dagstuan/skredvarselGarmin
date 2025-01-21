@@ -1,18 +1,16 @@
 import {
+  Box,
+  Icon,
   Modal,
-  ModalOverlay,
+  ModalBody,
+  ModalCloseButton,
   ModalContent,
   ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  Icon,
-  Box,
-  Center,
+  ModalOverlay,
   Text,
   VStack,
 } from "@chakra-ui/react";
 import { useNavigateOnClose } from "../../hooks/useNavigateOnClose";
-import { useState } from "react";
 import { LoginContent } from "./LoginContent";
 
 import { FaPaperPlane } from "react-icons/fa";
@@ -34,7 +32,7 @@ export const LoginModal = (props: LoginModalProps) => {
     handleEmailInputChange,
     handleSubmit,
     isPending,
-  } = useEmailLogin();
+  } = useEmailLogin(null);
 
   return (
     <Modal isOpen={!isClosing} onClose={onClose} isCentered>

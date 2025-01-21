@@ -2,7 +2,6 @@ using System.Net;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 using SkredvarselGarminWeb.Configuration;
 using SkredvarselGarminWeb.Database;
@@ -112,25 +111,18 @@ public static class WatchApiRouteBuilderExtensions
             return watches.Select(w => w.ToEndpointModel());
         }).RequireAuthorization();
 
-        app.MapPost("/api/watches/{watchAddKey}", (HttpContext ctx, string watchAddKey, SkredvarselDbContext dbContext) =>
+        app.MapPost("/api/watches/{watchAddKey}", (HttpContext ctx, string watchAddKey, SkredvarselDbContext dbContext, IWatchService watchService) =>
         {
             var user = dbContext.GetUserOrThrow(ctx.User);
 
-            var watchAddRequest = dbContext.WatchAddRequests.FirstOrDefault(r => EF.Functions.ILike(r.Key, watchAddKey));
+            var watchAddRequest = watchService.GetWatchAddRequest(watchAddKey);
 
             if (watchAddRequest == null)
             {
                 return Results.Problem("Fant ikke noen klokke med den koden.", statusCode: (int)HttpStatusCode.BadRequest);
             }
 
-            dbContext.Remove(watchAddRequest);
-            dbContext.Add(new WatchEntityModel
-            {
-                Id = watchAddRequest.WatchId,
-                PartNumber = watchAddRequest.PartNumber,
-                UserId = user.Id
-            });
-            dbContext.SaveChanges();
+            watchService.AddWatch(watchAddRequest, user.Id);
 
             return Results.Ok();
         }).RequireAuthorization();
