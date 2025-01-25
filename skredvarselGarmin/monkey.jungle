@@ -2,6 +2,9 @@ project.manifest = manifest.xml
 
 base.sourcePath = source
 
+approachs50.resourcePath = $(base.resourcePath);resources-complications;resources-h56
+approachs7042mm.resourcePath = $(base.resourcePath);resources-complications;resources-h60
+approachs7047mm.resourcePath = $(base.resourcePath);resources-complications;resources-h70
 fenix7.resourcePath = $(base.resourcePath);resources-complications
 fenix7s.resourcePath = $(base.resourcePath);resources-complications
 fenix7x.resourcePath = $(base.resourcePath);resources-complications
