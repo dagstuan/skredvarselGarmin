@@ -1,30 +1,30 @@
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  Text,
-  VStack,
   Box,
-  Icon,
   Center,
   Heading,
+  Icon,
   Link,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Text,
+  VStack,
 } from "@chakra-ui/react";
-import { Link as RouterLink } from "react-router-dom";
-import { VippsButton } from "./Buttons/VippsButton";
+import { ReactElement } from "react";
+import { FaPaperPlane } from "react-icons/fa";
+import { Link as RouterLink, useSearchParams } from "react-router-dom";
+import { useEmailLogin } from "../hooks/useEmailLogin";
+import { useNavigateOnClose } from "../hooks/useNavigateOnClose";
+import { useNavigateToAccountIfLoggedIn } from "../hooks/useNavigateToAccountIfLoggedIn";
+import { useUser } from "../hooks/useUser";
 import { FacebookButton } from "./Buttons/FacebookButton";
 import { GoogleButton } from "./Buttons/GoogleButton";
-import { FaPaperPlane } from "react-icons/fa";
-import { useNavigateOnClose } from "../hooks/useNavigateOnClose";
-import { useUser } from "../hooks/useUser";
-import { useNavigateToAccountIfLoggedIn } from "../hooks/useNavigateToAccountIfLoggedIn";
-import { OrDivider } from "./OrDivider";
-import { useEmailLogin } from "../hooks/useEmailLogin";
+import { VippsButton } from "./Buttons/VippsButton";
 import { EmailLoginForm } from "./EmailLoginForm/EmailLoginForm";
-import { ReactElement } from "react";
+import { OrDivider } from "./OrDivider";
 
 type BuySubscriptionModalProps = {
   headerText?: string;
@@ -47,9 +47,12 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
     ),
   } = props;
 
+  const [searchParams] = useSearchParams();
+  const watchKey = searchParams.get("watchKey");
+
   const { data: user, isLoading: isLoadingUser } = useUser();
 
-  useNavigateToAccountIfLoggedIn(user, isLoadingUser);
+  useNavigateToAccountIfLoggedIn(user, isLoadingUser, watchKey);
 
   const { isClosing, onClose } = useNavigateOnClose("/");
 
@@ -60,7 +63,7 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
     handleEmailInputChange,
     handleSubmit,
     isPending,
-  } = useEmailLogin();
+  } = useEmailLogin(watchKey);
 
   return (
     <Modal isOpen={!isLoadingUser && !isClosing} onClose={onClose} isCentered>
@@ -83,7 +86,10 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
                 </Box>
 
                 <VStack w="100%" alignItems="stretch">
-                  <VippsButton text="Kjøp abonnement med" />
+                  <VippsButton
+                    text="Kjøp abonnement med"
+                    link={`/createVippsAgreement${watchKey ? `?watchKey=${watchKey}` : ""}`}
+                  />
                 </VStack>
               </VStack>
 
@@ -104,8 +110,12 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
                   </Heading>
                   <VStack gap={5} w="100%" alignItems="stretch">
                     <VStack gap={2} w="100%" alignItems="stretch">
-                      <GoogleButton link="/google-login?returnUrl=/account" />
-                      <FacebookButton link="/facebook-login?returnUrl=/account" />
+                      <GoogleButton
+                        link={`/google-login?returnUrl=/account${watchKey ? `?watchKey=${watchKey}` : ""}`}
+                      />
+                      <FacebookButton
+                        link={`/facebook-login?returnUrl=/account${watchKey ? `?watchKey=${watchKey}` : ""}`}
+                      />
                     </VStack>
 
                     <OrDivider text="Eller" />

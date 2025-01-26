@@ -5,12 +5,13 @@ import { User } from "../types";
 export const useNavigateToAccountIfLoggedIn = (
   user: User | null | undefined,
   isLoadingUser: boolean,
+  watchKey: string | null,
 ) => {
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user && !isLoadingUser) {
-      navigate("/account");
+      navigate(`/account${watchKey ? `?watchKey=${watchKey}` : ""}`);
     }
   }, [user, isLoadingUser]);
 };

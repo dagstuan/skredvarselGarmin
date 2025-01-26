@@ -7,9 +7,10 @@ public static class AgreementExtensions
         agreement.UserId = userId;
     }
 
-    public static void RemoveCallbackId(this Agreement agreement)
+    public static void RemoveCallbackIdAndWatchKey(this Agreement agreement)
     {
         agreement.CallbackId = null;
+        agreement.WatchKey = null;
     }
 
     public static void SetAsActive(this Agreement agreement)

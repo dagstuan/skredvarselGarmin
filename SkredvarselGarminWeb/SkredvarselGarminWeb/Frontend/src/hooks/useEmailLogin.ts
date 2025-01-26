@@ -1,11 +1,16 @@
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "../api";
-import { useMutation } from "@tanstack/react-query";
 
-export const sendLoginEmail = async (email: string) =>
-  api.post(`/email-login-send?email=${email}&returnUrl=/account`);
+export const sendLoginEmail = async (config: {
+  email: string;
+  watchKey: string | null;
+}) =>
+  api.post(
+    `/email-login-send?email=${config.email}&returnUrl=/account${config.watchKey ? `?watchKey=${config.watchKey}` : ""}`,
+  );
 
-export const useEmailLogin = () => {
+export const useEmailLogin = (watchKey: string | null) => {
   const [showSentEmail, setShowSentEmail] = useState(false);
 
   const [email, setEmail] = useState<string | undefined>(undefined);
@@ -30,7 +35,7 @@ export const useEmailLogin = () => {
     if (!email) {
       setError("Du må skrive en e-postadresse.");
     } else {
-      mutate(email);
+      mutate({ email, watchKey });
     }
   };
 

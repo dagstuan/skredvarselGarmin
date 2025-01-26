@@ -7,17 +7,21 @@ import {
   DrawerContent,
   DrawerOverlay,
   Heading,
-  Text,
   Link,
+  Text,
 } from "@chakra-ui/react";
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import {
+  Link as RouterLink,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
+import { useNavigateOnClose } from "../../hooks/useNavigateOnClose";
 import { useUser } from "../../hooks/useUser";
+import { useAddWatch } from "../../hooks/useWatches";
 import { PersonalInfo } from "./PersonalInfo";
 import { Subscription } from "./Subscription";
 import { Watches } from "./Watches";
-import { Link as RouterLink } from "react-router-dom";
-import { useNavigateOnClose } from "../../hooks/useNavigateOnClose";
-import { useEffect } from "react";
 
 export const AccountPage = () => {
   const { data: user, isLoading: isLoadingUser } = useUser();
@@ -31,6 +35,25 @@ export const AccountPage = () => {
       navigate("/login");
     }
   }, [user, isLoadingUser]);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const watchKey = searchParams.get("watchKey");
+
+  const { mutate: mutateAddWatch, isPending: isAddWatchPending } = useAddWatch(
+    () => {
+      searchParams.delete("watchKey");
+      setSearchParams(searchParams, {
+        replace: true,
+        preventScrollReset: true,
+      });
+    },
+  );
+
+  useEffect(() => {
+    if (user && watchKey && !isAddWatchPending) {
+      mutateAddWatch(watchKey);
+    }
+  }, [mutateAddWatch, isAddWatchPending, user, watchKey]);
 
   return (
     <Drawer isOpen={!!user && !isClosing} onClose={onClose} size="md">

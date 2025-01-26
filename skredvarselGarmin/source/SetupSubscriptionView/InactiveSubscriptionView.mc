@@ -5,6 +5,8 @@ using Toybox.WatchUi as Ui;
 using Toybox.Timer;
 using Toybox.Communications as Comm;
 
+// This view is for when we have the watch in the database, but
+// the watch is not subscribed.
 class InactiveSubscriptionView extends Ui.View {
   private var _textArea as Ui.TextArea?;
   private var _checkSubscriptionTimer as Timer.Timer?;
