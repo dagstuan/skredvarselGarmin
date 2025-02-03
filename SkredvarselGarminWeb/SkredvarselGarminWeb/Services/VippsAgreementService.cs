@@ -224,6 +224,16 @@ public class VippsAgreementService(
                 }
             }
         }
+        else if (vippsAgreement.Status == VippsAgreementStatus.Stopped)
+        {
+            logger.LogInformation("Agreement {agreementId} was stopped in Vipps. Setting as stopped.", agreement.Id);
+            agreement.SetAsStopped();
+            dbContext.SaveChanges();
+        }
+        else
+        {
+            logger.LogWarning("Agreement {agreementId} was not active in Vipps. Status was {status}.", agreement.Id, vippsAgreement.Status);
+        }
     }
 
     public async Task StopAgreement(string agreementId)
