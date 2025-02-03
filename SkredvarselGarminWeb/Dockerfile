@@ -5,9 +5,12 @@ RUN npm install -g n
 RUN n lts
 RUN corepack enable
 
-FROM base as builder
+FROM base AS builder
 WORKDIR /app
 COPY . .
+WORKDIR /app/SkredvarselGarminWeb/Frontend
+RUN corepack prepare --activate
+WORKDIR /app
 RUN dotnet test
 RUN dotnet publish SkredvarselGarminWeb -c Release -o publish
 
