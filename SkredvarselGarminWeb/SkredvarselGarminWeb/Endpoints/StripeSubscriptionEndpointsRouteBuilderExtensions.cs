@@ -116,7 +116,8 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
                 stripeEvent = EventUtility.ConstructEvent(
                     json,
                     stripeSignature,
-                    stripeOptions.Value.WebhookSecret
+                    stripeOptions.Value.WebhookSecret,
+                    throwOnApiVersionMismatch: false
                 );
                 logger.LogInformation("Webhook notification with type: {eventType} found for {eventId}", stripeEvent.Type, stripeEvent.Id);
 
