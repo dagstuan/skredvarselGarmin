@@ -74,6 +74,14 @@ public class VippsAgreementService(
             agreement.NextChargeId = newCharge.ChargeId;
             dbContext.SaveChanges();
         }
+        else if (vippsAgreement.Status == VippsAgreementStatus.Stopped)
+        {
+            logger.LogInformation("Agreement {agreementId} was stopped in Vipps when creating next charge. Setting as unsubscribed.", agreement.Id);
+            agreement.SetAsUnsubscribed();
+            dbContext.SaveChanges();
+
+            _ = Task.Run(notificationService.NotifyUserDeactivated);
+        }
 
         transaction.Commit();
     }
@@ -294,7 +302,7 @@ public class VippsAgreementService(
             }
         }
 
-        agreementInDb.Status = EntityAgreementStatus.UNSUBSCRIBED;
+        agreementInDb.SetAsUnsubscribed();
         dbContext.SaveChanges();
 
         transaction.Commit();

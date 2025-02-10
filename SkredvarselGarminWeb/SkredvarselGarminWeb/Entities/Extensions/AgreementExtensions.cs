@@ -19,6 +19,11 @@ public static class AgreementExtensions
         agreement.ConfirmationUrl = null;
     }
 
+    public static void SetAsUnsubscribed(this Agreement agreement)
+    {
+        agreement.Status = AgreementStatus.UNSUBSCRIBED;
+    }
+
     public static void SetAsStopped(this Agreement agreement)
     {
         agreement.Status = AgreementStatus.STOPPED;
