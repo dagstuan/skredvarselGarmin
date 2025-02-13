@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0.101-bookworm-slim AS base
+FROM mcr.microsoft.com/dotnet/sdk:9.0.102-bookworm-slim AS base
 RUN apt-get update
 RUN apt-get install -y npm
 RUN npm install -g n
@@ -14,7 +14,7 @@ WORKDIR /app
 RUN dotnet test
 RUN dotnet publish SkredvarselGarminWeb -c Release -o publish
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0.101-bookworm-slim
+FROM mcr.microsoft.com/dotnet/sdk:9.0.102-bookworm-slim
 EXPOSE 8080
 WORKDIR /app
 COPY --from=builder /app/publish ./
