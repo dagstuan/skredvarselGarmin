@@ -2,6 +2,81 @@ import Toybox.Lang;
 
 using Toybox.Graphics as Gfx;
 
+function getTriggerSensitivityText(triggerSensitivity as Number) as String {
+  if (triggerSensitivity == 0) {
+    return $.getOrLoadResourceString("Ikke gitt", :TriggerSensitivityNotGiven);
+  } else if (triggerSensitivity == 10) {
+    return $.getOrLoadResourceString(
+      "Svært vanskelig å løse ut",
+      :TriggerSensitivityVeryHardToTrigger
+    );
+  } else if (triggerSensitivity == 20) {
+    return $.getOrLoadResourceString(
+      "Vanskelig å løse ut",
+      :TriggerSensitivityHardToTrigger
+    );
+  } else if (triggerSensitivity == 30) {
+    return $.getOrLoadResourceString(
+      "Lett å løse ut",
+      :TriggerSensitivityEasyToTrigger
+    );
+  } else if (triggerSensitivity == 40) {
+    return $.getOrLoadResourceString(
+      "Svært lett å løse ut",
+      :TriggerSensitivityVeryEasyToTrigger
+    );
+  } else if (triggerSensitivity == 45) {
+    return $.getOrLoadResourceString(
+      "Naturlig utløst",
+      :TriggerSensitivityNaturallyTriggered
+    );
+  }
+
+  throw new SkredvarselGarminException(
+    "Unknown trigger sensitivity: " + triggerSensitivity
+  );
+}
+
+function getPropagationText(propagation as Number) as String {
+  if (propagation == 0) {
+    return $.getOrLoadResourceString("Ikke gitt", :PropagationNotGiven);
+  } else if (propagation == 1) {
+    return $.getOrLoadResourceString(
+      "Få bratte heng",
+      :PropagationFewSteepSlopes
+    );
+  } else if (propagation == 2) {
+    return $.getOrLoadResourceString(
+      "Noen bratte heng",
+      :PropagationSomeSteepSlopes
+    );
+  } else if (propagation == 3) {
+    return $.getOrLoadResourceString(
+      "Mange bratte heng",
+      :PropagationManySteepSlopes
+    );
+  }
+
+  throw new SkredvarselGarminException("Unknown propagation: " + propagation);
+}
+
+function getTriggerText(
+  triggerSensitivity as Number,
+  propagation as Number
+) as String {
+  return Lang.format("$1$ $2$ $3$", [
+    getTriggerSensitivityText(triggerSensitivity),
+    $.getOrLoadResourceString("i", :In),
+    $.lowercaseFirstChar(getPropagationText(propagation)),
+  ]);
+}
+
+function getDestructiveSizeText(size as Number) as String {
+  var sizeText = $.getOrLoadResourceString("Str", :Size);
+
+  return Lang.format("$1$ $2$", [sizeText, size]);
+}
+
 module AvalancheUi {
   typedef AvalancheProblemSettings as {
     :problem as AvalancheProblem,
@@ -14,7 +89,7 @@ module AvalancheUi {
   };
 
   public class AvalancheProblemUi {
-    private var _typeName as String;
+    private var _problemText as String;
     private var _exposedHeights as Array<Number>;
     private var _validExpositions as String;
     private var _dangerLevel as Number;
@@ -32,7 +107,7 @@ module AvalancheUi {
 
     private var _dangerLevelWidth = 4;
 
-    private var _problemText as AvalancheUi.ScrollingText?;
+    private var _problemTextElement as AvalancheUi.ScrollingText?;
 
     private var _validExpositionsUi as AvalancheUi.ValidExpositions?;
     private var _validExpositionsUiSize as Numeric = 0;
@@ -44,7 +119,21 @@ module AvalancheUi {
     public function initialize(settings as AvalancheProblemSettings) {
       var problem = settings[:problem];
 
-      _typeName = problem["typeName"];
+      var typeName = problem["typeName"];
+      if (
+        problem["triggerSensitivity"] &&
+        problem["propagation"] &&
+        problem["destructiveSize"]
+      ) {
+        _problemText = Lang.format("$1$ - $2$ - $3$", [
+          typeName,
+          getTriggerText(problem["triggerSensitivity"], problem["propagation"]),
+          getDestructiveSizeText(problem["destructiveSize"]),
+        ]);
+      } else {
+        _problemText = typeName;
+      }
+
       _exposedHeights = problem["exposedHeights"];
       _validExpositions = problem["validExpositions"];
       _dangerLevel = problem["dangerLevel"];
@@ -71,8 +160,8 @@ module AvalancheUi {
     }
 
     public function onShow() as Void {
-      if (_problemText != null) {
-        _problemText.onShow();
+      if (_problemTextElement != null) {
+        _problemTextElement.onShow();
       }
       if (_exposedHeightTextUi != null) {
         _exposedHeightTextUi.onShow();
@@ -80,8 +169,8 @@ module AvalancheUi {
     }
 
     public function onHide() as Void {
-      if (_problemText != null) {
-        _problemText.onHide();
+      if (_problemTextElement != null) {
+        _problemTextElement.onHide();
       }
       if (_exposedHeightTextUi != null) {
         _exposedHeightTextUi.onHide();
@@ -89,8 +178,8 @@ module AvalancheUi {
     }
 
     public function onTick() as Void {
-      if (_problemText != null) {
-        _problemText.onTick();
+      if (_problemTextElement != null) {
+        _problemTextElement.onTick();
       }
       if (_exposedHeightTextUi != null) {
         _exposedHeightTextUi.onTick();
@@ -98,11 +187,12 @@ module AvalancheUi {
     }
 
     private function setupUiElements(dc as Gfx.Dc) {
-      _problemText = new ScrollingText({
+      _problemTextElement = new ScrollingText({
         :dc => dc,
-        :text => _typeName,
+        :text => _problemText,
         :containerWidth => _width,
         :containerHeight => _height * 0.25,
+        :scrollSpeed => 2,
         :font => Gfx.FONT_XTINY,
       });
 
@@ -148,7 +238,7 @@ module AvalancheUi {
     }
 
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
-      _problemText.draw(dc, x0, y0);
+      _problemTextElement.draw(dc, x0, y0);
 
       var elemX0 = x0 + _paddingLeftRight;
       var elemY0 = y0 + _height - _elemMaxHeight;

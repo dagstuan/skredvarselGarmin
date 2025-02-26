@@ -183,6 +183,17 @@ public function minValue(arr as Array<Number>) {
   return min;
 }
 
+function lowercaseFirstChar(str as String) as String {
+  if (str.length() == 0) {
+    return str;
+  }
+
+  var firstChar = str.substring(0, 1).toLower();
+  var rest = str.substring(1, str.length());
+
+  return firstChar + rest;
+}
+
 (:release)
 public function log(message as String) {}
 

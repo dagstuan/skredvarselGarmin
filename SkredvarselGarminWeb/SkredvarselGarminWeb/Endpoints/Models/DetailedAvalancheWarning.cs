@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 
+using SkredvarselGarminWeb.VarsomApi.Models;
+
 namespace SkredvarselGarminWeb.Endpoints.Models;
 
 public class DetailedAvalancheWarning
@@ -21,4 +23,7 @@ public class AvalancheProblem
     public required int[] ExposedHeights { get; init; }
     public required string ValidExpositions { get; init; }
     public required int DangerLevel { get; init; }
+    public required DestructiveSizeExt DestructiveSize { get; init; }
+    public required AvalTriggerSensitivity TriggerSensitivity { get; init; }
+    public required AvalPropagation Propagation { get; init; }
 }

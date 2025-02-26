@@ -31,6 +31,7 @@ typedef DetailedAvalancheWarning as {
   "avalancheProblems" as Array<AvalancheProblem>,
   "isTendency" as Boolean,
   "emergencyWarning" as String?,
+  "destructiveSize" as Number,
 };
 
 typedef SetupSubscriptionResponse as {

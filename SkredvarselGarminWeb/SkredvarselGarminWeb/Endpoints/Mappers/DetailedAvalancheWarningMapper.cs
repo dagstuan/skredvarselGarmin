@@ -34,6 +34,9 @@ public static class DetailedAvalancheWarningMapper
             ],
             ValidExpositions = problem.ValidExpositions,
             DangerLevel = problem.DangerLevel,
+            DestructiveSize = problem.DestructiveSizeExtId,
+            TriggerSensitivity = problem.AvalTriggerSensitivityId,
+            Propagation = problem.AvalPropagationId,
         }).OrderByDescending(x => x.DangerLevel),
         IsTendency = varsomWarning.IsTendency,
         EmergencyWarning = varsomWarning.EmergencyWarning?.ToEmergencyWarning(langKey)
