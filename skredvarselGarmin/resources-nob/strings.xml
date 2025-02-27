@@ -30,4 +30,15 @@
 	<string id="ComplicationShortLabel">Ava</string>
 	<string id="Updated">Oppdatert</string>
 	<string id="UseLocation">Bruk klokkeposisjon for å hente nærmeste skredvarsel.</string>
+	<string id="NotGiven">Ikke gitt</string>
+	<string id="TriggerSensitivityVeryHardToTrigger">Svært vanskelig å løse ut</string>
+	<string id="TriggerSensitivityHardToTrigger">Vanskelig å løse ut</string>
+	<string id="TriggerSensitivityEasyToTrigger">Lett å løse ut</string>
+	<string id="TriggerSensitivityVeryEasyToTrigger">Svært lett å løse ut</string>
+	<string id="TriggerSensitivityNaturallyTriggered">Naturlig utløst</string>
+	<string id="PropagationFewSteepSlopes">Få bratte heng</string>
+	<string id="PropagationSomeSteepSlopes">Noen bratte heng</string>
+	<string id="PropagationManySteepSlopes">Mange bratte heng</string>
+	<string id="Size">Str</string>
+	<string id="In">i</string>
 </strings>

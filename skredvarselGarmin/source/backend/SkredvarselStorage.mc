@@ -22,6 +22,7 @@ function getSelectedRegionIds() as Array<String> {
 
 (:background)
 function setSelectedRegionIdsInStorage(regionIds as Array<String>) {
+  Storage.deleteValue("selectedRegionIds");
   Storage.setValue("selectedRegionIds", regionIds);
 }
 
@@ -38,7 +39,7 @@ function getFavoriteRegionId() as String? {
 
 (:background)
 function resetStorageCacheIfRequired() {
-  var STORAGE_VERSION = 2;
+  var STORAGE_VERSION = 3;
   var storageVersion = Storage.getValue("storageVersion") as Number?;
   var cachedForecastsLanguage =
     Storage.getValue("cachedStorageLanguage") as Number?;
@@ -82,7 +83,9 @@ function resetStorageCacheIfRequired() {
     }
     setSelectedRegionIdsInStorage(selectedRegionIds);
     $.setHasSubscription(hasSubscription);
+    Storage.deleteValue("storageVersion");
     Storage.setValue("storageVersion", STORAGE_VERSION);
+    Storage.deleteValue("cachedStorageLanguage");
     Storage.setValue("cachedStorageLanguage", forecastLanguageSetting);
   }
 }

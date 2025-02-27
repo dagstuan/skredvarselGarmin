@@ -38,6 +38,7 @@ vivoactive4s.resourcePath = $(base.resourcePath);resources-h30
 vivoactive4.resourcePath = $(base.resourcePath);resources-h35
 instinct3amoled45mm.resourcePath = $(base.resourcePath);resources-h60
 instinct3amoled50mm.resourcePath = $(base.resourcePath);resources-h60
+descentg2.resourcePath = $(base.resourcePath);resources-h60
 
 descentmk2.excludeAnnotations=hasComplication;useBufferedBitmapOnGlance
 descentmk2s.excludeAnnotations=hasComplication;useBufferedBitmapOnGlance

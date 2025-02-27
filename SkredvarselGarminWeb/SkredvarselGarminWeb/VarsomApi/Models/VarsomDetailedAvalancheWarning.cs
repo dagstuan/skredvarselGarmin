@@ -15,10 +15,12 @@ public class VarsomDetailedAvalancheWarning
 public class VarsomAvalancheProblem
 {
     public required string AvalancheProblemTypeName { get; init; }
-    public required int AvalancheProblemTypeId { get; init; }
     public required int ExposedHeight1 { get; init; }
     public required int ExposedHeight2 { get; init; }
     public required int ExposedHeightFill { get; init; }
     public required string ValidExpositions { get; init; }
     public required int DangerLevel { get; init; }
+    public required DestructiveSizeExt DestructiveSizeExtId { get; init; }
+    public required AvalTriggerSensitivity AvalTriggerSensitivityId { get; init; }
+    public required AvalPropagation AvalPropagationId { get; init; }
 }

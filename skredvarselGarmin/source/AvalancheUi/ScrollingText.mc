@@ -14,6 +14,7 @@ module AvalancheUi {
     :containerWidth as Numeric,
     :containerHeight as Numeric,
     :scrollDirection as ScrollingTextDirection?,
+    :scrollSpeed as Numeric?,
     :xAlignment as TextElementsXAlignment?,
     :yAlignment as TextElementsYAlignment?,
     :font as Gfx.FontType,
@@ -46,6 +47,8 @@ module AvalancheUi {
     private var _ticksAtStart = 0;
     private var _ticksAtEnd = 0;
 
+    private var _speed;
+
     private var _bufferedBitmapText as Gfx.BufferedBitmap?;
 
     private var _isVisible as Boolean;
@@ -58,6 +61,8 @@ module AvalancheUi {
       _fontHeight = Gfx.getFontHeight(_font);
 
       _color = settings[:color] != null ? settings[:color] : Gfx.COLOR_WHITE;
+
+      _speed = settings[:scrollSpeed] != null ? settings[:scrollSpeed] : 2;
 
       _backgroundColor =
         settings[:backgroundColor] != null
@@ -236,7 +241,7 @@ module AvalancheUi {
         _ticksAtStart += 1;
       } else {
         _ticksAtStart = 0;
-        _textOffset -= 1;
+        _textOffset -= _speed;
       }
 
       if (atEnd && _ticksAtEnd > TICKS_AT_START_END) {

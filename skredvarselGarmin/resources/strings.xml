@@ -30,4 +30,15 @@
 	<string id="ComplicationShortLabel">Ava</string>
 	<string id="Updated">Updated</string>
 	<string id="UseLocation">Use watch location to show closest forecast.</string>
+	<string id="NotGiven">Ikke gitt</string>
+	<string id="TriggerSensitivityVeryHardToTrigger">Very hard to trigger</string>
+	<string id="TriggerSensitivityHardToTrigger">Hard to trigger</string>
+	<string id="TriggerSensitivityEasyToTrigger">Easy to trigger</string>
+	<string id="TriggerSensitivityVeryEasyToTrigger">Very easy to trigger</string>
+	<string id="TriggerSensitivityNaturallyTriggered">Naturally triggered</string>
+	<string id="PropagationFewSteepSlopes">Few steep slopes</string>
+	<string id="PropagationSomeSteepSlopes">Some steep slopes</string>
+	<string id="PropagationManySteepSlopes">Many steep slopes</string>
+	<string id="Size">Size</string>
+	<string id="In">in</string>
 </strings>

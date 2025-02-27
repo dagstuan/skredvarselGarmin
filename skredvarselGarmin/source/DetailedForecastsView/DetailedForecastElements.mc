@@ -49,7 +49,7 @@ public class DetailedForecastElements {
     _warning = settings[:warning];
     _fullWidth = settings[:fullWidth];
 
-    _areaWidth = Math.ceil(_fullWidth * 0.82);
+    _areaWidth = Math.ceil(_fullWidth * 0.84);
     _areaHeight = settings[:height];
     _x0 = _fullWidth / 2 - _areaWidth / 2;
 
