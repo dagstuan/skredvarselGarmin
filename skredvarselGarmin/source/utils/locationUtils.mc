@@ -22,15 +22,21 @@ function getUseLocation() as Lang.Boolean {
 function getLocation() as [ Lang.Double, Lang.Double ]? {
   // Get Location from Garmin Weather
   if (Toybox has :Weather) {
-    var w = Weather.getCurrentConditions();
-    if (w != null && w.observationLocationPosition != null) {
-      if ($.Debug) {
-        $.log("Location obtained from Weather");
-      }
+    try {
+      var w = Weather.getCurrentConditions();
+      if (w != null && w.observationLocationPosition != null) {
+        if ($.Debug) {
+          $.log("Location obtained from Weather");
+        }
 
-      var loc = w.observationLocationPosition.toDegrees();
-      saveLocation(loc);
-      return loc;
+        var loc = w.observationLocationPosition.toDegrees();
+        saveLocation(loc);
+        return loc;
+      }
+    } catch (ex) {
+      if ($.Debug) {
+        $.log("Failed getting location from Weather: " + ex);
+      }
     }
   }
 
