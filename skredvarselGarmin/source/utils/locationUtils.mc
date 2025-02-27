@@ -77,7 +77,9 @@ function getLastLocationTime() as Lang.Number {
 (:background)
 function saveLocation(loc as [ Lang.Double, Lang.Double ]) {
   try {
+    Storage.deleteValue("last_location");
     Storage.setValue("last_location", loc);
+    Storage.deleteValue("last_location_time");
     Storage.setValue("last_location_time", Time.now().value());
   } catch (ex) {}
 }

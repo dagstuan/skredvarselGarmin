@@ -11,5 +11,6 @@ function getHasSubscription() as Boolean {
 
 (:background)
 function setHasSubscription(hasSubscription as Boolean) as Void {
+  Storage.deleteValue("hasSubscription");
   Storage.setValue("hasSubscription", hasSubscription);
 }
