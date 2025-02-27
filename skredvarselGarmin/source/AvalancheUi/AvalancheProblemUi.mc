@@ -192,7 +192,7 @@ module AvalancheUi {
         :text => _problemText,
         :containerWidth => _width,
         :containerHeight => _height * 0.25,
-        :scrollSpeed => 2,
+        :scrollSpeed => 3,
         :font => Gfx.FONT_XTINY,
       });
 
