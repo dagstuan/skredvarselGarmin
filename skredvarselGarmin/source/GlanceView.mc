@@ -12,7 +12,7 @@ class GlanceView extends Ui.GlanceView {
   private var _forecastData as SimpleForecastData?;
   private var _dataAge as Lang.Number?;
 
-  (:typecheck(false)) // Will be unused for watches that don't use buffered glances.
+  (:useBufferedBitmapOnGlance)
   private var _bufferedBitmap as Gfx.BufferedBitmap?;
 
   private var _width as Lang.Number?;
@@ -107,9 +107,16 @@ class GlanceView extends Ui.GlanceView {
     ).draw(dc);
   }
 
+  (:useBufferedBitmapOnGlance)
+  function clearBufferedBitmap() {
+    _bufferedBitmap = null;
+  }
+
   function onHide() {
     _appNameText = null;
-    _bufferedBitmap = null;
+    if (self has :clearBufferedBitmap) {
+      clearBufferedBitmap();
+    }
   }
 
   private function setForecastDataFromStorage() as Void {
@@ -118,9 +125,12 @@ class GlanceView extends Ui.GlanceView {
       : $.getSimpleForecastForRegion(_favoriteRegionId);
 
     if (data != null) {
-      _bufferedBitmap = null;
       _forecastData = data[0];
       _dataAge = $.getStorageDataAge(data);
+
+      if (self has :clearBufferedBitmap) {
+        clearBufferedBitmap();
+      }
     }
   }
 }
