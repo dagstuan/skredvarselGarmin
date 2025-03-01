@@ -22,7 +22,6 @@ function getSelectedRegionIds() as Array<String> {
 
 (:background)
 function setSelectedRegionIdsInStorage(regionIds as Array<String>) {
-  Storage.deleteValue("selectedRegionIds");
   Storage.setValue("selectedRegionIds", regionIds);
 }
 
@@ -83,9 +82,7 @@ function resetStorageCacheIfRequired() {
     }
     setSelectedRegionIdsInStorage(selectedRegionIds);
     $.setHasSubscription(hasSubscription);
-    Storage.deleteValue("storageVersion");
     Storage.setValue("storageVersion", STORAGE_VERSION);
-    Storage.deleteValue("cachedStorageLanguage");
     Storage.setValue("cachedStorageLanguage", forecastLanguageSetting);
   }
 }

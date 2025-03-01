@@ -3,15 +3,15 @@ import Toybox.System;
 
 using Toybox.Application.Properties;
 
-typedef ReloadDataQueueItem as {
-  "regionId" as String?,
-  "forecastType" as String,
-};
+// RegionId: 0 = location, otherwise actual ID
+// ForecastType: 0 = simple, 1 = detailed
+
+typedef ReloadDataQueueItem as [Numeric, Numeric];
 
 (:background)
 class ServiceDelegate extends System.ServiceDelegate {
-  private var _reloadQueue as Array<ReloadDataQueueItem> = [];
-  private var _currentData as ReloadDataQueueItem?;
+  private var _reloadQueue as Array<[Numeric, Numeric]> = [];
+  private var _currentData as [Numeric, Numeric]?;
 
   public function initialize() {
     ServiceDelegate.initialize();
@@ -44,8 +44,7 @@ class ServiceDelegate extends System.ServiceDelegate {
       return;
     }
 
-    var deviceSettings = System.getDeviceSettings();
-    var monkeyVersion = deviceSettings.monkeyVersion;
+    var monkeyVersion = System.getDeviceSettings().monkeyVersion;
     if (
       monkeyVersion[0] < 4 &&
       !(monkeyVersion[0] >= 3 && monkeyVersion[1] >= 2)
@@ -63,27 +62,18 @@ class ServiceDelegate extends System.ServiceDelegate {
     }
 
     if ($.getUseLocation()) {
-      _reloadQueue.add({
-        :regionId => "location-region",
-        :forecastType => "simple",
-      });
+      _reloadQueue.add([0, 0]);
     }
 
     var selectedRegionIds = $.getSelectedRegionIds();
 
     for (var i = 0; i < selectedRegionIds.size(); i++) {
-      var regionId = selectedRegionIds[i];
+      var regionId = selectedRegionIds[i].toNumber();
 
-      _reloadQueue.add({
-        :regionId => regionId,
-        :forecastType => "simple",
-      });
+      _reloadQueue.add([regionId, 0]);
 
       if (i < 2) {
-        _reloadQueue.add({
-          :regionId => regionId,
-          :forecastType => "detailed",
-        });
+        _reloadQueue.add([regionId, 1]);
       }
     }
 
@@ -95,22 +85,20 @@ class ServiceDelegate extends System.ServiceDelegate {
     data as WebRequestCallbackData
   ) as Void {
     if (responseCode == 200) {
-      if (_currentData[:regionId].equals("location-region")) {
-        var regionId = (data as LocationAvalancheForecast)["regionId"];
+      var regionId = _currentData[0];
+      if (regionId == 0) {
+        var locationRegionId = (data as LocationAvalancheForecast)["regionId"].toNumber();
 
         if ($.Debug) {
           $.log(
             Lang.format(
               "Location forecast reloaded. Adding detailed forecast reload for region $1$.",
-              [regionId]
+              [locationRegionId]
             )
           );
         }
 
-        _reloadQueue.add({
-          :regionId => regionId,
-          :forecastType => "detailed",
-        });
+        _reloadQueue.add([locationRegionId, 1]);
       }
 
       _currentData = null;
@@ -129,20 +117,19 @@ class ServiceDelegate extends System.ServiceDelegate {
       _currentData = _reloadQueue[0];
       _reloadQueue = _reloadQueue.slice(1, null);
 
-      var regionId = _currentData[:regionId];
-      var forecastType = _currentData[:forecastType];
+      var regionId = _currentData[0];
 
-      if (regionId.equals("location-region")) {
+      if (regionId == 0) {
         $.loadSimpleForecastForLocation(method(:onReloadedRegion), false);
-      } else if (forecastType.equals("detailed")) {
+      } else if (_currentData[1] == 1) {
         $.loadDetailedWarningsForRegion(
-          regionId,
+          regionId.toString(),
           method(:onReloadedRegion),
           false
         );
       } else {
         $.loadSimpleForecastForRegion(
-          regionId,
+          regionId.toString(),
           method(:onReloadedRegion),
           false
         );
