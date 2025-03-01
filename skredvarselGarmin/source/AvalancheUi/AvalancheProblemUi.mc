@@ -74,7 +74,7 @@ function getTriggerText(
 function getDestructiveSizeText(size as Number) as String {
   var sizeText = $.getOrLoadResourceString("Str", :Size);
 
-  return Lang.format("$1$ $2$", [sizeText, size]);
+  return Lang.format("$1$ $2$", [$.lowercaseFirstChar(sizeText), size]);
 }
 
 module AvalancheUi {
@@ -125,7 +125,7 @@ module AvalancheUi {
         problem["propagation"] &&
         problem["destructiveSize"]
       ) {
-        _problemText = Lang.format("$1$ - $2$ - $3$", [
+        _problemText = Lang.format("$1$ - $2$ ($3$).", [
           typeName,
           getTriggerText(problem["triggerSensitivity"], problem["propagation"]),
           getDestructiveSizeText(problem["destructiveSize"]),
