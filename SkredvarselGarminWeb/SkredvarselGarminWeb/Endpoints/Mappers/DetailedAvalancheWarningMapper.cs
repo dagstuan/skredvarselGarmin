@@ -12,7 +12,7 @@ public static class DetailedAvalancheWarningMapper
             varsomWarning.ValidFrom,
             varsomWarning.ValidTo,
         ],
-        HasEmergency = !string.IsNullOrWhiteSpace(varsomWarning.EmergencyWarning?.ToEmergencyWarning(langKey)),
+        HasEmergency = !string.IsNullOrWhiteSpace(varsomWarning.EmergencyWarning?.ToEmergencyWarning(langKey, varsomWarning.AvalancheProblems)),
     };
 
     public static DetailedAvalancheWarning ToDetailedAvalancheWarning(this VarsomDetailedAvalancheWarning varsomWarning, string langKey) => new()
@@ -39,16 +39,29 @@ public static class DetailedAvalancheWarningMapper
             Propagation = problem.AvalPropagationId,
         }).OrderByDescending(x => x.DangerLevel),
         IsTendency = varsomWarning.IsTendency,
-        EmergencyWarning = varsomWarning.EmergencyWarning?.ToEmergencyWarning(langKey)
+        EmergencyWarning = varsomWarning.EmergencyWarning?.ToEmergencyWarning(langKey, varsomWarning.AvalancheProblems)
     };
 
-    private static string? ToEmergencyWarning(this string emergencyWarning, string langKey)
+    private static string? ToEmergencyWarning(this string emergencyWarning, string langKey, IEnumerable<VarsomAvalancheProblem>? avalancheProblems)
     {
-        var notGivenText = langKey == "1" ? "ikke gitt" : "not given";
+        const string langKeyNorwegian = "1";
+        const string langKeyEnglish = "2";
+        const string notGivenNorwegian = "ikke gitt";
+        const string notGivenEnglish = "not given";
 
-        return !string.IsNullOrWhiteSpace(emergencyWarning) &&
-            !emergencyWarning.Equals(notGivenText, StringComparison.CurrentCultureIgnoreCase)
-            ? emergencyWarning
-            : null;
+        var hasPersistentWeakLayer = avalancheProblems?.Any(problem => problem.AvalancheProblemTypeId == AvalancheProblemType.PersistentWeakLayerSlabAvalanches) ?? false;
+
+        var persistentWeakLayerWarning = hasPersistentWeakLayer ? langKey == langKeyNorwegian ? "Vedvarende svakt lag" : "Persistent weak layer" : null;
+
+        return (langKey, emergencyWarning.ToLower(), persistentWeakLayerWarning) switch
+        {
+            (langKeyNorwegian, notGivenNorwegian, null) => null,
+            (langKeyEnglish, notGivenEnglish, null) => null,
+            (langKeyNorwegian, _, null) => emergencyWarning,
+            (langKeyEnglish, _, null) => emergencyWarning,
+            (langKeyNorwegian, notGivenNorwegian, _) => $"{persistentWeakLayerWarning}.",
+            (langKeyEnglish, notGivenEnglish, _) => $"{persistentWeakLayerWarning}.",
+            (_, _, _) => $"{persistentWeakLayerWarning}. {emergencyWarning}.",
+        };
     }
 }
