@@ -94,7 +94,6 @@ class WebRequestDelegate {
         );
       }
 
-      Storage.deleteValue(_storageKey);
       Storage.setValue(_storageKey, [data, Time.now().value()]);
     } else if (responseCode == 401) {
       if ($.Debug) {

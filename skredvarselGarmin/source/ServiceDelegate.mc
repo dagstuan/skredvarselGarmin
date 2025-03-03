@@ -3,15 +3,13 @@ import Toybox.System;
 
 using Toybox.Application.Properties;
 
-// RegionId: 0 = location, otherwise actual ID
 // ForecastType: 0 = simple, 1 = detailed
-
-typedef ReloadDataQueueItem as [Numeric, Numeric];
+typedef ReloadDataQueueItem as [String, Numeric];
 
 (:background)
 class ServiceDelegate extends System.ServiceDelegate {
-  private var _reloadQueue as Array<[Numeric, Numeric]> = [];
-  private var _currentData as [Numeric, Numeric]?;
+  private var _reloadQueue as Array<[String, Numeric]> = [];
+  private var _currentData as [String, Numeric]?;
 
   public function initialize() {
     ServiceDelegate.initialize();
@@ -62,13 +60,13 @@ class ServiceDelegate extends System.ServiceDelegate {
     }
 
     if ($.getUseLocation()) {
-      _reloadQueue.add([0, 0]);
+      _reloadQueue.add(["location", 0]);
     }
 
     var selectedRegionIds = $.getSelectedRegionIds();
 
     for (var i = 0; i < selectedRegionIds.size(); i++) {
-      var regionId = selectedRegionIds[i].toNumber();
+      var regionId = selectedRegionIds[i];
 
       _reloadQueue.add([regionId, 0]);
 
@@ -86,8 +84,8 @@ class ServiceDelegate extends System.ServiceDelegate {
   ) as Void {
     if (responseCode == 200) {
       var regionId = _currentData[0];
-      if (regionId == 0) {
-        var locationRegionId = (data as LocationAvalancheForecast)["regionId"].toNumber();
+      if (regionId.equals("location")) {
+        var locationRegionId = (data as LocationAvalancheForecast)["regionId"].toString();
 
         if ($.Debug) {
           $.log(
@@ -119,7 +117,7 @@ class ServiceDelegate extends System.ServiceDelegate {
 
       var regionId = _currentData[0];
 
-      if (regionId == 0) {
+      if (regionId.equals("location")) {
         $.loadSimpleForecastForLocation(method(:onReloadedRegion), false);
       } else if (_currentData[1] == 1) {
         $.loadDetailedWarningsForRegion(

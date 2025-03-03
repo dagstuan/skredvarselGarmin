@@ -42,14 +42,10 @@ function resetStorageCacheIfRequired() {
   var storageVersion = Storage.getValue("storageVersion") as Number?;
   var cachedForecastsLanguage =
     Storage.getValue("cachedStorageLanguage") as Number?;
-  if (cachedForecastsLanguage == null) {
-    cachedForecastsLanguage = 1; // Assume Norwegian if no value in storage
-  }
 
   var forecastLanguageSetting = $.getForecastLanguage();
 
   if (
-    storageVersion == null ||
     storageVersion != STORAGE_VERSION ||
     cachedForecastsLanguage != forecastLanguageSetting
   ) {
@@ -65,17 +61,9 @@ function resetStorageCacheIfRequired() {
     var selectedRegionIds = $.getSelectedRegionIds();
     try {
       Storage.clearValues();
-    } catch (ex instanceof Toybox.Application.ObjectStoreAccessException) {
-      if ($.Debug) {
-        $.log(
-          "Failed to reset storage cache due to object store access exception."
-        );
-        ex.printStackTrace();
-      }
-      throw ex;
     } catch (ex) {
       if ($.Debug) {
-        $.log("Failed to reset storage cache for some reason.");
+        $.log("Failed to reset storage cache.");
         ex.printStackTrace();
       }
       throw ex;
