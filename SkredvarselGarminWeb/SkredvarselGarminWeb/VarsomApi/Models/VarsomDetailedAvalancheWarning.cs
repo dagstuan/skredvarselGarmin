@@ -15,6 +15,7 @@ public class VarsomDetailedAvalancheWarning
 public class VarsomAvalancheProblem
 {
     public required string AvalancheProblemTypeName { get; init; }
+    public required AvalancheProblemType AvalancheProblemTypeId { get; init; }
     public required int ExposedHeight1 { get; init; }
     public required int ExposedHeight2 { get; init; }
     public required int ExposedHeightFill { get; init; }
