@@ -1,7 +1,7 @@
 services:
   db:
     container_name: skredvarsel-garmin-db
-    image: imresamu/postgis
+    image: imresamu/postgis:16-3.5.2-bullseye
     restart: always
     environment:
       POSTGRES_PASSWORD: dev

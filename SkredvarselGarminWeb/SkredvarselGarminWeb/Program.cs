@@ -3,7 +3,6 @@ using Hangfire;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 
 using Resend;
 
@@ -68,7 +67,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.CustomSchemaIds(type => type.ToString());
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "SkredvarselGarminWeb", Version = "v1" });
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo { Title = "SkredvarselGarminWeb", Version = "v1" });
 });
 
 builder.Services.AddHttpClient<ResendClient>();

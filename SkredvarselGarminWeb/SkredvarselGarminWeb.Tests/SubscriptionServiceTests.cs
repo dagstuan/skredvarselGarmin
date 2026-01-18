@@ -2,7 +2,7 @@ using System.Net;
 
 using AutoFixture;
 
-using FluentAssertions;
+using AwesomeAssertions;
 
 using Hangfire;
 
