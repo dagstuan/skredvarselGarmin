@@ -80,7 +80,7 @@ public class StripeService(
             SubscriptionId = session.SubscriptionId,
             UserId = user.Id,
             Status = status,
-            NextChargeDate = DateOnly.FromDateTime(stripeSubscription.CurrentPeriodEnd)
+            NextChargeDate = DateOnly.FromDateTime(stripeSubscription.Items.Data[0].CurrentPeriodEnd)
         });
 
         dbContext.SaveChanges();
@@ -102,7 +102,7 @@ public class StripeService(
         }
 
         subscriptionInDb.Status = subscription.ToStripeSubscriptionStatus();
-        subscriptionInDb.NextChargeDate = DateOnly.FromDateTime(subscription.CurrentPeriodEnd);
+        subscriptionInDb.NextChargeDate = DateOnly.FromDateTime(subscription.Items.Data[0].CurrentPeriodEnd);
 
         dbContext.SaveChanges();
 
