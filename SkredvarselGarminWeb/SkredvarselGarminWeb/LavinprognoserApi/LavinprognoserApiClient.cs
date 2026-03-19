@@ -17,6 +17,13 @@ public partial class LavinprognoserApiClient(
         PropertyNameCaseInsensitive = true,
     };
 
+    public async Task<IEnumerable<WfsFeature<JsonElement>>> GetAllLocationPolygons()
+    {
+        var url = BuildWfsUrl("lavinprognoser:location", null);
+        var collection = await TryGetJsonAsync<WfsFeatureCollection<JsonElement>>(WfsClient, url);
+        return collection?.Features ?? [];
+    }
+
     public async Task<IEnumerable<WfsFeature<LavinprognoserLocation>>> GetLocationPolygons()
     {
         var url = BuildWfsUrl("lavinprognoser:location", null);

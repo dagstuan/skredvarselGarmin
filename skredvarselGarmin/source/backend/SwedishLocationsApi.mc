@@ -2,8 +2,7 @@ import Toybox.Lang;
 
 function getSortedSwedishRegionIds() as Array<String> {
   return [
-    "se_15",
-    "se_16",
+    "se_2",
     "se_17",
     "se_11",
     "se_18",
@@ -12,8 +11,7 @@ function getSortedSwedishRegionIds() as Array<String> {
     "se_14",
     "se_20",
     "se_21",
-    "se_22",
-    "se_23",
+    "se_7",
   ];
 }
 
@@ -21,10 +19,8 @@ function getSortedSwedishRegionIds() as Array<String> {
 function getSwedishRegionName(regionId as String) as String {
   var numericId = regionId.substring(3, regionId.length()).toNumber();
 
-  if (numericId == 15) {
-    return "Abisko/Riksgränsfjällen Väst";
-  } else if (numericId == 16) {
-    return "Abisko/Riksgränsfjällen Öst";
+  if (numericId == 2) {
+    return "Abisko/Riksgränsfjällen";
   } else if (numericId == 17) {
     return "Kebnekaisefjällen Väst";
   } else if (numericId == 11) {
@@ -41,10 +37,8 @@ function getSwedishRegionName(regionId as String) as String {
     return "Södra Lapplandsfjällen Nord";
   } else if (numericId == 21) {
     return "Södra Lapplandsfjällen Syd";
-  } else if (numericId == 22) {
-    return "Västra Härjedalsfjällen Nordväst";
-  } else if (numericId == 23) {
-    return "Västra Härjedalsfjällen Sydöst";
+  } else if (numericId == 7) {
+    return "Västra Härjedalsfjällen";
   }
 
   return regionId;

@@ -8,6 +8,7 @@ using AvalancheUi;
 class GlanceView extends Ui.GlanceView {
   private var _hasSubscription as Lang.Boolean?;
   private var _favoriteRegionId as Lang.String?;
+  private var _displayRegionId as Lang.String?;
 
   private var _forecastData as SimpleForecastData?;
   private var _dataAge as Lang.Number?;
@@ -21,6 +22,7 @@ class GlanceView extends Ui.GlanceView {
   private var _appNameText as Ui.Resource?;
 
   private var _useLocation as Lang.Boolean = false;
+  private var _displayingLocationForecast as Lang.Boolean = false;
 
   function initialize() {
     GlanceView.initialize();
@@ -29,7 +31,9 @@ class GlanceView extends Ui.GlanceView {
   function onShow() {
     _hasSubscription = $.getHasSubscription();
     _favoriteRegionId = $.getFavoriteRegionId();
+    _displayRegionId = _favoriteRegionId;
     _useLocation = $.getUseLocation();
+    _displayingLocationForecast = false;
     _appNameText = $.getOrLoadResourceString("Skredvarsel", :AppName);
   }
 
@@ -44,7 +48,11 @@ class GlanceView extends Ui.GlanceView {
       (_favoriteRegionId != null || _useLocation) &&
       _forecastData == null
     ) {
-      setForecastDataFromStorage();
+      if (_useLocation && self has :loadLocationForecastDataForGlance) {
+        loadLocationForecastDataForGlance();
+      } else if (_favoriteRegionId != null) {
+        setRegionForecastDataFromStorage();
+      }
     }
 
     if (
@@ -93,15 +101,11 @@ class GlanceView extends Ui.GlanceView {
         :locY => 0,
         :width => _width,
         :height => _height,
-        :regionName => $.getRegionName(
-          _useLocation
-            ? (_forecastData as LocationAvalancheForecast)["regionId"]
-            : _favoriteRegionId
-        ),
-        :forecast => _useLocation
+        :regionName => $.getRegionName(_displayRegionId),
+        :forecast => _displayingLocationForecast
           ? (_forecastData as LocationAvalancheForecast)["warnings"]
           : _forecastData,
-        :isLocationForecast => _useLocation,
+        :isLocationForecast => _displayingLocationForecast,
         :alignLineCenter => true,
       })
     ).draw(dc);
@@ -119,14 +123,30 @@ class GlanceView extends Ui.GlanceView {
     }
   }
 
-  private function setForecastDataFromStorage() as Void {
-    var data = _useLocation
-      ? $.getSimpleForecastForLocation()
-      : $.getSimpleForecastForRegion(_favoriteRegionId);
+  function setRegionForecastDataFromStorage() as Void {
+    var data = $.getSimpleForecastForRegion(_favoriteRegionId);
 
     if (data != null) {
       _forecastData = data[0];
       _dataAge = $.getStorageDataAge(data);
+      _displayRegionId = _favoriteRegionId;
+      _displayingLocationForecast = false;
+
+      if (self has :clearBufferedBitmap) {
+        clearBufferedBitmap();
+      }
+    }
+  }
+
+  (:loadLocationForecastOnGlance)
+  function loadLocationForecastDataForGlance() as Void {
+    var data = $.getSimpleForecastForLocation();
+
+    if (data != null) {
+      _forecastData = data[0];
+      _dataAge = $.getStorageDataAge(data);
+      _displayRegionId = (_forecastData as LocationAvalancheForecast)["regionId"];
+      _displayingLocationForecast = true;
 
       if (self has :clearBufferedBitmap) {
         clearBufferedBitmap();
