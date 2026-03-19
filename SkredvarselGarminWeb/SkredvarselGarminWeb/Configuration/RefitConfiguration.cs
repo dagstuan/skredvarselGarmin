@@ -4,6 +4,7 @@ using Polly.Timeout;
 
 using Refit;
 
+using SkredvarselGarminWeb.LavinprognoserApi;
 using SkredvarselGarminWeb.NtfyApi;
 using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.VarsomApi;
@@ -44,6 +45,20 @@ public static class RefitConfiguration
             .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api01.nve.no/hydrology/forecast/avalanche/v6.3.0/api"))
             .AddPolicyHandler(retryPolicy)
             .AddPolicyHandler(timeoutPolicy);
+
+        serviceCollection.AddTransient<LavinprognoserLoggingHandler>();
+        serviceCollection.AddHttpClient(LavinprognoserApiClient.WfsHttpClientName, c =>
+            c.BaseAddress = new Uri("https://nvgis.naturvardsverket.se/geoserver/lavinprognoser/"))
+            .AddHttpMessageHandler<LavinprognoserLoggingHandler>()
+            .AddPolicyHandler(retryPolicy)
+            .AddPolicyHandler(timeoutPolicy);
+
+        serviceCollection.AddHttpClient(LavinprognoserApiClient.WebsiteHttpClientName, c =>
+            c.BaseAddress = new Uri("https://www.lavinprognoser.se/"))
+            .AddPolicyHandler(retryPolicy)
+            .AddPolicyHandler(timeoutPolicy);
+
+        serviceCollection.AddTransient<ILavinprognoserApi, LavinprognoserApiClient>();
 
         serviceCollection.AddRefitClient<INtfyApiClient>()
             .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://ntfy.sh/skredvarsel"));

@@ -15,3 +15,17 @@ function getFormattedDateForApiCall(moment as Time.Moment) as String {
     info.day.format("%02u")
   );
 }
+
+(:background)
+function getForecastEndDateForApiCall(
+  now as Time.Moment,
+  regionId as String?
+) as String {
+  var endOffset = 2;
+
+  if (regionId != null && $.isSwedishRegion(regionId)) {
+    endOffset = 3;
+  }
+
+  return $.getFormattedDateForApiCall($.addDays(now, endOffset));
+}

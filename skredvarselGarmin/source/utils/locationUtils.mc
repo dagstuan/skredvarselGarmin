@@ -30,6 +30,9 @@ function getLocation() as [ Lang.Double, Lang.Double ]? {
         }
 
         var loc = w.observationLocationPosition.toDegrees();
+        if ($.Debug) {
+          $.log(Lang.format("Observed location: $1$, $2$", [loc[0], loc[1]]));
+        }
         saveLocation(loc);
         return loc;
       }

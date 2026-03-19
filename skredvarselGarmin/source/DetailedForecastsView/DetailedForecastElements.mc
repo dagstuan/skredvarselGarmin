@@ -209,20 +209,22 @@ public class DetailedForecastElements {
       length = mainText.length();
     }
 
+    if (length == 0) {
+      return $.getOrLoadResourceString("Ingen varseltekst tilgjengelig.", :NoForecastText);
+    }
+
     // Add a dot if it's not there in the main text.
-    if (length > 0) {
-      var lastChar = mainText.substring(length - 1, length);
+    var lastChar = mainText.substring(length - 1, length);
 
-      mainText = Lang.format("$1$$2$", [
-        mainText,
-        lastChar.equals(".") || lastChar.equals("!") || lastChar.equals("?")
-          ? ""
-          : ".",
-      ]);
+    mainText = Lang.format("$1$$2$", [
+      mainText,
+      lastChar.equals(".") || lastChar.equals("!") || lastChar.equals("?")
+        ? ""
+        : ".",
+    ]);
 
-      if (!_warning["isTendency"] && _warning["dangerLevel"] > 0) {
-        mainText = Lang.format("$1$ $2$", [mainText, _seeFullForecastText]);
-      }
+    if (!_warning["isTendency"] && _warning["dangerLevel"] > 0) {
+      mainText = Lang.format("$1$ $2$", [mainText, _seeFullForecastText]);
     }
 
     return mainText;

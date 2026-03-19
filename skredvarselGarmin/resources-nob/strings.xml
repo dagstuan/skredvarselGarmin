@@ -41,4 +41,12 @@
 	<string id="PropagationManySteepSlopes">Mange bratte heng</string>
 	<string id="Size">Str</string>
 	<string id="In">i</string>
+	<string id="ProblemTypeNewSnowLoose">Nysnø (løssnøskred)</string>
+	<string id="ProblemTypeWetSnowLoose">Våt snø (løssnøskred)</string>
+	<string id="ProblemTypeNewSnowSlab">Nysnø (flakskred)</string>
+	<string id="ProblemTypeWindDriftedSnow">Fokksnø (flakskred)</string>
+	<string id="ProblemTypePersistentWeakLayer">Vedvarende svakt lag (flakskred)</string>
+	<string id="ProblemTypeWetSnowSlab">Våt snø (flakskred)</string>
+	<string id="ProblemTypeGlidingSnow">Glideskred</string>
+	<string id="NoForecastText">Ingen varseltekst tilgjengelig.</string>
 </strings>

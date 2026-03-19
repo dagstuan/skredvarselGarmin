@@ -17,6 +17,17 @@ function getDetailedWarningsPathForRegion(
   formattedStartDate as String,
   formattedEndDate as String
 ) as String {
+  if ($.isSwedishRegion(regionId)) {
+    return (
+      "/se/detailedWarningsByRegion/" +
+      $.getSwedishNumericRegionId(regionId) +
+      "/" +
+      formattedStartDate +
+      "/" +
+      formattedEndDate
+    );
+  }
+
   return (
     "/detailedWarningsByRegion/" +
     regionId +
@@ -43,7 +54,7 @@ function loadDetailedWarningsForRegion(
 
   var now = Time.now();
   var start = $.getFormattedDateForApiCall($.subtractDays(now, 2));
-  var end = $.getFormattedDateForApiCall($.addDays(now, 2));
+  var end = $.getForecastEndDateForApiCall(now, regionId);
 
   var path = $.getDetailedWarningsPathForRegion(regionId, language, start, end);
   var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);

@@ -9,7 +9,7 @@ typedef SimpleAvalancheWarning as {
 typedef SimpleAvalancheForecast as Array<SimpleAvalancheWarning>;
 
 typedef LocationAvalancheForecast as {
-  "regionId" as Number,
+  "regionId" as String,
   "warnings" as SimpleAvalancheForecast,
 };
 
@@ -17,8 +17,9 @@ typedef SimpleForecastData as SimpleAvalancheForecast or
   LocationAvalancheForecast;
 
 typedef AvalancheProblem as {
-  "typeName" as String,
-  "exposedHeights" as Array<Number>,
+  "typeId" as Number,
+  "exposedHeights" as Array<Number>?,
+  "exposedHeightZones" as Array<Boolean>?,
   "validExpositions" as String,
   "dangerLevel" as Number,
 };

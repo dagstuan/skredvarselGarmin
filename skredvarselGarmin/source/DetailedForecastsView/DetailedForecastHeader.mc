@@ -1,6 +1,8 @@
 import Toybox.Lang;
 
 using Toybox.Graphics as Gfx;
+using Toybox.Math;
+using AvalancheUi;
 
 typedef DetailedForecastHeaderSettings as {
   :dc as Gfx.Dc,
@@ -13,9 +15,6 @@ typedef DetailedForecastHeaderSettings as {
 };
 
 public class DetailedForecastHeader {
-  private var _regionName as String;
-  private var _validityDate as String;
-
   private var _locX as Numeric;
   private var _locY as Numeric;
   private var _width as Numeric;
@@ -24,56 +23,90 @@ public class DetailedForecastHeader {
   private var _font = Gfx.FONT_XTINY;
   private var _fontHeight as Number = Gfx.getFontHeight(_font);
 
-  private var _bufferedBitmapText as Gfx.BufferedBitmap?;
-  private var _bufferedBitmapWidth as Numeric?;
-  private var _bufferedBitmapHeight as Numeric?;
-
   private var _deviceScreenWidth as Numeric = $.getDeviceScreenWidth();
 
-  public function initialize(settings as DetailedForecastFooterSettings) {
-    _regionName = settings[:regionName];
-    _validityDate = settings[:validityDate];
+  private var _dateBitmap as Gfx.BufferedBitmap?;
+  private var _dateBitmapWidth as Numeric = 0;
+
+  private var _regionNameText as AvalancheUi.ScrollingText?;
+  private var _regionNameX0 as Numeric = 0;
+
+  public function initialize(settings as DetailedForecastHeaderSettings) {
     _locX = settings[:locX];
     _locY = settings[:locY];
     _width = settings[:width];
     _height = settings[:height];
 
-    setupBufferedBitmaps(settings[:dc]);
+    setupBufferedBitmaps(settings[:dc], settings[:validityDate], settings[:regionName]);
   }
 
-  private function setupBufferedBitmaps(dc as Gfx.Dc) {
-    var text = _validityDate;
+  public function onShow() as Void {
+    if (_regionNameText != null) {
+      _regionNameText.onShow();
+    }
+  }
+
+  public function onHide() as Void {
+    if (_regionNameText != null) {
+      _regionNameText.onHide();
+    }
+  }
+
+  public function onTick() as Void {
+    if (_regionNameText != null) {
+      _regionNameText.onTick();
+    }
+  }
+
+  private function setupBufferedBitmaps(dc as Gfx.Dc, validityDate as String, regionName as String) {
+    _dateBitmapWidth = dc.getTextWidthInPixels(validityDate, _font);
+
+    _dateBitmap = $.newBufferedBitmap({
+      :width => _dateBitmapWidth,
+      :height => _fontHeight,
+    });
+    var bufferedDc = _dateBitmap.getDc();
+    bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+    bufferedDc.drawText(0, 0, _font, validityDate, Gfx.TEXT_JUSTIFY_LEFT);
 
     if (_deviceScreenWidth > 240) {
-      text = Lang.format("$1$\n$2$", [text, _regionName]);
+      var totalHeight = _fontHeight * 2;
+      var regionNameY = _locY + (_height - totalHeight) / 2 + _fontHeight;
+
+      // On a round screen, calculate the chord width at the region name's Y position.
+      var r = _deviceScreenWidth / 2.0;
+      var dy = r - regionNameY;
+      var regionNameWidth = 2.0 * Math.sqrt(r * r - dy * dy);
+
+      _regionNameX0 = (_width - regionNameWidth) / 2.0;
+
+      _regionNameText = new AvalancheUi.ScrollingText({
+        :dc => dc,
+        :text => regionName,
+        :containerWidth => regionNameWidth,
+        :containerHeight => _fontHeight,
+        :font => _font,
+        :scrollDirection => AvalancheUi.SCROLL_DIRECTION_HORIZONTAL,
+      });
     }
-
-    var textDimensions = dc.getTextDimensions(text, _font);
-
-    _bufferedBitmapWidth = textDimensions[0];
-    _bufferedBitmapHeight = textDimensions[1];
-
-    _bufferedBitmapText = $.newBufferedBitmap({
-      :width => _bufferedBitmapWidth,
-      :height => _bufferedBitmapHeight,
-    });
-    var bufferedDc = _bufferedBitmapText.getDc();
-    bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
-
-    bufferedDc.drawText(
-      textDimensions[0] / 2,
-      textDimensions[1] / 2,
-      _font,
-      text,
-      Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
-    );
   }
 
   public function draw(dc as Gfx.Dc) {
-    var textX0 = _locX + _width / 2 - _bufferedBitmapWidth / 2;
-    var textYOffset =
-      _deviceScreenWidth > 240 ? 0 : _height / 2 - _fontHeight / 2;
+    if (_deviceScreenWidth > 240) {
+      var totalHeight = _fontHeight * 2;
+      var topY = _locY + (_height - totalHeight) / 2;
 
-    dc.drawBitmap(textX0, _locY + textYOffset, _bufferedBitmapText);
+      dc.drawBitmap(_locX + _width / 2 - _dateBitmapWidth / 2, topY, _dateBitmap);
+
+      if (_regionNameText != null) {
+        _regionNameText.draw(dc, _regionNameX0, topY + _fontHeight);
+      }
+    } else {
+      dc.drawBitmap(
+        _locX + _width / 2 - _dateBitmapWidth / 2,
+        _locY + _height / 2 - _fontHeight / 2,
+        _dateBitmap
+      );
+    }
   }
 }

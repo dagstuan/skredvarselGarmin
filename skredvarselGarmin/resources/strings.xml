@@ -41,4 +41,12 @@
 	<string id="PropagationManySteepSlopes">Many steep slopes</string>
 	<string id="Size">Size</string>
 	<string id="In">in</string>
+	<string id="ProblemTypeNewSnowLoose">New snow (loose snow avalanche)</string>
+	<string id="ProblemTypeWetSnowLoose">Wet snow (loose snow avalanche)</string>
+	<string id="ProblemTypeNewSnowSlab">New snow (slab avalanche)</string>
+	<string id="ProblemTypeWindDriftedSnow">Wind drifted snow (slab avalanche)</string>
+	<string id="ProblemTypePersistentWeakLayer">Persistent weak layer (slab avalanche)</string>
+	<string id="ProblemTypeWetSnowSlab">Wet snow (slab avalanche)</string>
+	<string id="ProblemTypeGlidingSnow">Gliding snow avalanche</string>
+	<string id="NoForecastText">No forecast text available.</string>
 </strings>

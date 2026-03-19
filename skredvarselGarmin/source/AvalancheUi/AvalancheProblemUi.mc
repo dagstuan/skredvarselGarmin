@@ -106,6 +106,7 @@ module AvalancheUi {
     private var _paddingBetweenElements as Number = 0;
 
     private var _dangerLevelWidth = 4;
+    private var _hasExposedHeightZones as Boolean = false;
 
     private var _problemTextElement as AvalancheUi.ScrollingText?;
 
@@ -119,7 +120,7 @@ module AvalancheUi {
     public function initialize(settings as AvalancheProblemSettings) {
       var problem = settings[:problem];
 
-      var typeName = problem["typeName"];
+      var typeName = $.getProblemTypeName(problem["typeId"]);
       if (
         problem["triggerSensitivity"] &&
         problem["propagation"] &&
@@ -134,7 +135,14 @@ module AvalancheUi {
         _problemText = typeName;
       }
 
-      _exposedHeights = problem["exposedHeights"];
+      var exposedHeightZones = problem["exposedHeightZones"];
+      if (exposedHeightZones != null) {
+        _exposedHeights = [0, 0, $.exposedHeightZonesToFill(exposedHeightZones)];
+        _hasExposedHeightZones = true;
+      } else {
+        _exposedHeights = problem["exposedHeights"];
+        _hasExposedHeightZones = false;
+      }
       _validExpositions = problem["validExpositions"];
       _dangerLevel = problem["dangerLevel"];
 
@@ -216,25 +224,31 @@ module AvalancheUi {
       });
       _exposedHeightUiSize = _exposedHeightUi.getSize();
 
-      _exposedHeightTextUi = new AvalancheUi.ExposedHeightText({
-        :dc => dc,
-        :exposedHeight1 => _exposedHeights[0],
-        :exposedHeight2 => _exposedHeights[1],
-        :exposedHeightFill => _exposedHeights[2],
-        :dangerFillColor => _dangerFillColor,
-        :maxWidth => _elemMaxWidth,
-        :maxHeight => _elemMaxHeight,
-      });
-      _exposedHeightTextUiWidth = _exposedHeightTextUi.getWidth();
+      if (!_hasExposedHeightZones) {
+        _exposedHeightTextUi = new AvalancheUi.ExposedHeightText({
+          :dc => dc,
+          :exposedHeight1 => _exposedHeights[0],
+          :exposedHeight2 => _exposedHeights[1],
+          :exposedHeightFill => _exposedHeights[2],
+          :dangerFillColor => _dangerFillColor,
+          :maxWidth => _elemMaxWidth,
+          :maxHeight => _elemMaxHeight,
+        });
+        _exposedHeightTextUiWidth = _exposedHeightTextUi.getWidth();
+      }
 
-      var totalElementWidth =
-        _validExpositionsUiSize +
-        _exposedHeightUiSize +
-        _exposedHeightTextUiWidth +
-        _dangerLevelWidth;
+      var totalElementWidth = _hasExposedHeightZones
+        ? _validExpositionsUiSize + _exposedHeightUiSize
+        : _validExpositionsUiSize + _exposedHeightUiSize + _exposedHeightTextUiWidth + _dangerLevelWidth;
 
-      _paddingBetweenElements =
-        (_width - _paddingLeftRight * 2 - totalElementWidth) / 3;
+      if (_hasExposedHeightZones) {
+        // 2 elements: use a fixed gap and center the pair horizontally
+        _paddingBetweenElements = (_width * 0.1).toNumber();
+        _paddingLeftRight = (_width - totalElementWidth - _paddingBetweenElements) / 2;
+      } else {
+        _paddingBetweenElements =
+          (_width - _paddingLeftRight * 2 - totalElementWidth) / 3;
+      }
     }
 
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
@@ -263,10 +277,14 @@ module AvalancheUi {
       _exposedHeightUi.draw(dc, elemX0, elemY0 + exposedHeightUiShiftY);
 
       elemX0 += _exposedHeightUiSize + _paddingBetweenElements;
-      _exposedHeightTextUi.draw(dc, elemX0, elemY0);
+      if (_exposedHeightTextUi != null) {
+        _exposedHeightTextUi.draw(dc, elemX0, elemY0);
+      }
 
-      elemX0 += _exposedHeightTextUiWidth + _paddingBetweenElements;
-      drawDangerLevel(dc, elemX0, elemY0);
+      if (!_hasExposedHeightZones) {
+        elemX0 += _exposedHeightTextUiWidth + _paddingBetweenElements;
+        drawDangerLevel(dc, elemX0, elemY0);
+      }
     }
 
     private function drawDangerLevel(

@@ -12,6 +12,36 @@ const Debug = true;
 (:release)
 const Debug = false;
 
+// AvalancheProblemType IDs matching the backend enum
+const PROBLEM_TYPE_NOT_GIVEN = 0;
+const PROBLEM_TYPE_NEW_SNOW_LOOSE = 3;
+const PROBLEM_TYPE_WET_SNOW_LOOSE = 5;
+const PROBLEM_TYPE_NEW_SNOW_SLAB = 7;
+const PROBLEM_TYPE_WIND_DRIFTED_SNOW = 10;
+const PROBLEM_TYPE_PERSISTENT_WEAK_LAYER = 30;
+const PROBLEM_TYPE_WET_SNOW_SLAB = 45;
+const PROBLEM_TYPE_GLIDING_SNOW = 50;
+
+function getProblemTypeName(typeId as Number) as String {
+  if (typeId == PROBLEM_TYPE_NEW_SNOW_LOOSE) {
+    return $.getOrLoadResourceString("Nysnø (løssnøskred)", :ProblemTypeNewSnowLoose);
+  } else if (typeId == PROBLEM_TYPE_WET_SNOW_LOOSE) {
+    return $.getOrLoadResourceString("Våt snø (løssnøskred)", :ProblemTypeWetSnowLoose);
+  } else if (typeId == PROBLEM_TYPE_NEW_SNOW_SLAB) {
+    return $.getOrLoadResourceString("Nysnø (flakskred)", :ProblemTypeNewSnowSlab);
+  } else if (typeId == PROBLEM_TYPE_WIND_DRIFTED_SNOW) {
+    return $.getOrLoadResourceString("Fokksnø (flakskred)", :ProblemTypeWindDriftedSnow);
+  } else if (typeId == PROBLEM_TYPE_PERSISTENT_WEAK_LAYER) {
+    return $.getOrLoadResourceString("Vedvarende svakt lag (flakskred)", :ProblemTypePersistentWeakLayer);
+  } else if (typeId == PROBLEM_TYPE_WET_SNOW_SLAB) {
+    return $.getOrLoadResourceString("Våt snø (flakskred)", :ProblemTypeWetSnowSlab);
+  } else if (typeId == PROBLEM_TYPE_GLIDING_SNOW) {
+    return $.getOrLoadResourceString("Glideskred", :ProblemTypeGlidingSnow);
+  }
+
+  return $.getOrLoadResourceString("Ikke gitt", :NotGiven);
+}
+
 const DrawOutlines = false;
 
 (:glance)
@@ -19,7 +49,7 @@ const TIME_TO_SHOW_LOADING = Gregorian.SECONDS_PER_DAY;
 
 const TIME_TO_CONSIDER_DATA_STALE = Gregorian.SECONDS_PER_HOUR / 2;
 
-function getSortedRegionIds() as Array<String> {
+function getSortedNorwegianRegionIds() as Array<String> {
   return [
     "3003",
     "3006",
@@ -48,9 +78,22 @@ function getSortedRegionIds() as Array<String> {
   ];
 }
 
+(:background)
+function isSwedishRegion(regionId as String) as Boolean {
+  return regionId.substring(0, 3).equals("se_");
+}
+
+(:background)
+function getSwedishNumericRegionId(regionId as String) as String {
+  return regionId.substring(3, regionId.length());
+}
+
 (:glance)
 function getRegionName(regionId as String or Number) as String {
   if (regionId instanceof Lang.String) {
+    if ($.isSwedishRegion(regionId as String)) {
+      return $.getSwedishRegionName(regionId as String);
+    }
     regionId = regionId.toNumber();
   }
 
@@ -261,6 +304,25 @@ function drawOutline(
   dc.drawRectangle(x0, y0, width, height);
 }
 
+// Converts [aboveTreeline, atTreeline, belowTreeline] booleans to an exposedHeightFill value.
+// Uses the 3-piece triplet icon; each zone maps to top/mid/bottom triplet independently.
+// 3=above+below, 4=treeline only, 5=above only, 6=below only,
+// 7=above+treeline, 8=treeline+below, 9=all three
+function exposedHeightZonesToFill(zones as Array<Boolean>) as Number {
+  var above = zones[0];
+  var atLine = zones[1];
+  var below = zones[2];
+
+  if (above && !atLine && !below) { return 5; }
+  if (!above && !atLine && below) { return 6; }
+  if (!above && atLine && !below) { return 4; }
+  if (above && atLine && !below)  { return 7; }
+  if (!above && atLine && below)  { return 8; }
+  if (above && !atLine && below)  { return 3; }
+  if (above && atLine && below)   { return 9; }
+  return 0;
+}
+
 function min(a as Numeric, b as Numeric) {
   return a < b ? a : b;
 }
@@ -293,6 +355,10 @@ public function getDangerLevelToday(
   }
 
   return 0;
+}
+
+public function getDisplayDateForWarning(warning as DetailedAvalancheWarning) as Time.Moment {
+  return $.parseDate((warning["validity"] as Array)[1]).subtract(new Time.Duration(1));
 }
 
 public function getStartDateForDetailedWarnings() {

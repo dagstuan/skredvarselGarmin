@@ -26,6 +26,7 @@ public static class DetailedAvalancheWarningMapper
         MainText = varsomWarning.MainText,
         AvalancheProblems = (varsomWarning.AvalancheProblems ?? [])?.Select(problem => new AvalancheProblem()
         {
+            TypeId = (int)problem.AvalancheProblemTypeId,
             TypeName = problem.AvalancheProblemTypeName,
             ExposedHeights = [
                 problem.ExposedHeight1,
