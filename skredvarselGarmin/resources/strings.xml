@@ -21,7 +21,7 @@
 	<string id="FailedToSetupSubscription">Failed to setup subscription. Close the app and try again.</string>
 	<string id="NewWatch">Log in at skredvarsel.app on mobile, and add the watch with the code:</string>
 	<string id="UseWatchLanguage">Use watch language for user interface</string>
-	<string id="ForecastLanguage">Forecast language</string>
+	<string id="ForecastLanguage">Forecast language (for norwegian forecasts)</string>
 	<string id="AppVersionTitle">App version</string>
 	<string id="Norwegian">Norwegian</string>
 	<string id="English">English</string>
@@ -31,6 +31,8 @@
 	<string id="Updated">Updated</string>
 	<string id="UseLocation">Use watch location to show closest forecast.</string>
 	<string id="NotGiven">Ikke gitt</string>
+	<string id="TriggerSensitivityNotGiven">Not given</string>
+	<string id="PropagationNotGiven">Not given</string>
 	<string id="TriggerSensitivityVeryHardToTrigger">Very hard to trigger</string>
 	<string id="TriggerSensitivityHardToTrigger">Hard to trigger</string>
 	<string id="TriggerSensitivityEasyToTrigger">Easy to trigger</string>

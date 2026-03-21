@@ -1,0 +1,54 @@
+<strings>
+  <string id="AppName" scope="glance">Skredvarsel</string>
+	<string id="Loading" scope="glance">Laddar...</string>
+	<string id="WaitingForLocation" scope="glance">Väntar på position...</string>
+	<string id="Edit">Redigera</string>
+	<string id="Remove">Ta bort</string>
+	<string id="HitBackToExit">Tryck på tillbaka för att avsluta.</string>
+	<string id="RemoveAsFavorite">Ta bort favorit</string>
+	<string id="SetAsFavorite">Markera som favorit</string>
+	<string id="PickRegions">Välj regioner</string>
+	<string id="EditForecast">Redigera varsel</string>
+	<string id="NoRegionsSelected">Inga regioner valda.</string>
+	<string id="NoProblems">Inga lavinproblem.</string>
+	<string id="Today">I dag</string>
+	<string id="Yesterday">I går</string>
+	<string id="Tomorrow">I morgon</string>
+	<string id="Level">Lavinfara</string>
+	<string id="FailedToFetchTheForecast">Det gick inte att hämta prognosen. Försök igen senare.</string>
+	<string id="FailedToCheckForSubscription">Det gick inte att kontrollera abonnemanget. Försök att återansluta telefonen till klockan.</string>
+	<string id="SeenWatchInactiveSubscription">Gå till skredvarsel.app på mobilen för att registrera dig för appen.</string>
+	<string id="FailedToSetupSubscription">Det gick inte att konfigurera abonnemanget. Stäng appen och försök igen.</string>
+	<string id="NewWatch">Logga in på skredvarsel.app på mobilen och lägg till klockan med koden:</string>
+	<string id="UseWatchLanguage">Använd klockans språk för användargränssnittet</string>
+	<string id="ForecastLanguage">Prognosspråk (för norska prognoser)</string>
+	<string id="AppVersionTitle">Appversion</string>
+	<string id="Norwegian">Norska</string>
+	<string id="English">Engelska</string>
+	<string id="ComplicationName">Lavin</string>
+	<string id="ComplicationLongLabel">Lavin</string>
+	<string id="ComplicationShortLabel">Lav</string>
+	<string id="Updated">Uppdaterad</string>
+	<string id="UseLocation">Använd klockans position för att visa närmaste prognos.</string>
+	<string id="NotGiven">Inte angivet</string>
+	<string id="TriggerSensitivityNotGiven">Inte angivet</string>
+	<string id="PropagationNotGiven">Inte angivet</string>
+	<string id="TriggerSensitivityVeryHardToTrigger">Mycket svår att lösa ut</string>
+	<string id="TriggerSensitivityHardToTrigger">Svår att lösa ut</string>
+	<string id="TriggerSensitivityEasyToTrigger">Lätt att lösa ut</string>
+	<string id="TriggerSensitivityVeryEasyToTrigger">Mycket lätt att lösa ut</string>
+	<string id="TriggerSensitivityNaturallyTriggered">Naturligt utlöst</string>
+	<string id="PropagationFewSteepSlopes">Få branta sluttningar</string>
+	<string id="PropagationSomeSteepSlopes">Vissa branta sluttningar</string>
+	<string id="PropagationManySteepSlopes">Många branta sluttningar</string>
+	<string id="Size">Strl</string>
+	<string id="In">i</string>
+	<string id="ProblemTypeNewSnowLoose">Nysnö (lössnölavin)</string>
+	<string id="ProblemTypeWetSnowLoose">Våt snö (lössnölavin)</string>
+	<string id="ProblemTypeNewSnowSlab">Nysnö (flaklavin)</string>
+	<string id="ProblemTypeWindDriftedSnow">Vinddriven snö (flaklavin)</string>
+	<string id="ProblemTypePersistentWeakLayer">Beständigt svagt lager (flaklavin)</string>
+	<string id="ProblemTypeWetSnowSlab">Våt snö (flaklavin)</string>
+	<string id="ProblemTypeGlidingSnow">Glidlavin</string>
+	<string id="NoForecastText">Ingen prognostext tillgänglig.</string>
+</strings>
