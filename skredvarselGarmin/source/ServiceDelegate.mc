@@ -126,9 +126,15 @@ class ServiceDelegate extends System.ServiceDelegate {
     responseCode as Number,
     data as WebRequestCallbackData
   ) as Void {
-    if (responseCode == 200) {
+    if (responseCode == 200 || responseCode == -403) {
       if (self has :handleFullBackgroundReload) {
-        handleFullBackgroundReload(data);
+        if (responseCode == 200) {
+          handleFullBackgroundReload(data);
+        }
+      }
+
+      if ($.Debug && responseCode == -403) {
+        $.log("Background reload request returned -403. Continuing with next item.");
       }
 
       _currentData = null;
