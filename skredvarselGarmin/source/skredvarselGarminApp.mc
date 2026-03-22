@@ -119,7 +119,7 @@ class skredvarselGarminApp extends Application.AppBase {
     $.loadSimpleForecastForLocation(method(:onReceive), false);
   }
 
-  (:glance,:loadLocationForecastOnGlance)
+  (:glance)
   function fetchPositionIfStale() {
     if ($.getUseLocation()) {
       var location = $.getLocation();

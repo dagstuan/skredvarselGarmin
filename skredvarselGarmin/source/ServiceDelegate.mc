@@ -1,6 +1,9 @@
 import Toybox.Lang;
 import Toybox.System;
 
+using Toybox.Time;
+using Toybox.Time.Gregorian;
+
 // ForecastType: 0 = simple, 1 = detailed
 typedef ReloadDataQueueItem as [String, Numeric];
 
@@ -11,40 +14,6 @@ class ServiceDelegate extends System.ServiceDelegate {
 
   public function initialize() {
     ServiceDelegate.initialize();
-  }
-
-  private function queueLowMemoryBackgroundReload() as Void {
-    var favoriteRegionId = $.getFavoriteRegionId();
-
-    if (favoriteRegionId != null) {
-      _reloadQueue.add([favoriteRegionId, 0]);
-    }
-  }
-
-  (:fullBackgroundReload,:loadLocationForecastOnGlance)
-  protected function queueLocationForecastReload() as Void {
-    if ($.getUseLocation()) {
-      _reloadQueue.add(["location", 0]);
-    }
-  }
-
-  (:fullBackgroundReload)
-  protected function queueFullBackgroundReload() as Void {
-    if (self has :queueLocationForecastReload) {
-      queueLocationForecastReload();
-    }
-
-    var selectedRegionIds = $.getSelectedRegionIds();
-
-    for (var i = 0; i < selectedRegionIds.size(); i++) {
-      var regionId = selectedRegionIds[i];
-
-      _reloadQueue.add([regionId, 0]);
-
-      if (i < 2) {
-        _reloadQueue.add([regionId, 1]);
-      }
-    }
   }
 
   public function onTemporalEvent() as Void {
@@ -91,50 +60,57 @@ class ServiceDelegate extends System.ServiceDelegate {
       return;
     }
 
-    if (self has :queueFullBackgroundReload) {
-      queueFullBackgroundReload();
-    } else {
-      queueLowMemoryBackgroundReload();
-    }
-
-    reloadNextRegion();
-  }
-
-  (:fullBackgroundReload)
-  protected function handleFullBackgroundReload(
-    data as WebRequestCallbackData
-  ) as Void {
-    var regionId = _currentData[0];
-
-    if (regionId.equals("location")) {
-      var locationRegionId = (data as LocationAvalancheForecast)["regionId"].toString();
-
+    if ($.getUseLocation()) {
       if ($.Debug) {
         $.log(
-          Lang.format(
-            "Location forecast reloaded. Adding detailed forecast reload for region $1$.",
-            [locationRegionId]
-          )
+          "Queueing location forecast reload for background update and/or glance update."
         );
       }
 
-      _reloadQueue.add([locationRegionId, 1]);
+      _reloadQueue.add(["location", 0]);
+    } else if ($.Debug) {
+      $.log(
+        "Not queueing location forecast reload for background update and/or glance update since location is disabled."
+      );
     }
+
+    var selectedRegionIds = $.getSelectedRegionIds();
+
+    for (var i = 0; i < selectedRegionIds.size(); i++) {
+      var regionId = selectedRegionIds[i];
+
+      _reloadQueue.add([regionId, 0]);
+
+      if (i < 2) {
+        _reloadQueue.add([regionId, 1]);
+      }
+    }
+
+    reloadNextRegion();
   }
 
   public function onReloadedRegion(
     responseCode as Number,
     data as WebRequestCallbackData
   ) as Void {
-    if (responseCode == 200 || responseCode == -403) {
-      if (self has :handleFullBackgroundReload) {
-        if (responseCode == 200) {
-          handleFullBackgroundReload(data);
-        }
-      }
+    if (responseCode == -403) {
+      throw new SkredvarselGarminException("Background reload request returned -403 OOM.");
+    }
 
-      if ($.Debug && responseCode == -403) {
-        $.log("Background reload request returned -403. Continuing with next item.");
+    if (responseCode == 200) {
+      if (responseCode == 200 && _currentData[0].equals("location")) {
+        var locationRegionId = (data as LocationAvalancheForecast)["regionId"].toString();
+
+        if ($.Debug) {
+          $.log(
+            Lang.format(
+              "Location forecast reloaded. Adding detailed forecast reload for region $1$.",
+              [locationRegionId]
+            )
+          );
+        }
+
+        _reloadQueue.add([locationRegionId, 1]);
       }
 
       _currentData = null;
@@ -148,25 +124,22 @@ class ServiceDelegate extends System.ServiceDelegate {
     }
   }
 
-  (:fullBackgroundReload)
-  protected function reloadNextFullBackgroundRegion() as Void {
-    var regionId = _currentData[0];
-
-    if (regionId.equals("location")) {
-      $.loadSimpleForecastForLocation(method(:onReloadedRegion), false);
-    } else if (_currentData[1] == 1) {
-      $.loadDetailedWarningsForRegion(
-        regionId.toString(),
-        method(:onReloadedRegion),
-        false
-      );
-    } else {
-      $.loadSimpleForecastForRegion(
-        regionId.toString(),
-        method(:onReloadedRegion),
-        false
-      );
+  protected function loadDetailedWarningsForRegion() {
+    if ($.Debug) {
+      $.log(Lang.format("Loading detailed forecast for $1$", [_currentData[0]]));
     }
+
+    var language = $.getForecastLanguage();
+
+    var now = Time.now();
+    var start = $.getFormattedDateForApiCall($.subtractDays(now, 2));
+    var regionId = _currentData[0];
+    var end = $.getForecastEndDateForApiCall(now, regionId);
+
+    var path = $.getDetailedWarningsPathForRegion(regionId, language, start, end);
+    var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);
+
+    $.makeApiRequest(path, storageKey, method(:onReloadedRegion), false);
   }
 
   private function reloadNextRegion() as Boolean {
@@ -174,11 +147,15 @@ class ServiceDelegate extends System.ServiceDelegate {
       _currentData = _reloadQueue[0];
       _reloadQueue = _reloadQueue.slice(1, null);
 
-      if (self has :reloadNextFullBackgroundRegion) {
-        reloadNextFullBackgroundRegion();
+      var regionId = _currentData[0];
+
+      if (regionId.equals("location")) {
+        $.loadSimpleForecastForLocation(method(:onReloadedRegion), false);
+      } else if (_currentData[1] == 1) {
+        loadDetailedWarningsForRegion();
       } else {
         $.loadSimpleForecastForRegion(
-          _currentData[0].toString(),
+          regionId.toString(),
           method(:onReloadedRegion),
           false
         );

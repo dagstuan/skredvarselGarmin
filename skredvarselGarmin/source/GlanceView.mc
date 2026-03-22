@@ -138,7 +138,6 @@ class GlanceView extends Ui.GlanceView {
     }
   }
 
-  (:loadLocationForecastOnGlance)
   function loadLocationForecastDataForGlance() as Void {
     var data = $.getSimpleForecastForLocation();
 

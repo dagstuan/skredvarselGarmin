@@ -40,7 +40,6 @@ function getDetailedWarningsPathForRegion(
   );
 }
 
-(:background)
 function loadDetailedWarningsForRegion(
   regionId as String?,
   callback as WebRequestDelegateCallback,
@@ -61,3 +60,4 @@ function loadDetailedWarningsForRegion(
 
   $.makeApiRequest(path, storageKey, callback, useQueue);
 }
+
