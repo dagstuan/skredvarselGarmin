@@ -28,7 +28,10 @@ module AvalancheUi {
         return;
       }
 
-      dc.setAntiAlias(true);
+      if (dc has :setAntiAlias) {
+        dc.setAntiAlias(true);
+      }
+
       dc.setPenWidth(_indicatorWidth);
       var width = dc.getWidth();
       var height = dc.getHeight();

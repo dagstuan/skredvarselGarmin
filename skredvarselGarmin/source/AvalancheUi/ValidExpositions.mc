@@ -58,7 +58,10 @@ module AvalancheUi {
       }
 
       bufferedDc.setPenWidth(_radius);
-      bufferedDc.setAntiAlias(true);
+
+      if (bufferedDc has :setAntiAlias) {
+        bufferedDc.setAntiAlias(true);
+      }
 
       var anglePerChar = 360 / 8;
       var originalStartAngle = 90 + Math.ceil(anglePerChar / 2);

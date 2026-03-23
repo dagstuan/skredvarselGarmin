@@ -125,7 +125,10 @@ module AvalancheUi {
       });
       var bufferedDc = _bufferedBitmapText.getDc();
 
-      bufferedDc.setAntiAlias(true);
+      if (bufferedDc has :setAntiAlias) {
+        bufferedDc.setAntiAlias(true);
+      }
+
       bufferedDc.setColor(_color, _backgroundColor);
       bufferedDc.drawText(0, 0, _font, _text, Gfx.TEXT_JUSTIFY_LEFT);
     }
@@ -150,7 +153,10 @@ module AvalancheUi {
 
       var bufferedDc = _bufferedBitmapText.getDc();
 
-      bufferedDc.setAntiAlias(true);
+      if (bufferedDc has :setAntiAlias) {
+        bufferedDc.setAntiAlias(true);
+      }
+
       bufferedDc.setColor(_color, _backgroundColor);
 
       if (_textHeight <= _containerHeight) {
