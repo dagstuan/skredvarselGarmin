@@ -16,12 +16,12 @@ public static class LocationApiRouteBuilderExtensions
             string langKey,
             DateOnly from,
             DateOnly to,
-            bool includeSwedishAreas,
+            bool? includeSwedishAreas,
             IForecastAreaService forecastAreaService,
             IVarsomWarningService varsomWarningService,
             ILavinprognoserWarningService lavinprognoserWarningService) =>
         {
-            var (regionId, country) = forecastAreaService.GetClosestTypeAForecastAreaForLocation(latitude, longitude, includeSwedishAreas);
+            var (regionId, country) = forecastAreaService.GetClosestTypeAForecastAreaForLocation(latitude, longitude, includeSwedishAreas ?? false);
 
             IEnumerable<SimpleAvalancheWarning> simpleWarnings;
             if (country == Country.SE)
