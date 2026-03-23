@@ -37,7 +37,6 @@ public static class LavinprognoserApiRouteBuilderExtensions
 
         if (authOptions.UseWatchAuthorization)
         {
-            areasGet.RequireAuthorization("Garmin");
             simpleGet.RequireAuthorization("Garmin");
             detailedGet.RequireAuthorization("Garmin");
         }
