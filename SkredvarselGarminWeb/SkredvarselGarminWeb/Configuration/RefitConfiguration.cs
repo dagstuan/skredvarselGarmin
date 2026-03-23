@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 using Polly;
 using Polly.Extensions.Http;
 using Polly.Timeout;
@@ -14,6 +16,14 @@ namespace SkredvarselGarminWeb.Configuration;
 
 public static class RefitConfiguration
 {
+    private static readonly RefitSettings LavinprognoserRefitSettings = new()
+    {
+        ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+        })
+    };
+
     public static void AddRefitClients(this IServiceCollection serviceCollection, VippsOptions vippsOptions)
     {
         serviceCollection.AddSingleton<VippsAuthTokenStore>();
@@ -47,14 +57,14 @@ public static class RefitConfiguration
             .AddPolicyHandler(timeoutPolicy);
 
         serviceCollection.AddTransient<LavinprognoserLoggingHandler>();
-        serviceCollection.AddHttpClient(LavinprognoserApiClient.WfsHttpClientName, c =>
-            c.BaseAddress = new Uri("https://nvgis.naturvardsverket.se/geoserver/lavinprognoser/"))
+        serviceCollection.AddRefitClient<ILavinprognoserWfsApi>(LavinprognoserRefitSettings)
+            .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://nvgis.naturvardsverket.se/geoserver/lavinprognoser/"))
             .AddHttpMessageHandler<LavinprognoserLoggingHandler>()
             .AddPolicyHandler(retryPolicy)
             .AddPolicyHandler(timeoutPolicy);
 
-        serviceCollection.AddHttpClient(LavinprognoserApiClient.WebsiteHttpClientName, c =>
-            c.BaseAddress = new Uri("https://www.lavinprognoser.se/"))
+        serviceCollection.AddRefitClient<ILavinprognoserWebsiteApi>(LavinprognoserRefitSettings)
+            .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://www.lavinprognoser.se/"))
             .AddPolicyHandler(retryPolicy)
             .AddPolicyHandler(timeoutPolicy);
 

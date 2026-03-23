@@ -1,34 +1,25 @@
 using System.Text.Json;
 
+using Refit;
+
 using SkredvarselGarminWeb.LavinprognoserApi.Models;
 
 namespace SkredvarselGarminWeb.LavinprognoserApi;
 
 public partial class LavinprognoserApiClient(
-    IHttpClientFactory httpClientFactory) : ILavinprognoserApi
+    ILavinprognoserWfsApi wfsApi,
+    ILavinprognoserWebsiteApi websiteApi) : ILavinprognoserApi
 {
-    public const string WfsHttpClientName = "LavinprognoserWfs";
-    public const string WebsiteHttpClientName = "LavinprognoserWebsite";
-
-    private HttpClient WfsClient => httpClientFactory.CreateClient(WfsHttpClientName);
-    private HttpClient WebsiteClient => httpClientFactory.CreateClient(WebsiteHttpClientName);
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-    };
-
     public async Task<IEnumerable<WfsFeature<JsonElement>>> GetAllLocationPolygons()
     {
-        var url = BuildWfsUrl("lavinprognoser:location", null);
-        var collection = await TryGetJsonAsync<WfsFeatureCollection<JsonElement>>(WfsClient, url);
-        return collection?.Features ?? [];
+        var response = await GetAllWfsLocationPolygons("lavinprognoser:location", null);
+        return response.Content?.Features ?? [];
     }
 
     public async Task<IEnumerable<WfsFeature<LavinprognoserLocation>>> GetLocationPolygons()
     {
-        var url = BuildWfsUrl("lavinprognoser:location", null);
-        var collection = await TryGetJsonAsync<WfsFeatureCollection<LavinprognoserLocation>>(WfsClient, url);
-        return collection?.Features ?? [];
+        var response = await GetTypedWfsLocationPolygons("lavinprognoser:location", null);
+        return response.Content?.Features ?? [];
     }
 
     public async Task<IEnumerable<LavinprognoserDetailedWarning>> GetDetailedWarningsByArea(int areaId, DateOnly from, DateOnly to)
@@ -52,57 +43,55 @@ public partial class LavinprognoserApiClient(
 
     private async Task<LavinprognoserWebForecast?> FetchForecastForDate(string slug, DateOnly date)
     {
-        var response = await WebsiteClient.GetAsync(GetForecastPageUrl(slug, date));
+        var response = await GetForecastPage(slug, date);
         if (!response.IsSuccessStatusCode)
         {
             return default;
         }
 
-        var forecastResponse = await TryReadJsonAsync<LavinprognoserWebResponse>(response);
-        if (forecastResponse?.Content.Forecast != null)
+        if (response.Content?.Content.Forecast != null)
         {
-            return forecastResponse.Content.Forecast;
+            return response.Content.Content.Forecast;
         }
 
         var redirectedSlug = SwedishForecastAreaRegistry.TryGetSlugFromRequestUri(response.RequestMessage?.RequestUri);
         if (redirectedSlug == null || redirectedSlug == slug)
         {
-            return forecastResponse?.Content.Forecast;
+            return response.Content?.Content.Forecast;
         }
 
-        var redirectedResponse = await TryGetJsonAsync<LavinprognoserWebResponse>(WebsiteClient, GetForecastPageUrl(redirectedSlug, date));
-        return redirectedResponse?.Content.Forecast;
+        var redirectedResponse = await GetForecastPage(redirectedSlug, date);
+        return redirectedResponse.Content?.Content.Forecast;
     }
 
-    private static string GetForecastPageUrl(string fetchSlug, DateOnly date) =>
-        $"oversikt-alla-omraden/{fetchSlug}/index.json?forecast_date={date:yyyy-MM-dd}";
+    private Task<ApiResponse<WfsFeatureCollection<JsonElement>>> GetAllWfsLocationPolygons(string typeName, string? cqlFilter) =>
+        wfsApi.GetAllLocationPolygons(
+            service: "WFS",
+            version: "1.0.0",
+            request: "GetFeature",
+            typeName: typeName,
+            outputFormat: "application/json",
+            cqlFilter: cqlFilter);
 
-    private static async Task<T?> TryGetJsonAsync<T>(HttpClient httpClient, string url)
-    {
-        var response = await httpClient.GetAsync(url);
-        return !response.IsSuccessStatusCode ? default : await TryReadJsonAsync<T>(response);
-    }
+    private Task<ApiResponse<WfsFeatureCollection<LavinprognoserLocation>>> GetTypedWfsLocationPolygons(string typeName, string? cqlFilter) =>
+        wfsApi.GetLocationPolygons(
+            service: "WFS",
+            version: "1.0.0",
+            request: "GetFeature",
+            typeName: typeName,
+            outputFormat: "application/json",
+            cqlFilter: cqlFilter);
 
-    private static async Task<T?> TryReadJsonAsync<T>(HttpResponseMessage response)
+    private Task<ApiResponse<LavinprognoserWebResponse>> GetForecastPage(string slug, DateOnly date)
     {
-        if (!response.IsSuccessStatusCode)
+        var segments = slug.Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var forecastDate = date.ToString("yyyy-MM-dd");
+
+        return segments.Length switch
         {
-            return default;
-        }
-
-        var contentType = response.Content.Headers.ContentType?.MediaType;
-        return contentType == null || !contentType.Contains("json", StringComparison.OrdinalIgnoreCase)
-            ? default
-            : await response.Content.ReadFromJsonAsync<T>(JsonOptions);
-    }
-
-    private static string BuildWfsUrl(string typeName, string? cqlFilter)
-    {
-        var query = $"service=WFS&version=1.0.0&request=GetFeature&typeName={Uri.EscapeDataString(typeName)}&outputFormat=application/json";
-        if (cqlFilter != null)
-        {
-            query += $"&CQL_FILTER={Uri.EscapeDataString(cqlFilter)}";
-        }
-        return $"ows?{query}";
+            1 => websiteApi.GetForecastPage(segments[0], forecastDate),
+            2 => websiteApi.GetForecastPage(segments[0], segments[1], forecastDate),
+            _ => throw new InvalidOperationException($"Unsupported slug format: '{slug}'.")
+        };
     }
 }

@@ -1,12 +1,16 @@
 using System.Globalization;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 using AwesomeAssertions;
 
 using NSubstitute;
 
+using Refit;
+
 using SkredvarselGarminWeb.LavinprognoserApi;
+using SkredvarselGarminWeb.LavinprognoserApi.Models;
 
 namespace SkredvarselGarminWeb.Tests;
 
@@ -177,10 +181,12 @@ public class LavinprognoserApiClientTests
     [Fact]
     public async Task GetDetailedWarningsByArea_should_return_empty_when_area_id_is_not_in_hard_coded_registry()
     {
-        var httpClientFactory = Substitute.For<IHttpClientFactory>();
+        var wfsApi = Substitute.For<ILavinprognoserWfsApi>();
+        var websiteApi = Substitute.For<ILavinprognoserWebsiteApi>();
 
         var sut = new LavinprognoserApiClient(
-          httpClientFactory);
+          wfsApi,
+          websiteApi);
 
         var warnings = await sut.GetDetailedWarningsByArea(999, new DateOnly(2026, 3, 10), new DateOnly(2026, 3, 10));
 
@@ -191,37 +197,71 @@ public class LavinprognoserApiClientTests
         IReadOnlyDictionary<string, string> responses,
         IReadOnlyDictionary<string, HttpResponseMessage>? customResponses = null)
     {
-        var httpClientFactory = Substitute.For<IHttpClientFactory>();
-        var websiteClient = new HttpClient(new StubHttpMessageHandler(request =>
-        {
-            var pathAndQuery = request.RequestUri!.PathAndQuery.TrimStart('/');
-            if (customResponses != null && customResponses.TryGetValue(pathAndQuery, out var response))
-            {
-                if (response.RequestMessage == null)
-                {
-                    response.RequestMessage = request;
-                }
-                return response;
-            }
+        var wfsApi = Substitute.For<ILavinprognoserWfsApi>();
+        var websiteApi = Substitute.For<ILavinprognoserWebsiteApi>();
 
-            return responses.TryGetValue(pathAndQuery, out var json)
-                ? CreateJsonResponse(json)
-                : new HttpResponseMessage(HttpStatusCode.NotFound);
-        }))
-        {
-            BaseAddress = new Uri("https://www.lavinprognoser.se/")
-        };
+        websiteApi.GetForecastPage(Arg.Any<string>(), Arg.Any<string>())
+            .Returns(callInfo => CreateForecastResponse(
+                BuildForecastPath(callInfo.ArgAt<string>(0), null, callInfo.ArgAt<string>(1)),
+                responses,
+                customResponses));
 
-        httpClientFactory.CreateClient(LavinprognoserApiClient.WebsiteHttpClientName).Returns(websiteClient);
-        httpClientFactory.CreateClient(LavinprognoserApiClient.WfsHttpClientName).Returns(new HttpClient(new StubHttpMessageHandler(_ => new HttpResponseMessage(HttpStatusCode.NotFound))));
+        websiteApi.GetForecastPage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
+            .Returns(callInfo => CreateForecastResponse(
+                BuildForecastPath(callInfo.ArgAt<string>(0), callInfo.ArgAt<string>(1), callInfo.ArgAt<string>(2)),
+                responses,
+                customResponses));
+
+        wfsApi.GetAllLocationPolygons(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>())
+          .Returns(_ => CreateApiResponse<WfsFeatureCollection<JsonElement>>(new HttpResponseMessage(HttpStatusCode.NotFound), default));
+
+        wfsApi.GetLocationPolygons(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string?>())
+          .Returns(_ => CreateApiResponse<WfsFeatureCollection<LavinprognoserLocation>>(new HttpResponseMessage(HttpStatusCode.NotFound), default));
 
         return new LavinprognoserApiClient(
-          httpClientFactory);
+          wfsApi,
+          websiteApi);
     }
 
-    private static HttpResponseMessage CreateJsonResponse(string json) => new(HttpStatusCode.OK)
+    private static Task<ApiResponse<LavinprognoserWebResponse>> CreateForecastResponse(
+        string pathAndQuery,
+        IReadOnlyDictionary<string, string> responses,
+        IReadOnlyDictionary<string, HttpResponseMessage>? customResponses)
     {
-        Content = new StringContent(json, Encoding.UTF8, "application/json")
+        if (customResponses != null && customResponses.TryGetValue(pathAndQuery, out var customResponse))
+        {
+            if (customResponse.RequestMessage == null)
+            {
+                customResponse.RequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://www.lavinprognoser.se/{pathAndQuery}");
+            }
+
+            return CreateApiResponse<LavinprognoserWebResponse>(customResponse, default);
+        }
+
+        if (!responses.TryGetValue(pathAndQuery, out var json))
+        {
+            return CreateApiResponse<LavinprognoserWebResponse>(new HttpResponseMessage(HttpStatusCode.NotFound)
+            {
+                RequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://www.lavinprognoser.se/{pathAndQuery}")
+            }, default);
+        }
+
+        return CreateApiResponse(CreateJsonResponse(json, pathAndQuery), System.Text.Json.JsonSerializer.Deserialize<LavinprognoserWebResponse>(json));
+    }
+
+    private static Task<ApiResponse<T>> CreateApiResponse<T>(HttpResponseMessage response, T? content) =>
+      Task.FromResult(new ApiResponse<T>(response, content, new RefitSettings(), null));
+
+    private static string BuildForecastPath(string parentSlug, string? childSlug, string forecastDate)
+    {
+        var slug = childSlug == null ? parentSlug : $"{parentSlug}/{childSlug}";
+        return $"oversikt-alla-omraden/{slug}/index.json?forecast_date={forecastDate}";
+    }
+
+    private static HttpResponseMessage CreateJsonResponse(string json, string pathAndQuery) => new(HttpStatusCode.OK)
+    {
+        Content = new StringContent(json, Encoding.UTF8, "application/json"),
+        RequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://www.lavinprognoser.se/{pathAndQuery}")
     };
 
     private static HttpResponseMessage CreateRedirectResponse(string redirectedPath) => new(HttpStatusCode.OK)
@@ -232,10 +272,4 @@ public class LavinprognoserApiClientTests
 
     private static string FormatSwedishDate(DateTime value) =>
         value.ToString("dddd dd-MM-yyyy HH:mm", SwedishCulture);
-
-    private sealed class StubHttpMessageHandler(Func<HttpRequestMessage, HttpResponseMessage> responseFactory) : HttpMessageHandler
-    {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
-            Task.FromResult(responseFactory(request));
-    }
 }
