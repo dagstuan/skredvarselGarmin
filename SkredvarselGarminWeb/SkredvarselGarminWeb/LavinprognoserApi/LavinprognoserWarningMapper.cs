@@ -1,3 +1,5 @@
+using HtmlAgilityPack;
+
 using SkredvarselGarminWeb.LavinprognoserApi.Models;
 using SkredvarselGarminWeb.VarsomApi.Models;
 
@@ -83,11 +85,20 @@ public static partial class LavinprognoserWarningMapper
     private static string StripHtml(string? html)
     {
         if (string.IsNullOrWhiteSpace(html)) return string.Empty;
-        var stripped = StyleBlockRegex().Replace(html, " ");
-        stripped = HtmlCommentRegex().Replace(stripped, " ");
-        stripped = HtmlTagRegex().Replace(stripped, " ");
-        stripped = System.Net.WebUtility.HtmlDecode(stripped);
-        return WhitespaceRegex().Replace(stripped, " ").Trim();
+        var document = new HtmlDocument();
+        document.LoadHtml(html);
+
+        var removableNodes = document.DocumentNode.SelectNodes("//style|//script|//comment()");
+        if (removableNodes != null)
+        {
+            foreach (var node in removableNodes)
+            {
+                node.Remove();
+            }
+        }
+
+        var text = HtmlEntity.DeEntitize(document.DocumentNode.InnerText);
+        return WhitespaceRegex().Replace(text, " ").Trim();
     }
 
     // Swedish problem type ID → Varsom/EAWS AvalancheProblemType
@@ -134,18 +145,6 @@ public static partial class LavinprognoserWarningMapper
         _ when value != null => DestructiveSizeExt.Extreme,
         _ => DestructiveSizeExt.NotGiven,
     };
-
-    // Matches <style>...</style> blocks (including contents)
-    [System.Text.RegularExpressions.GeneratedRegex(@"<style[^>]*>[\s\S]*?</style>", System.Text.RegularExpressions.RegexOptions.IgnoreCase)]
-    private static partial System.Text.RegularExpressions.Regex StyleBlockRegex();
-
-    // Matches HTML comments including conditional comments <!--...-->
-    [System.Text.RegularExpressions.GeneratedRegex(@"<!--[\s\S]*?-->")]
-    private static partial System.Text.RegularExpressions.Regex HtmlCommentRegex();
-
-    // Matches any remaining HTML tag
-    [System.Text.RegularExpressions.GeneratedRegex(@"<[^>]+>")]
-    private static partial System.Text.RegularExpressions.Regex HtmlTagRegex();
 
     [System.Text.RegularExpressions.GeneratedRegex(@"\s+")]
     private static partial System.Text.RegularExpressions.Regex WhitespaceRegex();
