@@ -65,6 +65,9 @@
       <iq:product id="fr955"/>
       <iq:product id="fr965"/>
       <iq:product id="fr970"/>
+      <iq:product id="gpsmap66"/>
+      <iq:product id="gpsmap67"/>
+      <iq:product id="gpsmaph1"/>
       <iq:product id="instinct3amoled45mm"/>
       <iq:product id="instinct3amoled50mm"/>
       <iq:product id="marq2"/>
@@ -79,13 +82,18 @@
       <iq:product id="marqgolfer"/>
       <iq:product id="venu2"/>
       <iq:product id="venu2plus"/>
+      <iq:product id="venu2s"/>
       <iq:product id="venu3"/>
       <iq:product id="venu3s"/>
+      <iq:product id="venu441mm"/>
+      <iq:product id="venu445mm"/>
       <iq:product id="venux1"/>
       <iq:product id="vivoactive3m"/>
       <iq:product id="vivoactive3mlte"/>
       <iq:product id="vivoactive4"/>
       <iq:product id="vivoactive4s"/>
+      <iq:product id="vivoactive5"/>
+      <iq:product id="vivoactive6"/>
     </iq:products>
     <!--
             Use "Monkey C: Edit Permissions" from the Visual Studio Code command

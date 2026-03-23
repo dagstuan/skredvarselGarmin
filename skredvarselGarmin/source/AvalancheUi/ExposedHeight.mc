@@ -212,7 +212,10 @@ module AvalancheUi {
 
       bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
       bufferedDc.setPenWidth(1);
-      bufferedDc.setAntiAlias(true);
+
+      if (bufferedDc has :setAntiAlias) {
+        bufferedDc.setAntiAlias(true);
+      }
 
       if (exposedHeightFill == 1) {
         drawPoly(bufferedDc, getTopHalfPoints(), dangerFillColor, size);

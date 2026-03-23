@@ -89,6 +89,18 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
         );
       }
     }
+
+    if (self has :drawFocusIndicator) {
+      drawFocusIndicator(dc);
+    }
+  }
+
+  (:gpsmap)
+  function drawFocusIndicator(dc as Gfx.Dc) as Void {
+    if (isFocused()) {
+      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+      dc.drawRectangle(0, 0, dc.getWidth() - 1, dc.getHeight() - 1);
+    }
   }
 
   function drawTimeline(dc as Gfx.Dc) {

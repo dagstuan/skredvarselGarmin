@@ -82,7 +82,11 @@ public class DetailedForecastFooter {
         :height => _bufferedBitmapHeight,
       });
       var bufferedDc = _bufferedBitmap.getDc();
-      bufferedDc.setAntiAlias(true);
+
+      if (bufferedDc has :setAntiAlias) {
+        bufferedDc.setAntiAlias(true);
+      }
+
       bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
 
       bufferedDc.drawBitmap(

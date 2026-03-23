@@ -30,7 +30,10 @@ module AvalancheUi {
     }
 
     public function draw(dc as Gfx.Dc) {
-      dc.setAntiAlias(true);
+      if (dc has :setAntiAlias) {
+        dc.setAntiAlias(true);
+      }
+
       dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
       dc.setPenWidth(_penWidth);
 

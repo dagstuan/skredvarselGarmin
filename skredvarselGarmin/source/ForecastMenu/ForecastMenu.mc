@@ -99,18 +99,21 @@ public class ForecastMenu extends Ui.CustomMenu {
       bufferedDc.clear();
 
       var icon = Ui.loadResource($.getIconResourceForForecastMenu());
-
-      var iconX = width / 2 - $.getHalfWidthDangerLevelIcon();
-      bufferedDc.drawBitmap(iconX, 10, icon);
-
       var text = $.getOrLoadResourceString("Skredvarsel", :AppName);
-      bufferedDc.drawText(
-        width / 2,
-        height / 2 + 15,
-        _font,
-        text,
-        Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
-      );
+
+      if (self has :drawTitleIconInline) {
+        drawTitleIconInline(bufferedDc, icon, text, width, height);
+      } else {
+        var iconX = width / 2 - $.getHalfWidthDangerLevelIcon();
+        bufferedDc.drawBitmap(iconX, 10, icon);
+        bufferedDc.drawText(
+          width / 2,
+          height / 2 + 15,
+          _font,
+          text,
+          Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
+        );
+      }
 
       bufferedDc.setPenWidth(1);
       bufferedDc.setColor(Graphics.COLOR_DK_GRAY, Graphics.COLOR_TRANSPARENT);
@@ -127,6 +130,25 @@ public class ForecastMenu extends Ui.CustomMenu {
     }
 
     dc.drawBitmap(0, 0, _titleBitmap);
+  }
+
+  (:gpsmap)
+  protected function drawTitleIconInline(bufferedDc as Gfx.Dc, icon as Ui.BitmapResource, text as Ui.Resource, width as Number, height as Number) as Void {
+    var iconWidth = icon.getWidth();
+    var iconHeight = icon.getHeight();
+    var textWidth = bufferedDc.getTextWidthInPixels(text, _font);
+    var gap = 8;
+    var totalWidth = iconWidth + gap + textWidth;
+    var startX = (width - totalWidth) / 2;
+
+    bufferedDc.drawBitmap(startX, (height - iconHeight) / 2, icon);
+    bufferedDc.drawText(
+      startX + iconWidth + gap,
+      height / 2,
+      _font,
+      text,
+      Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER
+    );
   }
 
   public function drawFooter(dc as Gfx.Dc) {
