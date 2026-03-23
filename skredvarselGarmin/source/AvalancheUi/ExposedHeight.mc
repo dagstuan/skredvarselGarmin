@@ -220,19 +220,14 @@ module AvalancheUi {
       } else if (exposedHeightFill == 2) {
         drawPoly(bufferedDc, getTopHalfPoints(), nonDangerFillColor, size);
         drawPoly(bufferedDc, getBottomHalfPoints(), dangerFillColor, size);
-      } else if (exposedHeightFill == 3) {
-        drawPoly(bufferedDc, getTopTripletPoints(), dangerFillColor, size);
-        drawPoly(bufferedDc, getMidTripletPoints(), nonDangerFillColor, size);
-        drawPoly(bufferedDc, getBottomTripletPoints(), dangerFillColor, size);
-      } else if (exposedHeightFill == 4) {
-        drawPoly(bufferedDc, getTopTripletPoints(), nonDangerFillColor, size);
-        drawPoly(bufferedDc, getMidTripletPoints(), dangerFillColor, size);
-        drawPoly(
-          bufferedDc,
-          getBottomTripletPoints(),
-          nonDangerFillColor,
-          size
-        );
+      } else if (exposedHeightFill >= 3 && exposedHeightFill <= 9) {
+        // above=fill 3,5,7,9  mid=fill 3,4,7,8,9  below=fill 3,6,8,9  (see exposedHeightZonesToFill)
+        var above = exposedHeightFill == 3 || exposedHeightFill == 5 || exposedHeightFill == 7 || exposedHeightFill == 9;
+        var mid   = exposedHeightFill == 3 || exposedHeightFill == 4 || exposedHeightFill == 7 || exposedHeightFill == 8 || exposedHeightFill == 9;
+        var below = exposedHeightFill == 3 || exposedHeightFill == 6 || exposedHeightFill == 8 || exposedHeightFill == 9;
+        drawPoly(bufferedDc, getTopTripletPoints(),    above ? dangerFillColor : nonDangerFillColor, size);
+        drawPoly(bufferedDc, getMidTripletPoints(),    mid   ? dangerFillColor : nonDangerFillColor, size);
+        drawPoly(bufferedDc, getBottomTripletPoints(), below ? dangerFillColor : nonDangerFillColor, size);
       }
 
       return bufferedBitmap;

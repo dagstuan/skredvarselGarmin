@@ -2,6 +2,13 @@ import Toybox.Lang;
 
 using Toybox.Application.Storage;
 
+const MAX_SELECTED_REGIONS = 10;
+
+(:hasSelectedRegionLimitEnabled)
+function hasSelectedRegionLimitEnabled() as Boolean {
+  return true;
+}
+
 (:background)
 function getSimpleForecastCacheKeyForRegion(regionId as String) {
   return "simple_" + regionId;
@@ -38,7 +45,7 @@ function getFavoriteRegionId() as String? {
 
 (:background)
 function resetStorageCacheIfRequired() {
-  var STORAGE_VERSION = 3;
+  var STORAGE_VERSION = 4;
   var storageVersion = Storage.getValue("storageVersion") as Number?;
   var cachedForecastsLanguage =
     Storage.getValue("cachedStorageLanguage") as Number?;
@@ -117,10 +124,26 @@ public function removeSelectedRegion(regionId as String) {
 public function addSelectedRegion(regionId as String) {
   var selectedRegionIds = getSelectedRegionIds();
 
-  if (!arrayContainsString(selectedRegionIds, regionId)) {
-    var newRegionIds = selectedRegionIds.add(regionId);
-    setSelectedRegionIdsInStorage(newRegionIds);
+  if (arrayContainsString(selectedRegionIds, regionId)) {
+    return true;
   }
+
+  if (
+    $ has :hasSelectedRegionLimitEnabled &&
+    $.hasSelectedRegionLimitEnabled() &&
+    selectedRegionIds.size() >= MAX_SELECTED_REGIONS
+  ) {
+    return false;
+  }
+
+  var newRegionIds = selectedRegionIds.add(regionId);
+  setSelectedRegionIdsInStorage(newRegionIds);
+
+  return true;
+}
+
+public function getMaxSelectedRegions() as Number {
+  return MAX_SELECTED_REGIONS;
 }
 
 function removeForecastDataForRegion(regionId as String) {

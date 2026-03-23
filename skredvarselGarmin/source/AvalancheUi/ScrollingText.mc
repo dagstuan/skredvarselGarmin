@@ -135,8 +135,8 @@ module AvalancheUi {
         _text,
         _font,
         _containerWidth,
-        _containerHeight * 5,
-        false
+        _containerHeight * 10,
+        true
       );
 
       var fitTextDimensions = dc.getTextDimensions(fitText, _font);

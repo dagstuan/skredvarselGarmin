@@ -14,7 +14,7 @@ public static class ForecastAreaEndpointsRouteBuilderExtensions
     {
         app.MapGet("/api/forecastAreas/closestTypeAArea/{latitude}/{longitude}", (IForecastAreaService forecastAreaService, double latitude, double longitude) =>
         {
-            return forecastAreaService.GetClosestTypeAForecastAreaForLocation(latitude, longitude);
+            return forecastAreaService.GetClosestTypeAForecastAreaForLocation(latitude, longitude, true);
         });
 
         app.MapPost("/api/forecastAreas/replace", (IForecastAreaService forecastAreaService, IFormFile file) =>

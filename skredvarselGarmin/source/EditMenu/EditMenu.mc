@@ -10,7 +10,9 @@ public class EditMenu extends Ui.Menu2 {
 
     var selectedRegionIds = $.getSelectedRegionIds() as Array<String>;
 
-    var regions = $.getSortedRegionIds();
+    var regions = $.getSortedNorwegianRegionIds();
+    regions.addAll($.getSortedSwedishRegionIds());
+
     for (var i = 0; i < regions.size(); i++) {
       var regionId = regions[i];
       var regionName = $.getRegionName(regionId);

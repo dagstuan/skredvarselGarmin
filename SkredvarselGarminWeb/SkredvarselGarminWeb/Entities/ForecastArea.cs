@@ -11,6 +11,7 @@ public class ForecastArea
     public required int Id { get; set; }
     public required string Name { get; set; }
     public required char RegionType { get; set; }
+    public required string Country { get; set; }
 
     [Column(TypeName = "geometry (polygon, 25833)")]
     public required Polygon Area { get; set; }

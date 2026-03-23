@@ -58,6 +58,9 @@ builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IStripeService, StripeService>();
 builder.Services.AddTransient<INotificationService, NotificationService>();
 builder.Services.AddTransient<IForecastAreaService, ForecastAreaService>();
+builder.Services.AddTransient<ILavinprognoserWarningService, LavinprognoserWarningService>();
+builder.Services.AddTransient<IVarsomWarningService, VarsomWarningService>();
+builder.Services.AddTransient<ISwedishForecastAreaSeeder, SwedishForecastAreaSeeder>();
 builder.Services.AddTransient<IWatchService, WatchService>();
 
 builder.Services.SetupAuthentication(authOptions!, googleOptions!, facebookOptions!);
@@ -88,6 +91,9 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SkredvarselDbContext>();
     db.Database.Migrate();
+
+    var backgroundJobClient = scope.ServiceProvider.GetRequiredService<IBackgroundJobClient>();
+    backgroundJobClient.Enqueue<HangfireService>(s => s.SeedSwedishForecastAreas());
 }
 
 app.Use(next => context =>
@@ -109,6 +115,8 @@ app.MapHealthChecks("/healthz");
 app.MapUserEndpoints();
 app.MapAuthEndpoints();
 app.MapVarsomApiEndpoints(authOptions!);
+app.MapLavinprognoserApiEndpoints(authOptions!);
+app.MapLocationApiEndpoints(authOptions!);
 app.MapStripeSubscriptionEndpoints();
 app.MapVippsSubscriptionEndpoints();
 app.MapSubscriptionApiEndpoints();
@@ -130,6 +138,7 @@ using (var scope = app.Services.CreateScope())
     recurringJobManager.AddOrUpdate<HangfireService>("UpdateAgreementCharges", s => s.UpdateAgreementCharges(), "5 * * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("RemoveStaleWatchAddRequests", s => s.RemoveStaleWatchAddRequests(), "*/5 * * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("RemoveStaleUsers", s => s.RemoveStaleUsers(), "0 3 * * *");
+    recurringJobManager.AddOrUpdate<HangfireService>("SeedSwedishForecastAreas", s => s.SeedSwedishForecastAreas(), Cron.Daily);
     recurringJobManager.AddOrUpdate<HangfireService>("CreateNextChargeForAgreements", s => s.CreateNextChargeForAgreements(), Cron.Hourly);
 
     recurringJobManager.RemoveIfExists("CreateNextChargeForAgreement");

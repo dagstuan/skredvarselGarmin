@@ -1,7 +1,8 @@
 import Toybox.Lang;
 import Toybox.System;
 
-using Toybox.Application.Properties;
+using Toybox.Time;
+using Toybox.Time.Gregorian;
 
 // ForecastType: 0 = simple, 1 = detailed
 typedef ReloadDataQueueItem as [String, Numeric];
@@ -60,7 +61,17 @@ class ServiceDelegate extends System.ServiceDelegate {
     }
 
     if ($.getUseLocation()) {
+      if ($.Debug) {
+        $.log(
+          "Queueing location forecast reload for background update and/or glance update."
+        );
+      }
+
       _reloadQueue.add(["location", 0]);
+    } else if ($.Debug) {
+      $.log(
+        "Not queueing location forecast reload for background update and/or glance update since location is disabled."
+      );
     }
 
     var selectedRegionIds = $.getSelectedRegionIds();
@@ -82,9 +93,12 @@ class ServiceDelegate extends System.ServiceDelegate {
     responseCode as Number,
     data as WebRequestCallbackData
   ) as Void {
+    if (responseCode == -403) {
+      throw new SkredvarselGarminException("Background reload request returned -403 OOM.");
+    }
+
     if (responseCode == 200) {
-      var regionId = _currentData[0];
-      if (regionId.equals("location")) {
+      if (responseCode == 200 && _currentData[0].equals("location")) {
         var locationRegionId = (data as LocationAvalancheForecast)["regionId"].toString();
 
         if ($.Debug) {
@@ -110,6 +124,24 @@ class ServiceDelegate extends System.ServiceDelegate {
     }
   }
 
+  protected function loadDetailedWarningsForRegion() {
+    if ($.Debug) {
+      $.log(Lang.format("Loading detailed forecast for $1$", [_currentData[0]]));
+    }
+
+    var language = $.getForecastLanguage();
+
+    var now = Time.now();
+    var start = $.getFormattedDateForApiCall($.subtractDays(now, 2));
+    var regionId = _currentData[0];
+    var end = $.getForecastEndDateForApiCall(now, regionId);
+
+    var path = $.getDetailedWarningsPathForRegion(regionId, language, start, end);
+    var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);
+
+    $.makeApiRequest(path, storageKey, method(:onReloadedRegion), false);
+  }
+
   private function reloadNextRegion() as Boolean {
     if (_reloadQueue.size() > 0) {
       _currentData = _reloadQueue[0];
@@ -120,11 +152,7 @@ class ServiceDelegate extends System.ServiceDelegate {
       if (regionId.equals("location")) {
         $.loadSimpleForecastForLocation(method(:onReloadedRegion), false);
       } else if (_currentData[1] == 1) {
-        $.loadDetailedWarningsForRegion(
-          regionId.toString(),
-          method(:onReloadedRegion),
-          false
-        );
+        loadDetailedWarningsForRegion();
       } else {
         $.loadSimpleForecastForRegion(
           regionId.toString(),

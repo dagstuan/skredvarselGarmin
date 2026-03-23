@@ -150,7 +150,9 @@ class skredvarselGarminApp extends Application.AppBase {
 
     $.registerTemporalEvent();
 
-    fetchPositionIfStale();
+    if (self has :fetchPositionIfStale) {
+      fetchPositionIfStale();
+    }
     var initialViewAndDelegate = $.getInitialViewAndDelegate();
 
     if (initialViewAndDelegate[1] != null) {
@@ -163,7 +165,10 @@ class skredvarselGarminApp extends Application.AppBase {
   (:glance)
   public function getGlanceView() {
     $.registerTemporalEvent();
-    fetchPositionIfStale();
+
+    if (self has :fetchPositionIfStale) {
+      fetchPositionIfStale();
+    }
 
     return [new GlanceView()];
   }

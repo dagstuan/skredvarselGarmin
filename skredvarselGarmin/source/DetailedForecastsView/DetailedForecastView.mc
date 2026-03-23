@@ -70,6 +70,9 @@ class DetailedForecastView extends Ui.View {
   }
 
   public function onTick() as Void {
+    if (_header != null) {
+      _header.onTick();
+    }
     if (_footer != null) {
       _footer.onTick();
     }
@@ -101,6 +104,10 @@ class DetailedForecastView extends Ui.View {
     if (_updateTimer != null) {
       _updateTimer.stop();
       _updateTimer = null;
+    }
+    if (_header != null) {
+      _header.onHide();
+      _header = null;
     }
     if (_mainContent != null) {
       _mainContent.onHide();
@@ -166,8 +173,7 @@ class DetailedForecastView extends Ui.View {
   }
 
   private function setupHeader(dc as Gfx.Dc) {
-    var startValidity = (_warning["validity"] as Array)[0];
-    var validityDate = $.parseDate(startValidity);
+    var validityDate = $.getDisplayDateForWarning(_warning);
 
     _header = new DetailedForecastHeader({
       :dc => dc,
@@ -178,6 +184,7 @@ class DetailedForecastView extends Ui.View {
       :width => _width,
       :height => _headerHeight,
     });
+    _header.onShow();
   }
 
   private function setupDangerLevel(dc as Gfx.Dc) {

@@ -18,6 +18,17 @@ function getSimpleWarningsPathForRegion(
   formattedStartDate as String,
   formattedEndDate as String
 ) as String {
+  if ($.isSwedishRegion(regionId)) {
+    return (
+      "/se/simpleWarningsByRegion/" +
+      $.getSwedishNumericRegionId(regionId) +
+      "/" +
+      formattedStartDate +
+      "/" +
+      formattedEndDate
+    );
+  }
+
   return (
     "/simpleWarningsByRegion/" +
     regionId +
@@ -44,7 +55,7 @@ public function loadSimpleForecastForRegion(
 
   var now = Time.now();
   var start = $.getFormattedDateForApiCall($.subtractDays(now, 2));
-  var end = $.getFormattedDateForApiCall($.addDays(now, 2));
+  var end = $.getForecastEndDateForApiCall(now, regionId);
 
   var path = $.getSimpleWarningsPathForRegion(regionId, language, start, end);
   var storageKey = $.getSimpleForecastCacheKeyForRegion(regionId);
@@ -70,7 +81,8 @@ function getSimpleWarningsPathForLocation(
     "/" +
     formattedStartDate +
     "/" +
-    formattedEndDate
+    formattedEndDate +
+    "?includeSwedishAreas=true"
   );
 }
 

@@ -17,6 +17,7 @@ public class HangfireService(
     IBackgroundJobClient backgroundJobClient,
     IDateTimeNowProvider dateTimeNowProvider,
     IVippsAgreementService vippsAgreementService,
+    ISwedishForecastAreaSeeder swedishForecastAreaSeeder,
     ILogger<HangfireService> logger)
 {
     public async Task UpdatePendingAgreements()
@@ -105,6 +106,12 @@ public class HangfireService(
 
         dbContext.RemoveRange(staleWatchAddRequests);
         dbContext.SaveChanges();
+    }
+
+    [DisableConcurrentExecution(timeoutInSeconds: 300)]
+    public async Task SeedSwedishForecastAreas()
+    {
+        await swedishForecastAreaSeeder.SeedAsync();
     }
 
     public void RemoveStaleUsers()

@@ -68,7 +68,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
         if (index == -1) {
           // Still cant find the damn index.
           index = 0;
-          _visibleDate = $.parseDate(_detailedWarnings[index]["validity"][0]);
+          _visibleDate = $.getDisplayDateForWarning(_detailedWarnings[index]);
         }
       }
 
@@ -120,7 +120,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     if (newIndex == -1) {
       // Loop around
       newIndex = 0;
-      _visibleDate = $.parseDate(_detailedWarnings[newIndex]["validity"][0]);
+      _visibleDate = $.getDisplayDateForWarning(_detailedWarnings[newIndex]);
     } else {
       _visibleDate = newVisibleDate;
     }
@@ -140,7 +140,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     if (newIndex == -1) {
       // Loop around
       newIndex = _detailedWarnings.size() - 1;
-      _visibleDate = $.parseDate(_detailedWarnings[newIndex]["validity"][0]);
+      _visibleDate = $.getDisplayDateForWarning(_detailedWarnings[newIndex]);
     } else {
       _visibleDate = newVisibleDate;
     }

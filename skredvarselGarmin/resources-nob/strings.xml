@@ -21,7 +21,7 @@
 	<string id="FailedToSetupSubscription">Fikk ikke til å sette opp abonnement. Avslutt appen og prøv på nytt.</string>
 	<string id="NewWatch">Logg inn på skredvarsel.app på mobilen, og legg til klokken med koden:</string>
 	<string id="UseWatchLanguage">Bruk klokkespråk i brukergrensesnitt</string>
-	<string id="ForecastLanguage">Varselspråk</string>
+	<string id="ForecastLanguage">Varselspråk (for norske varsler)</string>
 	<string id="AppVersionTitle">Appversjon</string>
 	<string id="Norwegian">Norsk</string>
 	<string id="English">Engelsk</string>
@@ -30,7 +30,10 @@
 	<string id="ComplicationShortLabel">Ava</string>
 	<string id="Updated">Oppdatert</string>
 	<string id="UseLocation">Bruk klokkeposisjon for å hente nærmeste skredvarsel.</string>
+	<string id="MaxSelectedAreas">Du kan velge maksimalt $1$ regioner.</string>
 	<string id="NotGiven">Ikke gitt</string>
+	<string id="TriggerSensitivityNotGiven">Ikke gitt</string>
+	<string id="PropagationNotGiven">Ikke gitt</string>
 	<string id="TriggerSensitivityVeryHardToTrigger">Svært vanskelig å løse ut</string>
 	<string id="TriggerSensitivityHardToTrigger">Vanskelig å løse ut</string>
 	<string id="TriggerSensitivityEasyToTrigger">Lett å løse ut</string>
@@ -41,4 +44,12 @@
 	<string id="PropagationManySteepSlopes">Mange bratte heng</string>
 	<string id="Size">Str</string>
 	<string id="In">i</string>
+	<string id="ProblemTypeNewSnowLoose">Nysnø (løssnøskred)</string>
+	<string id="ProblemTypeWetSnowLoose">Våt snø (løssnøskred)</string>
+	<string id="ProblemTypeNewSnowSlab">Nysnø (flakskred)</string>
+	<string id="ProblemTypeWindDriftedSnow">Fokksnø (flakskred)</string>
+	<string id="ProblemTypePersistentWeakLayer">Vedvarende svakt lag (flakskred)</string>
+	<string id="ProblemTypeWetSnowSlab">Våt snø (flakskred)</string>
+	<string id="ProblemTypeGlidingSnow">Glideskred</string>
+	<string id="NoForecastText">Ingen varseltekst tilgjengelig.</string>
 </strings>
