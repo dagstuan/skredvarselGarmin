@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 using SkredvarselGarminWeb.Endpoints.Mappers;
 using SkredvarselGarminWeb.LavinprognoserApi;
 using SkredvarselGarminWeb.Options;
@@ -14,7 +12,7 @@ public static class LavinprognoserApiRouteBuilderExtensions
         var areasGet = app.MapGet("/api/se/areas", async (ILavinprognoserApi lavinprognoserApi) =>
         {
             var areas = await lavinprognoserApi.GetAllLocationPolygons();
-            return Results.Ok(areas.Select(MapAreaSummary));
+            return Results.Ok(areas.Select(area => area.ToSwedishAreaSummary()));
         });
 
         var simpleGet = app.MapGet("/api/se/simpleWarningsByRegion/{areaId}/{from}/{to}", async (
@@ -44,18 +42,4 @@ public static class LavinprognoserApiRouteBuilderExtensions
             detailedGet.RequireAuthorization("Garmin");
         }
     }
-
-    private static SwedishAreaSummary MapAreaSummary(LavinprognoserApi.Models.WfsFeature<JsonElement> area)
-    {
-        var properties = area.Properties;
-
-        return new SwedishAreaSummary(
-            Id: properties.GetProperty("id").GetInt32(),
-            Name: properties.GetProperty("label").GetString() ?? string.Empty,
-            ParentId: properties.TryGetProperty("parent_id", out var parentId) && parentId.ValueKind != JsonValueKind.Null
-                ? parentId.GetInt32()
-                : null);
-    }
-
-    private sealed record SwedishAreaSummary(int Id, string Name, int? ParentId);
 }
