@@ -13,7 +13,24 @@ public class EditMenuDelegate extends Ui.Menu2InputDelegate {
     var regionId = editMenuItem.getId() as String;
     var isEnabled = editMenuItem.isEnabled();
     if (isEnabled) {
-      $.addSelectedRegion(regionId);
+      var added = $.addSelectedRegion(regionId);
+      if (!added) {
+        editMenuItem.setEnabled(false);
+        Ui.requestUpdate();
+        Ui.pushView(
+          new TextAreaView(
+            Lang.format(
+              $.getOrLoadResourceString(
+                "You can select a maximum of $1$ areas.",
+                :MaxSelectedAreas
+              ),
+              [$.getMaxSelectedRegions()]
+            )
+          ),
+          new TextAreaViewDelegate(),
+          Ui.SLIDE_BLINK
+        );
+      }
     } else {
       $.removeSelectedRegion(regionId);
     }

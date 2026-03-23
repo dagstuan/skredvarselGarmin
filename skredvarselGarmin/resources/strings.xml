@@ -30,6 +30,7 @@
 	<string id="ComplicationShortLabel">Ava</string>
 	<string id="Updated">Updated</string>
 	<string id="UseLocation">Use watch location to show closest forecast.</string>
+	<string id="MaxSelectedAreas">You can select a maximum of $1$ areas.</string>
 	<string id="NotGiven">Ikke gitt</string>
 	<string id="TriggerSensitivityNotGiven">Not given</string>
 	<string id="PropagationNotGiven">Not given</string>

@@ -30,6 +30,7 @@
 	<string id="ComplicationShortLabel">Lav</string>
 	<string id="Updated">Uppdaterad</string>
 	<string id="UseLocation">Använd klockans position för att visa närmaste prognos.</string>
+	<string id="MaxSelectedAreas">Du kan välja maximalt $1$ regioner.</string>
 	<string id="NotGiven">Inte angivet</string>
 	<string id="TriggerSensitivityNotGiven">Inte angivet</string>
 	<string id="PropagationNotGiven">Inte angivet</string>

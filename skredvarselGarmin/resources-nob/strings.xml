@@ -30,6 +30,7 @@
 	<string id="ComplicationShortLabel">Ava</string>
 	<string id="Updated">Oppdatert</string>
 	<string id="UseLocation">Bruk klokkeposisjon for å hente nærmeste skredvarsel.</string>
+	<string id="MaxSelectedAreas">Du kan velge maksimalt $1$ regioner.</string>
 	<string id="NotGiven">Ikke gitt</string>
 	<string id="TriggerSensitivityNotGiven">Ikke gitt</string>
 	<string id="PropagationNotGiven">Ikke gitt</string>
