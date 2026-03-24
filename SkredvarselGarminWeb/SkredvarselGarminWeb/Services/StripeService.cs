@@ -12,13 +12,14 @@ namespace SkredvarselGarminWeb.Services;
 
 public class StripeService(
     SkredvarselDbContext dbContext,
+    IStripeClient stripeClient,
     INotificationService notificationService,
     IDateTimeNowProvider dateTimeNowProvider,
     ILogger<StripeService> logger) : IStripeService
 {
-    private static Subscription GetStripeSubscription(string subscriptionId)
+    private Subscription GetStripeSubscription(string subscriptionId)
     {
-        var service = new StripeSubscriptionService();
+        var service = new StripeSubscriptionService(stripeClient);
         return service.Get(subscriptionId);
     }
 
@@ -92,17 +93,35 @@ public class StripeService(
     {
         using var transaction = dbContext.Database.BeginTransaction();
 
-        var subscriptionInDb = dbContext.StripeSubscriptions.SingleOrDefault(s => s.SubscriptionId == subscription.Id);
+        var latestSubscription = GetStripeSubscription(subscription.Id);
+
+        logger.LogInformation(
+            "Processing stripe subscription update for {subscriptionId} with status {status} and cancelAtPeriodEnd {cancelAtPeriodEnd}.",
+            latestSubscription.Id,
+            latestSubscription.Status,
+            latestSubscription.CancelAtPeriodEnd);
+
+        var subscriptionInDb = dbContext.StripeSubscriptions.SingleOrDefault(s => s.SubscriptionId == latestSubscription.Id);
 
         if (subscriptionInDb == null)
         {
-            logger.LogInformation("Received subscription updated event for subscription not in local database.");
+            logger.LogInformation(
+                "Received subscription updated event for subscription {subscriptionId} not in local database.",
+                latestSubscription.Id);
             transaction.Commit();
             return;
         }
 
-        subscriptionInDb.Status = subscription.ToStripeSubscriptionStatus();
-        subscriptionInDb.NextChargeDate = DateOnly.FromDateTime(subscription.Items.Data[0].CurrentPeriodEnd);
+        var updatedStatus = latestSubscription.ToStripeSubscriptionStatus();
+
+        logger.LogInformation(
+            "Updating local stripe subscription {subscriptionId} from {previousStatus} to {updatedStatus}.",
+            latestSubscription.Id,
+            subscriptionInDb.Status,
+            updatedStatus);
+
+        subscriptionInDb.Status = updatedStatus;
+        subscriptionInDb.NextChargeDate = DateOnly.FromDateTime(latestSubscription.Items.Data[0].CurrentPeriodEnd);
 
         dbContext.SaveChanges();
 

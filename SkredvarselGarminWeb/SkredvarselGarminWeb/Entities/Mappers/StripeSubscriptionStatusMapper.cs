@@ -6,17 +6,28 @@ namespace SkredvarselGarminWeb.Entities.Mappers;
 
 public static class StripeSubscriptionStatusMapper
 {
-    public static StripeSubscriptionStatus ToStripeSubscriptionStatus(this Subscription subscription) => (subscription.Status, subscription.CancelAtPeriodEnd) switch
+    public static StripeSubscriptionStatus ToStripeSubscriptionStatus(this Subscription subscription)
     {
-        ("active", false) => StripeSubscriptionStatus.ACTIVE,
-        ("active", true) => StripeSubscriptionStatus.UNSUBSCRIBED,
-        ("canceled", false) => StripeSubscriptionStatus.CANCELED,
-        ("incomplete", false) => StripeSubscriptionStatus.INCOMPLETE,
-        ("incomplete_expired", false) => StripeSubscriptionStatus.INCOMPLETE_EXPIRED,
-        ("past_due", false) => StripeSubscriptionStatus.PAST_DUE,
-        ("paused", false) => StripeSubscriptionStatus.PAUSED,
-        ("trialing", false) => StripeSubscriptionStatus.TRIALING,
-        ("unpaid", false) => StripeSubscriptionStatus.UNPAID,
-        _ => throw new InvalidEnumArgumentException(nameof(subscription.Status))
-    };
+        if (subscription.Status == "canceled")
+        {
+            return StripeSubscriptionStatus.CANCELED;
+        }
+
+        if ((subscription.CancelAtPeriodEnd || subscription.CancelAt != null) && subscription.Status is "active" or "trialing")
+        {
+            return StripeSubscriptionStatus.UNSUBSCRIBED;
+        }
+
+        return subscription.Status switch
+        {
+            "active" => StripeSubscriptionStatus.ACTIVE,
+            "incomplete" => StripeSubscriptionStatus.INCOMPLETE,
+            "incomplete_expired" => StripeSubscriptionStatus.INCOMPLETE_EXPIRED,
+            "past_due" => StripeSubscriptionStatus.PAST_DUE,
+            "paused" => StripeSubscriptionStatus.PAUSED,
+            "trialing" => StripeSubscriptionStatus.TRIALING,
+            "unpaid" => StripeSubscriptionStatus.UNPAID,
+            _ => throw new InvalidEnumArgumentException(nameof(subscription.Status))
+        };
+    }
 }
