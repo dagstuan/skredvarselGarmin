@@ -1,15 +1,6 @@
-import {
-  Image,
-  Link,
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Spinner,
-  useBreakpointValue,
-  HStack,
-} from "@chakra-ui/react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { Button } from "./ui/button";
+import { Heading } from "./ui/heading";
 
 import avalancheIcon from "../assets/avalanche_icon.svg";
 import { useUser } from "../hooks/useUser";
@@ -18,82 +9,61 @@ export const Nav = () => {
   const { data: user, isLoading } = useUser();
   const navigate = useNavigate();
 
-  return (
-    <>
-      <Flex justifyContent={"center"} px={4} bg="gray.100">
-        <Flex
-          w={"100%"}
-          maxW={"100%"}
-          h={20}
-          alignItems={"center"}
-          justifyContent={"space-between"}
-        >
-          <Link style={{ textDecoration: "none" }} as={RouterLink} to="/">
-            <Flex gap={3} alignItems={"center"}>
-              <Image
-                h={10}
-                src={avalancheIcon}
-                htmlWidth={40}
-                htmlHeight={40}
-                alt="Avalanche icon"
-              />
-              <Heading
-                as="h1"
-                size={useBreakpointValue({
-                  base: "s",
-                  md: "lg",
-                })}
-                noOfLines={1}
-              >
-                {useBreakpointValue({
-                  base: "Skredvarsel",
-                  sm: "Skredvarsel for Garmin",
-                })}
-              </Heading>
-            </Flex>
-          </Link>
+  const isMobile = window.innerWidth < 640;
+  const heading = isMobile ? "Skredvarsel" : "Skredvarsel for Garmin";
+  const headingSize = window.innerWidth < 768 ? "sm" : "lg";
 
-          <Box>
-            {isLoading ? (
-              <Spinner />
-            ) : !user ? (
-              <>
+  return (
+    <div className="flex justify-center px-4 bg-gray-100">
+      <div className="w-full max-w-full h-20 flex items-center justify-between">
+        <RouterLink to="/" className="no-underline">
+          <div className="flex gap-3 items-center">
+            <img
+              className="h-10"
+              src={avalancheIcon}
+              width={40}
+              height={40}
+              alt="Avalanche icon"
+            />
+            <Heading as="h1" size={headingSize} className="line-clamp-1">
+              {heading}
+            </Heading>
+          </div>
+        </RouterLink>
+
+        <div>
+          {isLoading ? (
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+          ) : !user ? (
+            <Button
+              onClick={() => navigate("/login")}
+              variant="blue"
+              className="rounded"
+            >
+              Logg inn
+            </Button>
+          ) : (
+            <div className="flex gap-4">
+              {user.isAdmin && (
                 <Button
-                  onClick={() => navigate("/login")}
-                  color={"white"}
-                  colorScheme="blue"
-                  borderRadius={4}
+                  variant="blue"
+                  className="rounded"
+                  render={<RouterLink to="/admin" />}
                 >
-                  Logg inn
+                  Admin
                 </Button>
-              </>
-            ) : (
-              <HStack gap={4}>
-                {user.isAdmin && (
-                  <Button
-                    as={RouterLink}
-                    to="/admin"
-                    isLoading={isLoading}
-                    colorScheme="blue"
-                    borderRadius={4}
-                  >
-                    Admin
-                  </Button>
-                )}
-                <Button
-                  as={RouterLink}
-                  to="/account"
-                  isLoading={isLoading}
-                  colorScheme="blue"
-                  borderRadius={4}
-                >
-                  Min side
-                </Button>
-              </HStack>
-            )}
-          </Box>
-        </Flex>
-      </Flex>
-    </>
+              )}
+              <Button
+                variant="blue"
+                className="rounded"
+                render={<RouterLink to="/account" />}
+              >
+                Min side
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };

@@ -1,20 +1,5 @@
-import {
-  Accordion,
-  AccordionButton,
-  AccordionIcon,
-  AccordionItem,
-  AccordionPanel,
-  Box,
-  Flex,
-  Heading,
-  Link,
-  ListItem,
-  OrderedList,
-  useBreakpointValue,
-  Text,
-  UnorderedList,
-  Image,
-} from "@chakra-ui/react";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "./ui/accordion";
+import { Heading } from "./ui/heading";
 
 import problemsHelpImage from "../assets/problems_help.png?format=webp&as=meta:width;height;src&imagetools";
 import { useEffect, useRef } from "react";
@@ -34,295 +19,242 @@ export const FaqPage = () => {
         curr.scrollIntoView();
       }, 0);
     }
-  }, []);
+  }, [isVippsLoginHash]);
+
+  const isMobile = window.innerWidth < 640;
 
   return (
-    <Flex
-      m="0 auto"
-      flexDir="column"
-      maxW="4xl"
-      gap={10}
-      py={10}
-      px={useBreakpointValue({ base: 4, sm: 10 })}
-    >
-      <Heading as="h1" size="2xl" mb={4}>
+    <div className="m-auto flex flex-col max-w-4xl gap-10 py-10 px-4 sm:px-10">
+      <Heading as="h1" size="2xl" className="mb-4">
         Ofte stilte spørsmål
       </Heading>
 
       <Accordion
-        allowMultiple
-        defaultIndex={isVippsLoginHash ? [12] : undefined}
+        multiple
+        defaultValue={isVippsLoginHash ? ["12"] : undefined}
       >
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Hvordan installerer jeg appen?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
-            <OrderedList>
-              <ListItem>
+        <AccordionItem value="0">
+          <AccordionTrigger>
+            Hvordan installerer jeg appen?
+          </AccordionTrigger>
+          <AccordionContent>
+            <ol className="list-decimal list-inside space-y-2">
+              <li>
                 Gå til{" "}
-                <Link
+                <a
                   href="https://apps.garmin.com/en-US/apps/35174bf3-b1da-4391-9426-70bcb210c292"
                   target="_blank"
-                  color="blue.600"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
                 >
                   Connect IQ Store
-                </Link>{" "}
+                </a>{" "}
                 og last ned appen til klokken din. Det kan hende du må
                 installere "Connect IQ Store"-appen til mobiltelefonen din.
-              </ListItem>
-              <ListItem>
-                <Link
-                  color="blue.600"
+              </li>
+              <li>
+                <a
+                  className="text-blue-600 hover:underline"
                   href="https://skredvarsel.app/createVippsAgreement"
                 >
                   Kjøp et abonnement på appen
-                </Link>
+                </a>
                 .
-              </ListItem>
-              <ListItem>
+              </li>
+              <li>
                 Start appen på klokka. Da bør det dukke opp en kode du skal
                 skrive inn.
-              </ListItem>
-              <ListItem>
+              </li>
+              <li>
                 Gå til{" "}
-                <Link color="blue.600" href="https://skredvarsel.app/account">
+                <a className="text-blue-600 hover:underline" href="https://skredvarsel.app/account">
                   Min side
-                </Link>{" "}
+                </a>{" "}
                 og skriv inn koden som står på klokka.
-              </ListItem>
-              <ListItem>Tusen takk! 🎉</ListItem>
-            </OrderedList>
-          </AccordionPanel>
+              </li>
+              <li>Tusen takk! 🎉</li>
+            </ol>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Hva betyr symbolene i detaljvisningen?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
-            <Flex
-              gap={4}
-              flexDir={useBreakpointValue({ base: "column", sm: "row" })}
-            >
-              <Box flexBasis={useBreakpointValue({ base: "50%", sm: "40%" })}>
-                <Image
+        <AccordionItem value="1">
+          <AccordionTrigger>
+            Hva betyr symbolene i detaljvisningen?
+          </AccordionTrigger>
+          <AccordionContent>
+            <div className={`flex gap-4 ${isMobile ? 'flex-col' : 'flex-row'}`}>
+              <div className={isMobile ? 'w-full' : 'w-2/5'}>
+                <img
                   src={problemsHelpImage.src}
-                  htmlWidth={problemsHelpImage.width}
-                  htmlHeight={problemsHelpImage.height}
+                  width={problemsHelpImage.width}
+                  height={problemsHelpImage.height}
+                  alt="Problems help"
                 />
-              </Box>
-              <Box flexBasis={useBreakpointValue({ base: "50%" })}>
-                <Text mb={2}>Rødt markerer området som er mest utsatt.</Text>
-                <OrderedList mb={2}>
-                  <ListItem>
+              </div>
+              <div className="flex-1">
+                <p className="mb-2">Rødt markerer området som er mest utsatt.</p>
+                <ol className="list-decimal list-inside mb-2 space-y-1">
+                  <li>
                     Himmelretninger som er mest utsatt for skredproblemet.
-                  </ListItem>
-                  <ListItem>Hvor i fjellet skredproblemet er.</ListItem>
-                  <ListItem>
+                  </li>
+                  <li>Hvor i fjellet skredproblemet er.</li>
+                  <li>
                     Høyder over havet hvor skredproblemet finnes.
-                  </ListItem>
-                  <ListItem>Varslet faregrad for skredproblemet.</ListItem>
-                </OrderedList>
-                <Text>
+                  </li>
+                  <li>Varslet faregrad for skredproblemet.</li>
+                </ol>
+                <p>
                   NB! Det vil alltid være lokale variasjoner, og de røde
                   områdene angir mest utsatte steder. Det vil si at
                   skredproblemet også kan være tilstede i andre områder, men det
                   er forventa at det er i mindre omfang her.
-                </Text>
-              </Box>
-            </Flex>
-          </AccordionPanel>
+                </p>
+              </div>
+            </div>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Kan jeg betale med noe annet enn Vipps?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
+        <AccordionItem value="2">
+          <AccordionTrigger>
+            Kan jeg betale med noe annet enn Vipps?
+          </AccordionTrigger>
+          <AccordionContent>
             Garmin tilbyr ikke betaling av apper i sin egen "Connect IQ Store",
             så all betaling for apper til Garmin-klokker må tas utenfor. Derfor
             må jeg selv lage betalingsløsning, og har enn så lenge valgt å kun
             tilby Vipps som betalingsløsning.
-          </AccordionPanel>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Hvilke klokker virker appen på?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
-            <Text mb={4}>
+        <AccordionItem value="3">
+          <AccordionTrigger>
+            Hvilke klokker virker appen på?
+          </AccordionTrigger>
+          <AccordionContent>
+            <p className="mb-4">
               Appen virker på de fleste nyere Garmin-klokker som har
               fargeskjerm. En fullstendig oversikt kan sees på{" "}
-              <Link
+              <a
                 href="https://apps.garmin.com/en-US/apps/35174bf3-b1da-4391-9426-70bcb210c292"
                 target="_blank"
-                color="blue.600"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
               >
                 Connect IQ Store
-              </Link>
+              </a>
               . Hvis du har en klokke med støtte for musikk er det større
               sannsynlighet for at appen virker, siden de klokkene har mer
               minne.
-            </Text>
-            <Text mb={4}>
+            </p>
+            <p className="mb-4">
               Klokker hvor appen ikke virker på grunn av manglende minne:
-            </Text>
-            <UnorderedList>
-              <ListItem>Fenix 3</ListItem>
-              <ListItem>Fenix 5</ListItem>
-              <ListItem>Fenix 5S</ListItem>
-              <ListItem>Fenix 5X</ListItem>
-              <ListItem>Fenix 6 (non-pro)</ListItem>
-              <ListItem>Forerunner 635</ListItem>
-              <ListItem>Forerunner 935</ListItem>
-              <ListItem>Forerunner 235 (non-music)</ListItem>
-              <ListItem>Vivoactive 3</ListItem>
-            </UnorderedList>
-          </AccordionPanel>
+            </p>
+            <ul className="list-disc list-inside">
+              <li>Fenix 3</li>
+              <li>Fenix 5</li>
+              <li>Fenix 5S</li>
+              <li>Fenix 5X</li>
+              <li>Fenix 6 (non-pro)</li>
+              <li>Forerunner 635</li>
+              <li>Forerunner 935</li>
+              <li>Forerunner 235 (non-music)</li>
+              <li>Vivoactive 3</li>
+            </ul>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Hvorfor virker den ikke på {"["}klokken min{"]"}?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
+        <AccordionItem value="4">
+          <AccordionTrigger>
+            Hvorfor virker den ikke på [klokken min]?
+          </AccordionTrigger>
+          <AccordionContent>
             Jeg har forsøkt å få appen til å fungere på så mange klokker som
             mulig, og nye klokker legges til etterhvert. Hvis appen ikke
             fungerer på klokken din er det mest sannsynlig på grunn av
             minnebegrensninger i selve klokken. Garmin-klokker har veldig
             strenge krav til minnebruk for å opprettholde batteritiden på
             klokka.
-          </AccordionPanel>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Ting ser rart ut på skjermen min.
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
+        <AccordionItem value="5">
+          <AccordionTrigger>
+            Ting ser rart ut på skjermen min.
+          </AccordionTrigger>
+          <AccordionContent>
             Noen Garmin-klokker med veldig liten skjerm har ikke så mye plass
             til å vise informasjon. Jeg er enda ikke helt ferdig med å få appen
             til å virke perfekt med små skjermer. Jeg har heller ikke testet med
             alle fysiske klokker, siden jeg ikke eier alle sammen. Send meg
             gjerne et bilde av hvordan det ser ut på klokken din så jeg kan
             forbedre visningen.
-          </AccordionPanel>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Hvor kommer varslene fra?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
+        <AccordionItem value="6">
+          <AccordionTrigger>
+            Hvor kommer varslene fra?
+          </AccordionTrigger>
+          <AccordionContent>
             Varslene hentes fra Snøskredvarslingen i Norge og{" "}
-            <Link href="https://www.varsom.no" target="_blank" color="blue.600">
+            <a href="https://www.varsom.no" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
               www.varsom.no
-            </Link>{" "}
+            </a>{" "}
             via deres åpne API som ligger{" "}
-            <Link
+            <a
               href="http://api.nve.no/doc/snoeskredvarsel/"
               target="_blank"
-              color="blue.600"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
             >
               her
-            </Link>
+            </a>
             .
-          </AccordionPanel>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Hvor ofte blir varslene oppdatert?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
+        <AccordionItem value="7">
+          <AccordionTrigger>
+            Hvor ofte blir varslene oppdatert?
+          </AccordionTrigger>
+          <AccordionContent>
             Klokka henter varslene en gang per time og lagrer de på klokka. I
             tillegg hentes de på nytt når du åpner appen dersom de er gamle.
             Hvis varslene er eldre enn 24 timer gamle vil de ikke lenger vises
             frem.
-          </AccordionPanel>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Hvordan kommuniserer klokka med internett?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
+        <AccordionItem value="8">
+          <AccordionTrigger>
+            Hvordan kommuniserer klokka med internett?
+          </AccordionTrigger>
+          <AccordionContent>
             Klokka er avhengig av tilkobling til mobiltelefon med Bluetooth for
             å få hentet varsler fra internett, siden nesten ingen Garmin-klokker
             har direkte tilgang til internett selv. Hvis klokken din har
             utdaterte varsler eller slutter å vise varsler kan det være fordi
             klokka mangler tilkobling til mobil.
-          </AccordionPanel>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Kan klokka forstyrre skredsøkeren (sender/mottaker)?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
+        <AccordionItem value="9">
+          <AccordionTrigger>
+            Kan klokka forstyrre skredsøkeren (sender/mottaker)?
+          </AccordionTrigger>
+          <AccordionContent>
             Akkurat som at en mobiltelefon kan forstyrre en skredsøker, er det
             også en viss mulighet for at en smartklokke kan forårsake
             forstyrrelser. Derfor anbefales det å slå av kommunikasjon med
             mobiltelefonen mens man går tur. En{" "}
-            <Link
+            <a
               href="https://arc.lib.montana.edu/snow-science/objects/ISSW14_paper_P4.13.pdf"
-              color="blue.600"
+              className="text-blue-600 hover:underline"
               target="_blank"
+              rel="noopener noreferrer"
             >
               forskningsartikkel
-            </Link>{" "}
+            </a>{" "}
             fra 2014 publiserte en anbefaling om at man har klokka på motsatt
             hånd av den hånda man bruker en en skredsøker i søk-modus.
             <br />
@@ -333,113 +265,91 @@ export const FaqPage = () => {
             bruker under topptur slår av kommunikasjon med mobil. Se
             instruksjonsboka for klokken din for å finne ut hvordan du gjør det
             på din klokke.
-          </AccordionPanel>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Hvorfor er ikke appen gratis?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
+        <AccordionItem value="10">
+          <AccordionTrigger>
+            Hvorfor er ikke appen gratis?
+          </AccordionTrigger>
+          <AccordionContent>
             For å få appen til å fungere med Garmin må jeg kjøre en liten
             webtjeneste som behandler varslene fra Varsom og fjerner unødvendig
             informasjon for klokkevisning. Appen koster litt penger slik at jeg
             kan holde den webtjenesten gående uten å tape penger.
-          </AccordionPanel>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Kan jeg få se kildekoden til appen?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
+        <AccordionItem value="11">
+          <AccordionTrigger>
+            Kan jeg få se kildekoden til appen?
+          </AccordionTrigger>
+          <AccordionContent>
             Det kan du! Hele appen, inkludert denne websiden, ligger åpent
             tilgjengelig på{" "}
-            <Link
+            <a
               href="https://github.com/dagstuan/skredvarselGarmin/"
               target="_blank"
-              color="blue.600"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
             >
               Github
-            </Link>
+            </a>
             .
-          </AccordionPanel>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem ref={vippsLoginRef}>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Hvorfor kan jeg ikke logge inn med Vipps lenger?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
+        <AccordionItem value="12" ref={vippsLoginRef}>
+          <AccordionTrigger>
+            Hvorfor kan jeg ikke logge inn med Vipps lenger?
+          </AccordionTrigger>
+          <AccordionContent>
             Vipps har endret vilkårene sine, og "Logg inn med Vipps" er nå et{" "}
-            <Link href="https://vippsmobilepay.com/no/priser/logg-inn">
+            <a href="https://vippsmobilepay.com/no/priser/logg-inn" className="hover:underline">
               betalt produkt.
-            </Link>{" "}
+            </a>{" "}
             Jeg syns prisen Vipps har valgt å ta er urimelig høy, og har derfor
             erstattet "Logg inn med Vipps" med innlogging med e-post. Hvis du
             har problemer med å logge inn, ikke nøl med å ta kontakt!
-          </AccordionPanel>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Jeg fant en feil!
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
+        <AccordionItem value="13">
+          <AccordionTrigger>
+            Jeg fant en feil!
+          </AccordionTrigger>
+          <AccordionContent>
             Ta kontakt, så skal jeg prøve å fikse det.
-          </AccordionPanel>
+          </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem>
-          <h2>
-            <AccordionButton>
-              <Box as="span" flex="1" textAlign="left">
-                Jeg lurer fortsatt på noe. Hvordan kan jeg ta kontakt?
-              </Box>
-              <AccordionIcon />
-            </AccordionButton>
-          </h2>
-          <AccordionPanel pb={4}>
+        <AccordionItem value="14">
+          <AccordionTrigger>
+            Jeg lurer fortsatt på noe. Hvordan kan jeg ta kontakt?
+          </AccordionTrigger>
+          <AccordionContent>
             Ta kontakt på{" "}
-            <Link
+            <a
               href="https://www.instagram.com/dagstuan/"
               target="_blank"
-              color="blue.600"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
             >
               Instagram
-            </Link>{" "}
+            </a>{" "}
             eller{" "}
-            <Link
+            <a
               href="mailto:d.stuan@gmail.com"
               target="_blank"
-              color="blue.600"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
             >
               mail
-            </Link>{" "}
+            </a>{" "}
             hvis du fortsatt lurer på noe.
-          </AccordionPanel>
+          </AccordionContent>
         </AccordionItem>
       </Accordion>
-    </Flex>
+    </div>
   );
 };

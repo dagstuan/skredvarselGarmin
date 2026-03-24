@@ -1,10 +1,14 @@
-import { defineConfig, splitVendorChunkPlugin } from "vite";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import { imagetools } from "vite-imagetools";
 import https from "https";
 import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Get base folder for certificates.
 const baseFolder =
@@ -50,19 +54,16 @@ export default defineConfig(async () => {
   }
 
   return {
-    plugins: [react(), imagetools(), splitVendorChunkPlugin()],
+    plugins: [react(), tailwindcss(), imagetools()],
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    },
     build: {
       rollupOptions: {
         output: {
           manualChunks(id: string) {
-            // creating a chunk to @open-ish deps. Reducing the vendor chunk size
-            if (
-              id.includes("@chakra-ui") ||
-              id.includes("@emotion") ||
-              id.includes("framer-motion")
-            ) {
-              return "@chakra-ui";
-            }
             // creating a chunk to react routes deps. Reducing the vendor chunk size
             if (
               id.includes("react-router-dom") ||

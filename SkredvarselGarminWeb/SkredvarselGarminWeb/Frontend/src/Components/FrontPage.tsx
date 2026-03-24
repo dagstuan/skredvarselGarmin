@@ -1,18 +1,5 @@
-import {
-  Flex,
-  VStack,
-  useBreakpointValue,
-  Stack,
-  Text,
-  Wrap,
-  WrapItem,
-  SlideFade,
-  Box,
-  Button,
-  Icon,
-  HStack,
-} from "@chakra-ui/react";
 import { Features } from "./Features";
+import { Button } from "./ui/button";
 
 import bg from "../assets/bg.jpg?format=webp&as=source&imagetools";
 import { CiqStoreButton } from "./CiqStoreButton";
@@ -29,6 +16,7 @@ import { VippsIcon } from "./Icons/VippsIcon";
 import { useUser } from "../hooks/useUser";
 import { useCallback } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
+import { cn } from "../lib/utils";
 
 export const FrontPage = () => {
   const scrollPosition = useScrollPosition();
@@ -45,126 +33,71 @@ export const FrontPage = () => {
 
   return (
     <>
-      <Flex
-        w="full"
-        h="calc(100vh - var(--chakra-sizes-20))"
-        flexDir="column"
-        backgroundImage={bg}
-        backgroundSize="cover"
-        backgroundPosition="center center"
-      >
-        <Box
-          w="full"
-          h="calc(100vh - var(--chakra-sizes-20))"
-          bgGradient="linear(to-r, blackAlpha.500, transparent)"
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-        >
-          <VStack
-            flex="1 1 100%"
-            justifyContent="center"
-            px={useBreakpointValue({ base: 4, md: 8 })}
-          >
-            <VStack>
-              <Stack
-                boxShadow="0px 0px 100px 100px var(--chakra-colors-blackAlpha-200);"
-                bg="blackAlpha.200"
-                rounded="2xl"
-                maxW="4xl"
-                align="flex-start"
-                spacing={6}
-              >
-                <Text
-                  color="white"
-                  fontWeight={700}
-                  lineHeight={1.2}
-                  fontSize={useBreakpointValue({ base: "3xl", md: "4xl" })}
+      <div className="relative w-full h-[calc(100vh-5rem)] flex flex-col items-center">
+        <img
+          src={bg}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-linear-to-r from-black/35 to-transparent" />
+        <div className="relative z-10 flex-1 flex items-center justify-center px-4 md:px-8">
+          <div className="flex flex-col gap-6 max-w-4xl items-start p-8 rounded-2xl">
+            <p className="text-white font-bold leading-tight text-3xl md:text-4xl">
+              Skredvarsel for Garmin-klokker.
+              <br />
+              Oppdatert og tilgjengelig mens du er på tur.
+            </p>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-white text-3xl font-extrabold">30 kr</span>
+              <span className="text-xl text-white">/år</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <div>
+                <CiqStoreButton size="lg" />
+              </div>
+              <div className="flex flex-col gap-1 items-start">
+                <Button
+                  variant="green"
+                  size="lg"
+                  onClick={onBuyClick}
                 >
-                  Skredvarsel for Garmin-klokker.
-                  <br />
-                  Oppdatert og tilgjengelig mens du er på tur.
-                </Text>
-                <Stack direction="row" align="center" justify="center">
-                  <Text color="white" fontSize="3xl" fontWeight={800}>
-                    30 kr
-                  </Text>
-                  <Text fontSize="xl" color="white">
-                    /år
-                  </Text>
-                </Stack>
-                <Wrap spacing={2}>
-                  <WrapItem>
-                    <CiqStoreButton size="lg" />
-                  </WrapItem>
-                  <WrapItem>
-                    <VStack gap={1} align="flex-start">
-                      <Button
-                        leftIcon={<Icon as={FaSkiingNordic} />}
-                        rightIcon={<Icon as={FaSkiing} />}
-                        onClick={onBuyClick}
-                        size="lg"
-                        colorScheme="green"
-                      >
-                        Kjøp abonnement
-                      </Button>
-                      <HStack alignItems="center">
-                        <VippsIcon
-                          title="Vipps"
-                          color="white"
-                          w={14}
-                          h="100%"
-                        />
-                        <Icon
-                          title="Kort"
-                          color="white"
-                          as={FaCreditCard}
-                          w={7}
-                          h="100%"
-                        />
-                        <Icon
-                          title="Apple Pay"
-                          color="white"
-                          as={FaApplePay}
-                          w={9}
-                          h="100%"
-                        />
-                        <Icon
-                          title="Google Pay"
-                          color="white"
-                          as={FaGooglePay}
-                          w={9}
-                          h="100%"
-                        />
-                      </HStack>
-                    </VStack>
-                  </WrapItem>
-                </Wrap>
-              </Stack>
-            </VStack>
-          </VStack>
-          <SlideFade
-            reverse={false}
-            offsetY="20px"
-            in={scrollPosition === 0}
-            transition={{
-              exit: {
-                duration: 0.5,
-              },
-              enter: {
-                duration: 0.75,
-              },
-            }}
-          >
-            <ChevronIcon
-              color="white"
-              opacity={0.6}
-              mb={5}
-              boxSize={useBreakpointValue({ base: 50, md: 100 })}
-            />
-          </SlideFade>
-        </Box>
-      </Flex>
+                  <FaSkiingNordic className="w-5 h-5" />
+                  <span>Kjøp abonnement</span>
+                  <FaSkiing className="w-5 h-5" />
+                </Button>
+                <div className="flex items-center gap-2">
+                  <VippsIcon
+                    title="Vipps"
+                    className="w-14 h-auto text-white"
+                  />
+                  <FaCreditCard
+                    title="Kort"
+                    className="w-7 h-auto text-white"
+                  />
+                  <FaApplePay
+                    title="Apple Pay"
+                    className="w-9 h-auto text-white"
+                  />
+                  <FaGooglePay
+                    title="Google Pay"
+                    className="w-9 h-auto text-white"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className={cn(
+            "relative z-10 transition-all duration-500",
+            scrollPosition === 0
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-5"
+          )}
+        >
+          <ChevronIcon className="text-white opacity-60 mb-5 w-12.5 h-12.5 md:w-25 md:h-25" />
+        </div>
+      </div>
       <Features />
       <Outlet />
     </>

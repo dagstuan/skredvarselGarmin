@@ -1,15 +1,9 @@
 import {
-  Box,
-  Icon,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+  Dialog,
+  DialogPopup,
+  DialogTitle,
+  DialogClose,
+} from "../ui/dialog";
 import { useNavigateOnClose } from "../../hooks/useNavigateOnClose";
 import { LoginContent } from "./LoginContent";
 
@@ -35,14 +29,31 @@ export const LoginModal = (props: LoginModalProps) => {
   } = useEmailLogin(null);
 
   return (
-    <Modal isOpen={!isClosing} onClose={onClose} isCentered>
-      <ModalOverlay />
-      <ModalContent alignItems="center">
-        <ModalHeader>
-          {!showSentEmail ? "Logg inn" : "E-post sendt"}
-        </ModalHeader>
-        <ModalCloseButton />
-        <ModalBody w="100%" pb={9} maxW="sm">
+    <Dialog open={!isClosing} onOpenChange={(open) => !open && onClose()}>
+      <DialogPopup className="flex flex-col items-center">
+        <div className="flex items-center justify-between w-full pb-4">
+          <DialogTitle>
+            {!showSentEmail ? "Logg inn" : "E-post sendt"}
+          </DialogTitle>
+          <DialogClose className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+            <span className="sr-only">Close</span>
+          </DialogClose>
+        </div>
+        <div className="w-full pb-9 max-w-sm">
           {!showSentEmail && (
             <LoginContent
               loginText={loginText}
@@ -54,23 +65,15 @@ export const LoginModal = (props: LoginModalProps) => {
             />
           )}
           {showSentEmail && (
-            <VStack gap={6}>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                bg="green.500"
-                color="white"
-                borderRadius="50%"
-                boxSize={28}
-              >
-                <Icon w={16} h={16} as={FaPaperPlane} />
-              </Box>
-              <Text>Sjekk innboksen din for en innloggingslenke.</Text>
-            </VStack>
+            <div className="flex flex-col gap-6 items-center">
+              <div className="flex items-center justify-center bg-green-500 text-white rounded-full w-28 h-28">
+                <FaPaperPlane className="w-16 h-16" />
+              </div>
+              <p>Sjekk innboksen din for en innloggingslenke.</p>
+            </div>
           )}
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+        </div>
+      </DialogPopup>
+    </Dialog>
   );
 };

@@ -1,39 +1,34 @@
-import { Button, ButtonProps, HStack, Icon, VStack } from "@chakra-ui/react";
-import {
-  FaStripe,
-  FaCcVisa,
-  FaCcMastercard,
-  FaApplePay,
-  FaGooglePay,
-  FaCreditCard,
-} from "react-icons/fa";
+import { buttonVariants } from "../ui/button";
+import { FaStripe, FaCreditCard, FaApplePay, FaGooglePay } from "react-icons/fa";
+import { cn } from "../../lib/utils";
+import { VariantProps } from "class-variance-authority";
 
 type StripeButtonProps = {
   text?: string;
   link?: string;
-} & Pick<ButtonProps, "size">;
+  size?: VariantProps<typeof buttonVariants>["size"];
+};
 
 export const StripeButton = (props: StripeButtonProps) => {
-  const { text = "Kjøp abonnement med", link = "/createStripeSubscription" } =
-    props;
+  const { text = "Kjøp abonnement med", link = "/createStripeSubscription", size } = props;
 
   return (
-    <VStack gap={0} alignItems="flex-start">
-      <Button
-        as="a"
+    <div className="flex flex-col gap-0 items-start">
+      <a
         href={link}
-        borderRadius={4}
-        colorScheme="purple"
-        size={props.size ?? "md"}
-        rightIcon={<Icon as={FaStripe} h={10} w={12} />}
+        className={cn(
+          buttonVariants({ variant: "default", size }),
+          "rounded bg-purple-600 hover:bg-purple-700"
+        )}
       >
         {text}
-      </Button>
-      <HStack alignItems="center">
-        <Icon title="Kort" as={FaCreditCard} w={6} h="100%" />
-        <Icon title="Apple pay" as={FaApplePay} w={9} h="100%" />
-        <Icon title="Google pay" as={FaGooglePay} w={9} h="100%" />
-      </HStack>
-    </VStack>
+        <FaStripe className="h-10 w-12 ml-2" />
+      </a>
+      <div className="flex items-center gap-1">
+        <FaCreditCard title="Kort" className="w-6 h-auto" />
+        <FaApplePay title="Apple pay" className="w-9 h-auto" />
+        <FaGooglePay title="Google pay" className="w-9 h-auto" />
+      </div>
+    </div>
   );
 };

@@ -1,13 +1,6 @@
-import {
-  Box,
-  Center,
-  Heading,
-  Text,
-  Stack,
-  useColorModeValue,
-  Image,
-  useBreakpointValue,
-} from "@chakra-ui/react";
+import { Card, CardContent } from "./ui/card";
+import { Heading } from "./ui/heading";
+import { cn } from "../lib/utils";
 
 type FeatureProps = {
   imgUrl: string;
@@ -25,36 +18,22 @@ export const Feature = ({
   text,
 }: FeatureProps) => {
   return (
-    <Center py={6}>
-      <Box
-        maxW={useBreakpointValue({ base: "100%", sm: "3xs" })}
-        bg={useColorModeValue("white", "gray.900")}
-        boxShadow={"2xl"}
-        rounded={"md"}
-        p={6}
-        overflow={"hidden"}
-      >
-        <Box bg={"gray.100"} mt={-6} mx={-6} mb={6} pos={"relative"}>
-          <Image
-            w={"full"}
-            objectFit={"cover"}
-            htmlWidth={imgWidth}
-            htmlHeight={imgHeight}
-            src={imgUrl}
-            alt={text}
-          />
-        </Box>
-        <Stack>
-          <Heading
-            color={useColorModeValue("gray.700", "white")}
-            size={"md"}
-            fontFamily={"body"}
-          >
-            {heading}
-          </Heading>
-          <Text color={"gray.600"}>{text}</Text>
-        </Stack>
-      </Box>
-    </Center>
+    <Card className="bg-white shadow-2xl rounded-md overflow-hidden sm:max-w-56">
+      <div className="bg-slate-100">
+        <img
+          className="w-full object-cover"
+          width={imgWidth}
+          height={imgHeight}
+          src={imgUrl}
+          alt={text}
+        />
+      </div>
+      <CardContent className="space-y-2 p-6">
+        <Heading as="h3" size="md" className="text-gray-700">
+          {heading}
+        </Heading>
+        <p className="text-gray-600">{text}</p>
+      </CardContent>
+    </Card>
   );
 };

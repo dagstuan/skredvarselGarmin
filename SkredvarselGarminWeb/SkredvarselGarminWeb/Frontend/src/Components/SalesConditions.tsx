@@ -1,65 +1,65 @@
-import { Box, Flex, Heading, Text } from "@chakra-ui/react";
+import { Heading } from "./ui/heading";
 
 export const SalesConditions = () => {
   return (
-    <Flex m="0 auto" flexDir="column" gap={10} maxW="4xl" p={10}>
-      <Box>
-        <Heading as="h2" size="2xl" pb={4}>
+    <div className="m-auto flex flex-col gap-10 max-w-4xl p-10">
+      <div>
+        <Heading as="h2" size="2xl" className="pb-4">
           Salgsbetingelser
         </Heading>
 
-        <Text fontSize="xl">
+        <p className="text-xl">
           Disse salgsbetingelsene gjelder for salg av varer og tjenester til
           forbrukere av Skredvarsel for Garmin. Med forbruker menes en fysisk
           person som ikke hovedsakelig handler som ledd i næringsvirksomhet.
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Selger
         </Heading>
 
-        <Text>
+        <p>
           Dag Stuan
           <br /> Organisasjonsnummer: 926 049 690
           <br /> Adresse: Marie Wexelsens veg 6, 7045 Trondheim
           <br /> Heretter også omtalt som «vi», «oss» eller «skredvarsel.app».
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Kjøper
         </Heading>
 
-        <Text>
+        <p>
           Er den personen som er oppgitt som kjøper i bestillingen (heretter
           også omtalt som «du», «din» eller «deg»).
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Betaling
         </Heading>
 
-        <Text>
+        <p>
           Vipps brukes som betalingsmetode. Abonnementsbetaling vil bli
           fakturert automatisk ved starten av den månedlige eller årlige
           perioden, avhengig av hvilken betalingsperiode du velger. Betaling
           fornyes automatisk inntil abonnementet ditt nedgraderes eller
           avsluttes. Du kan kansellere abonnementet ditt når som helst, som
           beskrevet nedenfor.
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Avgifter
         </Heading>
 
-        <Text>
+        <p>
           For å få tilgang til applikasjonen på klokka, blir du pålagt å betale
           abonnementsavgift. Abonnementsavgift kan betales på månedlig eller
           årlig basis. Abonnementsavgiften betales på forhånd. Hvis du bytter
@@ -70,15 +70,15 @@ export const SalesConditions = () => {
           seg retten til å øke abonnementsavgiftene, eventuelle tilknyttede
           skatter, eller å innføre nye avgifter når som helst med rimelig
           forhåndsvarsel.
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Automatisk fornyelse av abonnement
         </Heading>
 
-        <Text>
+        <p>
           Abonnementsavgifter vil bli fakturert automatisk ved starten av den
           månedlige eller årlige perioden, avhengig av hva som er aktuelt. Disse
           avgiftene fornyes automatisk inntil abonnementet ditt nedgraderes
@@ -86,40 +86,40 @@ export const SalesConditions = () => {
           første kostnadene dine med mindre du får beskjed om noe annet på
           forhånd. Du kan kansellere abonnementet ditt når som helst, som
           beskrevet nedenfor.
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Levering
         </Heading>
 
-        <Text>
+        <p>
           Etter godkjent betaling vil du få tilgang til data på klokken.
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Kansellering av abonnement
         </Heading>
 
-        <Text>
+        <p>
           Du kan kansellere abonnementet ditt ved å gå til «Konto»-siden og
           velge «Avslutt». Kanselleringen av et abonnement trer i kraft ved
           slutten av gjeldende faktureringsperiode. Du kan fornye abonnementet
           ditt når som helst uten å åpne en ny konto, selv om
           abonnementsavgiftene kan ha økt. Du kan slette kontoen din når som
           helst.
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Angrerett
         </Heading>
 
-        <Text>
+        <p>
           Alle abonnementer har 14 dagers angrerett. Vær oppmerksom på at
           angreretten kun gjelder nye kjøp, og ikke ved automatisk fornyelse av
           ditt abonnement. For å angre ditt kjøp, send en e-post til:
@@ -128,28 +128,28 @@ export const SalesConditions = () => {
           benytter deg av angreretten, vil du få tilbakebetalt tjenestens verdi
           ved kjøpstidspunktet. Beløpet vil tilbakeføres direkte til den
           Vipps-kontoen du benyttet ved kjøp.
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Konfliktløsning
         </Heading>
 
-        <Text>
+        <p>
           Klager rettes til selger innen rimelig tid. Partene skal forsøke å
           løse eventuelle tvister i minnelighet. Dersom dette ikke lykkes, kan
           kjøperen ta kontakt med Forbrukerrådet for mekling. Forbrukerrådet er
           tilgjengelig på telefon 23 400 500 eller www.forbrukerradet.no.
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Mangel ved varen - kjøperens rettigheter og reklamasjonsfrist
         </Heading>
 
-        <Text>
+        <p>
           Hvis det foreligger en mangel ved varen må kjøper innen rimelig tid
           etter at den ble oppdaget eller burde ha blitt oppdaget, gi selger
           melding om at han eller hun vil påberope seg mangelen. Kjøper har
@@ -158,8 +158,8 @@ export const SalesConditions = () => {
           to år etter at kjøper overtok varen. For å reklamere på ditt kjøp,
           send en e-post til: d.stuan@gmail.com med beskrivelse av hva som er
           mangelfullt med varen.
-        </Text>
-      </Box>
-    </Flex>
+        </p>
+      </div>
+    </div>
   );
 };

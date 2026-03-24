@@ -1,34 +1,26 @@
-import {
-  Box,
-  Flex,
-  Heading,
-  Link,
-  ListItem,
-  Text,
-  UnorderedList,
-} from "@chakra-ui/react";
+import { Heading } from "./ui/heading";
 
 export const PrivacyPolicy = () => {
   return (
-    <Flex m="0 auto" flexDir="column" maxW="4xl" gap={10} p={10}>
-      <Box>
-        <Heading as="h2" size="2xl" mb={4}>
+    <div className="m-auto flex flex-col max-w-4xl gap-10 p-10">
+      <div>
+        <Heading as="h2" size="2xl" className="mb-4">
           Personvernerklæring
         </Heading>
 
-        <Text fontSize="xl">
+        <p className="text-xl">
           Når du bruker skredvarsel.app, gir du oss tilgang til opplysninger om
           deg. Her kan du lese hvilke opplysninger vi samler inn, hvordan vi
           gjør det og hva vi bruker dem til.
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Om skredvarsel.app
         </Heading>
 
-        <Text>
+        <p>
           Skredvarsel.app er eid av Dag Stuan og har til hensikt å selge
           abonnement på app som viser skredvarsel på Garmin-klokker.
           Skredvarsel.app er i henhold til personopplysningsloven og EUs
@@ -39,63 +31,63 @@ export const PrivacyPolicy = () => {
           Vi har følgende kontaktdetaljer
           <br />
           <br />
-          <UnorderedList>
-            <ListItem>Adresse: Marie Wexelsens veg 6, 7045 Trondheim</ListItem>
-            <ListItem>Organisasjonsnummer: 926 049 690</ListItem>
-          </UnorderedList>
-        </Text>
-      </Box>
+          <ul className="list-disc list-inside">
+            <li>Adresse: Marie Wexelsens veg 6, 7045 Trondheim</li>
+            <li>Organisasjonsnummer: 926 049 690</li>
+          </ul>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Hva er personopplysninger?
         </Heading>
 
-        <Text>
+        <p>
           Personopplysninger er informasjon som kan knyttes til en person, for
           eksempel navn, bosted, telefonnummer, e-postadresse, IP-adresse.
           Opplysninger om hvordan du bruker kartmannen.no, for eksempel hvilke
           produkter du har sett på eller kjøpt også som personopplysninger.
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Hvilke opplysninger samler vi inn?
         </Heading>
 
-        <Text>
+        <p>
           Når du oppretter en bruker for å kjøpe et abonnement oppgir du
           telefonnummer til Vipps. Vi får informasjon fra Vipps og lagrer navn,
           telefonnummer og e-postadresse. Dette blir lagret slik at du senere
           kan hente status for abonnementet ditt og si det opp ved behov.
-        </Text>
-      </Box>
+        </p>
+      </div>
 
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Informasjonskapsler
         </Heading>
 
-        <Text>
+        <p>
           Det benyttes informasjonskapsler på skredvarsel.app. En
           informasjonskapsel er en liten tekstfil som sendes til nettleseren og
           plasseres på datamaskinen, nettbrettet eller mobilenheten din når du
           besøker et nettsted. Den kan brukes til å huske informasjon om
           besøkene dine og kan for eksempel brukes til å spore preferansene
           dine, for eksempel språkinnstillinger.
-        </Text>
+        </p>
         <br />
 
-        <Text>
+        <p>
           Vi bruker informasjonskapsler til å forbedre og forenkle besøket ditt.
           Vi bruker ikke informasjonskapsler til å lagre personlig informasjon
           med mindre du har gitt oss tillatelse til å gjøre det. Vi bruker
           heller ikke informasjonskapsler til å oppgi opplysninger til
           tredjeparter.
-        </Text>
+        </p>
         <br />
-        <Text>
+        <p>
           De fleste nettlesere godtar automatisk informasjonskapsler. Samtykke
           til bruk av informasjonskapsler anses å ha blitt gitt hvis nettleseren
           er innstilt til å godta bruk. Dette gjelder også hvis godkjenning er
@@ -107,43 +99,46 @@ export const PrivacyPolicy = () => {
           begrense informasjonskapsler kan påvirke funksjonaliteten til
           nettstedet. Mange interaktive funksjoner som tilbys av nettstedet,
           avhenger av informasjonskapsler.
-        </Text>
-      </Box>
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+        </p>
+      </div>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Hvilke informasjonskapsler benyttes?
         </Heading>
 
-        <Text>Skredvarsel.app bruker følgende informasjonskapsler:</Text>
+        <p>Skredvarsel.app bruker følgende informasjonskapsler:</p>
         <br />
-        <Heading as="h4" size="md" pb={3}>
+        <Heading as="h4" size="md" className="pb-3">
           Betaling
         </Heading>
-        <UnorderedList>
-          <ListItem>Vipps faste betalinger</ListItem>
-          <ListItem>
+        <ul className="list-disc list-inside">
+          <li>Vipps faste betalinger</li>
+          <li>
             Vipps innhenter informasjon basert på deres retningslinjer som du
             kan finne i{" "}
-            <Link
-              color="blue.600"
+            <a
+              className="text-blue-600 hover:underline"
               href="https://www.vipps.no/vilkar/cookie-og-personvern/"
             >
               Vipps personvernerklæring
-            </Link>
-          </ListItem>
-        </UnorderedList>
-      </Box>
-      <Box>
-        <Heading as="h3" size="lg" pb={4}>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <Heading as="h3" size="lg" className="pb-4">
           Forespørsel om sletting av data
         </Heading>
 
-        <Text>
+        <p>
           I samsvar med personvernlovgivningen kan du be oss om å slette dine
           personopplysninger. Dette kan gjøres ved å ta kontakt på{" "}
-          <Link href="mailto:d.stuan@gmail.com">d.stuan@gmail.com</Link>.
-        </Text>
-      </Box>
-    </Flex>
+          <a href="mailto:d.stuan@gmail.com" className="hover:underline">
+            d.stuan@gmail.com
+          </a>
+          .
+        </p>
+      </div>
+    </div>
   );
 };

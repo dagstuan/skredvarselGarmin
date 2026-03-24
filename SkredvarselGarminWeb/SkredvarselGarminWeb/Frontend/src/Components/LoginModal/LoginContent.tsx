@@ -1,8 +1,7 @@
-import { VStack, Text, Center, Link } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 import { FacebookButton } from "../Buttons/FacebookButton";
 import { GoogleButton } from "../Buttons/GoogleButton";
 import { OrDivider } from "../OrDivider";
-import { Link as RouterLink } from "react-router-dom";
 import { EmailLoginForm } from "../EmailLoginForm/EmailLoginForm";
 
 type LoginContentProps = {
@@ -25,17 +24,17 @@ export const LoginContent = (props: LoginContentProps) => {
   } = props;
 
   return (
-    <VStack gap={7} alignItems="stretch">
+    <div className="flex flex-col gap-7">
       {loginText && (
-        <Text fontSize="md" align="center" mb={2}>
+        <p className="text-md text-center mb-2">
           {loginText}
-        </Text>
+        </p>
       )}
 
-      <VStack gap={5} alignItems="stretch">
+      <div className="flex flex-col gap-5">
         <GoogleButton link="/google-login?returnUrl=/account" />
         <FacebookButton link="/facebook-login?returnUrl=/account" />
-      </VStack>
+      </div>
       <OrDivider text="Eller logg inn med e-post" />
       <EmailLoginForm
         email={email}
@@ -44,11 +43,11 @@ export const LoginContent = (props: LoginContentProps) => {
         error={error}
         isLoading={isLoading}
       />
-      <Center>
-        <Link as={RouterLink} to="/faq#vippslogin">
+      <div className="flex justify-center">
+        <RouterLink to="/faq#vippslogin" className="hover:underline">
           Hvorfor kan jeg ikke logge inn med Vipps?
-        </Link>
-      </Center>
-    </VStack>
+        </RouterLink>
+      </div>
+    </div>
   );
 };
