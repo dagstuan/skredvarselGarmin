@@ -1,0 +1,66 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "monkeyc",
+			"device": "fenix7",
+			"simulatorBuild": true,
+			"problemMatcher": [
+				"$monkeyc.error",
+				"$monkeyc.fileWarning",
+				"$monkeyc.genericWarning"
+			],
+			"label": "monkeyc: fenix7",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "omonkeyc",
+			"device": "fenix7",
+			"simulatorBuild": false,
+			"problemMatcher": [
+				"$monkeyc.error",
+				"$monkeyc.fileWarning",
+				"$monkeyc.genericWarning"
+			],
+			"releaseBuild": true,
+			"label": "optimized monkeyc: fenix7 release",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "monkeyc",
+			"device": "fenix6pro",
+			"simulatorBuild": true,
+			"problemMatcher": [
+				"$monkeyc.error",
+				"$monkeyc.fileWarning",
+				"$monkeyc.genericWarning"
+			],
+			"label": "monkeyc: fenix6pro",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "monkeyc",
+			"device": "fenix5plus",
+			"simulatorBuild": true,
+			"problemMatcher": [
+				"$monkeyc.error",
+				"$monkeyc.fileWarning",
+				"$monkeyc.genericWarning"
+			],
+			"label": "monkeyc: fenix5plus",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		}
+	]
+}
