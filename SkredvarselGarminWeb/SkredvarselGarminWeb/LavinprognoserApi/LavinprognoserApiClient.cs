@@ -1,5 +1,7 @@
 using System.Text.Json;
 
+using Microsoft.Extensions.Caching.Memory;
+
 using Refit;
 
 using SkredvarselGarminWeb.LavinprognoserApi.Models;
@@ -8,8 +10,11 @@ namespace SkredvarselGarminWeb.LavinprognoserApi;
 
 public partial class LavinprognoserApiClient(
     ILavinprognoserWfsApi wfsApi,
-    ILavinprognoserWebsiteApi websiteApi) : ILavinprognoserApi
+    ILavinprognoserWebsiteApi websiteApi,
+    IMemoryCache memoryCache) : ILavinprognoserApi
 {
+    private static readonly SemaphoreSlim FetchSemaphore = new(3, 3);
+
     public async Task<IEnumerable<WfsFeature<JsonElement>>> GetAllLocationPolygons()
     {
         var response = await GetAllWfsLocationPolygons("lavinprognoser:location", null);
@@ -43,25 +48,56 @@ public partial class LavinprognoserApiClient(
 
     private async Task<LavinprognoserWebForecast?> FetchForecastForDate(string slug, DateOnly date)
     {
-        var response = await GetForecastPage(slug, date);
-        if (!response.IsSuccessStatusCode)
+        var cacheKey = $"LavinprognoserForecast_{slug}_{date:yyyy-MM-dd}";
+        if (memoryCache.TryGetValue<LavinprognoserWebForecast?>(cacheKey, out var cached))
         {
-            return default;
+            return cached;
         }
 
-        if (response.Content?.Content.Forecast != null)
+        await FetchSemaphore.WaitAsync();
+        try
         {
-            return response.Content.Content.Forecast;
-        }
+            if (memoryCache.TryGetValue<LavinprognoserWebForecast?>(cacheKey, out cached))
+            {
+                return cached;
+            }
 
-        var redirectedSlug = SwedishForecastAreaRegistry.TryGetSlugFromRequestUri(response.RequestMessage?.RequestUri);
-        if (redirectedSlug == null || redirectedSlug == slug)
+            var response = await GetForecastPage(slug, date);
+            if (!response.IsSuccessStatusCode)
+            {
+                return default;
+            }
+
+            LavinprognoserWebForecast? forecast;
+            if (response.Content?.Content.Forecast != null)
+            {
+                forecast = response.Content.Content.Forecast;
+            }
+            else
+            {
+                var redirectedSlug = SwedishForecastAreaRegistry.TryGetSlugFromRequestUri(response.RequestMessage?.RequestUri);
+                if (redirectedSlug == null || redirectedSlug == slug)
+                {
+                    forecast = response.Content?.Content.Forecast;
+                }
+                else
+                {
+                    var redirectedResponse = await GetForecastPage(redirectedSlug, date);
+                    forecast = redirectedResponse.Content?.Content.Forecast;
+                }
+            }
+
+            memoryCache.Set(cacheKey, forecast, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+            });
+
+            return forecast;
+        }
+        finally
         {
-            return response.Content?.Content.Forecast;
+            FetchSemaphore.Release();
         }
-
-        var redirectedResponse = await GetForecastPage(redirectedSlug, date);
-        return redirectedResponse.Content?.Content.Forecast;
     }
 
     private Task<ApiResponse<WfsFeatureCollection<JsonElement>>> GetAllWfsLocationPolygons(string typeName, string? cqlFilter) =>

@@ -5,6 +5,8 @@ using System.Text.Json;
 
 using AwesomeAssertions;
 
+using Microsoft.Extensions.Caching.Memory;
+
 using NSubstitute;
 
 using Refit;
@@ -186,7 +188,8 @@ public class LavinprognoserApiClientTests
 
         var sut = new LavinprognoserApiClient(
           wfsApi,
-          websiteApi);
+          websiteApi,
+          new MemoryCache(new MemoryCacheOptions()));
 
         var warnings = await sut.GetDetailedWarningsByArea(999, new DateOnly(2026, 3, 10), new DateOnly(2026, 3, 10));
 
@@ -220,7 +223,8 @@ public class LavinprognoserApiClientTests
 
         return new LavinprognoserApiClient(
           wfsApi,
-          websiteApi);
+          websiteApi,
+          new MemoryCache(new MemoryCacheOptions()));
     }
 
     private static Task<ApiResponse<LavinprognoserWebResponse>> CreateForecastResponse(
