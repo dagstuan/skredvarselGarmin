@@ -94,6 +94,7 @@ using (var scope = app.Services.CreateScope())
 
     var backgroundJobClient = scope.ServiceProvider.GetRequiredService<IBackgroundJobClient>();
     backgroundJobClient.Enqueue<HangfireService>(s => s.SeedSwedishForecastAreas());
+    backgroundJobClient.Enqueue<HangfireService>(s => s.PreWarmLavinprognoserCache());
 }
 
 app.Use(next => context =>
@@ -140,6 +141,7 @@ using (var scope = app.Services.CreateScope())
     recurringJobManager.AddOrUpdate<HangfireService>("RemoveStaleUsers", s => s.RemoveStaleUsers(), "0 3 * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("SeedSwedishForecastAreas", s => s.SeedSwedishForecastAreas(), Cron.Daily);
     recurringJobManager.AddOrUpdate<HangfireService>("CreateNextChargeForAgreements", s => s.CreateNextChargeForAgreements(), Cron.Hourly);
+    recurringJobManager.AddOrUpdate<HangfireService>("PreWarmLavinprognoserCache", s => s.PreWarmLavinprognoserCache(), Cron.Hourly);
 
     recurringJobManager.RemoveIfExists("CreateNextChargeForAgreement");
 }
