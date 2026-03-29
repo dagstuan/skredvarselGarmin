@@ -59,12 +59,20 @@ public static class RefitConfiguration
         serviceCollection.AddTransient<LavinprognoserLoggingHandler>();
         serviceCollection.AddRefitClient<ILavinprognoserWfsApi>(LavinprognoserRefitSettings)
             .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://nvgis.naturvardsverket.se/geoserver/lavinprognoser/"))
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+            {
+                MaxConnectionsPerServer = 3,
+            })
             .AddHttpMessageHandler<LavinprognoserLoggingHandler>()
             .AddPolicyHandler(retryPolicy)
             .AddPolicyHandler(timeoutPolicy);
 
         serviceCollection.AddRefitClient<ILavinprognoserWebsiteApi>(LavinprognoserRefitSettings)
             .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://www.lavinprognoser.se/"))
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+            {
+                MaxConnectionsPerServer = 3,
+            })
             .AddPolicyHandler(retryPolicy)
             .AddPolicyHandler(timeoutPolicy);
 

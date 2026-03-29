@@ -123,10 +123,10 @@ public class HangfireService(
         var from = today.AddDays(-2);
         var to = today.AddDays(3);
 
-        var tasks = SwedishForecastAreaRegistry.AreasById.Keys
-            .Select(areaId => lavinprognoserWarningService.GetDetailedWarningsByArea(areaId, from, to));
-
-        await Task.WhenAll(tasks);
+        foreach (var areaId in SwedishForecastAreaRegistry.AreasById.Keys)
+        {
+            await lavinprognoserWarningService.GetDetailedWarningsByArea(areaId, from, to);
+        }
     }
 
     public void RemoveStaleUsers()
