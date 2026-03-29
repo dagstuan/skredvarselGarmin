@@ -49,6 +49,9 @@ const TIME_TO_SHOW_LOADING = Gregorian.SECONDS_PER_DAY;
 
 const TIME_TO_CONSIDER_DATA_STALE = Gregorian.SECONDS_PER_HOUR / 2;
 
+(:background)
+const NEXT_DAY_FORECAST_HOUR = 17;
+
 function getSortedNorwegianRegionIds() as Array<String> {
   return [
     "3003",
@@ -364,7 +367,7 @@ public function getDisplayDateForWarning(warning as DetailedAvalancheWarning) as
 public function getStartDateForDetailedWarnings() {
   var startDate = Time.today();
   var now = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
-  if (now.hour >= 17) {
+  if (now.hour >= $.NEXT_DAY_FORECAST_HOUR) {
     startDate = addDays(startDate, 1);
   }
   return startDate;

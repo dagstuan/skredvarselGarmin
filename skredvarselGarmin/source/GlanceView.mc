@@ -48,7 +48,7 @@ class GlanceView extends Ui.GlanceView {
       (_favoriteRegionId != null || _useLocation) &&
       _forecastData == null
     ) {
-      if (_useLocation && self has :loadLocationForecastDataForGlance) {
+      if (_useLocation) {
         loadLocationForecastDataForGlance();
       } else if (_favoriteRegionId != null) {
         setRegionForecastDataFromStorage();
@@ -95,20 +95,17 @@ class GlanceView extends Ui.GlanceView {
   }
 
   function drawTimeline(dc as Gfx.Dc) {
-    (
-      new AvalancheUi.ForecastTimeline({
-        :locX => 0,
-        :locY => 0,
-        :width => _width,
-        :height => _height,
-        :regionName => $.getRegionName(_displayRegionId),
-        :forecast => _displayingLocationForecast
-          ? (_forecastData as LocationAvalancheForecast)["warnings"]
-          : _forecastData,
-        :isLocationForecast => _displayingLocationForecast,
-        :alignLineCenter => true,
-      })
-    ).draw(dc);
+    AvalancheUi.drawForecastTimeline(dc, {
+      :locX => 0,
+      :locY => 0,
+      :width => _width,
+      :height => _height,
+      :regionName => $.getRegionName(_displayRegionId),
+      :forecast => _displayingLocationForecast
+        ? (_forecastData as LocationAvalancheForecast)["warnings"]
+        : _forecastData,
+      :isLocationForecast => _displayingLocationForecast,
+    });
   }
 
   (:useBufferedBitmapOnGlance)

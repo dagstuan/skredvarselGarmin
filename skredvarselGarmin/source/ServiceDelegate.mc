@@ -43,23 +43,6 @@ class ServiceDelegate extends System.ServiceDelegate {
       return;
     }
 
-    var monkeyVersion = System.getDeviceSettings().monkeyVersion;
-    if (
-      monkeyVersion[0] < 4 &&
-      !(monkeyVersion[0] >= 3 && monkeyVersion[1] >= 2)
-    ) {
-      if ($.Debug) {
-        $.log(
-          Lang.format(
-            "Api version $1$.$2$.$3$. No API support for modifying store in background. Not refreshing data.",
-            monkeyVersion
-          )
-        );
-      }
-      Background.exit(false);
-      return;
-    }
-
     if ($.getUseLocation()) {
       if ($.Debug) {
         $.log(
@@ -132,9 +115,9 @@ class ServiceDelegate extends System.ServiceDelegate {
     var language = $.getForecastLanguage();
 
     var now = Time.now();
-    var start = $.getFormattedDateForApiCall($.subtractDays(now, 2));
+    var start = $.getBackgroundDetailedForecastStartDate(now);
     var regionId = _currentData[0];
-    var end = $.getForecastEndDateForApiCall(now, regionId);
+    var end = $.getBackgroundDetailedForecastEndDate(now, regionId);
 
     var path = $.getDetailedWarningsPathForRegion(regionId, language, start, end);
     var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);

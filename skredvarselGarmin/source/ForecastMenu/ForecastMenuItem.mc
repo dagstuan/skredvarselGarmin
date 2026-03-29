@@ -122,7 +122,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
         ? (_forecastData as LocationAvalancheForecast)["warnings"]
         : _forecastData;
 
-      var forecastTimeline = new AvalancheUi.ForecastTimeline({
+      AvalancheUi.drawForecastTimeline(bufferedDc, {
         :locX => marginLeft,
         :locY => 0,
         :width => width - marginRight,
@@ -131,8 +131,6 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
         :forecast => forecast,
         :isLocationForecast => _isLocationForecast,
       });
-
-      forecastTimeline.draw(bufferedDc);
     }
 
     dc.drawBitmap(0, 0, _bufferedBitmap);

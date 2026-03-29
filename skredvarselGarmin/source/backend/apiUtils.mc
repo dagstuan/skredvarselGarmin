@@ -29,3 +29,35 @@ function getForecastEndDateForApiCall(
 
   return $.getFormattedDateForApiCall($.addDays(now, endOffset));
 }
+
+// Returns start/end dates for a background detailed forecast fetch.
+// On memory-limited devices, only fetch today or tomorrow (single day).
+(:background,:limitedBackgroundMemory)
+function getBackgroundDetailedForecastStartDate(now as Time.Moment) as String {
+  var nowInfo = Gregorian.info(now, Time.FORMAT_SHORT);
+  var targetDay = nowInfo.hour >= $.NEXT_DAY_FORECAST_HOUR ? $.addDays(now, 1) : now;
+  return $.getFormattedDateForApiCall(targetDay);
+}
+
+(:background,:noLimitedBackgroundMemory)
+function getBackgroundDetailedForecastStartDate(now as Time.Moment) as String {
+  return $.getFormattedDateForApiCall($.subtractDays(now, 2));
+}
+
+(:background,:limitedBackgroundMemory)
+function getBackgroundDetailedForecastEndDate(
+  now as Time.Moment,
+  regionId as String?
+) as String {
+  var nowInfo = Gregorian.info(now, Time.FORMAT_SHORT);
+  var targetDay = nowInfo.hour >= $.NEXT_DAY_FORECAST_HOUR ? $.addDays(now, 1) : now;
+  return $.getFormattedDateForApiCall(targetDay);
+}
+
+(:background,:noLimitedBackgroundMemory)
+function getBackgroundDetailedForecastEndDate(
+  now as Time.Moment,
+  regionId as String?
+) as String {
+  return $.getForecastEndDateForApiCall(now, regionId);
+}

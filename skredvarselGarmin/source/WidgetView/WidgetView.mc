@@ -132,7 +132,7 @@ public class WidgetView extends Ui.View {
         ? (_forecastData as LocationAvalancheForecast)["warnings"]
         : _forecastData;
 
-      var forecastTimeline = new AvalancheUi.ForecastTimeline({
+      AvalancheUi.drawForecastTimeline(bufferedDc, {
         :locX => 0,
         :locY => 0,
         :width => forecastWidth,
@@ -141,7 +141,6 @@ public class WidgetView extends Ui.View {
         :forecast => forecast,
         :isLocationForecast => _useLocation,
       });
-      forecastTimeline.draw(bufferedDc);
     }
 
     var x0 = _margin;

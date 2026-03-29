@@ -30,7 +30,11 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     _fetchedTime = settings[:fetchedTime];
 
     var dataAge = Time.now().compare(_fetchedTime);
-    if (dataAge > $.TIME_TO_CONSIDER_DATA_STALE && $.canMakeWebRequest()) {
+
+    // Memory constrained devices only fetch a single day in the background, refetch since we are in foreground now.
+    var numWarnings = _detailedWarnings.size();
+
+    if ((dataAge > $.TIME_TO_CONSIDER_DATA_STALE || numWarnings <= 1) && $.canMakeWebRequest()) {
       if ($.Debug) {
         $.log("Stale forecast, try to reload in background");
       }

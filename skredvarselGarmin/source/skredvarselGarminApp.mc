@@ -10,6 +10,22 @@ using Toybox.Position;
 
 (:glance)
 function registerTemporalEvent() {
+  var monkeyVersion = System.getDeviceSettings().monkeyVersion;
+  if (
+    monkeyVersion[0] < 4 &&
+    !(monkeyVersion[0] >= 3 && monkeyVersion[1] >= 2)
+  ) {
+    if ($.Debug) {
+      $.log(
+        Lang.format(
+          "Api version $1$.$2$.$3$. No background storage support. Skipping temporal event registration.",
+          monkeyVersion
+        )
+      );
+    }
+    return;
+  }
+
   if ($.getHasSubscription() == false) {
     if ($.Debug) {
       $.log("No subscription detected. Removing temporal event.");
