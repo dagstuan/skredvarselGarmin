@@ -45,7 +45,7 @@ function getFavoriteRegionId() as String? {
 
 (:background)
 function resetStorageCacheIfRequired() {
-  var STORAGE_VERSION = 4;
+  var STORAGE_VERSION = 5;
   var storageVersion = Storage.getValue("storageVersion") as Number?;
   var cachedForecastsLanguage =
     Storage.getValue("cachedStorageLanguage") as Number?;
