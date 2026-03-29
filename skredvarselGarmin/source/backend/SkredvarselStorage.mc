@@ -66,6 +66,18 @@ function resetStorageCacheIfRequired() {
 
     var hasSubscription = $.getHasSubscription();
     var selectedRegionIds = $.getSelectedRegionIds();
+
+    // Migrate old Abisko area (se_2) to the two new sub-areas (se_15, se_16)
+    if (arrayContainsString(selectedRegionIds, "se_2")) {
+      selectedRegionIds = removeStringFromArray(selectedRegionIds, "se_2");
+      if (!arrayContainsString(selectedRegionIds, "se_15")) {
+        selectedRegionIds.add("se_15");
+      }
+      if (!arrayContainsString(selectedRegionIds, "se_16")) {
+        selectedRegionIds.add("se_16");
+      }
+    }
+
     try {
       Storage.clearValues();
     } catch (ex) {

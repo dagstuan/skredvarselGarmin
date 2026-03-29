@@ -191,6 +191,7 @@ function colorize(dangerLevel as Number) as Graphics.ColorType {
   return 0xaaaaaa;
 }
 
+(:background)
 function arrayContainsString(arr as Array<String>, str as String) {
   for (var i = 0; i < arr.size(); i++) {
     if (arr[i].equals(str)) {
@@ -201,6 +202,7 @@ function arrayContainsString(arr as Array<String>, str as String) {
   return false;
 }
 
+(:background)
 function removeStringFromArray(currArray as Array<String>, value as String) {
   var newArray = [];
   for (var i = 0; i < currArray.size(); i++) {

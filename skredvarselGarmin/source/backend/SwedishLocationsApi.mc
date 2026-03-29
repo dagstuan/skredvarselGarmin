@@ -2,7 +2,8 @@ import Toybox.Lang;
 
 function getSortedSwedishRegionIds() as Array<String> {
   return [
-    "se_2",
+    "se_15",
+    "se_16",
     "se_17",
     "se_11",
     "se_18",
@@ -19,8 +20,10 @@ function getSortedSwedishRegionIds() as Array<String> {
 function getSwedishRegionName(regionId as String) as String {
   var numericId = regionId.substring(3, regionId.length()).toNumber();
 
-  if (numericId == 2) {
-    return "Abisko/Riksgränsfjällen";
+  if (numericId == 15) {
+    return "Abisko/Riksgränsfjällen Öst";
+  } else if (numericId == 16) {
+    return "Abisko/Riksgränsfjällen Väst";
   } else if (numericId == 17) {
     return "Kebnekaisefjällen Väst";
   } else if (numericId == 11) {

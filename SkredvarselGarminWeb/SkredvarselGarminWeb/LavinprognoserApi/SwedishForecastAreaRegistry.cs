@@ -7,14 +7,15 @@ public static class SwedishForecastAreaRegistry
 
     public static IReadOnlyDictionary<int, SwedishForecastArea> AreasById { get; } = new Dictionary<int, SwedishForecastArea>
     {
-        [2] = new SwedishForecastArea("Abisko/Riksgränsfjällen", "abisko_riksgransfjallen"),
+        [15] = new SwedishForecastArea("Abisko/Riksgränsfjällen Vast", "abisko_riksgransfjallen/abisko-riksgransenfjallen-vast"),
+        [16] = new SwedishForecastArea("Abisko/Riksgränsfjällen Öst", "abisko_riksgransfjallen/abisko-riksgransenfjallen-ost"),
         [7] = new SwedishForecastArea("Vastra Harjedalen", "vastra_harjedalsfjallen"),
-        [11] = new SwedishForecastArea("Kebnekaise Ost", "kebnekaisefjallen/kebnekaisefjallen-ost"),
-        [12] = new SwedishForecastArea("Sodra Jamtland Vast", "sodra_jamtlandsfjallen/sodra-jamtlandsfjallen-vast"),
-        [14] = new SwedishForecastArea("Sodra Jamtland Ost", "sodra_jamtlandsfjallen/sodra-jamtlandsfjallen-ost"),
+        [11] = new SwedishForecastArea("Kebnekaise Öst", "kebnekaisefjallen/kebnekaisefjallen-ost"),
         [17] = new SwedishForecastArea("Kebnekaise Vast", "kebnekaisefjallen/kebnekaisefjallen-vast"),
+        [12] = new SwedishForecastArea("Sodra Jamtland Vast", "sodra_jamtlandsfjallen/sodra-jamtlandsfjallen-vast"),
+        [14] = new SwedishForecastArea("Sodra Jamtland Öst", "sodra_jamtlandsfjallen/sodra-jamtlandsfjallen-ost"),
         [18] = new SwedishForecastArea("Vastra Vindelfjallen Vast", "vastra_vindelfjallen/vastra-vindelfjallen-vast"),
-        [19] = new SwedishForecastArea("Vastra Vindelfjallen Ost", "vastra_vindelfjallen/vastra-vindelfjallen-ost"),
+        [19] = new SwedishForecastArea("Vastra Vindelfjallen Öst", "vastra_vindelfjallen/vastra-vindelfjallen-ost"),
         [20] = new SwedishForecastArea("Sodra Lappland Nord", "sodra_lapplandsfjallen/sodra-lapplandsfjallen-nord"),
         [21] = new SwedishForecastArea("Sodra Lappland Syd", "sodra_lapplandsfjallen/sodra-lapplandsfjallen-syd"),
     };
