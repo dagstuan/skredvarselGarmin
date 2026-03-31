@@ -111,13 +111,14 @@ public class HangfireService(
     }
 
     [DisableConcurrentExecution(timeoutInSeconds: 300)]
-    public async Task SeedSwedishForecastAreas()
+    public async Task SeedSwedishForecastAreas(CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         await swedishForecastAreaSeeder.SeedAsync();
     }
 
     [DisableConcurrentExecution(timeoutInSeconds: 300)]
-    public async Task PreWarmLavinprognoserCache()
+    public async Task PreWarmLavinprognoserCache(CancellationToken cancellationToken)
     {
         var today = DateOnly.FromDateTime(dateTimeNowProvider.UtcNow);
         var from = today.AddDays(-2);
@@ -125,6 +126,7 @@ public class HangfireService(
 
         foreach (var areaId in SwedishForecastAreaRegistry.AreasById.Keys)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             await lavinprognoserWarningService.GetDetailedWarningsByArea(areaId, from, to);
         }
     }
