@@ -1,0 +1,5 @@
+<properties>
+    <property id="forecastLanguage" type="number">1</property>
+    <property id="useWatchLanguage" type="boolean">false</property>
+    <property id="resetSubscription" type="boolean">false</property>
+</properties>
