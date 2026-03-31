@@ -18,7 +18,8 @@ public class WatchService(SkredvarselDbContext dbContext) : IWatchService
         {
             Id = watchAddRequest.WatchId,
             PartNumber = watchAddRequest.PartNumber,
-            UserId = userId
+            UserId = userId,
+            AppType = watchAddRequest.AppType
         });
 
         dbContext.WatchAddRequests.Remove(watchAddRequest);

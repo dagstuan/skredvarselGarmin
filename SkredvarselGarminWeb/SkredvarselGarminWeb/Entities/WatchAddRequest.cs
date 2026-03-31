@@ -15,4 +15,7 @@ public class WatchAddRequest
     public required string Key { get; init; }
 
     public required DateTime Created { get; init; }
+
+    [Required]
+    public required AppType AppType { get; init; }
 }

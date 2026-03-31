@@ -1,3 +1,5 @@
+using SkredvarselGarminWeb.Entities;
+
 using WatchEndpointModel = SkredvarselGarminWeb.Endpoints.Models.Watch;
 using WatchEntityModel = SkredvarselGarminWeb.Entities.Watch;
 
@@ -7,10 +9,18 @@ public static class WatchMapper
 {
     public static WatchEndpointModel ToEndpointModel(this WatchEntityModel entity)
     {
+        var name = entity.PartNumber.ToWatchName();
+        var appTypeName = entity.AppType switch
+        {
+            AppType.DataField => "datafield",
+            _ => "widget",
+        };
+        name = $"{name} ({appTypeName})";
+
         return new WatchEndpointModel
         {
             Id = entity.Id,
-            Name = entity.PartNumber.ToWatchName()
+            Name = name
         };
     }
 

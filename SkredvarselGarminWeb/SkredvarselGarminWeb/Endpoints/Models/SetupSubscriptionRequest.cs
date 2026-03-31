@@ -8,4 +8,6 @@ public class SetupSubscriptionRequest
 
     [Required]
     public required string PartNumber { get; init; }
+
+    public string? AppType { get; init; }
 }

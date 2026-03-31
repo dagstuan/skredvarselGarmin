@@ -15,4 +15,7 @@ public class Watch
     public required string UserId { get; set; }
 
     public User User { get; set; } = null!;
+
+    [Required]
+    public required AppType AppType { get; set; }
 }

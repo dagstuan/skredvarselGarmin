@@ -51,12 +51,18 @@ public static class WatchApiRouteBuilderExtensions
             }
 
             var key = GenerateKey();
+            AppType appType = AppType.Widget;
+            if (request.AppType != null && !Enum.TryParse(request.AppType, ignoreCase: true, out appType))
+            {
+                return Results.BadRequest($"Invalid AppType: '{request.AppType}'.");
+            }
             dbContext.WatchAddRequests.Add(new WatchAddRequest
             {
                 Created = dateTimeNowProvider.Now.SetKindUtc(),
                 PartNumber = request.PartNumber,
                 Key = key,
-                WatchId = request.WatchId
+                WatchId = request.WatchId,
+                AppType = appType
             });
             dbContext.SaveChanges();
 
