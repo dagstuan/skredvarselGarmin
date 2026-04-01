@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <iq:manifest version="3" xmlns:iq="http://www.garmin.com/xml/connectiq">
-  <iq:application id="a1b2c3d4-e5f6-7890-abcd-ef1234567890" type="datafield" name="@Strings.AppName" entry="DatafieldApp" launcherIcon="@Drawables.Level2" minApiLevel="3.2.0">
+  <iq:application id="d3ae8528-98d6-4c5c-b347-f814e094c339" type="datafield" name="@Strings.AppName" entry="DatafieldApp" launcherIcon="@Drawables.Level2" minApiLevel="3.2.0">
     <iq:products>
       <iq:product id="approachs50"/>
       <iq:product id="approachs7042mm"/>
