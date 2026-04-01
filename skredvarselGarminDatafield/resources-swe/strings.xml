@@ -5,6 +5,7 @@
     <string id="WaitingForForecast">Väntar på prognos...</string>
     <string id="NoProblems">Inga lavinproblem.</string>
     <string id="Level">Lavinfara</string>
+    <string id="EnableBackgroundFetching">Aktivera bakgrundshämtning</string>
     <string id="UseWatchLanguage">Använd klockans språk för användargränssnittet</string>
     <string id="ForecastLanguage">Prognosspråk (för norska prognoser)</string>
     <string id="Norwegian">Norska</string>

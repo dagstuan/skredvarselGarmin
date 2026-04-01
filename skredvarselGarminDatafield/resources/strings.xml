@@ -5,6 +5,7 @@
     <string id="WaitingForForecast">Waiting for forecast...</string>
     <string id="NoProblems">No avalanche problems.</string>
     <string id="Level">Level</string>
+    <string id="EnableBackgroundFetching">Enable background fetching</string>
     <string id="UseWatchLanguage">Use watch language for user interface</string>
     <string id="ForecastLanguage">Forecast language (for norwegian forecasts)</string>
     <string id="Norwegian">Norwegian</string>

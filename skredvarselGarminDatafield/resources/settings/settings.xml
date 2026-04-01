@@ -1,4 +1,7 @@
 <settings>
+    <setting propertyKey="@Properties.enableBackgroundFetching" title="@Strings.EnableBackgroundFetching">
+        <settingConfig type="boolean" />
+    </setting>
     <setting propertyKey="@Properties.useWatchLanguage" title="@Strings.UseWatchLanguage">
         <settingConfig type="boolean" />
     </setting>

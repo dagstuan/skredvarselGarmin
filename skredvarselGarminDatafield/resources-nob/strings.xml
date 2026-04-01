@@ -5,6 +5,7 @@
     <string id="WaitingForForecast">Venter på varsel...</string>
     <string id="NoProblems">Ingen skredproblemer.</string>
     <string id="Level">Faregrad</string>
+    <string id="EnableBackgroundFetching">Aktiver bakgrunnshenting</string>
     <string id="UseWatchLanguage">Bruk klokkespråk i brukergrensesnitt</string>
     <string id="ForecastLanguage">Varselspråk (for norske varsler)</string>
     <string id="Norwegian">Norsk</string>

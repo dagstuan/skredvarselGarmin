@@ -7,6 +7,7 @@ using AvalancheUi;
 (:glance)
 class GlanceView extends Ui.GlanceView {
   private var _hasSubscription as Lang.Boolean?;
+  private var _backgroundFetchingEnabled as Lang.Boolean = true;
   private var _favoriteRegionId as Lang.String?;
   private var _displayRegionId as Lang.String?;
 
@@ -30,6 +31,7 @@ class GlanceView extends Ui.GlanceView {
 
   function onShow() {
     _hasSubscription = $.getHasSubscription();
+    _backgroundFetchingEnabled = $.getEnableBackgroundFetching();
     _favoriteRegionId = $.getFavoriteRegionId();
     _displayRegionId = _favoriteRegionId;
     _useLocation = $.getUseLocation();
@@ -44,6 +46,7 @@ class GlanceView extends Ui.GlanceView {
 
   function onUpdate(dc as Gfx.Dc) {
     if (
+      _backgroundFetchingEnabled &&
       _hasSubscription &&
       (_favoriteRegionId != null || _useLocation) &&
       _forecastData == null
@@ -56,6 +59,7 @@ class GlanceView extends Ui.GlanceView {
     }
 
     if (
+      _backgroundFetchingEnabled == false ||
       _hasSubscription == false ||
       !(_favoriteRegionId != null || _useLocation) ||
       _forecastData == null ||
@@ -141,7 +145,9 @@ class GlanceView extends Ui.GlanceView {
     if (data != null) {
       _forecastData = data[0];
       _dataAge = $.getStorageDataAge(data);
-      _displayRegionId = (_forecastData as LocationAvalancheForecast)["regionId"];
+      _displayRegionId = (_forecastData as LocationAvalancheForecast)[
+        "regionId"
+      ];
       _displayingLocationForecast = true;
 
       if (self has :clearBufferedBitmap) {

@@ -15,6 +15,16 @@ class DatafieldServiceDelegate extends System.ServiceDelegate {
       $.log("Datafield temporal event triggered.");
     }
 
+    if ($.getBackgroundFetchingEnabled() == false) {
+      if ($.Debug) {
+        $.log("Background fetching disabled. Skipping reload.");
+      }
+
+      Background.deleteTemporalEvent();
+      Background.exit(false);
+      return;
+    }
+
     if ($.canMakeWebRequest() == false) {
       if ($.Debug) {
         $.log("No connection available. Skipping reload.");

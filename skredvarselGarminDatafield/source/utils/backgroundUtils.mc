@@ -1,11 +1,28 @@
 import Toybox.Lang;
 
+using Toybox.Application.Properties;
 using Toybox.Background;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
 
 (:background)
+function getBackgroundFetchingEnabled() as Boolean {
+  var enabled = Properties.getValue("enableBackgroundFetching") as Boolean?;
+
+  return enabled != null ? enabled : true;
+}
+
+(:background)
 function registerTemporalEvent() as Void {
+  if ($.getBackgroundFetchingEnabled() == false) {
+    if ($.Debug) {
+      $.log("Background fetching disabled. Removing temporal event.");
+    }
+
+    Background.deleteTemporalEvent();
+    return;
+  }
+
   if ($.getHasSubscription() == false) {
     if ($.Debug) {
       $.log("No subscription detected. Removing temporal event.");

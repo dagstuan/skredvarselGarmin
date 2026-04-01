@@ -55,6 +55,15 @@ class DatafieldApp extends Application.AppBase {
 
   (:noForegroundRequest)
   private function _maybeQueueImmediateBackgroundFetch() as Void {
+    if ($.getBackgroundFetchingEnabled() == false) {
+      if ($.Debug) {
+        $.log(
+          "_maybeQueueImmediateBackgroundFetch: background fetching disabled."
+        );
+      }
+      return;
+    }
+
     if ($.Debug) {
       $.log("_maybeQueueImmediateBackgroundFetch: queuing background fetch.");
     }

@@ -26,6 +26,15 @@ function registerTemporalEvent() {
     return;
   }
 
+  if ($.getEnableBackgroundFetching() == false) {
+    if ($.Debug) {
+      $.log("Background fetching disabled. Removing temporal event.");
+    }
+
+    Background.deleteTemporalEvent();
+    return;
+  }
+
   if ($.getHasSubscription() == false) {
     if ($.Debug) {
       $.log("No subscription detected. Removing temporal event.");
@@ -76,7 +85,7 @@ function registerTemporalEvent() {
   }
 }
 
-function getInitialViewAndDelegate() as [ Ui.Views, Ui.InputDelegates? ] {
+function getInitialViewAndDelegate() as [Ui.Views, Ui.InputDelegates?] {
   var deviceSettings = System.getDeviceSettings();
   if (
     deviceSettings has :isGlanceModeEnabled &&
@@ -101,7 +110,11 @@ function switchToInitialView(transition as Ui.SlideType) {
 
   var initialViewAndDelegate = $.getInitialViewAndDelegate();
 
-  Ui.switchToView(initialViewAndDelegate[0], initialViewAndDelegate[1], transition);
+  Ui.switchToView(
+    initialViewAndDelegate[0],
+    initialViewAndDelegate[1],
+    transition
+  );
 }
 
 (:background)
@@ -142,7 +155,11 @@ class skredvarselGarminApp extends Application.AppBase {
       var lastLocationTime = $.getLastLocationTime();
 
       var dataAge = Time.now().compare(new Time.Moment(lastLocationTime));
-      if (location == null || lastLocationTime == null || dataAge > $.TIME_TO_CONSIDER_DATA_STALE) {
+      if (
+        location == null ||
+        lastLocationTime == null ||
+        dataAge > $.TIME_TO_CONSIDER_DATA_STALE
+      ) {
         if ($.Debug) {
           $.log("Location is stale. Fetching new location.");
         }
@@ -155,7 +172,7 @@ class skredvarselGarminApp extends Application.AppBase {
     }
   }
 
-  function getInitialView() as [ Ui.Views ] or [ Ui.Views, Ui.InputDelegates ] {
+  function getInitialView() as [Ui.Views] or [Ui.Views, Ui.InputDelegates] {
     if ($.getHasSubscription() == false) {
       if ($.Debug) {
         $.log("No subscription detected.");
@@ -182,7 +199,7 @@ class skredvarselGarminApp extends Application.AppBase {
   public function getGlanceView() {
     $.registerTemporalEvent();
 
-    if (self has :fetchPositionIfStale) {
+    if ($.getEnableBackgroundFetching() && self has :fetchPositionIfStale) {
       fetchPositionIfStale();
     }
 

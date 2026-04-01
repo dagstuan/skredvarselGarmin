@@ -23,6 +23,16 @@ class ServiceDelegate extends System.ServiceDelegate {
       );
     }
 
+    if ($.getEnableBackgroundFetching() == false) {
+      if ($.Debug) {
+        $.log("Background fetching disabled. Removing temporal event.");
+      }
+
+      Background.deleteTemporalEvent();
+      Background.exit(false);
+      return;
+    }
+
     if ($.getHasSubscription() == false) {
       if ($.Debug) {
         $.log("No subscription detected. Not reloading.");
@@ -77,12 +87,16 @@ class ServiceDelegate extends System.ServiceDelegate {
     data as WebRequestCallbackData
   ) as Void {
     if (responseCode == -403) {
-      throw new SkredvarselGarminException("Background reload request returned -403 OOM.");
+      throw new SkredvarselGarminException(
+        "Background reload request returned -403 OOM."
+      );
     }
 
     if (responseCode == 200) {
       if (responseCode == 200 && _currentData[0].equals("location")) {
-        var locationRegionId = (data as LocationAvalancheForecast)["regionId"].toString();
+        var locationRegionId = (data as LocationAvalancheForecast)[
+          "regionId"
+        ].toString();
 
         if ($.Debug) {
           $.log(
@@ -109,7 +123,9 @@ class ServiceDelegate extends System.ServiceDelegate {
 
   protected function loadDetailedWarningsForRegion() {
     if ($.Debug) {
-      $.log(Lang.format("Loading detailed forecast for $1$", [_currentData[0]]));
+      $.log(
+        Lang.format("Loading detailed forecast for $1$", [_currentData[0]])
+      );
     }
 
     var language = $.getForecastLanguage();
@@ -119,7 +135,12 @@ class ServiceDelegate extends System.ServiceDelegate {
     var regionId = _currentData[0];
     var end = $.getBackgroundDetailedForecastEndDate(now, regionId);
 
-    var path = $.getDetailedWarningsPathForRegion(regionId, language, start, end);
+    var path = $.getDetailedWarningsPathForRegion(
+      regionId,
+      language,
+      start,
+      end
+    );
     var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);
 
     $.makeApiRequest(path, storageKey, method(:onReloadedRegion), false);
