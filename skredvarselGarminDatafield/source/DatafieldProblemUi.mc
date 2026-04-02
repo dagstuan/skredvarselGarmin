@@ -1,6 +1,7 @@
 import Toybox.Lang;
 
 using Toybox.Graphics as Gfx;
+using Toybox.System;
 using Toybox.WatchUi as Ui;
 
 function getTriggerSensitivityText(triggerSensitivity as Number) as String {
@@ -80,8 +81,13 @@ function getDestructiveSizeText(size as Number) as String {
 
 // Renders a single avalanche problem as an inline horizontal row:
 // [scrolling problem text]
-// [problem type icon] [aspect rose] [exposed height icon]
+// [problem type icon] [aspect rose] [exposed height icon/text]
 class DatafieldProblemUi {
+  private const EXPOSED_HEIGHT_ICON_MS = 5000;
+  private const EXPOSED_HEIGHT_TEXT_MS = 12000;
+  private const EXPOSED_HEIGHT_TEXT_WIDTH_MULTIPLIER_SINGLE = 1.5f;
+  private const EXPOSED_HEIGHT_TEXT_WIDTH_MULTIPLIER = 2f;
+
   private var _height as Number;
   private var _headingFont as Gfx.FontType = Gfx.FONT_XTINY;
   private var _headingHeight as Number;
@@ -92,16 +98,18 @@ class DatafieldProblemUi {
 
   private var _problemTextElement as AvalancheUi.ScrollingText;
   private var _problemIcon as Ui.BitmapResource;
-  private var _problemIconBitmap as Gfx.BufferedBitmap?;
   private var _problemIconSize as Number = 0;
   private var _validExpositionsUi as AvalancheUi.ValidExpositions;
-  private var _exposedHeightUi as AvalancheUi.ExposedHeight;
+  private var _exposedHeightUi as AvalancheUi.ExposedHeight?;
+  private var _exposedHeightTextUi as AvalancheUi.ExposedHeightText?;
 
   private var _iconSize as Number;
   private var _iconRowHeight as Number;
   private var _gap as Number;
   private var _iconRowWidth as Number = 0;
   private var _inline as Boolean = false;
+  private var _exposedHeightToggleStartMs as Number = 0;
+  private var _exposedHeightTextWasVisible as Boolean = false;
 
   public function initialize(
     dc as Gfx.Dc,
@@ -155,7 +163,6 @@ class DatafieldProblemUi {
 
     // Draw the problem type icon at its native size (no scaling needed)
     _problemIconSize = _problemIcon.getHeight();
-    _problemIconBitmap = null;
 
     var gapFactor = inline ? 0.2f : 0.35f;
     _gap =
@@ -196,18 +203,39 @@ class DatafieldProblemUi {
 
     var expositionsSize = _validExpositionsUi.getSize();
     var expositionsTotalH = _validExpositionsUi.getTotalHeight();
-    var exposedHeightSize = _exposedHeightUi.getSize();
-    _iconRowWidth =
-      _problemIconSize + _gap + expositionsSize + _gap + exposedHeightSize;
-
+    var exposedHeightSize = (
+      _exposedHeightUi as AvalancheUi.ExposedHeight
+    ).getSize();
     _iconRowHeight = $.max([_iconSize, expositionsTotalH, exposedHeightSize]);
 
-    var textContainerWidth = _iconRowWidth;
+    var useExposedHeightText =
+      numProblems != 3 && problem["exposedHeightZones"] == null;
+    if (useExposedHeightText) {
+      var maxExposedHeightTextWidth = getMaxExposedHeightTextWidth(
+        dc.getWidth(),
+        expositionsSize,
+        exposedHeightSize,
+        numProblems
+      );
+
+      _exposedHeightTextUi = new AvalancheUi.ExposedHeightText({
+        :dc => dc,
+        :exposedHeight1 => exposedHeights[0],
+        :exposedHeight2 => exposedHeights[1],
+        :exposedHeightFill => exposedHeights[2],
+        :dangerFillColor => dangerFillColor,
+        :maxWidth => maxExposedHeightTextWidth,
+        :maxHeight => exposedHeightSize,
+      });
+    }
+
+    _iconRowWidth =
+      _problemIconSize + _gap + expositionsSize + _gap + exposedHeightSize;
 
     _problemTextElement = new AvalancheUi.ScrollingText({
       :dc => dc,
       :text => problemText,
-      :containerWidth => textContainerWidth,
+      :containerWidth => _iconRowWidth,
       :containerHeight => _headingHeight,
       :scrollSpeed => 3,
       :font => _headingFont,
@@ -218,8 +246,69 @@ class DatafieldProblemUi {
     _height = _headingHeight + _headingGap + _iconRowHeight;
   }
 
+  private function getMaxExposedHeightTextWidth(
+    fieldWidth as Number,
+    expositionsSize as Number,
+    exposedHeightSize as Number,
+    numProblems as Number
+  ) as Number {
+    var maxExposedHeightTextWidth =
+      fieldWidth -
+      _dangerLineWidth -
+      _dangerLineGap -
+      _problemIconSize -
+      _gap -
+      expositionsSize -
+      _gap;
+
+    if (numProblems == 1) {
+      maxExposedHeightTextWidth = (
+        exposedHeightSize * EXPOSED_HEIGHT_TEXT_WIDTH_MULTIPLIER_SINGLE
+      ).toNumber();
+    } else if (
+      numProblems == 2 &&
+      maxExposedHeightTextWidth > exposedHeightSize
+    ) {
+      maxExposedHeightTextWidth = exposedHeightSize;
+    }
+
+    if (numProblems == 2) {
+      maxExposedHeightTextWidth = (
+        maxExposedHeightTextWidth * EXPOSED_HEIGHT_TEXT_WIDTH_MULTIPLIER
+      ).toNumber();
+    }
+
+    if (maxExposedHeightTextWidth > fieldWidth) {
+      maxExposedHeightTextWidth = fieldWidth;
+    }
+    if (maxExposedHeightTextWidth < 1) {
+      maxExposedHeightTextWidth = 1;
+    }
+
+    return maxExposedHeightTextWidth;
+  }
+
   public function onShow() as Void {
+    _exposedHeightToggleStartMs = System.getTimer();
+    _exposedHeightTextWasVisible = false;
     _problemTextElement.onShow();
+  }
+
+  private function shouldShowExposedHeightText() as Boolean {
+    if (_exposedHeightTextUi == null) {
+      return false;
+    }
+
+    var now = System.getTimer();
+    if (now < _exposedHeightToggleStartMs) {
+      _exposedHeightToggleStartMs = now;
+      return false;
+    }
+
+    var elapsedMs =
+      (now - _exposedHeightToggleStartMs) %
+      (EXPOSED_HEIGHT_ICON_MS + EXPOSED_HEIGHT_TEXT_MS);
+    return elapsedMs >= EXPOSED_HEIGHT_ICON_MS;
   }
 
   public function getScrollingTextCycleTicks() as Number {
@@ -272,11 +361,7 @@ class DatafieldProblemUi {
     var curX = iconRowX;
 
     // Problem type icon
-    if (_problemIconBitmap != null) {
-      dc.drawBitmap(curX, bottomY - _problemIconSize, _problemIconBitmap);
-    } else {
-      dc.drawBitmap(curX, bottomY - _problemIconSize, _problemIcon);
-    }
+    dc.drawBitmap(curX, bottomY - _problemIconSize, _problemIcon);
     curX += _problemIconSize + _gap;
 
     // Aspect rose — center the circle, "N" label extends above
@@ -284,8 +369,27 @@ class DatafieldProblemUi {
     _validExpositionsUi.draw(dc, curX, bottomY - expositionsSize);
     curX += expositionsSize + _gap;
 
-    // Exposed height icon
-    var exposedHeightSize = _exposedHeightUi.getSize();
-    _exposedHeightUi.draw(dc, curX, bottomY - exposedHeightSize);
+    var showExposedHeightText = shouldShowExposedHeightText();
+    if (showExposedHeightText && !_exposedHeightTextWasVisible) {
+      (_exposedHeightTextUi as AvalancheUi.ExposedHeightText).onShow();
+    }
+    _exposedHeightTextWasVisible = showExposedHeightText;
+
+    var exposedHeightSize = (
+      _exposedHeightUi as AvalancheUi.ExposedHeight
+    ).getSize();
+    if (showExposedHeightText) {
+      (_exposedHeightTextUi as AvalancheUi.ExposedHeightText).draw(
+        dc,
+        curX,
+        bottomY - exposedHeightSize
+      );
+    } else {
+      (_exposedHeightUi as AvalancheUi.ExposedHeight).draw(
+        dc,
+        curX,
+        bottomY - exposedHeightSize
+      );
+    }
   }
 }

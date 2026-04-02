@@ -1,5 +1,6 @@
 {
   "editor.formatOnSave": true,
+  // "monkeyC.compilerOptions": "-r",
   "[xml]": {
     "editor.formatOnSave": false
   },
