@@ -40,34 +40,17 @@ class DatafieldForecastView {
     _buildProblemUis(dc);
     _buildRegionNameText(dc);
     _syncScrollingTextCycles();
-    checkRegionAndFetchIfNeeded();
   }
 
   public function compute(info as Activity.Info) as Void {
-    if (info has :currentLocation && info.currentLocation != null) {
-      $.saveLocation(info.currentLocation.toDegrees());
-    }
-
-    _maybeRetryFetch();
+    checkRegionAndFetchIfNeeded(info);
   }
 
   (:noForegroundRequest)
-  private function _maybeRetryFetch() as Void {}
+  public function checkRegionAndFetchIfNeeded(info as Activity.Info) as Void {}
 
   (:foregroundRequest)
-  private function _maybeRetryFetch() as Void {
-    // Retry on each compute until we have data — handles the case where
-    // location wasn't available yet when onLayout first called this.
-    if (_locationDetailedForecast == null && !_isLoading) {
-      checkRegionAndFetchIfNeeded();
-    }
-  }
-
-  (:noForegroundRequest)
-  public function checkRegionAndFetchIfNeeded() as Void {}
-
-  (:foregroundRequest)
-  public function checkRegionAndFetchIfNeeded() as Void {
+  public function checkRegionAndFetchIfNeeded(info as Activity.Info) as Void {
     if (!$.canMakeWebRequest()) {
       if ($.Debug) {
         $.log(
@@ -77,95 +60,73 @@ class DatafieldForecastView {
       return;
     }
 
-    // If data is stale by age, just refetch immediately without the region check
-    var now = Time.now().value();
-    if (!_isLoading && now - _lastFetchTime > $.TIME_TO_CONSIDER_DATA_STALE) {
-      var location = $.getLocation();
-      if (location != null) {
-        if ($.Debug) {
-          $.log("checkRegionAndFetchIfNeeded: data stale, fetching.");
-        }
-        _isLoading = true;
-        _lastFetchTime = now;
-        $.loadDetailedWarningsForLocation(
-          method(:onDetailedForecastReceived),
-          false
-        );
-        return;
-      } else {
-        if ($.Debug) {
-          $.log("checkRegionAndFetchIfNeeded: data stale but no location yet.");
-        }
-        return;
-      }
-    } else if ($.Debug) {
-      $.log("checkRegionAndFetchIfNeeded: data not stale, checking region.");
-    }
-
-    // Data is fresh — check if we've moved to a different region
-    if (_locationDetailedForecast == null || _isLoading) {
+    if (_isLoading) {
       if ($.Debug) {
-        $.log(
-          "checkRegionAndFetchIfNeeded: no cached data or currently loading, skipping region check."
-        );
+        $.log("checkRegionAndFetchIfNeeded: already loading, skipping.");
       }
-
       return;
     }
-    var location = $.getLocation();
+
+    var location =
+      info.currentLocation != null
+        ? info.currentLocation.toDegrees()
+        : $.getLocation();
+
     if (location == null) {
       if ($.Debug) {
-        $.log("checkRegionAndFetchIfNeeded: no location for region check.");
+        $.log("checkRegionAndFetchIfNeeded: no location available.");
       }
       return;
     }
-    var url = Lang.format("$1$/regionByLocation/$2$/$3$", [
-      $.ApiBaseUrl,
-      location[0].format("%.6f"),
-      location[1].format("%.6f"),
-    ]);
-    $.makeGetRequestWithAuthorization(url, method(:onRegionCheckReceived));
+
+    var storedLocation = $.getStoredLocation();
+    if (storedLocation != null) {
+      var distanceKm = $.getDistanceInKilometers(storedLocation, location);
+
+      if (distanceKm > 10.0f) {
+        if ($.Debug) {
+          $.log(
+            Lang.format(
+              "Moved $1$ km since last forecast location. Refetching.",
+              [distanceKm.format("%.1f")]
+            )
+          );
+        }
+
+        _requestDetailedForecast(location);
+        return;
+      }
+    }
+
+    if (_locationDetailedForecast == null) {
+      if ($.Debug) {
+        $.log("checkRegionAndFetchIfNeeded: no cached data, fetching.");
+      }
+      _requestDetailedForecast(location);
+      return;
+    }
+
+    // If data is stale by age, just refetch immediately without the region check
+    var now = Time.now().value();
+    if (now - _lastFetchTime > $.TIME_TO_CONSIDER_DATA_STALE) {
+      if ($.Debug) {
+        $.log("checkRegionAndFetchIfNeeded: data stale, fetching.");
+      }
+      _requestDetailedForecast(location);
+      return;
+    }
   }
 
-  (:foregroundRequest)
-  public function onRegionCheckReceived(
-    responseCode as Number,
-    data as WebRequestCallbackData
+  private function _requestDetailedForecast(
+    location as [Lang.Double, Lang.Double]
   ) as Void {
-    if (responseCode == 401) {
-      if ($.Debug) {
-        $.log(
-          "Region check returned 401 — switching to subscription setup view."
-        );
-      }
-
-      switchToSubscriptionView();
-      return;
-    }
-
-    if (responseCode != 200 || data == null) {
-      return;
-    }
-    var regionId = (data as Dictionary)["regionId"].toString();
-    var cachedRegionId = (
-      _locationDetailedForecast as DetailedWarningsForLocationResponse
-    )["regionId"].toString();
-    if (!regionId.equals(cachedRegionId)) {
-      if ($.Debug) {
-        $.log(
-          Lang.format("Region mismatch: cached=$1$, current=$2$. Refetching.", [
-            cachedRegionId,
-            regionId,
-          ])
-        );
-      }
-      _isLoading = true;
-      _lastFetchTime = Time.now().value();
-      $.loadDetailedWarningsForLocation(
-        method(:onDetailedForecastReceived),
-        false
-      );
-    }
+    _isLoading = true;
+    _lastFetchTime = Time.now().value();
+    $.loadDetailedWarningsForLocation(
+      location,
+      method(:onDetailedForecastReceived),
+      false
+    );
   }
 
   public function onUpdate(dc as Gfx.Dc) as Void {
@@ -616,6 +577,7 @@ class DatafieldForecastView {
     data as WebRequestDelegateCallbackData
   ) as Void {
     _isLoading = false;
+
     if (responseCode == 200) {
       if ($.Debug) {
         $.log("Foreground fetch succeeded.");

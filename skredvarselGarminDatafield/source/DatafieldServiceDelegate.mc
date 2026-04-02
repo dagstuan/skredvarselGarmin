@@ -34,7 +34,8 @@ class DatafieldServiceDelegate extends System.ServiceDelegate {
       return;
     }
 
-    if ($.getLocation() == null) {
+    var location = $.getLocation();
+    if (location == null) {
       if ($.Debug) {
         $.log("No location available. Skipping reload.");
       }
@@ -43,7 +44,11 @@ class DatafieldServiceDelegate extends System.ServiceDelegate {
       return;
     }
 
-    $.loadDetailedWarningsForLocation(method(:onDetailedForecastLoaded), false);
+    $.loadDetailedWarningsForLocation(
+      location,
+      method(:onDetailedForecastLoaded),
+      false
+    );
   }
 
   public function onDetailedForecastLoaded(

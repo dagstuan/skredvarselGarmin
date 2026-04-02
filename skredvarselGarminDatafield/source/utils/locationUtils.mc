@@ -3,58 +3,67 @@ using Toybox.Weather;
 using Toybox.Lang;
 
 using Toybox.Application.Storage;
-using Toybox.Application.Properties;
+using Toybox.Math;
 using Toybox.Time;
 
 (:background)
 function getLocation() as [Lang.Double, Lang.Double]? {
-  // Get Location from Garmin Weather
-  if (Toybox has :Weather) {
-    try {
-      var w = Weather.getCurrentConditions();
-      if (w != null && w.observationLocationPosition != null) {
-        if ($.Debug) {
-          $.log("Location obtained from Weather");
-        }
-
-        var loc = w.observationLocationPosition.toDegrees();
-        if ($.Debug) {
-          $.log(Lang.format("Observed location: $1$, $2$", [loc[0], loc[1]]));
-        }
-        saveLocation(loc);
-        return loc;
-      }
-    } catch (ex) {
-      if ($.Debug) {
-        $.log("Failed getting location from Weather: " + ex);
-      }
+  var activityInfo = Activity.getActivityInfo();
+  if (activityInfo != null && activityInfo.currentLocation != null) {
+    if ($.Debug) {
+      $.log("Location obtained from Activity");
     }
+
+    return activityInfo.currentLocation.toDegrees();
   }
 
-  // Get Location from Activity
-  var lastActivity = Activity.getActivityInfo();
-  if (lastActivity != null) {
-    var lastLocationTime = $.getLastLocationTime();
+  var weatherLocation = getWeatherLocation();
+  if (weatherLocation != null) {
+    return weatherLocation;
+  }
 
-    if (
-      lastActivity.currentLocation != null &&
-      lastActivity.startTime != null &&
-      lastActivity.startTime.compare(new Time.Moment(lastLocationTime)) > 0
-    ) {
-      if ($.Debug) {
-        $.log("Location obtained from Activity");
-      }
-
-      var loc = lastActivity.currentLocation.toDegrees();
-      saveLocation(loc);
-      return loc;
+  var storedLocation = getStoredLocation();
+  if (storedLocation != null) {
+    if ($.Debug) {
+      $.log("Location obtained from storage.");
     }
+
+    return storedLocation;
   }
 
   if ($.Debug) {
-    $.log("Location obtained from Storage.");
+    $.log("Location unavailable.");
   }
-  // Get last known Location
+
+  return null;
+}
+
+(:background)
+function getWeatherLocation() as [Lang.Double, Lang.Double]? {
+  if (!(Toybox has :Weather)) {
+    return null;
+  }
+
+  try {
+    var weather = Weather.getCurrentConditions();
+    if (weather != null && weather.observationLocationPosition != null) {
+      if ($.Debug) {
+        $.log("Location obtained from Weather");
+      }
+
+      return weather.observationLocationPosition.toDegrees();
+    }
+  } catch (ex) {
+    if ($.Debug) {
+      $.log("Failed getting location from Weather: " + ex);
+    }
+  }
+
+  return null;
+}
+
+(:background)
+function getStoredLocation() as [Lang.Double, Lang.Double]? {
   return Storage.getValue("last_location") as [Lang.Double, Lang.Double];
 }
 
@@ -71,4 +80,30 @@ function saveLocation(loc as [Lang.Double, Lang.Double]) {
     Storage.setValue("last_location", loc);
     Storage.setValue("last_location_time", Time.now().value());
   } catch (ex) {}
+}
+
+function getDistanceInKilometers(
+  fromLocation as [Lang.Double, Lang.Double],
+  toLocation as [Lang.Double, Lang.Double]
+) as Lang.Double {
+  var earthRadiusKm = 6371.0f;
+  var fromLat = Math.toRadians(fromLocation[0]);
+  var toLat = Math.toRadians(toLocation[0]);
+  var deltaLat = toLat - fromLat;
+  var deltaLon = Math.toRadians(toLocation[1] - fromLocation[1]);
+
+  var sinLat = Math.sin(deltaLat / 2.0f);
+  var sinLon = Math.sin(deltaLon / 2.0f);
+  var haversine =
+    sinLat * sinLat + Math.cos(fromLat) * Math.cos(toLat) * sinLon * sinLon;
+
+  if (haversine < 0.0f) {
+    haversine = 0.0f;
+  } else if (haversine > 1.0f) {
+    haversine = 1.0f;
+  }
+
+  var arc =
+    2.0f * Math.atan2(Math.sqrt(haversine), Math.sqrt(1.0f - haversine));
+  return earthRadiusKm * arc;
 }
