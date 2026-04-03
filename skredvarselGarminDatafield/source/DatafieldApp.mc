@@ -67,23 +67,7 @@ class DatafieldApp extends Application.AppBase {
     if ($.Debug) {
       $.log("_maybeQueueImmediateBackgroundFetch: queuing background fetch.");
     }
-    var fiveMinutes = new Time.Duration(5 * 60);
-    var lastRun = Background.getLastTemporalEventTime();
-    var fetchAt =
-      lastRun != null ? lastRun.add(fiveMinutes) : Time.now().add(fiveMinutes);
-
-    // If the earliest allowed time is already in the past, schedule for now+5min
-    if (fetchAt.value() < Time.now().value()) {
-      fetchAt = Time.now().add(fiveMinutes);
-    }
-
-    var secsFromNow = fetchAt.value() - Time.now().value();
-    Background.registerForTemporalEvent(fetchAt);
-    if ($.Debug) {
-      $.log(
-        Lang.format("Background fetch queued in $1$ seconds.", [secsFromNow])
-      );
-    }
+    $.queueImmediateBackgroundJob();
   }
 
   function getServiceDelegate() {
@@ -99,7 +83,10 @@ class DatafieldApp extends Application.AppBase {
       );
     }
 
-    if (fetchedData == true) {
+    if (
+      fetchedData == true ||
+      fetchedData == $.BACKGROUND_SUBSCRIPTION_RESULT
+    ) {
       if (_rootView != null) {
         _rootView.onDataChanged();
       }

@@ -1,9 +1,13 @@
 import Toybox.Lang;
 
 using Toybox.Application.Properties;
+using Toybox.Application.Storage;
 using Toybox.Background;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
+
+const QUEUED_IMMEDIATE_BACKGROUND_JOB_RUN_AT_STORAGE_KEY =
+  "queuedImmediateBackgroundJobRunAt";
 
 (:background)
 function getBackgroundFetchingEnabled() as Boolean {
@@ -71,4 +75,48 @@ function registerTemporalEvent() as Void {
       );
     }
   }
+}
+
+(:background)
+function queueImmediateBackgroundJob() as Void {
+  var fiveMinutes = new Time.Duration(5 * 60);
+  var now = Time.now();
+  var lastRun = Background.getLastTemporalEventTime();
+  var runAt = lastRun != null ? lastRun.add(fiveMinutes) : now;
+
+  if (runAt.value() < now.value()) {
+    runAt = now;
+  }
+
+  Storage.setValue(
+    QUEUED_IMMEDIATE_BACKGROUND_JOB_RUN_AT_STORAGE_KEY,
+    runAt.value()
+  );
+  Background.registerForTemporalEvent(runAt);
+
+  if ($.Debug) {
+    $.log(
+      Lang.format("Queued immediate background job in $1$ seconds.", [
+        runAt.value() - now.value(),
+      ])
+    );
+  }
+}
+
+(:background)
+function clearQueuedImmediateBackgroundJob() as Void {
+  Storage.setValue(QUEUED_IMMEDIATE_BACKGROUND_JOB_RUN_AT_STORAGE_KEY, 0);
+}
+
+(:background)
+function getQueuedImmediateBackgroundJobSecondsRemaining() as Number {
+  var queuedRunAt =
+    Storage.getValue(QUEUED_IMMEDIATE_BACKGROUND_JOB_RUN_AT_STORAGE_KEY) as
+    Number?;
+  if (queuedRunAt == null || queuedRunAt <= 0) {
+    return 0;
+  }
+
+  var remainingSeconds = queuedRunAt - Time.now().value();
+  return remainingSeconds > 0 ? remainingSeconds : 0;
 }

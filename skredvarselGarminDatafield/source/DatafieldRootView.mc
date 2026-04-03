@@ -16,6 +16,13 @@ class DatafieldRootView extends Ui.DataField {
   }
 
   public function onDataChanged() as Void {
+    if (_showSubscription) {
+      if (_subscriptionView != null) {
+        (_subscriptionView as DatafieldSubscriptionView).onDataChanged();
+      }
+      return;
+    }
+
     if (_forecastView != null) {
       (_forecastView as DatafieldForecastView).onDataChanged();
     }
