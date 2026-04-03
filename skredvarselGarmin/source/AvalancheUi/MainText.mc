@@ -48,10 +48,12 @@ module AvalancheUi {
 
     public function onShow() as Void {
       if (_emergencyWarningText != null) {
+        _emergencyWarningText.reset();
         _emergencyWarningText.onShow();
       }
 
       if (_mainText != null) {
+        _mainText.reset();
         _mainText.onShow();
       }
     }

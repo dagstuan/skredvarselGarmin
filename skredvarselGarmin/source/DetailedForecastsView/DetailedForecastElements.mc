@@ -56,6 +56,11 @@ public class DetailedForecastElements {
     _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
     _elements = new [_numElements];
     setupElements(settings[:dc]);
+
+    var currentElement = _elements[_currentPage];
+    if (currentElement != null) {
+      currentElement.onShow();
+    }
   }
 
   public function onHide() {
@@ -188,9 +193,6 @@ public class DetailedForecastElements {
 
     for (var i = 0; i < _elements.size(); i++) {
       _elements[i].draw(dc, _x0 + xOffset, y0);
-      if (_currentPage == i) {
-        _elements[i].onShow();
-      }
       xOffset += _fullWidth;
     }
   }
@@ -210,7 +212,10 @@ public class DetailedForecastElements {
     }
 
     if (length == 0) {
-      return $.getOrLoadResourceString("Ingen varseltekst tilgjengelig.", :NoForecastText);
+      return $.getOrLoadResourceString(
+        "Ingen varseltekst tilgjengelig.",
+        :NoForecastText
+      );
     }
 
     // Add a dot if it's not there in the main text.

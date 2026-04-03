@@ -137,7 +137,11 @@ module AvalancheUi {
 
       var exposedHeightZones = problem["exposedHeightZones"];
       if (exposedHeightZones != null) {
-        _exposedHeights = [0, 0, $.exposedHeightZonesToFill(exposedHeightZones)];
+        _exposedHeights = [
+          0,
+          0,
+          $.exposedHeightZonesToFill(exposedHeightZones),
+        ];
         _hasExposedHeightZones = true;
       } else {
         _exposedHeights = problem["exposedHeights"];
@@ -169,6 +173,7 @@ module AvalancheUi {
 
     public function onShow() as Void {
       if (_problemTextElement != null) {
+        _problemTextElement.reset();
         _problemTextElement.onShow();
       }
       if (_exposedHeightTextUi != null) {
@@ -239,12 +244,16 @@ module AvalancheUi {
 
       var totalElementWidth = _hasExposedHeightZones
         ? _validExpositionsUiSize + _exposedHeightUiSize
-        : _validExpositionsUiSize + _exposedHeightUiSize + _exposedHeightTextUiWidth + _dangerLevelWidth;
+        : _validExpositionsUiSize +
+          _exposedHeightUiSize +
+          _exposedHeightTextUiWidth +
+          _dangerLevelWidth;
 
       if (_hasExposedHeightZones) {
         // 2 elements: use a fixed gap and center the pair horizontally
         _paddingBetweenElements = (_width * 0.1).toNumber();
-        _paddingLeftRight = (_width - totalElementWidth - _paddingBetweenElements) / 2;
+        _paddingLeftRight =
+          (_width - totalElementWidth - _paddingBetweenElements) / 2;
       } else {
         _paddingBetweenElements =
           (_width - _paddingLeftRight * 2 - totalElementWidth) / 3;

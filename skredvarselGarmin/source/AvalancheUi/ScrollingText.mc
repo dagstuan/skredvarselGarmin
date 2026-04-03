@@ -104,6 +104,12 @@ module AvalancheUi {
       }
     }
 
+    public function reset() as Void {
+      _textOffset = 0.0;
+      _ticksAtStart = 0;
+      _ticksAtEnd = 0;
+    }
+
     public function getWidth() {
       return $.min(_textWidth, _containerWidth);
     }
