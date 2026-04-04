@@ -13,7 +13,7 @@ public partial class LavinprognoserApiClient(
     ILavinprognoserWebsiteApi websiteApi,
     IMemoryCache memoryCache) : ILavinprognoserApi
 {
-    private static readonly SemaphoreSlim FetchSemaphore = new(3, 3);
+    private static readonly SemaphoreSlim FetchSemaphore = new(10, 10);
 
     public async Task<IEnumerable<WfsFeature<JsonElement>>> GetAllLocationPolygons()
     {

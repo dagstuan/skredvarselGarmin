@@ -61,7 +61,7 @@ public static class RefitConfiguration
             .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://nvgis.naturvardsverket.se/geoserver/lavinprognoser/"))
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
-                MaxConnectionsPerServer = 3,
+                MaxConnectionsPerServer = 10,
             })
             .AddHttpMessageHandler<LavinprognoserLoggingHandler>()
             .AddPolicyHandler(retryPolicy)
@@ -71,7 +71,7 @@ public static class RefitConfiguration
             .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://www.lavinprognoser.se/"))
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
-                MaxConnectionsPerServer = 3,
+                MaxConnectionsPerServer = 10,
             })
             .AddPolicyHandler(retryPolicy)
             .AddPolicyHandler(timeoutPolicy);
