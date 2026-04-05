@@ -17,6 +17,7 @@ module AvalancheUi {
   public class ExposedHeightText {
     private const MS_AT_START_END = 2000;
     private const SCROLL_SPEED = 2;
+    private const SINGLE_VALUE_VERTICAL_GAP = 2;
 
     private var _exposedHeight1 as Number;
     private var _exposedHeight2 as Number;
@@ -82,7 +83,7 @@ module AvalancheUi {
           createTextElement(
             dc,
             _maxWidth,
-            _halfMaxHeight,
+            _fontHeight,
             Y_ALIGN_TOP,
             _exposedHeight1 + "m"
           ),
@@ -92,8 +93,8 @@ module AvalancheUi {
           createTextElement(
             dc,
             _maxWidth,
-            _halfMaxHeight,
-            Y_ALIGN_BOTTOM,
+            _fontHeight,
+            Y_ALIGN_TOP,
             _exposedHeight1 + "m"
           ),
         ];
@@ -112,20 +113,20 @@ module AvalancheUi {
             dc,
             textWidth,
             _halfMaxHeight,
-            Y_ALIGN_BOTTOM,
+            Y_ALIGN_CENTER,
             _exposedHeight1 + "m"
           ),
           createTextElement(
             dc,
             textWidth,
             _halfMaxHeight,
-            Y_ALIGN_TOP,
+            Y_ALIGN_CENTER,
             _exposedHeight2 + "m"
           ),
         ];
       } else if (_exposedHeightFill == 4) {
         var text = Lang.format("$1$-$2$m", [_exposedHeight2, _exposedHeight1]);
-        var textWidth = _textContainerWidth - _arrowWidth - _elementSpacing;
+        var textWidth = _textContainerWidth;
         if (textWidth < 1) {
           textWidth = 1;
         }
@@ -163,71 +164,68 @@ module AvalancheUi {
     }
 
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
-      if ($.DrawOutlines) {
-        $.drawOutline(dc, x0, y0, _width, _halfMaxHeight);
-      }
-
       var bottomY0 = y0 + _halfMaxHeight;
 
       if ($.DrawOutlines) {
+        $.drawOutline(dc, x0, y0, _width, _maxHeight);
+        $.drawOutline(dc, x0, y0, _width, _halfMaxHeight);
         $.drawOutline(dc, x0, bottomY0, _width, _halfMaxHeight);
       }
 
       if (_exposedHeightFill == 1) {
-        var fill1TextWidth = getVisibleTextWidth(0);
+        var fill1GroupY =
+          y0 +
+          (_maxHeight -
+            _arrowHeight -
+            SINGLE_VALUE_VERTICAL_GAP -
+            _fontHeight) /
+            2;
         drawArrow(
           dc,
           0,
-          x0 + fill1TextWidth / 2 - _arrowWidth / 2,
-          y0,
-          _halfMaxHeight,
-          X_ALIGN_LEFT,
-          Y_ALIGN_BOTTOM
+          x0,
+          fill1GroupY,
+          _arrowHeight,
+          X_ALIGN_CENTER,
+          Y_ALIGN_TOP
         );
-        drawTextElement(dc, 0, x0, bottomY0);
+        drawTextElement(
+          dc,
+          0,
+          x0,
+          fill1GroupY + _arrowHeight + SINGLE_VALUE_VERTICAL_GAP
+        );
       } else if (_exposedHeightFill == 2) {
-        var fill2TextWidth = getVisibleTextWidth(0);
-        drawTextElement(dc, 0, x0, y0);
+        var fill2GroupY =
+          y0 +
+          (_maxHeight -
+            _fontHeight -
+            SINGLE_VALUE_VERTICAL_GAP -
+            _arrowHeight) /
+            2;
+        drawTextElement(dc, 0, x0, fill2GroupY);
         drawArrow(
           dc,
           0,
-          x0 + fill2TextWidth / 2 - _arrowWidth / 2,
-          bottomY0,
-          _halfMaxHeight,
-          X_ALIGN_LEFT,
+          x0,
+          fill2GroupY + _fontHeight + SINGLE_VALUE_VERTICAL_GAP,
+          _arrowHeight,
+          X_ALIGN_CENTER,
           Y_ALIGN_TOP
         );
       } else if (_exposedHeightFill == 3) {
-        drawArrow(
-          dc,
-          0,
-          x0,
-          y0 - _elementSpacing / 2,
-          _halfMaxHeight,
-          X_ALIGN_LEFT,
-          Y_ALIGN_BOTTOM
-        );
-        drawTextElement(
-          dc,
-          0,
-          x0 + _arrowWidth + _elementSpacing,
-          y0 - _elementSpacing / 2
-        );
+        drawArrow(dc, 0, x0, y0, _halfMaxHeight, X_ALIGN_LEFT, Y_ALIGN_CENTER);
+        drawTextElement(dc, 0, x0 + _arrowWidth + _elementSpacing, y0);
         drawArrow(
           dc,
           1,
           x0,
-          bottomY0 + _elementSpacing / 2,
+          bottomY0,
           _halfMaxHeight,
           X_ALIGN_LEFT,
-          Y_ALIGN_TOP
+          Y_ALIGN_CENTER
         );
-        drawTextElement(
-          dc,
-          1,
-          x0 + _arrowWidth + _elementSpacing,
-          bottomY0 + _elementSpacing / 2
-        );
+        drawTextElement(dc, 1, x0 + _arrowWidth + _elementSpacing, bottomY0);
       } else if (_exposedHeightFill == 4) {
         drawArrow(
           dc,
@@ -308,7 +306,7 @@ module AvalancheUi {
       containerWidth as Number
     ) as Number {
       if (textWidth <= containerWidth) {
-        return 0;
+        return (containerWidth - textWidth) / 2;
       }
 
       var now = System.getTimer();
@@ -353,8 +351,12 @@ module AvalancheUi {
         arrowXOffset = _width / 2 - _arrowWidth / 2;
       }
 
-      var arrowYOffset =
-        yAlignment == Y_ALIGN_TOP ? 0 : containerHeight - _arrowHeight;
+      var arrowYOffset = 0;
+      if (yAlignment == Y_ALIGN_CENTER) {
+        arrowYOffset = containerHeight / 2 - _arrowHeight / 2;
+      } else if (yAlignment == Y_ALIGN_BOTTOM) {
+        arrowYOffset = containerHeight - _arrowHeight;
+      }
       _arrows[arrowIndex].draw(dc, x0 + arrowXOffset, y0 + arrowYOffset);
     }
   }

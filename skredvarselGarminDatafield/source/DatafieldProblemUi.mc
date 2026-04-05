@@ -85,8 +85,6 @@ function getDestructiveSizeText(size as Number) as String {
 class DatafieldProblemUi {
   private const EXPOSED_HEIGHT_ICON_MS = 5000;
   private const EXPOSED_HEIGHT_TEXT_MS = 12000;
-  private const EXPOSED_HEIGHT_TEXT_WIDTH_MULTIPLIER_SINGLE = 1.5f;
-  private const EXPOSED_HEIGHT_TEXT_WIDTH_MULTIPLIER = 2f;
 
   private var _height as Number;
   private var _headingFont as Gfx.FontType = Gfx.FONT_XTINY;
@@ -211,20 +209,13 @@ class DatafieldProblemUi {
     var useExposedHeightText =
       numProblems != 3 && problem["exposedHeightZones"] == null;
     if (useExposedHeightText) {
-      var maxExposedHeightTextWidth = getMaxExposedHeightTextWidth(
-        dc.getWidth(),
-        expositionsSize,
-        exposedHeightSize,
-        numProblems
-      );
-
       _exposedHeightTextUi = new AvalancheUi.ExposedHeightText({
         :dc => dc,
         :exposedHeight1 => exposedHeights[0],
         :exposedHeight2 => exposedHeights[1],
         :exposedHeightFill => exposedHeights[2],
         :dangerFillColor => dangerFillColor,
-        :maxWidth => maxExposedHeightTextWidth,
+        :maxWidth => exposedHeightSize,
         :maxHeight => exposedHeightSize,
       });
     }
@@ -244,48 +235,6 @@ class DatafieldProblemUi {
     });
 
     _height = _headingHeight + _headingGap + _iconRowHeight;
-  }
-
-  private function getMaxExposedHeightTextWidth(
-    fieldWidth as Number,
-    expositionsSize as Number,
-    exposedHeightSize as Number,
-    numProblems as Number
-  ) as Number {
-    var maxExposedHeightTextWidth =
-      fieldWidth -
-      _dangerLineWidth -
-      _dangerLineGap -
-      _problemIconSize -
-      _gap -
-      expositionsSize -
-      _gap;
-
-    if (numProblems == 1) {
-      maxExposedHeightTextWidth = (
-        exposedHeightSize * EXPOSED_HEIGHT_TEXT_WIDTH_MULTIPLIER_SINGLE
-      ).toNumber();
-    } else if (
-      numProblems == 2 &&
-      maxExposedHeightTextWidth > exposedHeightSize
-    ) {
-      maxExposedHeightTextWidth = exposedHeightSize;
-    }
-
-    if (numProblems == 2) {
-      maxExposedHeightTextWidth = (
-        maxExposedHeightTextWidth * EXPOSED_HEIGHT_TEXT_WIDTH_MULTIPLIER
-      ).toNumber();
-    }
-
-    if (maxExposedHeightTextWidth > fieldWidth) {
-      maxExposedHeightTextWidth = fieldWidth;
-    }
-    if (maxExposedHeightTextWidth < 1) {
-      maxExposedHeightTextWidth = 1;
-    }
-
-    return maxExposedHeightTextWidth;
   }
 
   public function onShow() as Void {
@@ -333,21 +282,19 @@ class DatafieldProblemUi {
     y0 as Number,
     fieldWidth as Number
   ) as Void {
+    var problemX;
     var iconRowX;
     var dangerLineX;
     if (_inline) {
-      // Inline mode: danger line at left edge of x0, icons start just after it
-      dangerLineX = x0;
-      iconRowX = x0 + _dangerLineWidth + _dangerLineGap;
+      // Inline mode: x0 is the left edge of the full problem block.
+      problemX = x0;
     } else {
-      // Normal mode: icons centered within field width, danger line floats to their left
-      iconRowX = x0 + (fieldWidth - _iconRowWidth) / 2;
-      dangerLineX = iconRowX - _dangerLineWidth - _dangerLineGap;
+      // Normal mode: center the entire problem block, including the danger bar.
+      problemX = x0 + (fieldWidth - getTotalWidth()) / 2;
     }
 
-    if ($.DrawOutlines) {
-      $.drawOutline(dc, iconRowX, y0, _iconRowWidth, _height);
-    }
+    dangerLineX = problemX;
+    iconRowX = problemX + _dangerLineWidth + _dangerLineGap;
 
     var dangerColor = $.colorize(_dangerLevel);
     dc.setColor(dangerColor, Gfx.COLOR_TRANSPARENT);
