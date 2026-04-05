@@ -1,4 +1,5 @@
 using Toybox.Activity;
+using Toybox.Position;
 using Toybox.Weather;
 using Toybox.Lang;
 
@@ -33,6 +34,32 @@ function getLocation() as [Lang.Double, Lang.Double]? {
 
   if ($.Debug) {
     $.log("Location unavailable.");
+  }
+
+  return null;
+}
+
+function getCurrentElevation() as Lang.Float? {
+  try {
+    var positionInfo = Position.getInfo();
+    if (positionInfo.altitude != null) {
+      var altitude = positionInfo.altitude as Lang.Float;
+      return altitude >= 0.0f ? altitude : 0.0f;
+    }
+  } catch (ex) {
+    if ($.Debug) {
+      $.log("Failed getting GPS elevation: " + ex);
+    }
+  }
+
+  var activityInfo = Activity.getActivityInfo();
+  if (activityInfo != null && activityInfo.altitude != null) {
+    var altitude = activityInfo.altitude as Lang.Float;
+    if ($.Debug) {
+      $.log("GPS elevation unavailable. Falling back to activity altitude.");
+    }
+
+    return altitude >= 0.0f ? altitude : 0.0f;
   }
 
   return null;

@@ -102,6 +102,48 @@ function getIconResourceForProblemTypeLarge(typeId as Number) {
   return $.Rez.Drawables.AvalancheIconSvg;
 }
 
+function getIconResourceForProblemTypeGray(typeId as Number) {
+  if (
+    typeId == PROBLEM_TYPE_NEW_SNOW_LOOSE ||
+    typeId == PROBLEM_TYPE_NEW_SNOW_SLAB
+  ) {
+    return $.Rez.Drawables.ProblemNewSnowGray;
+  } else if (
+    typeId == PROBLEM_TYPE_WET_SNOW_LOOSE ||
+    typeId == PROBLEM_TYPE_WET_SNOW_SLAB
+  ) {
+    return $.Rez.Drawables.ProblemWetSnowGray;
+  } else if (typeId == PROBLEM_TYPE_WIND_DRIFTED_SNOW) {
+    return $.Rez.Drawables.ProblemWindSlabGray;
+  } else if (typeId == PROBLEM_TYPE_PERSISTENT_WEAK_LAYER) {
+    return $.Rez.Drawables.ProblemPersistentWeakLayerGray;
+  } else if (typeId == PROBLEM_TYPE_GLIDING_SNOW) {
+    return $.Rez.Drawables.ProblemGlidingSnowGray;
+  }
+  return $.Rez.Drawables.AvalancheIconSvg;
+}
+
+function getIconResourceForProblemTypeLargeGray(typeId as Number) {
+  if (
+    typeId == PROBLEM_TYPE_NEW_SNOW_LOOSE ||
+    typeId == PROBLEM_TYPE_NEW_SNOW_SLAB
+  ) {
+    return $.Rez.Drawables.ProblemNewSnowLargeGray;
+  } else if (
+    typeId == PROBLEM_TYPE_WET_SNOW_LOOSE ||
+    typeId == PROBLEM_TYPE_WET_SNOW_SLAB
+  ) {
+    return $.Rez.Drawables.ProblemWetSnowLargeGray;
+  } else if (typeId == PROBLEM_TYPE_WIND_DRIFTED_SNOW) {
+    return $.Rez.Drawables.ProblemWindSlabLargeGray;
+  } else if (typeId == PROBLEM_TYPE_PERSISTENT_WEAK_LAYER) {
+    return $.Rez.Drawables.ProblemPersistentWeakLayerLargeGray;
+  } else if (typeId == PROBLEM_TYPE_GLIDING_SNOW) {
+    return $.Rez.Drawables.ProblemGlidingSnowLargeGray;
+  }
+  return $.Rez.Drawables.AvalancheIconSvg;
+}
+
 const DrawOutlines = false;
 
 const TIME_TO_CONSIDER_DATA_STALE = Gregorian.SECONDS_PER_HOUR / 2;

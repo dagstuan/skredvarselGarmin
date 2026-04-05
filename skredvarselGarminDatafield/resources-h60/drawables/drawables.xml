@@ -4,15 +4,25 @@
 	<bitmap id="Level3" filename="level_3_h60.png" />
 	<bitmap id="Level4_5" filename="level_4_5_h60.png" />
 	<bitmap id="NoLevel" filename="no_level_h60.png" />
-	<bitmap id="ProblemNewSnow" filename="problem_new_snow.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
-	<bitmap id="ProblemWetSnow" filename="problem_wet_snow.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
-	<bitmap id="ProblemWindSlab" filename="problem_wind_slab.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
-	<bitmap id="ProblemPersistentWeakLayer" filename="problem_persistent_weak_layer.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
-	<bitmap id="ProblemGlidingSnow" filename="problem_gliding_snow.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
-	<bitmap id="ProblemNewSnowLarge" filename="problem_new_snow.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
-	<bitmap id="ProblemWetSnowLarge" filename="problem_wet_snow.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
-	<bitmap id="ProblemWindSlabLarge" filename="problem_wind_slab.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
-	<bitmap id="ProblemPersistentWeakLayerLarge" filename="problem_persistent_weak_layer.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
-	<bitmap id="ProblemGlidingSnowLarge" filename="problem_gliding_snow.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
+	<bitmap id="ProblemNewSnow" filename="../../resources/drawables/problem_new_snow.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
+	<bitmap id="ProblemWetSnow" filename="../../resources/drawables/problem_wet_snow.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
+	<bitmap id="ProblemWindSlab" filename="../../resources/drawables/problem_wind_slab.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
+	<bitmap id="ProblemPersistentWeakLayer" filename="../../resources/drawables/problem_persistent_weak_layer.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
+	<bitmap id="ProblemGlidingSnow" filename="../../resources/drawables/problem_gliding_snow.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
+	<bitmap id="ProblemNewSnowLarge" filename="../../resources/drawables/problem_new_snow.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
+	<bitmap id="ProblemWetSnowLarge" filename="../../resources/drawables/problem_wet_snow.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
+	<bitmap id="ProblemWindSlabLarge" filename="../../resources/drawables/problem_wind_slab.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
+	<bitmap id="ProblemPersistentWeakLayerLarge" filename="../../resources/drawables/problem_persistent_weak_layer.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
+	<bitmap id="ProblemGlidingSnowLarge" filename="../../resources/drawables/problem_gliding_snow.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
+	<bitmap id="ProblemNewSnowGray" filename="../../resources/drawables/problem_new_snow_gray.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
+	<bitmap id="ProblemWetSnowGray" filename="../../resources/drawables/problem_wet_snow_gray.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
+	<bitmap id="ProblemWindSlabGray" filename="../../resources/drawables/problem_wind_slab_gray.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
+	<bitmap id="ProblemPersistentWeakLayerGray" filename="../../resources/drawables/problem_persistent_weak_layer_gray.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
+	<bitmap id="ProblemGlidingSnowGray" filename="../../resources/drawables/problem_gliding_snow_gray.svg" automaticPalette="false" scaleX="0.4815" scaleY="0.4815" scaleRelativeTo="image" />
+	<bitmap id="ProblemNewSnowLargeGray" filename="../../resources/drawables/problem_new_snow_gray.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
+	<bitmap id="ProblemWetSnowLargeGray" filename="../../resources/drawables/problem_wet_snow_gray.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
+	<bitmap id="ProblemWindSlabLargeGray" filename="../../resources/drawables/problem_wind_slab_gray.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
+	<bitmap id="ProblemPersistentWeakLayerLargeGray" filename="../../resources/drawables/problem_persistent_weak_layer_gray.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
+	<bitmap id="ProblemGlidingSnowLargeGray" filename="../../resources/drawables/problem_gliding_snow_gray.svg" automaticPalette="false" scaleX="0.7408" scaleY="0.7408" scaleRelativeTo="image" />
 	<bitmap id="UpdatedIcon" filename="updated_icon_26x26.png" />
 </drawables>

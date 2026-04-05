@@ -15,5 +15,15 @@
 	<bitmap id="ProblemWindSlabLarge" filename="problem_wind_slab.svg" automaticPalette="false" scaleX="0.4938" scaleY="0.4938" scaleRelativeTo="image" />
 	<bitmap id="ProblemPersistentWeakLayerLarge" filename="problem_persistent_weak_layer.svg" automaticPalette="false" scaleX="0.4938" scaleY="0.4938" scaleRelativeTo="image" />
 	<bitmap id="ProblemGlidingSnowLarge" filename="problem_gliding_snow.svg" automaticPalette="false" scaleX="0.4938" scaleY="0.4938" scaleRelativeTo="image" />
+	<bitmap id="ProblemNewSnowGray" filename="problem_new_snow_gray.svg" automaticPalette="false" scaleX="0.3210" scaleY="0.3210" scaleRelativeTo="image" />
+	<bitmap id="ProblemWetSnowGray" filename="problem_wet_snow_gray.svg" automaticPalette="false" scaleX="0.3210" scaleY="0.3210" scaleRelativeTo="image" />
+	<bitmap id="ProblemWindSlabGray" filename="problem_wind_slab_gray.svg" automaticPalette="false" scaleX="0.3210" scaleY="0.3210" scaleRelativeTo="image" />
+	<bitmap id="ProblemPersistentWeakLayerGray" filename="problem_persistent_weak_layer_gray.svg" automaticPalette="false" scaleX="0.3210" scaleY="0.3210" scaleRelativeTo="image" />
+	<bitmap id="ProblemGlidingSnowGray" filename="problem_gliding_snow_gray.svg" automaticPalette="false" scaleX="0.3210" scaleY="0.3210" scaleRelativeTo="image" />
+	<bitmap id="ProblemNewSnowLargeGray" filename="problem_new_snow_gray.svg" automaticPalette="false" scaleX="0.4938" scaleY="0.4938" scaleRelativeTo="image" />
+	<bitmap id="ProblemWetSnowLargeGray" filename="problem_wet_snow_gray.svg" automaticPalette="false" scaleX="0.4938" scaleY="0.4938" scaleRelativeTo="image" />
+	<bitmap id="ProblemWindSlabLargeGray" filename="problem_wind_slab_gray.svg" automaticPalette="false" scaleX="0.4938" scaleY="0.4938" scaleRelativeTo="image" />
+	<bitmap id="ProblemPersistentWeakLayerLargeGray" filename="problem_persistent_weak_layer_gray.svg" automaticPalette="false" scaleX="0.4938" scaleY="0.4938" scaleRelativeTo="image" />
+	<bitmap id="ProblemGlidingSnowLargeGray" filename="problem_gliding_snow_gray.svg" automaticPalette="false" scaleX="0.4938" scaleY="0.4938" scaleRelativeTo="image" />
 	<bitmap id="UpdatedIcon" filename="updated_icon_16x16.png" />
 </drawables>

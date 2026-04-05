@@ -86,26 +86,31 @@ class DatafieldProblemUi {
   private const EXPOSED_HEIGHT_ICON_MS = 5000;
   private const EXPOSED_HEIGHT_TEXT_MS = 12000;
 
+  private var _problem as AvalancheProblem;
   private var _height as Number;
   private var _headingFont as Gfx.FontType = Gfx.FONT_XTINY;
   private var _headingHeight as Number;
   private var _headingGap as Number;
   private var _dangerLevel as Number;
+  private var _grayscaleDangerFillColor as Gfx.ColorType;
   private var _dangerLineWidth as Number = 4;
   private var _dangerLineGap as Number;
 
   private var _problemTextElement as AvalancheUi.ScrollingText;
   private var _problemIcon as Ui.BitmapResource;
+  private var _problemIconGrayscale as Ui.BitmapResource;
   private var _problemIconSize as Number = 0;
   private var _validExpositionsUi as AvalancheUi.ValidExpositions;
+  private var _validExpositionsUiGrayscale as AvalancheUi.ValidExpositions;
   private var _exposedHeightUi as AvalancheUi.ExposedHeight?;
+  private var _exposedHeightUiGrayscale as AvalancheUi.ExposedHeight?;
   private var _exposedHeightTextUi as AvalancheUi.ExposedHeightText?;
+  private var _exposedHeightTextUiGrayscale as AvalancheUi.ExposedHeightText?;
 
   private var _iconSize as Number;
   private var _iconRowHeight as Number;
   private var _gap as Number;
   private var _iconRowWidth as Number = 0;
-  private var _inline as Boolean = false;
   private var _exposedHeightToggleStartMs as Number = 0;
   private var _exposedHeightTextWasVisible as Boolean = false;
 
@@ -113,18 +118,21 @@ class DatafieldProblemUi {
     dc as Gfx.Dc,
     problem as AvalancheProblem,
     iconScale as Float,
-    inline as Boolean,
+    headingGapFactor as Float,
+    gapFactor as Float,
     numProblems as Number
   ) {
-    _inline = inline;
+    _problem = problem;
 
-    var dangerFillColor = Gfx.COLOR_RED;
-    var nonDangerFillColor = Gfx.COLOR_LT_GRAY;
+    var activeDangerFillColor = Gfx.COLOR_RED;
+    var activeNonDangerFillColor = Gfx.COLOR_LT_GRAY;
+    var grayscaleDangerFillColor = 0x404040;
+    var grayscaleNonDangerFillColor = 0xb0b0b0;
+    _grayscaleDangerFillColor = grayscaleDangerFillColor;
     var typeId = problem["typeId"] as Number;
     _dangerLevel = problem["dangerLevel"] as Number;
     _headingHeight = Gfx.getFontHeight(_headingFont);
 
-    var headingGapFactor = inline ? 0.1f : numProblems == 1 ? 0.3f : 0.15f;
     _headingGap = (_headingHeight * headingGapFactor).toNumber();
     if (_headingGap < 1) {
       _headingGap = 1;
@@ -151,7 +159,13 @@ class DatafieldProblemUi {
       iconScale > 1.0f
         ? $.getIconResourceForProblemTypeLarge(typeId)
         : $.getIconResourceForProblemType(typeId);
+    var grayscaleProblemIconResource =
+      iconScale > 1.0f
+        ? $.getIconResourceForProblemTypeLargeGray(typeId)
+        : $.getIconResourceForProblemTypeGray(typeId);
     _problemIcon = Ui.loadResource(problemIconResource) as Ui.BitmapResource;
+    _problemIconGrayscale =
+      Ui.loadResource(grayscaleProblemIconResource) as Ui.BitmapResource;
 
     // _iconSize drives the aspect rose and exposed height icon sizes
     var baseIcon =
@@ -162,7 +176,6 @@ class DatafieldProblemUi {
     // Draw the problem type icon at its native size (no scaling needed)
     _problemIconSize = _problemIcon.getHeight();
 
-    var gapFactor = inline ? 0.2f : 0.35f;
     _gap =
       (_iconSize * gapFactor).toNumber() < 3
         ? 3
@@ -172,30 +185,53 @@ class DatafieldProblemUi {
       _dangerLineGap = 2;
     }
 
-    var exposedHeights =
-      problem["exposedHeightZones"] != null
-        ? [
-            0,
-            0,
-            $.exposedHeightZonesToFill(
-              problem["exposedHeightZones"] as Array<Boolean>
-            ),
-          ]
-        : problem["exposedHeights"] as Array<Number>;
+    var hasExposedHeightZones = problem["exposedHeightZones"] != null;
+    var absoluteExposedHeights = problem["exposedHeights"] as Array<Number>?;
+
+    var exposedHeights = hasExposedHeightZones
+      ? [
+          0,
+          0,
+          $.exposedHeightZonesToFill(
+            problem["exposedHeightZones"] as Array<Boolean>
+          ),
+        ]
+      : absoluteExposedHeights != null
+        ? absoluteExposedHeights
+        : [0, 0, 0];
+
+    var exposedHeight1 = exposedHeights[0];
+    var exposedHeight2 = exposedHeights[1];
+    var exposedHeightFill = exposedHeights[2];
 
     _validExpositionsUi = new AvalancheUi.ValidExpositions({
       :validExpositions => problem["validExpositions"] as String,
-      :dangerFillColor => dangerFillColor,
-      :nonDangerFillColor => nonDangerFillColor,
+      :dangerFillColor => activeDangerFillColor,
+      :nonDangerFillColor => activeNonDangerFillColor,
       :radius => _iconSize / 2,
+    });
+    _validExpositionsUiGrayscale = new AvalancheUi.ValidExpositions({
+      :validExpositions => problem["validExpositions"] as String,
+      :dangerFillColor => grayscaleDangerFillColor,
+      :nonDangerFillColor => grayscaleNonDangerFillColor,
+      :radius => _iconSize / 2,
+      :labelColor => Gfx.COLOR_WHITE,
     });
 
     _exposedHeightUi = new AvalancheUi.ExposedHeight({
-      :exposedHeight1 => exposedHeights[0],
-      :exposedHeight2 => exposedHeights[1],
-      :exposedHeightFill => exposedHeights[2],
-      :dangerFillColor => dangerFillColor,
-      :nonDangerFillColor => nonDangerFillColor,
+      :exposedHeight1 => exposedHeight1,
+      :exposedHeight2 => exposedHeight2,
+      :exposedHeightFill => exposedHeightFill,
+      :dangerFillColor => activeDangerFillColor,
+      :nonDangerFillColor => activeNonDangerFillColor,
+      :size => _iconSize,
+    });
+    _exposedHeightUiGrayscale = new AvalancheUi.ExposedHeight({
+      :exposedHeight1 => exposedHeight1,
+      :exposedHeight2 => exposedHeight2,
+      :exposedHeightFill => exposedHeightFill,
+      :dangerFillColor => grayscaleDangerFillColor,
+      :nonDangerFillColor => grayscaleNonDangerFillColor,
       :size => _iconSize,
     });
 
@@ -206,15 +242,24 @@ class DatafieldProblemUi {
     ).getSize();
     _iconRowHeight = $.max([_iconSize, expositionsTotalH, exposedHeightSize]);
 
-    var useExposedHeightText =
-      numProblems != 3 && problem["exposedHeightZones"] == null;
+    var useExposedHeightText = numProblems != 3 && !hasExposedHeightZones;
     if (useExposedHeightText) {
       _exposedHeightTextUi = new AvalancheUi.ExposedHeightText({
         :dc => dc,
-        :exposedHeight1 => exposedHeights[0],
-        :exposedHeight2 => exposedHeights[1],
-        :exposedHeightFill => exposedHeights[2],
-        :dangerFillColor => dangerFillColor,
+        :exposedHeight1 => exposedHeight1,
+        :exposedHeight2 => exposedHeight2,
+        :exposedHeightFill => exposedHeightFill,
+        :dangerFillColor => activeDangerFillColor,
+        :maxWidth => exposedHeightSize,
+        :maxHeight => exposedHeightSize,
+      });
+      _exposedHeightTextUiGrayscale = new AvalancheUi.ExposedHeightText({
+        :dc => dc,
+        :exposedHeight1 => exposedHeight1,
+        :exposedHeight2 => exposedHeight2,
+        :exposedHeightFill => exposedHeightFill,
+        :dangerFillColor => grayscaleDangerFillColor,
+        :textColor => Gfx.COLOR_LT_GRAY,
         :maxWidth => exposedHeightSize,
         :maxHeight => exposedHeightSize,
       });
@@ -276,53 +321,63 @@ class DatafieldProblemUi {
     return _height;
   }
 
+  public function getProblem() as AvalancheProblem {
+    return _problem;
+  }
+
   public function draw(
     dc as Gfx.Dc,
     x0 as Number,
     y0 as Number,
-    fieldWidth as Number
+    isGrayscale as Boolean
   ) as Void {
-    var problemX;
-    var iconRowX;
-    var dangerLineX;
-    if (_inline) {
-      // Inline mode: x0 is the left edge of the full problem block.
-      problemX = x0;
-    } else {
-      // Normal mode: center the entire problem block, including the danger bar.
-      problemX = x0 + (fieldWidth - getTotalWidth()) / 2;
-    }
+    var iconRowX = x0 + _dangerLineWidth + _dangerLineGap;
 
-    dangerLineX = problemX;
-    iconRowX = problemX + _dangerLineWidth + _dangerLineGap;
+    var useGrayscaleStyling = isGrayscale;
 
     if ($.DrawOutlines) {
-      $.drawOutline(dc, problemX, y0, getTotalWidth(), _height);
+      $.drawOutline(dc, x0, y0, getTotalWidth(), _height);
     }
 
-    var dangerColor = $.colorize(_dangerLevel);
+    var dangerColor = useGrayscaleStyling
+      ? _grayscaleDangerFillColor
+      : $.colorize(_dangerLevel);
     dc.setColor(dangerColor, Gfx.COLOR_TRANSPARENT);
-    dc.fillRectangle(dangerLineX, y0, _dangerLineWidth, _height);
+    dc.fillRectangle(x0, y0, _dangerLineWidth, _height);
 
     _problemTextElement.draw(dc, iconRowX, y0);
 
-    var iconRowY = y0 + _headingHeight + _headingGap;
-    var bottomY = iconRowY + _iconRowHeight;
+    var bottomY = y0 + _headingHeight + _headingGap + _iconRowHeight;
 
     var curX = iconRowX;
 
     // Problem type icon
-    dc.drawBitmap(curX, bottomY - _problemIconSize, _problemIcon);
+    dc.drawBitmap(
+      curX,
+      bottomY - _problemIconSize,
+      useGrayscaleStyling ? _problemIconGrayscale : _problemIcon
+    );
     curX += _problemIconSize + _gap;
 
     // Aspect rose — center the circle, "N" label extends above
     var expositionsSize = _validExpositionsUi.getSize();
-    _validExpositionsUi.draw(dc, curX, bottomY - expositionsSize);
+    if (useGrayscaleStyling) {
+      _validExpositionsUiGrayscale.draw(dc, curX, bottomY - expositionsSize);
+    } else {
+      _validExpositionsUi.draw(dc, curX, bottomY - expositionsSize);
+    }
     curX += expositionsSize + _gap;
 
     var showExposedHeightText = shouldShowExposedHeightText();
     if (showExposedHeightText && !_exposedHeightTextWasVisible) {
-      (_exposedHeightTextUi as AvalancheUi.ExposedHeightText).onShow();
+      if (_exposedHeightTextUi != null) {
+        (_exposedHeightTextUi as AvalancheUi.ExposedHeightText).onShow();
+      }
+      if (_exposedHeightTextUiGrayscale != null) {
+        (
+          _exposedHeightTextUiGrayscale as AvalancheUi.ExposedHeightText
+        ).onShow();
+      }
     }
     _exposedHeightTextWasVisible = showExposedHeightText;
 
@@ -330,17 +385,33 @@ class DatafieldProblemUi {
       _exposedHeightUi as AvalancheUi.ExposedHeight
     ).getSize();
     if (showExposedHeightText) {
-      (_exposedHeightTextUi as AvalancheUi.ExposedHeightText).draw(
-        dc,
-        curX,
-        bottomY - exposedHeightSize
-      );
+      if (useGrayscaleStyling) {
+        (_exposedHeightTextUiGrayscale as AvalancheUi.ExposedHeightText).draw(
+          dc,
+          curX,
+          bottomY - exposedHeightSize
+        );
+      } else {
+        (_exposedHeightTextUi as AvalancheUi.ExposedHeightText).draw(
+          dc,
+          curX,
+          bottomY - exposedHeightSize
+        );
+      }
     } else {
-      (_exposedHeightUi as AvalancheUi.ExposedHeight).draw(
-        dc,
-        curX,
-        bottomY - exposedHeightSize
-      );
+      if (useGrayscaleStyling) {
+        (_exposedHeightUiGrayscale as AvalancheUi.ExposedHeight).draw(
+          dc,
+          curX,
+          bottomY - exposedHeightSize
+        );
+      } else {
+        (_exposedHeightUi as AvalancheUi.ExposedHeight).draw(
+          dc,
+          curX,
+          bottomY - exposedHeightSize
+        );
+      }
     }
   }
 }

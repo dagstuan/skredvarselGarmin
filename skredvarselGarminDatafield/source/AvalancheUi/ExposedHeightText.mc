@@ -12,6 +12,7 @@ module AvalancheUi {
     :maxWidth as Numeric,
     :maxHeight as Numeric,
     :dangerFillColor as Gfx.ColorType,
+    :textColor as Gfx.ColorType?,
   };
 
   public class ExposedHeightText {
@@ -41,12 +42,15 @@ module AvalancheUi {
     private var _texts as Array<Dictionary> = [];
 
     private var _dangerFillColor as Gfx.ColorType;
+    private var _textColor as Gfx.ColorType = Gfx.COLOR_WHITE;
 
     public function initialize(settings as ExposedHeightTextSettings) {
       _exposedHeight1 = settings[:exposedHeight1];
       _exposedHeight2 = settings[:exposedHeight2];
       _exposedHeightFill = settings[:exposedHeightFill];
       _dangerFillColor = settings[:dangerFillColor];
+      _textColor =
+        settings[:textColor] != null ? settings[:textColor] : Gfx.COLOR_WHITE;
       _maxWidth = settings[:maxWidth];
       _maxHeight = settings[:maxHeight];
       _halfMaxHeight = _maxHeight / 2;
@@ -269,7 +273,7 @@ module AvalancheUi {
       }
 
       dc.setClip(x0, y0 + yOffset, containerWidth, _fontHeight);
-      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+      dc.setColor(_textColor, Gfx.COLOR_TRANSPARENT);
       dc.drawText(
         x0 + getTextXOffset(textWidth, containerWidth),
         y0 + yOffset,

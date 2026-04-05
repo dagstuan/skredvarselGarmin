@@ -10,6 +10,7 @@ module AvalancheUi {
     :radius as Numeric,
     :dangerFillColor as Gfx.ColorType,
     :nonDangerFillColor as Gfx.ColorType,
+    :labelColor as Gfx.ColorType?,
   };
 
   public class ValidExpositions {
@@ -37,6 +38,8 @@ module AvalancheUi {
       }
       var dangerFillColor = settings[:dangerFillColor];
       var nonDangerFillColor = settings[:nonDangerFillColor];
+      var labelColor =
+        settings[:labelColor] != null ? settings[:labelColor] : Gfx.COLOR_WHITE;
       var bufferedBitmap = $.newBufferedBitmap({
         :width => _radius * 2,
         :height => _radius * 2 + _fontHeight,
@@ -44,7 +47,7 @@ module AvalancheUi {
 
       var bufferedDc = bufferedBitmap.getDc();
 
-      bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+      bufferedDc.setColor(labelColor, Gfx.COLOR_TRANSPARENT);
       bufferedDc.drawText(
         _radius,
         _fontHeight / 2,

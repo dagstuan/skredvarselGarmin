@@ -27,6 +27,7 @@ class DatafieldForecastView {
 
   private var _fieldWidth as Number = 0;
   private var _fieldHeight as Number = 0;
+  private var _isActivityRunning as Boolean = false;
   private var _needsFullRebuild as Boolean = false;
 
   public function onDataChanged() as Void {
@@ -43,6 +44,8 @@ class DatafieldForecastView {
   }
 
   public function compute(info as Activity.Info) as Void {
+    _isActivityRunning =
+      info has :timerState && info.timerState == Activity.TIMER_STATE_ON;
     checkRegionAndFetchIfNeeded(info);
   }
 
@@ -267,17 +270,108 @@ class DatafieldForecastView {
 
     var iconScale = _numProblems == 3 ? 0.85f : _numProblems == 1 ? 1.4f : 1.0f;
     for (var i = 0; i < _numProblems; i++) {
-      var inline = _numProblems == 3 && i < 2;
+      var usesTightSpacing = _numProblems == 3 && i < 2;
+      var headingGapFactor = usesTightSpacing
+        ? 0.1f
+        : _numProblems == 1
+          ? 0.3f
+          : 0.15f;
+      var gapFactor = usesTightSpacing ? 0.2f : 0.35f;
       var problemUi = new DatafieldProblemUi(
         dc,
         problems[i] as AvalancheProblem,
         iconScale,
-        inline,
+        headingGapFactor,
+        gapFactor,
         _numProblems
       );
       problemUi.onShow();
       _problemUis[i] = problemUi;
     }
+  }
+
+  private function _getCenteredProblemX(
+    problemUi as DatafieldProblemUi
+  ) as Number {
+    return (_fieldWidth - problemUi.getTotalWidth()) / 2;
+  }
+
+  private function _isProblemActiveAtElevation(
+    problem as AvalancheProblem,
+    elevation as Float?
+  ) as Boolean {
+    if (elevation == null) {
+      return false;
+    }
+
+    var exposedHeightZones = problem["exposedHeightZones"] as Array<Boolean>?;
+    var absoluteExposedHeights = problem["exposedHeights"] as Array<Number>?;
+    if (exposedHeightZones != null || absoluteExposedHeights == null) {
+      return false;
+    }
+
+    if (absoluteExposedHeights.size() < 3) {
+      return false;
+    }
+
+    var exposedHeight1 = absoluteExposedHeights[0];
+    var exposedHeight2 = absoluteExposedHeights[1];
+    var exposedHeightFill = absoluteExposedHeights[2];
+    if (exposedHeightFill < 1 || exposedHeightFill > 4) {
+      return false;
+    }
+
+    if (exposedHeightFill == 1) {
+      return elevation >= exposedHeight1;
+    } else if (exposedHeightFill == 2) {
+      return elevation <= exposedHeight1;
+    } else if (exposedHeightFill == 3) {
+      return elevation >= exposedHeight1 || elevation <= exposedHeight2;
+    } else if (exposedHeightFill == 4) {
+      return elevation <= exposedHeight1 && elevation >= exposedHeight2;
+    }
+
+    return false;
+  }
+
+  private function _shouldRenderProblemInGrayscale(
+    problemUi as DatafieldProblemUi,
+    elevation as Float?
+  ) as Boolean {
+    var problem = problemUi.getProblem();
+
+    if (!_isActivityRunning) {
+      if ($.Debug) {
+        var problemName = $.getProblemTypeName(problem["typeId"] as Number);
+        var elevationText =
+          elevation != null ? elevation.format("%.0f") : "n/a";
+        $.log(
+          Lang.format(
+            "Problem '$1$': grayscale=false (activity not running, elevation=$2$).",
+            [problemName, elevationText]
+          )
+        );
+      }
+      return false;
+    }
+
+    var shouldRenderGrayscale = !_isProblemActiveAtElevation(
+      problem,
+      elevation
+    );
+    if ($.Debug) {
+      var problemName = $.getProblemTypeName(problem["typeId"] as Number);
+      var elevationText = elevation != null ? elevation.format("%.0f") : "n/a";
+      $.log(
+        Lang.format("Problem '$1$': grayscale=$2$ (elevation=$3$).", [
+          problemName,
+          shouldRenderGrayscale ? "true" : "false",
+          elevationText,
+        ])
+      );
+    }
+
+    return shouldRenderGrayscale;
   }
 
   private function _syncScrollingTextCycles() as Void {
@@ -474,6 +568,7 @@ class DatafieldForecastView {
 
     // --- Problems area ---
 
+    var elevation = $.getCurrentElevation();
     var problemGapY = _getProblemGapY();
     var footerH = _getUpdatedAtContentHeight();
     var footerPadding = _getFooterPaddingY();
@@ -497,14 +592,19 @@ class DatafieldForecastView {
       if (_problemUis[0] != null) {
         var p0 = _problemUis[0] as DatafieldProblemUi;
         var p0X = centerX - inlineGap / 2 - p0.getTotalWidth();
-        p0.draw(dc, p0X, curY, _fieldWidth);
+        p0.draw(dc, p0X, curY, _shouldRenderProblemInGrayscale(p0, elevation));
         if (p0.getTotalHeight() > row0H) {
           row0H = p0.getTotalHeight();
         }
       }
       if (_problemUis[1] != null) {
         var p1 = _problemUis[1] as DatafieldProblemUi;
-        p1.draw(dc, centerX + inlineGap / 2, curY, _fieldWidth);
+        p1.draw(
+          dc,
+          centerX + inlineGap / 2,
+          curY,
+          _shouldRenderProblemInGrayscale(p1, elevation)
+        );
         if (p1.getTotalHeight() > row0H) {
           row0H = p1.getTotalHeight();
         }
@@ -519,13 +619,24 @@ class DatafieldForecastView {
 
       // Row 1: problem 2 full width
       if (_problemUis[2] != null) {
-        (_problemUis[2] as DatafieldProblemUi).draw(dc, 0, curY, _fieldWidth);
+        var p2 = _problemUis[2] as DatafieldProblemUi;
+        p2.draw(
+          dc,
+          _getCenteredProblemX(p2),
+          curY,
+          _shouldRenderProblemInGrayscale(p2, elevation)
+        );
       }
     } else {
       for (var i = 0; i < _numProblems; i++) {
         if (_problemUis[i] != null) {
           var problemUi = _problemUis[i] as DatafieldProblemUi;
-          problemUi.draw(dc, 0, curY, _fieldWidth);
+          problemUi.draw(
+            dc,
+            _getCenteredProblemX(problemUi),
+            curY,
+            _shouldRenderProblemInGrayscale(problemUi, elevation)
+          );
           if (i < _numProblems - 1) {
             _drawDivider(
               dc,
