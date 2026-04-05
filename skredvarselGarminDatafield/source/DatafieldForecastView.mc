@@ -296,6 +296,19 @@ class DatafieldForecastView {
     return (_fieldWidth - problemUi.getTotalWidth()) / 2;
   }
 
+  private function _canEvaluateProblemActiveStateAtElevation(
+    problem as AvalancheProblem
+  ) as Boolean {
+    var exposedHeightZones = problem["exposedHeightZones"] as Array<Boolean>?;
+    var exposedHeights = problem["exposedHeights"] as Array<Number>?;
+
+    return (
+      exposedHeightZones == null &&
+      exposedHeights != null &&
+      exposedHeights.size() >= 3
+    );
+  }
+
   private function _isProblemActiveAtElevation(
     problem as AvalancheProblem,
     elevation as Float?
@@ -349,6 +362,19 @@ class DatafieldForecastView {
           Lang.format(
             "Problem '$1$': grayscale=false (activity not running, elevation=$2$).",
             [problemName, elevationText]
+          )
+        );
+      }
+      return false;
+    }
+
+    if (!_canEvaluateProblemActiveStateAtElevation(problem)) {
+      if ($.Debug) {
+        var problemName = $.getProblemTypeName(problem["typeId"] as Number);
+        $.log(
+          Lang.format(
+            "Problem '$1$': grayscale=false (no evaluable exposed heights).",
+            [problemName]
           )
         );
       }
