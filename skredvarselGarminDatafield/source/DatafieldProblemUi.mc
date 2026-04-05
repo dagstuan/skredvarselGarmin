@@ -296,6 +296,10 @@ class DatafieldProblemUi {
     dangerLineX = problemX;
     iconRowX = problemX + _dangerLineWidth + _dangerLineGap;
 
+    if ($.DrawOutlines) {
+      $.drawOutline(dc, problemX, y0, getTotalWidth(), _height);
+    }
+
     var dangerColor = $.colorize(_dangerLevel);
     dc.setColor(dangerColor, Gfx.COLOR_TRANSPARENT);
     dc.fillRectangle(dangerLineX, y0, _dangerLineWidth, _height);

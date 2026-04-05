@@ -226,6 +226,11 @@ class DatafieldForecastView {
     var problems =
       _detailedWarning["avalancheProblems"] as Array<AvalancheProblem>;
 
+    // if ($.Debug) {
+    //   problems = problems.slice(0, 1); // --- IGNORE --- Force one-problem layout for testing
+    //   problems.add(problems[0]); // --- IGNORE --- Force three-problem layout for testing
+    // }
+
     // Sort by dangerLevel descending (insertion sort) so most dangerous renders first
     for (var i = 1; i < problems.size(); i++) {
       var key = problems[i];
@@ -354,11 +359,61 @@ class DatafieldForecastView {
   }
 
   private function _getContentTopY() as Numeric {
-    return (_fieldHeight * 0.05).toNumber();
+    var topPaddingRatio = _isCompactLayout() ? 0.03 : 0.05;
+    var topY = (_fieldHeight * topPaddingRatio).toNumber();
+
+    return topY >= 4 ? topY : 4;
   }
 
   private function _getHeaderGapY() as Numeric {
-    return (_fieldHeight * 0.01).toNumber();
+    var headerGapRatio = _isCompactLayout() ? 0.005 : 0.01;
+    var headerGapY = (_fieldHeight * headerGapRatio).toNumber();
+
+    return headerGapY >= 1 ? headerGapY : 1;
+  }
+
+  private function _getProblemGapY() as Numeric {
+    var isCompact = _isCompactLayout();
+    var gapRatio = 0.05;
+    var gapReduction = _numProblems == 2 ? 3 : 0;
+
+    if (isCompact && _numProblems < 3) {
+      // Compact one-problem and two-problem layouts use a smaller base gap.
+      gapRatio = 0.03;
+    }
+
+    var problemGapY = (_fieldHeight * gapRatio).toNumber() - gapReduction;
+
+    return problemGapY >= 4 ? problemGapY : 4;
+  }
+
+  private function _getFooterPaddingY() as Numeric {
+    var footerPaddingRatio = _isCompactLayout() ? 0.025 : 0.04;
+    var footerPaddingY = (_fieldHeight * footerPaddingRatio).toNumber();
+    if (footerPaddingY < (_isCompactLayout() ? 4 : 2)) {
+      footerPaddingY = _isCompactLayout() ? 4 : 2;
+    }
+
+    return footerPaddingY;
+  }
+
+  private function _getHeaderToProblemsGapY() as Numeric {
+    return _isCompactLayout() ? 0 : _getHeaderGapY();
+  }
+
+  private function _getUpdatedAtContentHeight() as Numeric {
+    if (_updatedAtBitmapH > 0) {
+      return _updatedAtBitmapH;
+    }
+
+    var fontH = Gfx.getFontHeight(Gfx.FONT_XTINY);
+    var updatedIcon =
+      Ui.loadResource($.Rez.Drawables.UpdatedIcon) as Ui.BitmapResource;
+    return $.max([fontH, updatedIcon.getHeight()]);
+  }
+
+  private function _isCompactLayout() as Boolean {
+    return _fieldHeight <= 240;
   }
 
   private function _drawDivider(dc as Gfx.Dc, y as Numeric) as Void {
@@ -419,23 +474,25 @@ class DatafieldForecastView {
 
     // --- Problems area ---
 
-    var problemGapY = (
-      _fieldHeight * (_numProblems == 3 ? 0.03 : 0.05)
-    ).toNumber();
-    var footerH = Gfx.getFontHeight(Gfx.FONT_XTINY);
-    var footerPadding = (_fieldHeight * 0.04).toNumber();
+    var problemGapY = _getProblemGapY();
+    var footerH = _getUpdatedAtContentHeight();
+    var footerPadding = _getFooterPaddingY();
     var totalProblemsH = _getProblemsContentHeight(problemGapY);
-    var availableProblemsH =
-      _fieldHeight - headerBottomY - footerH - footerPadding * 2;
-    var curY = (
-      headerBottomY +
-      (availableProblemsH - totalProblemsH) / 2
-    ).toNumber();
+    var headerToProblemsGapY = _getHeaderToProblemsGapY();
+    var problemsTopY = headerBottomY + headerToProblemsGapY;
+    var problemsBottomY = _fieldHeight - footerPadding - footerH;
+    var centeredOffset = (problemsBottomY - problemsTopY - totalProblemsH) / 2;
+    if (centeredOffset < 0) {
+      centeredOffset = 0;
+    }
+    var curY = (problemsTopY + centeredOffset).toNumber();
 
     if (_numProblems == 3) {
       // Row 0: problems 0 and 1 spread outward from center with a small gap
       var centerX = _fieldWidth / 2;
-      var inlineGap = (_fieldWidth * 0.05).toNumber();
+      var inlineGap = (
+        _fieldWidth * (_isCompactLayout() ? 0.035 : 0.05)
+      ).toNumber();
       var row0H = 0;
       if (_problemUis[0] != null) {
         var p0 = _problemUis[0] as DatafieldProblemUi;
@@ -480,12 +537,11 @@ class DatafieldForecastView {
       }
     }
 
-    _drawUpdatedAt(dc, footerH, footerPadding);
+    _drawUpdatedAt(dc, footerPadding);
   }
 
   private function _drawUpdatedAt(
     dc as Gfx.Dc,
-    footerH as Numeric,
     footerPadding as Numeric
   ) as Void {
     if (_detailedWarning == null) {
@@ -531,7 +587,7 @@ class DatafieldForecastView {
     }
 
     var bitmapX = (_fieldWidth - _updatedAtBitmapW) / 2;
-    var bitmapY = _fieldHeight - footerPadding - footerH;
+    var bitmapY = _fieldHeight - footerPadding - _updatedAtBitmapH;
     dc.drawBitmap(bitmapX, bitmapY, _updatedAtBitmap);
   }
 
