@@ -91,12 +91,19 @@ module AvalancheUi {
     currYOffset += fontHeight + gapY;
 
     // cutoff = 2 days ago, in seconds
-    var earlyCutoffTime = new Time.Moment(Time.now().value() - 2 * Gregorian.SECONDS_PER_DAY);
+    var earlyCutoffTime = new Time.Moment(
+      Time.now().value() - 2 * Gregorian.SECONDS_PER_DAY
+    );
     var oneDaySeconds = Gregorian.SECONDS_PER_DAY.toFloat();
     var currXOffset = locX;
 
     for (var i = 0; i < forecast.size(); i++) {
-      var warning = forecast[i] as SimpleAvalancheWarning;
+      var warning = forecast[i] as SimpleAvalancheWarning?;
+
+      if (warning == null) {
+        continue;
+      }
+
       var validity = warning["validity"] as Array?;
 
       if (validity == null || validity.size() < 2) {
@@ -135,7 +142,10 @@ module AvalancheUi {
         dangerLevelString += "!";
       }
 
-      var textWidth = dc.getTextWidthInPixels(dangerLevelString, Gfx.FONT_GLANCE);
+      var textWidth = dc.getTextWidthInPixels(
+        dangerLevelString,
+        Gfx.FONT_GLANCE
+      );
       if (currXOffset > locX && textWidth < lengthThisElem) {
         var textY0 = currYOffset + dangerLevelGapY + lineHeight;
 

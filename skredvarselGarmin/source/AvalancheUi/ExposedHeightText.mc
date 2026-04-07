@@ -112,22 +112,29 @@ module AvalancheUi {
 
     private function setupElements(dc as Gfx.Dc) {
       if (_exposedHeightFill == 1) {
+        var singleUpWidth = getCenteredElementWidth(dc, _exposedHeight1 + "m");
         _arrows = [createArrow(UP)];
         _scrollingTexts = [
           createScrollingText(
             dc,
-            _maxWidth,
+            singleUpWidth,
             _halfMaxHeight,
+            X_ALIGN_CENTER,
             Y_ALIGN_TOP,
             _exposedHeight1 + "m"
           ),
         ];
       } else if (_exposedHeightFill == 2) {
+        var singleDownWidth = getCenteredElementWidth(
+          dc,
+          _exposedHeight1 + "m"
+        );
         _scrollingTexts = [
           createScrollingText(
             dc,
-            _maxWidth,
+            singleDownWidth,
             _halfMaxHeight,
+            X_ALIGN_CENTER,
             Y_ALIGN_BOTTOM,
             _exposedHeight1 + "m"
           ),
@@ -140,6 +147,7 @@ module AvalancheUi {
             dc,
             _maxWidth - _arrowWidth - _elementSpacing,
             _halfMaxHeight,
+            X_ALIGN_LEFT,
             Y_ALIGN_BOTTOM,
             _exposedHeight1 + "m"
           ),
@@ -147,18 +155,42 @@ module AvalancheUi {
             dc,
             _maxWidth - _arrowWidth - _elementSpacing,
             _halfMaxHeight,
+            X_ALIGN_LEFT,
             Y_ALIGN_TOP,
             _exposedHeight2 + "m"
           ),
         ];
       } else if (_exposedHeightFill == 4) {
         var text = Lang.format("$1$-$2$m", [_exposedHeight2, _exposedHeight1]);
+        var centeredRangeWidth = getCenteredElementWidth(dc, text);
 
         _arrows = [createArrow(DOWN), createArrow(UP)];
         _scrollingTexts = [
-          createScrollingText(dc, _maxWidth, _fontHeight, Y_ALIGN_CENTER, text),
+          createScrollingText(
+            dc,
+            centeredRangeWidth,
+            _fontHeight,
+            X_ALIGN_CENTER,
+            Y_ALIGN_CENTER,
+            text
+          ),
         ];
       }
+    }
+
+    private function getCenteredElementWidth(
+      dc as Gfx.Dc,
+      text as String
+    ) as Numeric {
+      var textWidth = dc.getTextWidthInPixels(text, _font);
+      var width = $.max([_arrowWidth, textWidth]);
+      if (width > _maxWidth) {
+        width = _maxWidth;
+      }
+      if (width < 1) {
+        width = 1;
+      }
+      return width;
     }
 
     private function createArrow(direction as AvalancheUi.ArrowDirection) {
@@ -174,6 +206,7 @@ module AvalancheUi {
       dc as Gfx.Dc,
       containerWidth as Numeric,
       containerHeight as Numeric,
+      xAlignment as TextElementsXAlignment,
       yAlignment as TextElementsYAlignment,
       text as String
     ) {
@@ -182,7 +215,7 @@ module AvalancheUi {
         :text => text,
         :containerWidth => containerWidth,
         :containerHeight => containerHeight,
-        :xAlignment => X_ALIGN_LEFT,
+        :xAlignment => xAlignment,
         :yAlignment => yAlignment,
         :font => _font,
       });
