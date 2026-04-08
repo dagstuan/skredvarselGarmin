@@ -117,6 +117,10 @@ module AvalancheUi {
       return _radius * 2;
     }
 
+    public function getTotalHeight() as Number {
+      return _radius * 2 + _fontHeight;
+    }
+
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
       var Y0 = y0 - _fontHeight;
 

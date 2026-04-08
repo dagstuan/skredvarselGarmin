@@ -24,17 +24,35 @@ const PROBLEM_TYPE_GLIDING_SNOW = 50;
 
 function getProblemTypeName(typeId as Number) as String {
   if (typeId == PROBLEM_TYPE_NEW_SNOW_LOOSE) {
-    return $.getOrLoadResourceString("Nysnø (løssnøskred)", :ProblemTypeNewSnowLoose);
+    return $.getOrLoadResourceString(
+      "Nysnø (løssnøskred)",
+      :ProblemTypeNewSnowLoose
+    );
   } else if (typeId == PROBLEM_TYPE_WET_SNOW_LOOSE) {
-    return $.getOrLoadResourceString("Våt snø (løssnøskred)", :ProblemTypeWetSnowLoose);
+    return $.getOrLoadResourceString(
+      "Våt snø (løssnøskred)",
+      :ProblemTypeWetSnowLoose
+    );
   } else if (typeId == PROBLEM_TYPE_NEW_SNOW_SLAB) {
-    return $.getOrLoadResourceString("Nysnø (flakskred)", :ProblemTypeNewSnowSlab);
+    return $.getOrLoadResourceString(
+      "Nysnø (flakskred)",
+      :ProblemTypeNewSnowSlab
+    );
   } else if (typeId == PROBLEM_TYPE_WIND_DRIFTED_SNOW) {
-    return $.getOrLoadResourceString("Fokksnø (flakskred)", :ProblemTypeWindDriftedSnow);
+    return $.getOrLoadResourceString(
+      "Fokksnø (flakskred)",
+      :ProblemTypeWindDriftedSnow
+    );
   } else if (typeId == PROBLEM_TYPE_PERSISTENT_WEAK_LAYER) {
-    return $.getOrLoadResourceString("Vedvarende svakt lag (flakskred)", :ProblemTypePersistentWeakLayer);
+    return $.getOrLoadResourceString(
+      "Vedvarende svakt lag (flakskred)",
+      :ProblemTypePersistentWeakLayer
+    );
   } else if (typeId == PROBLEM_TYPE_WET_SNOW_SLAB) {
-    return $.getOrLoadResourceString("Våt snø (flakskred)", :ProblemTypeWetSnowSlab);
+    return $.getOrLoadResourceString(
+      "Våt snø (flakskred)",
+      :ProblemTypeWetSnowSlab
+    );
   } else if (typeId == PROBLEM_TYPE_GLIDING_SNOW) {
     return $.getOrLoadResourceString("Glideskred", :ProblemTypeGlidingSnow);
   }
@@ -295,7 +313,7 @@ function drawOutline(
   height as Numeric
 ) {}
 
-(:debug)
+(:debug,:glance)
 function drawOutline(
   dc as Graphics.Dc,
   x0 as Numeric,
@@ -318,13 +336,27 @@ function exposedHeightZonesToFill(zones as Array<Boolean>) as Number {
   var atLine = zones[1];
   var below = zones[2];
 
-  if (above && !atLine && !below) { return 5; }
-  if (!above && !atLine && below) { return 6; }
-  if (!above && atLine && !below) { return 4; }
-  if (above && atLine && !below)  { return 7; }
-  if (!above && atLine && below)  { return 8; }
-  if (above && !atLine && below)  { return 3; }
-  if (above && atLine && below)   { return 9; }
+  if (above && !atLine && !below) {
+    return 5;
+  }
+  if (!above && !atLine && below) {
+    return 6;
+  }
+  if (!above && atLine && !below) {
+    return 4;
+  }
+  if (above && atLine && !below) {
+    return 7;
+  }
+  if (!above && atLine && below) {
+    return 8;
+  }
+  if (above && !atLine && below) {
+    return 3;
+  }
+  if (above && atLine && below) {
+    return 9;
+  }
   return 0;
 }
 
@@ -362,8 +394,12 @@ public function getDangerLevelToday(
   return 0;
 }
 
-public function getDisplayDateForWarning(warning as DetailedAvalancheWarning) as Time.Moment {
-  return $.parseDate((warning["validity"] as Array)[1]).subtract(new Time.Duration(1));
+public function getDisplayDateForWarning(
+  warning as DetailedAvalancheWarning
+) as Time.Moment {
+  return $.parseDate((warning["validity"] as Array)[1]).subtract(
+    new Time.Duration(1)
+  );
 }
 
 public function getStartDateForDetailedWarnings() {

@@ -79,43 +79,48 @@ function getDestructiveSizeText(size as Number) as String {
 
 module AvalancheUi {
   typedef AvalancheProblemSettings as {
+    :dc as Gfx.Dc,
     :problem as AvalancheProblem,
-    :locX as Numeric,
-    :locY as Numeric,
     :width as Numeric,
     :height as Numeric,
-    :dangerFillColor as Gfx.ColorType,
-    :nonDangerFillColor as Gfx.ColorType,
   };
 
   public class AvalancheProblemUi {
+    private const PROBLEM_BLOCK_WIDTH_RATIO = 0.94;
+    private const ICON_SIZE_HEIGHT_RATIO = 0.55;
+    private const ICON_PADDING_RATIO = 0.35;
+    private const DANGER_LINE_GAP_RATIO = 0.6;
+
     private var _problemText as String;
     private var _exposedHeights as Array<Number>;
     private var _validExpositions as String;
     private var _dangerLevel as Number;
 
-    private var _width as Numeric;
-    private var _height as Numeric;
+    private var _availableWidth as Number = 0;
+    private var _availableHeight as Number = 0;
+    private var _textHeight as Number = 0;
+    private var _headingGap as Number = 0;
+    private var _iconRowHeight as Number = 0;
+    private var _dangerLineGap as Number = 0;
+    private var _textContainerWidth as Number = 0;
+    private var _problemBlockWidth as Number = 0;
+    private var _problemBlockHeight as Number = 0;
 
     private var _dangerFillColor as Gfx.ColorType;
     private var _nonDangerFillColor as Gfx.ColorType;
 
-    private var _elemMaxWidth as Number;
-    private var _elemMaxHeight as Number;
-    private var _paddingLeftRight as Number = 0;
+    private var _iconRowAvailableHeight as Number;
     private var _paddingBetweenElements as Number = 0;
 
     private var _dangerLevelWidth = 4;
     private var _hasExposedHeightZones as Boolean = false;
+    private var _iconRowWidth as Number = 0;
 
     private var _problemTextElement as AvalancheUi.ScrollingText?;
 
     private var _validExpositionsUi as AvalancheUi.ValidExpositions?;
-    private var _validExpositionsUiSize as Numeric = 0;
     private var _exposedHeightUi as AvalancheUi.ExposedHeight?;
-    private var _exposedHeightUiSize as Numeric = 0;
     private var _exposedHeightTextUi as AvalancheUi.ExposedHeightText?;
-    private var _exposedHeightTextUiWidth as Numeric = 0;
 
     public function initialize(settings as AvalancheProblemSettings) {
       var problem = settings[:problem];
@@ -150,21 +155,15 @@ module AvalancheUi {
       _validExpositions = problem["validExpositions"];
       _dangerLevel = problem["dangerLevel"];
 
-      _width = settings[:width];
-      _height = settings[:height];
-
-      var deviceScreenWidth = $.getDeviceScreenWidth();
-      if (deviceScreenWidth > 240) {
-        _paddingLeftRight = (_width * 0.08).toNumber();
+      _availableWidth = settings[:width].toNumber();
+      _availableHeight = settings[:height].toNumber();
+      _textHeight = Gfx.getFontHeight(Gfx.FONT_XTINY);
+      _headingGap = (_textHeight * 0.3).toNumber();
+      if (_headingGap < 1) {
+        _headingGap = 1;
       }
 
-      var minPaddingBetweenElements = (_width * 0.04).toNumber();
-      _elemMaxHeight = (_height * 0.75).toNumber();
-      _elemMaxWidth = (
-        (_width - _paddingLeftRight * 2 - minPaddingBetweenElements * 3) /
-        3
-      ).toNumber();
-
+      _iconRowAvailableHeight = _availableHeight - _textHeight - _headingGap;
       _dangerFillColor = Gfx.COLOR_RED;
       _nonDangerFillColor = Gfx.COLOR_LT_GRAY;
 
@@ -200,99 +199,145 @@ module AvalancheUi {
     }
 
     private function setupUiElements(dc as Gfx.Dc) {
+      _problemBlockWidth = (
+        _availableWidth * PROBLEM_BLOCK_WIDTH_RATIO
+      ).toNumber();
+      setupGraphicElements(dc);
+
+      _textContainerWidth =
+        _problemBlockWidth - _dangerLevelWidth - _dangerLineGap;
+      if (_textContainerWidth < 1) {
+        _textContainerWidth = 1;
+      }
+
       _problemTextElement = new ScrollingText({
         :dc => dc,
         :text => _problemText,
-        :containerWidth => _width,
-        :containerHeight => _height * 0.25,
+        :containerWidth => _textContainerWidth,
+        :containerHeight => _textHeight,
         :scrollSpeed => 3,
+        :xAlignment => X_ALIGN_LEFT,
         :font => Gfx.FONT_XTINY,
       });
 
-      var maxSize = $.min(_elemMaxWidth, _elemMaxHeight);
+      _problemBlockHeight = _textHeight + _headingGap + _iconRowHeight;
+    }
 
-      _validExpositionsUi = new AvalancheUi.ValidExpositions({
-        :validExpositions => _validExpositions,
-        :dangerFillColor => _dangerFillColor,
-        :nonDangerFillColor => _nonDangerFillColor,
-        :radius => maxSize / 2,
-      });
-      _validExpositionsUiSize = _validExpositionsUi.getSize();
+    private function setupGraphicElements(dc as Gfx.Dc) as Void {
+      var maxAllowedIconRowWidth =
+        _problemBlockWidth > 0 ? _problemBlockWidth : _availableWidth;
+      var iconSize = (
+        _iconRowAvailableHeight * ICON_SIZE_HEIGHT_RATIO
+      ).toNumber();
+      if (iconSize < 1) {
+        iconSize = 1;
+      }
 
-      _exposedHeightUi = new AvalancheUi.ExposedHeight({
-        :exposedHeight1 => _exposedHeights[0],
-        :exposedHeight2 => _exposedHeights[1],
-        :exposedHeightFill => _exposedHeights[2],
-        :dangerFillColor => _dangerFillColor,
-        :nonDangerFillColor => _nonDangerFillColor,
-        :size => maxSize * 0.9,
-      });
-      _exposedHeightUiSize = _exposedHeightUi.getSize();
+      for (var i = 0; i < 6; i++) {
+        _paddingBetweenElements = (iconSize * ICON_PADDING_RATIO).toNumber();
+        if (_paddingBetweenElements < 3) {
+          _paddingBetweenElements = 3;
+        }
 
-      if (!_hasExposedHeightZones) {
-        _exposedHeightTextUi = new AvalancheUi.ExposedHeightText({
-          :dc => dc,
+        _dangerLineGap = (
+          _paddingBetweenElements * DANGER_LINE_GAP_RATIO
+        ).toNumber();
+        if (_dangerLineGap < 2) {
+          _dangerLineGap = 2;
+        }
+
+        _validExpositionsUi = new AvalancheUi.ValidExpositions({
+          :validExpositions => _validExpositions,
+          :dangerFillColor => _dangerFillColor,
+          :nonDangerFillColor => _nonDangerFillColor,
+          :radius => iconSize / 2,
+        });
+
+        _exposedHeightUi = new AvalancheUi.ExposedHeight({
           :exposedHeight1 => _exposedHeights[0],
           :exposedHeight2 => _exposedHeights[1],
           :exposedHeightFill => _exposedHeights[2],
           :dangerFillColor => _dangerFillColor,
-          :maxWidth => _elemMaxWidth,
-          :maxHeight => _elemMaxHeight,
+          :nonDangerFillColor => _nonDangerFillColor,
+          :size => iconSize,
         });
-        _exposedHeightTextUiWidth = _exposedHeightTextUi.getWidth();
-      }
+        var exposedHeightUiSize = getExposedHeightUiSize();
 
-      var totalElementWidth = _hasExposedHeightZones
-        ? _validExpositionsUiSize + _exposedHeightUiSize
-        : _validExpositionsUiSize +
-          _exposedHeightUiSize +
-          _exposedHeightTextUiWidth +
-          _dangerLevelWidth;
+        _exposedHeightTextUi = null;
+        if (!_hasExposedHeightZones) {
+          _exposedHeightTextUi = new AvalancheUi.ExposedHeightText({
+            :dc => dc,
+            :exposedHeight1 => _exposedHeights[0],
+            :exposedHeight2 => _exposedHeights[1],
+            :exposedHeightFill => _exposedHeights[2],
+            :dangerFillColor => _dangerFillColor,
+            :maxWidth => exposedHeightUiSize,
+            :maxHeight => exposedHeightUiSize,
+          });
+        }
 
-      if (_hasExposedHeightZones) {
-        // 2 elements: use a fixed gap and center the pair horizontally
-        _paddingBetweenElements = (_width * 0.1).toNumber();
-        _paddingLeftRight =
-          (_width - totalElementWidth - _paddingBetweenElements) / 2;
-      } else {
-        _paddingBetweenElements =
-          (_width - _paddingLeftRight * 2 - totalElementWidth) / 3;
+        _iconRowHeight = $.max([
+          _validExpositionsUi.getTotalHeight(),
+          exposedHeightUiSize,
+        ]);
+        _iconRowWidth = getRowWidth();
+
+        var totalWidth = _dangerLevelWidth + _dangerLineGap + _iconRowWidth;
+        var totalHeight = _textHeight + _headingGap + _iconRowHeight;
+        if (
+          totalWidth <= maxAllowedIconRowWidth &&
+          totalHeight <= _availableHeight
+        ) {
+          break;
+        }
+
+        var widthScale =
+          maxAllowedIconRowWidth.toFloat() / totalWidth.toFloat();
+        var heightScale = _availableHeight.toFloat() / totalHeight.toFloat();
+        var scale = widthScale < heightScale ? widthScale : heightScale;
+        if (scale >= 1.0f) {
+          break;
+        }
+
+        iconSize = (iconSize.toFloat() * scale).toNumber();
       }
     }
 
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
-      _problemTextElement.draw(dc, x0, y0);
-
-      var elemX0 = x0 + _paddingLeftRight;
-      var elemY0 = y0 + _height - _elemMaxHeight;
+      var validExpositionsUiSize = getValidExpositionsUiSize();
+      var exposedHeightUiSize = getExposedHeightUiSize();
+      var problemBlockXOffset = (_availableWidth - _problemBlockWidth) / 2;
+      var problemBlockYOffset = (_availableHeight - _problemBlockHeight) / 2;
+      var problemBlockX0 = x0 + problemBlockXOffset;
+      var problemBlockY0 = y0 + problemBlockYOffset;
+      var textX0 = problemBlockX0 + _dangerLevelWidth + _dangerLineGap;
+      var iconRowX0 = textX0 + (_textContainerWidth - _iconRowWidth) / 2;
+      var bottomY = problemBlockY0 + _textHeight + _headingGap + _iconRowHeight;
 
       if ($.DrawOutlines) {
         $.drawOutline(
           dc,
-          elemX0,
-          elemY0,
-          _width - _paddingLeftRight * 2,
-          _elemMaxHeight
+          problemBlockX0,
+          problemBlockY0,
+          _problemBlockWidth,
+          _problemBlockHeight
         );
       }
 
-      // x0 and y0 for expositions are the center of the circle.
-      var validExpositionsUiShiftY =
-        _elemMaxHeight / 2 - _validExpositionsUiSize / 2;
-      _validExpositionsUi.draw(dc, elemX0, elemY0 + validExpositionsUiShiftY);
+      drawDangerLevel(dc, problemBlockX0, problemBlockY0);
 
-      elemX0 += _validExpositionsUiSize + _paddingBetweenElements;
-      var exposedHeightUiShiftY = _elemMaxHeight / 2 - _exposedHeightUiSize / 2;
-      _exposedHeightUi.draw(dc, elemX0, elemY0 + exposedHeightUiShiftY);
+      _problemTextElement.draw(dc, textX0, problemBlockY0);
 
-      elemX0 += _exposedHeightUiSize + _paddingBetweenElements;
+      var curX = iconRowX0;
+      _validExpositionsUi.draw(dc, curX, bottomY - validExpositionsUiSize);
+
+      curX += validExpositionsUiSize + _paddingBetweenElements;
+      var exposedHeightY0 = bottomY - exposedHeightUiSize;
+      _exposedHeightUi.draw(dc, curX, exposedHeightY0);
+
+      curX += exposedHeightUiSize + _paddingBetweenElements;
       if (_exposedHeightTextUi != null) {
-        _exposedHeightTextUi.draw(dc, elemX0, elemY0);
-      }
-
-      if (!_hasExposedHeightZones) {
-        elemX0 += _exposedHeightTextUiWidth + _paddingBetweenElements;
-        drawDangerLevel(dc, elemX0, elemY0);
+        _exposedHeightTextUi.draw(dc, curX, exposedHeightY0);
       }
     }
 
@@ -304,13 +349,42 @@ module AvalancheUi {
       var color = $.colorize(_dangerLevel);
       dc.setColor(color, Gfx.COLOR_TRANSPARENT);
 
-      var size = $.min(_elemMaxWidth, _elemMaxHeight);
+      dc.fillRectangle(x0, y0, _dangerLevelWidth, _problemBlockHeight);
+    }
 
-      dc.fillRectangle(
-        x0,
-        y0 + _elemMaxHeight / 2 - size / 2,
-        _dangerLevelWidth,
-        size
+    private function getValidExpositionsUiSize() as Numeric {
+      if (_validExpositionsUi == null) {
+        return 0;
+      }
+
+      return _validExpositionsUi.getSize();
+    }
+
+    private function getExposedHeightUiSize() as Numeric {
+      if (_exposedHeightUi == null) {
+        return 0;
+      }
+
+      return _exposedHeightUi.getSize();
+    }
+
+    private function getExposedHeightTextUiWidth() as Numeric {
+      if (_exposedHeightTextUi == null) {
+        return 0;
+      }
+
+      return _exposedHeightTextUi.getWidth();
+    }
+
+    private function getRowWidth() as Number {
+      var totalWidth = getValidExpositionsUiSize() + getExposedHeightUiSize();
+
+      if (_hasExposedHeightZones) {
+        return totalWidth + _paddingBetweenElements;
+      }
+
+      return (
+        totalWidth + getExposedHeightTextUiWidth() + _paddingBetweenElements * 2
       );
     }
   }

@@ -119,6 +119,8 @@ class GlanceView extends Ui.GlanceView {
 
   function onHide() {
     _appNameText = null;
+    _forecastData = null;
+    _dataAge = null;
     if (self has :clearBufferedBitmap) {
       clearBufferedBitmap();
     }
