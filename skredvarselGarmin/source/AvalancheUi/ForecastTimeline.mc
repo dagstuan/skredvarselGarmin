@@ -98,12 +98,7 @@ module AvalancheUi {
     var currXOffset = locX;
 
     for (var i = 0; i < forecast.size(); i++) {
-      var warning = forecast[i] as SimpleAvalancheWarning?;
-
-      if (warning == null) {
-        continue;
-      }
-
+      var warning = forecast[i] as SimpleAvalancheWarning;
       var validity = warning["validity"] as Array?;
 
       if (validity == null || validity.size() < 2) {
