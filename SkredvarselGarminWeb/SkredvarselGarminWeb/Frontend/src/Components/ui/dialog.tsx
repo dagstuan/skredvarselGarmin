@@ -52,13 +52,12 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Viewport
         data-slot="dialog-viewport"
-        className="fixed inset-0 z-50 overflow-y-auto flex justify-center items-start py-8 px-4 pointer-events-none"
-        style={{ WebkitOverflowScrolling: "touch" }}
+        className="fixed inset-0 z-50 overflow-y-auto flex justify-center items-start py-8 px-4"
       >
         <DialogPrimitive.Popup
           data-slot="dialog-content"
           className={cn(
-            "bg-background data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 ring-foreground/10 relative grid w-full max-w-lg gap-6 sm:rounded-xl p-6 ring-1 duration-100 outline-none pointer-events-auto",
+            "bg-background data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 ring-foreground/10 relative grid w-full max-w-lg gap-6 sm:rounded-xl p-6 ring-1 duration-100 outline-none",
             className,
           )}
           {...props}
