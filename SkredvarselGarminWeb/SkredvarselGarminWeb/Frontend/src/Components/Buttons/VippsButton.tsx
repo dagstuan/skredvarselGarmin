@@ -1,30 +1,34 @@
-import { Button, ButtonProps, Flex, Text } from "@chakra-ui/react";
-
+import { buttonVariants } from "../ui/button";
 import { VippsIcon } from "../Icons/VippsIcon";
+import { cn } from "../../lib/utils";
+import { VariantProps } from "class-variance-authority";
 
 type VippsButtonProps = {
   text?: string;
   link?: string;
-} & Pick<ButtonProps, "size">;
+  size?: VariantProps<typeof buttonVariants>["size"];
+  className?: string;
+};
 
 export const VippsButton = (props: VippsButtonProps) => {
-  const { text = "Fortsett med", link = "/createVippsAgreement" } = props;
+  const {
+    text = "Fortsett med",
+    link = "/createVippsAgreement",
+    size = "lg",
+    className,
+  } = props;
 
   return (
-    <Button
-      as="a"
+    <a
       href={link}
-      bg={"#ff5b24"}
-      color={"white"}
-      rounded={"full"}
-      borderRadius={4}
-      size={props.size ?? "md"}
-      _hover={{ bg: "#ec6638" }}
+      className={cn(
+        buttonVariants({ size: size }),
+        "bg-brand-vipps-500 text-white hover:bg-brand-vipps-600 flex items-center",
+        className,
+      )}
     >
-      <Flex gap={2} alignItems="center">
-        <Text>{text}</Text>
-        <VippsIcon alignSelf="flex-end" w={14} h={4} />
-      </Flex>
-    </Button>
+      <span className="leading-none">{text}</span>
+      <VippsIcon className="size-auto w-14 h-4 translate-y-0.5" />
+    </a>
   );
 };

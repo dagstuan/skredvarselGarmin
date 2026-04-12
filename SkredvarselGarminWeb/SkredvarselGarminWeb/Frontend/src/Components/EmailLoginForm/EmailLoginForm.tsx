@@ -1,4 +1,5 @@
-import { FormControl, Input, FormErrorMessage, Button } from "@chakra-ui/react";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
 
 type EmailLoginFormProps = {
   email: string | undefined;
@@ -14,20 +15,25 @@ export const EmailLoginForm = (props: EmailLoginFormProps) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <FormControl isInvalid={!!error}>
+      <div className="space-y-2">
         <Input
           type="email"
-          bg="white"
+          className="bg-white"
           placeholder="E-post"
           value={email}
           onChange={handleEmailInputChange}
+          aria-invalid={!!error}
+          aria-describedby={error ? "email-error" : undefined}
         />
-        <FormErrorMessage>{error}</FormErrorMessage>
-      </FormControl>
+        {error && (
+          <p id="email-error" className="text-sm text-red-500">
+            {error}
+          </p>
+        )}
+      </div>
       <Button
-        mt={4}
-        w="100%"
-        colorScheme="green"
+        className="mt-2 w-full"
+        variant="green"
         isLoading={isLoading}
         type="submit"
       >

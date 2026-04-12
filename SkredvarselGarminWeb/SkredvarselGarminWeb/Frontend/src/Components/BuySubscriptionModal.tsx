@@ -1,19 +1,12 @@
 import {
-  Box,
-  Center,
-  Heading,
-  Icon,
-  Link,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
-import { ReactElement } from "react";
+  Dialog,
+  DialogPopup,
+  DialogTitle,
+  DialogHeader,
+  DialogDescription,
+} from "./ui/dialog";
+import { Heading } from "./ui/heading";
+import { ReactElement, useState, useEffect } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import { useEmailLogin } from "../hooks/useEmailLogin";
@@ -39,10 +32,6 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
         Abonnement kan kjøpes direkte med Vipps,
         <br />
         eller logg inn for andre alternativer.
-        <br />
-        <br />
-        Hvis du allerede har et abonnement kan du logge inn nedenfor for å endre
-        det.
       </>
     ),
   } = props;
@@ -56,6 +45,15 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
 
   const { isClosing, onClose } = useNavigateOnClose("/");
 
+  // Delay opening to allow mount animation
+  const [shouldOpen, setShouldOpen] = useState(false);
+  useEffect(() => {
+    if (!isLoadingUser) {
+      const timer = setTimeout(() => setShouldOpen(true), 10);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoadingUser]);
+
   const {
     email,
     showSentEmail,
@@ -66,96 +64,83 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
   } = useEmailLogin(watchKey);
 
   return (
-    <Modal isOpen={!isLoadingUser && !isClosing} onClose={onClose} isCentered>
-      <ModalOverlay />
-      <ModalContent alignItems="center" overflow="hidden">
-        <ModalHeader>{headerText}</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody w="100%" p={0}>
+    <Dialog
+      open={shouldOpen && !isClosing}
+      onOpenChange={(open) => !open && onClose()}
+    >
+      <DialogPopup className="flex flex-col items-center overflow-hidden">
+        <DialogHeader className="w-full pb-4">
+          <DialogTitle>{headerText}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Velg hvordan du vil kjope abonnement eller logge inn for a endre
+            det.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="w-full">
           {!showSentEmail && (
-            <VStack gap={8} w="100%" alignItems="center">
-              <VStack
-                gap={5}
-                w={{ base: "90%", md: "80%" }}
-                alignItems="center"
-              >
-                <Box w="100%" p={3} boxShadow="xs" rounded="sm" bg="gray.50">
-                  <Text fontSize="md" align="left">
-                    {informationElement}
-                  </Text>
-                </Box>
+            <div className="flex flex-col gap-8 w-full items-center">
+              <div className="flex flex-col gap-5 items-center w-full">
+                <div className="w-full p-3 shadow-sm rounded-sm bg-gray-50">
+                  <p className="text-md text-left">{informationElement}</p>
+                </div>
 
-                <VStack w="100%" alignItems="stretch">
+                <div className="w-full flex flex-col">
                   <VippsButton
+                    className="w-full"
                     text="Kjøp abonnement med"
                     link={`/createVippsAgreement${watchKey ? `?watchKey=${watchKey}` : ""}`}
                   />
-                </VStack>
-              </VStack>
+                </div>
+              </div>
 
-              <Center w="100%" bg="gray.100" pt={4} pb={8}>
-                <VStack
-                  w={{ base: "90%", md: "80%" }}
-                  maxW="sm"
-                  gap={5}
-                  alignItems="stretch"
-                >
-                  <Heading
-                    textAlign="center"
-                    as="header"
-                    size="sm"
-                    fontWeight="bold"
-                  >
+              <div className="w-full bg-gray-100 px-4 pt-4 pb-8 rounded-md">
+                <div className="w-full flex flex-col gap-5">
+                  <Heading as="h2" className="text-center font-bold text-xl">
                     Logg inn / registrer deg
                   </Heading>
-                  <VStack gap={5} w="100%" alignItems="stretch">
-                    <VStack gap={2} w="100%" alignItems="stretch">
-                      <GoogleButton
-                        link={`/google-login?returnUrl=/account${watchKey ? `?watchKey=${watchKey}` : ""}`}
-                      />
-                      <FacebookButton
-                        link={`/facebook-login?returnUrl=/account${watchKey ? `?watchKey=${watchKey}` : ""}`}
-                      />
-                    </VStack>
+                  <div className="w-full flex flex-col gap-2">
+                    <GoogleButton
+                      className="w-full"
+                      link={`/google-login?returnUrl=/account${watchKey ? `?watchKey=${watchKey}` : ""}`}
+                    />
+                    <FacebookButton
+                      className="w-full"
+                      link={`/facebook-login?returnUrl=/account${watchKey ? `?watchKey=${watchKey}` : ""}`}
+                    />
+                  </div>
 
-                    <OrDivider text="Eller" />
-                    <VStack w="100%" alignItems="stretch">
-                      <EmailLoginForm
-                        email={email}
-                        handleEmailInputChange={handleEmailInputChange}
-                        handleSubmit={handleSubmit}
-                        error={error}
-                        isLoading={isPending}
-                      />
-                    </VStack>
-                    <Center>
-                      <Link as={RouterLink} to="/faq#vippslogin">
-                        Hvorfor kan jeg ikke logge inn med Vipps?
-                      </Link>
-                    </Center>
-                  </VStack>
-                </VStack>
-              </Center>
-            </VStack>
+                  <OrDivider text="Eller" bgClassName="bg-gray-100" />
+                  <div className="w-full flex flex-col">
+                    <EmailLoginForm
+                      email={email}
+                      handleEmailInputChange={handleEmailInputChange}
+                      handleSubmit={handleSubmit}
+                      error={error}
+                      isLoading={isPending}
+                    />
+                  </div>
+                  <div className="flex justify-center">
+                    <RouterLink
+                      to="/faq#vippslogin"
+                      className="hover:underline"
+                    >
+                      Hvorfor kan jeg ikke logge inn med Vipps?
+                    </RouterLink>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
           {showSentEmail && (
-            <VStack gap={6} pb={6}>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                bg="green.500"
-                color="white"
-                borderRadius="50%"
-                boxSize={28}
-              >
-                <Icon w={16} h={16} as={FaPaperPlane} />
-              </Box>
-              <Text>Sjekk innboksen din for en innloggingslenke.</Text>
-            </VStack>
+            <div className="flex flex-col gap-6 pb-6 items-center">
+              <div className="flex items-center justify-center bg-green-500 text-white rounded-full w-28 h-28">
+                <FaPaperPlane className="w-16 h-16" />
+              </div>
+              <p>Sjekk innboksen din for en innloggingslenke.</p>
+            </div>
           )}
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+        </div>
+      </DialogPopup>
+    </Dialog>
   );
 };

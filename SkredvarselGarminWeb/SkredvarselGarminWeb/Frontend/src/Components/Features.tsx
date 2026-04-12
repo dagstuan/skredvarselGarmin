@@ -1,12 +1,5 @@
-import {
-  Heading,
-  Flex,
-  Text,
-  Card,
-  CardBody,
-  Stack,
-  Image,
-} from "@chakra-ui/react";
+import { Heading } from "./ui/heading";
+import { Card, CardContent } from "./ui/card";
 import { Feature } from "./Feature";
 
 import glanceImage from "../assets/glance.png?format=webp&quality=60&as=meta:width;height;src&imagetools";
@@ -16,22 +9,8 @@ import problemsImage from "../assets/problems.png?format=webp&quality=60&as=meta
 import offlineImage from "../assets/offline.jpg?w=800&format=webp&as=meta:width;height;src&imagetools";
 
 export const Features = () => (
-  <Flex
-    py={20}
-    flexDir={"column"}
-    justifyContent={"center"}
-    alignItems={"center"}
-  >
-    <Heading as="h2" size="xl" m={10}>
-      Funksjoner
-    </Heading>
-    <Flex
-      m={10}
-      gap={10}
-      alignItems={"flex-start"}
-      justifyContent="center"
-      flexWrap="wrap"
-    >
+  <div className="py-10 md:py-20 flex flex-col gap-10 justify-center items-center">
+    <div className="px-5 sm:px-10 flex gap-8 md:gap-10 items-start justify-center flex-wrap">
       <Feature
         imgUrl={glanceImage.src}
         imgWidth={glanceImage.width}
@@ -57,39 +36,31 @@ export const Features = () => (
         imgUrl={problemsImage.src}
         imgWidth={problemsImage.width}
         imgHeight={problemsImage.height}
-        heading="Skredproblemer"
+        heading="Skred&shy;problemer"
         text="Visning av alle skredproblemer meldt på en gitt dag."
       />
-    </Flex>
+    </div>
 
-    <Card
-      m={10}
-      maxW={"3xl"}
-      direction={{ base: "column", sm: "row" }}
-      overflow="hidden"
-      variant="outline"
-      boxShadow={"2xl"}
-    >
-      <Image
-        objectFit="cover"
-        maxW={{ base: "100%", sm: "200px" }}
+    <Card className="mx-5 sm:mx-10 max-w-3xl flex flex-col sm:flex-row overflow-hidden shadow-2xl border">
+      <img
+        className="object-cover w-full sm:w-50"
         src={offlineImage.src}
-        htmlWidth={offlineImage.width}
-        htmlHeight={offlineImage.height}
+        width={offlineImage.width}
+        height={offlineImage.height}
         alt="Skredvarsel for Garmin"
       />
 
-      <Stack>
-        <CardBody>
-          <Heading size="md">Tilgjengelig uten tilkobling</Heading>
+      <CardContent className="p-6">
+        <Heading as="h3" className="mb-2 text-xl">
+          Tilgjengelig uten tilkobling
+        </Heading>
 
-          <Text py="2">
-            Appen synkroniserer snøskredvarselet for alle valgte regioner hver
-            time. Og varselet er tilgjengelig selv om du er på tur uten dekning
-            eller uten mobil.
-          </Text>
-        </CardBody>
-      </Stack>
+        <p className="py-2 text-lg">
+          Appen synkroniserer snøskredvarselet for alle valgte regioner hver
+          time. Og varselet er tilgjengelig selv om du er på tur uten dekning
+          eller uten mobil.
+        </p>
+      </CardContent>
     </Card>
-  </Flex>
+  </div>
 );

@@ -1,4 +1,3 @@
-import { Box, Flex } from "@chakra-ui/react";
 import { Outlet } from "react-router-dom";
 
 import { Footer } from "./Components/Footer";
@@ -9,15 +8,15 @@ function App() {
   useScrollToTopOnNavigate();
 
   return (
-    <Flex minH="100vh" flexDir="column">
+    <div className="min-h-screen flex flex-col">
       <Nav />
-      <Box w="100%">
+      <div className="w-full">
         <Outlet />
-      </Box>
-      <Box mt="auto">
+      </div>
+      <div className="mt-auto">
         <Footer />
-      </Box>
-    </Flex>
+      </div>
+    </div>
   );
 }
 

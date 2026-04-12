@@ -1,12 +1,3 @@
-import {
-  Spinner,
-  Button,
-  Text,
-  VStack,
-  AbsoluteCenter,
-  Box,
-  Divider,
-} from "@chakra-ui/react";
 import { format, parse } from "date-fns";
 import {
   useReactivateVippsAgreement,
@@ -15,13 +6,15 @@ import {
 } from "../../hooks/useSubscription";
 import { VippsButton } from "../Buttons/VippsButton";
 import { StripeButton } from "../Buttons/StripeButton";
+import { Button } from "../ui/button";
+import { Separator } from "../ui/separator";
+import { Spinner } from "../ui/spinner";
 
 const StripeCustomerPortalButton = () => (
   <Button
-    as="a"
-    href="/stripe-customer-portal"
-    colorScheme="blue"
-    borderRadius={4}
+    nativeButton={false}
+    render={(props) => <a {...props} href="/stripe-customer-portal" />}
+    variant="blue"
   >
     Gå til Stripe for å endre abonnement
   </Button>
@@ -35,25 +28,29 @@ export const Subscription = () => {
   const reactivateSubscription = useReactivateVippsAgreement();
 
   if (isSubscriptionLoading) {
-    return <Spinner />;
+    return (
+      <div className="flex items-center justify-center">
+        <Spinner className="size-5" />
+      </div>
+    );
   }
 
   if (!subscription) {
     return (
-      <VStack align="flex-start" gap={2}>
-        <Text mb={2}>Du har ikke registrert et abonnement på appen.</Text>
+      <div className="flex flex-col items-start gap-2">
+        <p className="mb-2">Du har ikke registrert et abonnement på appen.</p>
 
-        <VStack gap={5} alignItems="stretch">
+        <div className="flex flex-col gap-5">
           <VippsButton text="Kjøp abonnement med" />
-          <Box position="relative">
-            <Divider />
-            <AbsoluteCenter bg="white" px="4">
+          <div className="relative">
+            <Separator />
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-4">
               Eller
-            </AbsoluteCenter>
-          </Box>
+            </div>
+          </div>
           <StripeButton />
-        </VStack>
-      </VStack>
+        </div>
+      </div>
     );
   }
 
@@ -65,19 +62,25 @@ export const Subscription = () => {
     vippsConfirmationUrl,
   } = subscription;
 
-  if (subscriptionType === "Vipps") {
-    if (vippsAgreementStatus === "PENDING" && vippsConfirmationUrl) {
-      return (
-        <>
-          <Text mb={2}>
-            Du har en pågående registrering for et abonnement. Gå til Vipps for
-            å fullføre registreringen.
-          </Text>
+  if (
+    subscriptionType === "Vipps" &&
+    vippsAgreementStatus === "PENDING" &&
+    vippsConfirmationUrl
+  ) {
+    return (
+      <div className="flex flex-col items-start gap-2">
+        <p className="mb-2">
+          Du har en pågående registrering for et abonnement. Gå til Vipps for å
+          fullføre registreringen.
+        </p>
 
-          <VippsButton text="Gå til" link={vippsConfirmationUrl} />
-        </>
-      );
-    }
+        <VippsButton
+          className="w-full cursor-pointer"
+          text="Gå til"
+          link={vippsConfirmationUrl}
+        />
+      </div>
+    );
   }
 
   var formattedNextChargeDate =
@@ -88,18 +91,17 @@ export const Subscription = () => {
   if (subscriptionType === "Vipps" && vippsAgreementStatus == "UNSUBSCRIBED") {
     return (
       <>
-        <Text mb={2}>
+        <p className="mb-2">
           Du har sagt opp abonnementet ditt. Du har fortsatt tilgang frem til{" "}
           {formattedNextChargeDate}.
-        </Text>
+        </p>
 
         <Button
-          colorScheme="green"
-          borderRadius={4}
-          isDisabled={reactivateSubscription.isPending}
+          variant="green"
+          disabled={reactivateSubscription.isPending}
           onClick={() => reactivateSubscription.mutate()}
         >
-          Re-aktiver abonnement
+          Behold abonnementet
         </Button>
       </>
     );
@@ -111,10 +113,10 @@ export const Subscription = () => {
   ) {
     return (
       <>
-        <Text mb={2}>
+        <p className="mb-2">
           Du har sagt opp abonnementet ditt. Du har fortsatt tilgang frem til{" "}
           {formattedNextChargeDate}.
-        </Text>
+        </p>
 
         <StripeCustomerPortalButton />
       </>
@@ -125,17 +127,16 @@ export const Subscription = () => {
     <>
       {subscription != null && (
         <>
-          <Text mb={2}>
+          <p className="mb-2">
             Du har registrert et abonnement på appen. Tusen takk!{" "}
             {formattedNextChargeDate &&
               `Abonnementet fornyes automatisk ${formattedNextChargeDate}`}
-          </Text>
+          </p>
 
           {subscriptionType == "Vipps" && (
             <Button
-              colorScheme="gray"
-              borderRadius={4}
-              isDisabled={stopSubscription.isPending}
+              variant="secondary"
+              disabled={stopSubscription.isPending}
               onClick={() => stopSubscription.mutate()}
             >
               Avslutt abonnement

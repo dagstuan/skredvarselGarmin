@@ -1,15 +1,3 @@
-import {
-  Box,
-  Button,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerOverlay,
-  Heading,
-  Link,
-  Text,
-} from "@chakra-ui/react";
 import { useEffect } from "react";
 import {
   Link as RouterLink,
@@ -19,6 +7,15 @@ import {
 import { useNavigateOnClose } from "../../hooks/useNavigateOnClose";
 import { useUser } from "../../hooks/useUser";
 import { useAddWatch } from "../../hooks/useWatches";
+import {
+  Drawer,
+  DrawerPopup,
+  DrawerClose,
+  DrawerTitle,
+  DrawerDescription,
+} from "../ui/drawer";
+import { Heading } from "../ui/heading";
+import { Button } from "../ui/button";
 import { PersonalInfo } from "./PersonalInfo";
 import { Subscription } from "./Subscription";
 import { Watches } from "./Watches";
@@ -40,6 +37,7 @@ export const AccountPage = () => {
   const watchKey = searchParams.get("watchKey");
 
   const { mutate: mutateAddWatch, isPending: isAddWatchPending } = useAddWatch(
+    undefined,
     () => {
       searchParams.delete("watchKey");
       setSearchParams(searchParams, {
@@ -56,51 +54,84 @@ export const AccountPage = () => {
   }, [mutateAddWatch, isAddWatchPending, user, watchKey]);
 
   return (
-    <Drawer isOpen={!!user && !isClosing} onClose={onClose} size="md">
-      <DrawerOverlay />
-      <DrawerContent>
-        <DrawerCloseButton />
-
-        <DrawerBody>
-          <Heading size="md" mt={2} mb={8}>
-            Min side
-          </Heading>
-
-          <Text mb={10}>
-            Lurer du på noe? Se{" "}
-            <Link as={RouterLink} to="/faq" color="blue.600">
-              ofte stilte spørsmål
-            </Link>
-            .
-          </Text>
-
-          <Box mb={10}>
-            <Heading size="sm" mb={2}>
-              Abonnement
+    <Drawer
+      autoFocus
+      open={!isClosing}
+      onOpenChange={(open) => !open && onClose()}
+      direction="right"
+    >
+      <DrawerPopup className="focus:outline-none w-full! overflow-hidden p-0">
+        <DrawerTitle className="sr-only">Min side</DrawerTitle>
+        <DrawerDescription className="sr-only">
+          Administrer abonnement, klokker og personlige opplysninger.
+        </DrawerDescription>
+        <DrawerClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-4 w-4"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+          <span className="sr-only">Close</span>
+        </DrawerClose>
+        <div
+          className="overflow-y-auto overscroll-contain h-full p-4"
+          data-vaul-no-drag
+        >
+          <div className="flex flex-col gap-4">
+            <Heading as="h2" className="mt-2 mb-4 text-xl">
+              Min side
             </Heading>
 
-            <Subscription />
-          </Box>
+            <p className="mb-6">
+              Lurer du på noe? Se{" "}
+              <RouterLink to="/faq" className="text-blue-600 hover:underline">
+                ofte stilte spørsmål
+              </RouterLink>
+              .
+            </p>
 
-          <Box mb={10}>
-            <Watches />
-          </Box>
+            <div className="mb-6">
+              <Heading as="h3" className="mb-2 text-xl">
+                Abonnement
+              </Heading>
 
-          <Box mb={10}>
-            <Heading size="sm" mb={2}>
-              Personlige opplysninger
-            </Heading>
+              <Subscription />
+            </div>
 
-            <PersonalInfo />
-          </Box>
+            <div className="mb-6">
+              <Watches />
+            </div>
 
-          <Box mb={5}>
-            <Button as="a" href="/logout" colorScheme="blue" borderRadius={4}>
-              Logg ut
-            </Button>
-          </Box>
-        </DrawerBody>
-      </DrawerContent>
+            <div className="mb-6">
+              <Heading as="h3" className="mb-2 text-xl">
+                Personlige opplysninger
+              </Heading>
+
+              <PersonalInfo />
+            </div>
+
+            <div className="mb-5">
+              <Button
+                nativeButton={false}
+                render={(props) => <a {...props} href="/logout" />}
+                variant="blue"
+              >
+                Logg ut
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DrawerPopup>
     </Drawer>
   );
 };
