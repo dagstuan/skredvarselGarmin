@@ -53,6 +53,7 @@ function DialogContent({
       <DialogPrimitive.Viewport
         data-slot="dialog-viewport"
         className="fixed inset-0 z-50 overflow-y-auto flex justify-center items-start py-8 px-4 pointer-events-none"
+        style={{ WebkitOverflowScrolling: "touch" }}
       >
         <DialogPrimitive.Popup
           data-slot="dialog-content"
