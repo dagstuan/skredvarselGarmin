@@ -26,6 +26,9 @@ public class VippsAgreementService(
 
     public async Task CreateNextChargeForAgreement(string agreementId)
     {
+        using var connection = JobStorage.Current.GetConnection();
+        using var distributedLock = connection.AcquireDistributedLock($"CreateNextChargeForAgreement:{agreementId}", TimeSpan.FromSeconds(10));
+
         using var transaction = dbContext.Database.BeginTransaction();
 
         var agreement = dbContext.Agreements
@@ -86,9 +89,11 @@ public class VippsAgreementService(
         transaction.Commit();
     }
 
-    [DisableConcurrentExecution(10)]
     public async Task UpdateAgreementCharges(string agreementId)
     {
+        using var connection = JobStorage.Current.GetConnection();
+        using var distributedLock = connection.AcquireDistributedLock($"UpdateAgreementCharges:{agreementId}", TimeSpan.FromSeconds(10));
+
         var isExistingTransaction = dbContext.Database.CurrentTransaction != null;
 
         if (!isExistingTransaction)
