@@ -19,6 +19,7 @@ public class VippsAgreementService(
     IVippsApiClient vippsApiClient,
     IDateTimeNowProvider dateTimeNowProvider,
     INotificationService notificationService,
+    JobStorage jobStorage,
     ILogger<VippsAgreementService> logger) : IVippsAgreementService
 {
     private readonly TimeSpan ChargeRetryDays = TimeSpan.FromDays(6);
@@ -26,7 +27,7 @@ public class VippsAgreementService(
 
     public async Task CreateNextChargeForAgreement(string agreementId)
     {
-        using var connection = JobStorage.Current.GetConnection();
+        using var connection = jobStorage.GetConnection();
         using var distributedLock = connection.AcquireDistributedLock($"CreateNextChargeForAgreement:{agreementId}", TimeSpan.FromSeconds(10));
 
         using var transaction = dbContext.Database.BeginTransaction();
@@ -91,7 +92,7 @@ public class VippsAgreementService(
 
     public async Task UpdateAgreementCharges(string agreementId)
     {
-        using var connection = JobStorage.Current.GetConnection();
+        using var connection = jobStorage.GetConnection();
         using var distributedLock = connection.AcquireDistributedLock($"UpdateAgreementCharges:{agreementId}", TimeSpan.FromSeconds(10));
 
         var isExistingTransaction = dbContext.Database.CurrentTransaction != null;

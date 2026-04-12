@@ -5,6 +5,7 @@ using AutoFixture;
 using AwesomeAssertions;
 
 using Hangfire;
+using Hangfire.Storage;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -62,12 +63,19 @@ public class SubscriptionServiceTests
         _vippsApiClient = Substitute.For<IVippsApiClient>();
         _dateTimeNowProvider = Substitute.For<IDateTimeNowProvider>();
 
+        var jobStorageConnection = Substitute.For<IStorageConnection>();
+        jobStorageConnection
+            .AcquireDistributedLock(Arg.Any<string>(), Arg.Any<TimeSpan>())
+            .Returns(Substitute.For<IDisposable>());
+        var jobStorage = Substitute.For<JobStorage>();
+        jobStorage.GetConnection().Returns(jobStorageConnection);
 
         _subscriptionService = new VippsAgreementService(
             _dbContext,
             _vippsApiClient,
             _dateTimeNowProvider,
             Substitute.For<INotificationService>(),
+            jobStorage,
             Substitute.For<ILogger<VippsAgreementService>>());
     }
 
