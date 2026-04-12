@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { XIcon } from "lucide-react";
 import {
   Link as RouterLink,
   useNavigate,
@@ -65,22 +66,8 @@ export const AccountPage = () => {
         <DrawerDescription className="sr-only">
           Administrer abonnement, klokker og personlige opplysninger.
         </DrawerDescription>
-        <DrawerClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="h-4 w-4"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
+        <DrawerClose className="absolute right-3 top-3 inline-flex items-center justify-center size-9 rounded-md cursor-pointer opacity-70 transition-all hover:opacity-100 hover:bg-muted focus:outline-none disabled:pointer-events-none">
+          <XIcon className="size-5" />
           <span className="sr-only">Close</span>
         </DrawerClose>
         <div

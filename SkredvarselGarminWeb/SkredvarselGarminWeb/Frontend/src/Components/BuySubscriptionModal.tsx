@@ -68,7 +68,7 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
       open={shouldOpen && !isClosing}
       onOpenChange={(open) => !open && onClose()}
     >
-      <DialogPopup className="flex flex-col items-center overflow-hidden">
+      <DialogPopup className="flex flex-col items-center">
         <DialogHeader className="w-full pb-4">
           <DialogTitle>{headerText}</DialogTitle>
           <DialogDescription className="sr-only">
