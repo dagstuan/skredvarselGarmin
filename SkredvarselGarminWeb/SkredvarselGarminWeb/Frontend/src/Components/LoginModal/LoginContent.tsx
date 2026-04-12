@@ -1,8 +1,7 @@
-import { VStack, Text, Center, Link } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 import { FacebookButton } from "../Buttons/FacebookButton";
 import { GoogleButton } from "../Buttons/GoogleButton";
 import { OrDivider } from "../OrDivider";
-import { Link as RouterLink } from "react-router-dom";
 import { EmailLoginForm } from "../EmailLoginForm/EmailLoginForm";
 
 type LoginContentProps = {
@@ -25,18 +24,20 @@ export const LoginContent = (props: LoginContentProps) => {
   } = props;
 
   return (
-    <VStack gap={7} alignItems="stretch">
-      {loginText && (
-        <Text fontSize="md" align="center" mb={2}>
-          {loginText}
-        </Text>
-      )}
+    <div className="flex flex-col gap-7">
+      {loginText && <p className="text-md text-center mb-2">{loginText}</p>}
 
-      <VStack gap={5} alignItems="stretch">
-        <GoogleButton link="/google-login?returnUrl=/account" />
-        <FacebookButton link="/facebook-login?returnUrl=/account" />
-      </VStack>
-      <OrDivider text="Eller logg inn med e-post" />
+      <div className="flex flex-col gap-2">
+        <GoogleButton
+          className="w-full"
+          link="/google-login?returnUrl=/account"
+        />
+        <FacebookButton
+          className="w-full"
+          link="/facebook-login?returnUrl=/account"
+        />
+      </div>
+      <OrDivider text="Eller" />
       <EmailLoginForm
         email={email}
         handleEmailInputChange={handleEmailInputChange}
@@ -44,11 +45,11 @@ export const LoginContent = (props: LoginContentProps) => {
         error={error}
         isLoading={isLoading}
       />
-      <Center>
-        <Link as={RouterLink} to="/faq#vippslogin">
+      <div className="flex justify-center">
+        <RouterLink to="/faq#vippslogin" className="hover:underline">
           Hvorfor kan jeg ikke logge inn med Vipps?
-        </Link>
-      </Center>
-    </VStack>
+        </RouterLink>
+      </div>
+    </div>
   );
 };

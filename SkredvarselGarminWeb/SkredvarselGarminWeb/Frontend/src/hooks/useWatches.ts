@@ -1,8 +1,8 @@
-import { useToast } from "@chakra-ui/react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../api";
 import { queryClient } from "../main";
 import { Watch } from "../types";
+import { toast } from "../lib/toast";
 
 const getWatches = async () =>
   api.get("/api/watches").then((res) => res.data as Watch[]);
@@ -14,22 +14,15 @@ export const useWatches = () =>
 
 const addWatch = (key: string) => api.post(`/api/watches/${key}`);
 
-export const useAddWatch = (onSuccess?: () => void) => {
-  const toast = useToast();
-
+export const useAddWatch = (onSuccess?: () => void, onSettled?: () => void) => {
   return useMutation({
     mutationFn: addWatch,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
-      toast({
-        title: "Klokke lagt til!",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom-right",
-      });
+      toast.success("Klokke lagt til");
       onSuccess?.();
     },
+    onSettled,
   });
 };
 

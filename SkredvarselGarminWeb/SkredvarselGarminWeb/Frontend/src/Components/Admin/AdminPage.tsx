@@ -1,60 +1,67 @@
-import {
-  Container,
-  Heading,
-  Spinner,
-  Stat,
-  StatGroup,
-  StatLabel,
-  StatNumber,
-} from "@chakra-ui/react";
+import { Heading } from "../ui/heading";
+import { Spinner } from "../ui/spinner";
 import { useAdminData } from "../../hooks/useAdminData";
 
 export const AdminPage = () => {
   const { data: adminData, isLoading } = useAdminData();
 
   if (isLoading || !adminData) {
-    return <Spinner />;
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Spinner className="size-8" />
+      </div>
+    );
   }
 
   return (
-    <Container maxW="4xl" padding={25}>
-      <Heading as="h1" mb={10}>
+    <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+      <Heading as="h1" className="mb-10">
         Admin
       </Heading>
 
-      <StatGroup mb={5}>
-        <Stat>
-          <StatLabel>Number of users</StatLabel>
-          <StatNumber>{adminData.numUsers}</StatNumber>
-        </Stat>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-5">
+        <div className="flex flex-col">
+          <dt className="text-sm font-medium text-gray-500">Number of users</dt>
+          <dd className="text-3xl font-bold">{adminData.numUsers}</dd>
+        </div>
 
-        <Stat>
-          <StatLabel>Watches</StatLabel>
-          <StatNumber>{adminData.watches}</StatNumber>
-        </Stat>
+        <div className="flex flex-col">
+          <dt className="text-sm font-medium text-gray-500">Watches</dt>
+          <dd className="text-3xl font-bold">{adminData.watches}</dd>
+        </div>
 
-        <Stat>
-          <StatLabel>Stale users</StatLabel>
-          <StatNumber>{adminData.staleUsers.length}</StatNumber>
-        </Stat>
-      </StatGroup>
+        <div className="flex flex-col">
+          <dt className="text-sm font-medium text-gray-500">Stale users</dt>
+          <dd className="text-3xl font-bold">{adminData.staleUsers.length}</dd>
+        </div>
+      </div>
 
-      <StatGroup>
-        <Stat>
-          <StatLabel>Active agreements</StatLabel>
-          <StatNumber>{adminData.activeAgreements}</StatNumber>
-        </Stat>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="flex flex-col">
+          <dt className="text-sm font-medium text-gray-500">
+            Active agreements
+          </dt>
+          <dd className="text-3xl font-bold">{adminData.activeAgreements}</dd>
+        </div>
 
-        <Stat>
-          <StatLabel>Unsubscribed agreements</StatLabel>
-          <StatNumber>{adminData.unsubscribedAgreements}</StatNumber>
-        </Stat>
+        <div className="flex flex-col">
+          <dt className="text-sm font-medium text-gray-500">
+            Unsubscribed agreements
+          </dt>
+          <dd className="text-3xl font-bold">
+            {adminData.unsubscribedAgreements}
+          </dd>
+        </div>
 
-        <Stat>
-          <StatLabel>Active or unsubbed agreements</StatLabel>
-          <StatNumber>{adminData.activeOrUnsubscribedAgreements}</StatNumber>
-        </Stat>
-      </StatGroup>
-    </Container>
+        <div className="flex flex-col">
+          <dt className="text-sm font-medium text-gray-500">
+            Active or unsubbed agreements
+          </dt>
+          <dd className="text-3xl font-bold">
+            {adminData.activeOrUnsubscribedAgreements}
+          </dd>
+        </div>
+      </div>
+    </div>
   );
 };

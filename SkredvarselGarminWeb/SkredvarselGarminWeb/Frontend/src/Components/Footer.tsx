@@ -1,75 +1,78 @@
 import { ReactNode } from "react";
-
-import {
-  Box,
-  Container,
-  Link,
-  SimpleGrid,
-  Stack,
-  Text,
-  useColorModeValue,
-} from "@chakra-ui/react";
-
 import { Link as RouterLink } from "react-router-dom";
 
 const ListHeader = ({ children }: { children: ReactNode }) => {
-  return (
-    <Text fontWeight={"500"} fontSize={"lg"} mb={2}>
-      {children}
-    </Text>
-  );
+  return <div className="font-medium text-lg mb-2">{children}</div>;
 };
 
 export const Footer = () => {
   return (
-    <Box
-      bg={useColorModeValue("gray.50", "gray.900")}
-      color={useColorModeValue("gray.700", "gray.200")}
-    >
-      <Container as={Stack} maxW={"6xl"} pt={10}>
-        <SimpleGrid
-          templateColumns={{ sm: "1fr 1fr", md: "2fr 1fr 1fr 1fr 1fr" }}
-          spacing={8}
-        >
-          <Stack spacing={6}>
-            <Box>
-              <Box>Dag Stuan</Box>
-            </Box>
-            <Text fontSize={"sm"}>
-              Varsler fra Snøskredvarslingen i Norge og{" "}
-              <Link href="https://www.varsom.no">www.varsom.no</Link>
-            </Text>
-            <Text fontSize={"sm"}>
+    <div className="bg-gray-50 text-gray-700">
+      <div className="mx-auto w-full max-w-6xl px-4 pt-10 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8">
+          <div className="space-y-6 md:col-span-2">
+            <div>Dag Stuan</div>
+            <p className="text-sm">
+              Varsler fra Snøskredvarslingen i Norge (
+              <a
+                href="https://www.varsom.no"
+                className="underline hover:no-underline"
+              >
+                www.varsom.no
+              </a>
+              ) og Naturvårdsverket i Sverige (
+              <a
+                href="https://www.lavinprognoser.se/"
+                className="underline hover:no-underline"
+              >
+                www.lavinprognoser.se
+              </a>
+              )
+            </p>
+            <p className="text-sm">
               Ikoner fra{" "}
-              <Link href="https://www.avalanches.org/">
+              <a
+                href="https://www.avalanches.org/"
+                className="underline hover:no-underline"
+              >
                 European Avalanche Warning Services.
-              </Link>
-            </Text>
-          </Stack>
-          <Stack align={"flex-start"}>
+              </a>
+            </p>
+          </div>
+          <div className="flex flex-col items-start space-y-2">
             <ListHeader>Om</ListHeader>
-            <Link as={RouterLink} to="faq">
+            <RouterLink to="faq" className="hover:underline">
               Ofte stilte spørsmål
-            </Link>
-            <Link as={RouterLink} to="privacy">
+            </RouterLink>
+            <RouterLink to="privacy" className="hover:underline">
               Personvern og informasjonskapsler
-            </Link>
-            <Link as={RouterLink} to="salesconditions">
+            </RouterLink>
+            <RouterLink to="salesconditions" className="hover:underline">
               Salgsbetingelser
-            </Link>
-            <Link href="https://github.com/dagstuan/skredvarselGarmin/">
+            </RouterLink>
+            <a
+              href="https://github.com/dagstuan/skredvarselGarmin/"
+              className="hover:underline"
+            >
               Kildekode
-            </Link>
-          </Stack>
-          <Stack align={"flex-start"}>
+            </a>
+          </div>
+          <div className="flex flex-col items-start space-y-2">
             <ListHeader>Sosiale medier</ListHeader>
-            <Link href="https://www.instagram.com/dagstuan/">Instagram</Link>
-            <Link href="https://github.com/dagstuan/">Github</Link>
-          </Stack>
-        </SimpleGrid>
-      </Container>
-      <Container maxW={"6xl"} py={10}>
-        <Text fontSize="xs" maxW="3xl">
+            <a
+              href="https://www.instagram.com/skredvarselgarmin/"
+              className="hover:underline"
+            >
+              Instagram
+            </a>
+            <a href="https://github.com/dagstuan/" className="hover:underline">
+              Github
+            </a>
+          </div>
+        </div>
+      </div>
+      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+        <p className="text-xs max-w-3xl">
           Bruk varslene og datagrunnlaget på eget ansvar. Det kan forekomme feil
           og mangler. Varselet er et hjelpemiddel, ikke en fasit. Gjør alltid
           egne vurderinger. Tilpass egen risiko i utsatte områder ved å velge
@@ -78,8 +81,8 @@ export const Footer = () => {
           komplekse og avvike fra det som er varslet. Verken NVE eller Dag Stuan
           gir garantier for informasjonens aktualitet og tar ikke ansvar for at
           data kan gi feil eller villedende informasjon.
-        </Text>
-      </Container>
-    </Box>
+        </p>
+      </div>
+    </div>
   );
 };

@@ -1,16 +1,22 @@
-import { AbsoluteCenter, Box, Divider, Text } from "@chakra-ui/react";
+import { Separator } from "./ui/separator";
 
 type OrDividerProps = {
   text?: string;
+  bgClassName?: string;
 };
 
-export const OrDivider = ({ text = "Eller" }: OrDividerProps) => {
+export const OrDivider = ({
+  text = "Eller",
+  bgClassName = "bg-background",
+}: OrDividerProps) => {
   return (
-    <Box mb={2} mt={2} position="relative" whiteSpace="nowrap">
-      <Divider />
-      <AbsoluteCenter bg="transparent" px="4">
+    <div className="mb-2 mt-2 relative whitespace-nowrap">
+      <Separator />
+      <div
+        className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 px-4 ${bgClassName}`}
+      >
         {text}
-      </AbsoluteCenter>
-    </Box>
+      </div>
+    </div>
   );
 };

@@ -1,26 +1,24 @@
-import { Button, Flex, Icon, Text } from "@chakra-ui/react";
+import { buttonVariants } from "../ui/button";
 import { FcGoogle } from "react-icons/fc";
+import { cn } from "../../lib/utils";
 
 type GoogleButtonProps = {
   link: string;
+  className?: string;
 };
 
-export const GoogleButton = ({ link }: GoogleButtonProps) => {
+export const GoogleButton = ({ link, className }: GoogleButtonProps) => {
   return (
-    <Button
-      as="a"
+    <a
       href={link}
-      rounded={"full"}
-      borderColor="black"
-      borderRadius={4}
-      colorScheme="gray"
-      variant="outline"
-      size={"md"}
+      className={cn(
+        buttonVariants({ variant: "outline" }),
+        "border-black rounded-md",
+        className,
+      )}
     >
-      <Flex gap={2} alignItems="center">
-        <Icon as={FcGoogle} w={6} h={6} />
-        <Text>Logg inn med Google</Text>
-      </Flex>
-    </Button>
+      <FcGoogle className="h-6 w-6" />
+      <span>Logg inn med Google</span>
+    </a>
   );
 };

@@ -1,22 +1,12 @@
-import {
-  Heading,
-  UnorderedList,
-  ListItem,
-  FormControl,
-  FormLabel,
-  Flex,
-  Input,
-  Button,
-  FormHelperText,
-  Box,
-  Text,
-  Spinner,
-  FormErrorMessage,
-} from "@chakra-ui/react";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useAddWatch, useWatches } from "../../hooks/useWatches";
 import { ProblemDetails } from "../../types";
+import { Heading } from "../ui/heading";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { Label } from "../ui/label";
+import { Spinner } from "../ui/spinner";
 import { Watch } from "./Watch";
 
 export const Watches = () => {
@@ -62,60 +52,64 @@ export const Watches = () => {
   const isError = !!error;
 
   return (
-    <>
-      <Heading size="sm" mb={2}>
+    <div>
+      <Heading as="h3" className="mb-2 text-xl">
         Klokker
       </Heading>
 
       {isLoading ? (
-        <Spinner />
+        <div className="flex items-center justify-center">
+          <Spinner className="size-5" />
+        </div>
       ) : (
         <>
           {!watches || watches.length < 1 ? (
-            <Text mb={4}>Du har ikke lagt til noen klokker.</Text>
+            <p className="mb-4">Du har ikke lagt til noen klokker.</p>
           ) : (
             <>
-              <UnorderedList mb={4} listStyleType="none" marginInlineStart={0}>
+              <ul className="mb-4 list-none">
                 {watches.map((w) => (
-                  <ListItem key={w.id}>
+                  <li key={w.id}>
                     <Watch watch={w} />
-                  </ListItem>
+                  </li>
                 ))}
-              </UnorderedList>
+              </ul>
             </>
           )}
         </>
       )}
 
-      <Box pt={4} pl={4} pb={4} pr={8} bg="gray.100">
+      <div className="pt-4 pl-4 pb-4 pr-8 bg-gray-100 rounded-md">
         <form onSubmit={handleAddSubmit}>
-          <FormControl mb={2} isInvalid={isError}>
-            <FormLabel>Legg til klokke</FormLabel>
-            <Flex gap={4}>
+          <div className="mb-2">
+            <Label htmlFor="watch-key" className="mb-2 block">
+              Legg til klokke
+            </Label>
+            <div className="flex gap-4">
               <Input
-                colorScheme="red"
-                bg="white"
+                id="watch-key"
+                className="bg-white"
                 value={key}
                 onChange={handleInputChange}
               />
               <Button
-                colorScheme="blue"
+                variant="blue"
                 type="submit"
-                isDisabled={addWatch.isPending}
+                disabled={addWatch.isPending}
               >
                 Legg til
               </Button>
-            </Flex>
+            </div>
             {!isError ? (
-              <FormHelperText>
+              <p className="text-sm text-muted-foreground mt-2">
                 Skriv inn koden som står på klokka når du starter appen.
-              </FormHelperText>
+              </p>
             ) : (
-              <FormErrorMessage>{error}</FormErrorMessage>
+              <p className="text-sm text-red-600 mt-2">{error}</p>
             )}
-          </FormControl>
+          </div>
         </form>
-      </Box>
-    </>
+      </div>
+    </div>
   );
 };
