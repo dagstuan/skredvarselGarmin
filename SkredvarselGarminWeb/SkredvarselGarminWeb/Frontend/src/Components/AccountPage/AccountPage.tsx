@@ -61,7 +61,7 @@ export const AccountPage = () => {
       onOpenChange={(open) => !open && onClose()}
       direction="right"
     >
-      <DrawerPopup className="focus:outline-none w-full! overflow-hidden p-0">
+      <DrawerPopup className="focus:outline-none w-full overflow-hidden p-0 select-text">
         <DrawerTitle className="sr-only">Min side</DrawerTitle>
         <DrawerDescription className="sr-only">
           Administrer abonnement, klokker og personlige opplysninger.
@@ -71,7 +71,7 @@ export const AccountPage = () => {
           <span className="sr-only">Close</span>
         </DrawerClose>
         <div
-          className="overflow-y-auto overscroll-contain h-full p-4"
+          className="overflow-y-auto h-full p-4 select-text"
           data-vaul-no-drag
         >
           <div className="flex flex-col gap-4">
