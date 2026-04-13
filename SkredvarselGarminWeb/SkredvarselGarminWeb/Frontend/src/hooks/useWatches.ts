@@ -1,8 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../api";
 import { queryClient } from "../main";
-import { Watch } from "../types";
+import { ProblemDetails, Watch } from "../types";
 import { toast } from "../lib/toast";
+import { AxiosError } from "axios";
 
 const getWatches = async () =>
   api.get("/api/watches").then((res) => res.data as Watch[]);
@@ -21,6 +22,12 @@ export const useAddWatch = (onSuccess?: () => void, onSettled?: () => void) => {
       queryClient.invalidateQueries({ queryKey });
       toast.success("Klokke lagt til");
       onSuccess?.();
+    },
+    onError: (error) => {
+      toast.error(
+        ((error as AxiosError).response?.data as ProblemDetails).detail ??
+          "Det skjedde en feil når vi prøvde å legge til klokken. Prøv igjen senere.",
+      );
     },
     onSettled,
   });
