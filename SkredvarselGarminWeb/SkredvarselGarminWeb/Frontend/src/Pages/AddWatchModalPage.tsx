@@ -5,12 +5,13 @@ export const Component = () => (
     headerText="Kjøp abonnement"
     informationElement={
       <>
-        Abonnement kan kjøpes direkte med Vipps, eller logg inn for andre
-        alternativer. <br />
+        Abonnement kan kjøpes med Vipps eller Stripe.
         <br />
-        Hvis du allerede har kjøpt abonnement, kan du logge inn for å legge til
+        <br />
+        Hvis du allerede har et abonnement, kan du logge inn for å legge til
         klokken din.
       </>
     }
+    showLogin
   />
 );

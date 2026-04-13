@@ -37,7 +37,7 @@
     <PackageReference Include="Refit" Version="10.1.6" />
     <PackageReference Include="Refit.HttpClientFactory" Version="10.1.6" />
     <PackageReference Include="Resend" Version="0.2.2" />
-    <PackageReference Include="Stripe.net" Version="50.4.1" />
+    <PackageReference Include="Stripe.net" Version="51.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.5" />
   </ItemGroup>
   <ItemGroup>

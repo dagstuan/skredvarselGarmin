@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { XIcon } from "lucide-react";
 import {
   Link as RouterLink,
@@ -36,23 +36,29 @@ export const AccountPage = () => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const watchKey = searchParams.get("watchKey");
+  const handledWatchKeyRef = useRef<string | null>(null);
 
-  const { mutate: mutateAddWatch, isPending: isAddWatchPending } = useAddWatch(
-    undefined,
-    () => {
-      searchParams.delete("watchKey");
-      setSearchParams(searchParams, {
-        replace: true,
-        preventScrollReset: true,
-      });
-    },
-  );
+  const { mutate: mutateAddWatch } = useAddWatch(undefined, () => {
+    searchParams.delete("watchKey");
+    setSearchParams(searchParams, {
+      replace: true,
+      preventScrollReset: true,
+    });
+  });
 
   useEffect(() => {
-    if (user && watchKey && !isAddWatchPending) {
-      mutateAddWatch(watchKey);
+    if (!watchKey) {
+      handledWatchKeyRef.current = null;
+      return;
     }
-  }, [mutateAddWatch, isAddWatchPending, user, watchKey]);
+
+    if (!user || handledWatchKeyRef.current === watchKey) {
+      return;
+    }
+
+    handledWatchKeyRef.current = watchKey;
+    mutateAddWatch(watchKey);
+  }, [mutateAddWatch, user, watchKey]);
 
   return (
     <Drawer
@@ -61,7 +67,17 @@ export const AccountPage = () => {
       onOpenChange={(open) => !open && onClose()}
       direction="right"
     >
-      <DrawerPopup className="focus:outline-none w-full! overflow-hidden p-0">
+      <DrawerPopup
+        className="focus:outline-none w-full overflow-hidden p-0 select-text"
+        onPointerDownOutside={(event) => {
+          if (
+            event.target instanceof Element &&
+            event.target.closest("[data-toast-viewport='true']")
+          ) {
+            event.preventDefault();
+          }
+        }}
+      >
         <DrawerTitle className="sr-only">Min side</DrawerTitle>
         <DrawerDescription className="sr-only">
           Administrer abonnement, klokker og personlige opplysninger.
@@ -71,7 +87,7 @@ export const AccountPage = () => {
           <span className="sr-only">Close</span>
         </DrawerClose>
         <div
-          className="overflow-y-auto overscroll-contain h-full p-4"
+          className="overflow-y-auto h-full p-4 select-text"
           data-vaul-no-drag
         >
           <div className="flex flex-col gap-4">

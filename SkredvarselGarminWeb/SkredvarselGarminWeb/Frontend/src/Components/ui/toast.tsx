@@ -47,7 +47,10 @@ function ToasterViewport() {
 
   return (
     <Toast.Portal>
-      <Toast.Viewport className="pointer-events-none fixed top-4 right-4 z-60 flex w-[calc(100vw-2rem)] max-w-sm flex-col gap-3 outline-none sm:top-6 sm:right-6">
+      <Toast.Viewport
+        data-toast-viewport="true"
+        className="pointer-events-none fixed top-4 right-4 z-60 flex w-[calc(100vw-2rem)] max-w-sm flex-col gap-3 outline-none sm:top-6 sm:right-6"
+      >
         {toasts.map((toast) => (
           <Toast.Root
             key={toast.id}
