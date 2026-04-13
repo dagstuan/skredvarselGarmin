@@ -15,6 +15,7 @@ import { useNavigateToAccountIfLoggedIn } from "../hooks/useNavigateToAccountIfL
 import { useUser } from "../hooks/useUser";
 import { FacebookButton } from "./Buttons/FacebookButton";
 import { GoogleButton } from "./Buttons/GoogleButton";
+import { StripeButton } from "./Buttons/StripeButton";
 import { VippsButton } from "./Buttons/VippsButton";
 import { EmailLoginForm } from "./EmailLoginForm/EmailLoginForm";
 import { OrDivider } from "./OrDivider";
@@ -22,6 +23,7 @@ import { OrDivider } from "./OrDivider";
 type BuySubscriptionModalProps = {
   headerText?: string;
   informationElement?: ReactElement;
+  showLogin?: boolean;
 };
 
 export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
@@ -29,11 +31,11 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
     headerText = "Kjøp abonnement",
     informationElement = (
       <>
-        Abonnement kan kjøpes direkte med Vipps,
-        <br />
-        eller logg inn for andre alternativer.
+        Abonnement kjøpes med Vipps eller Stripe. Velg hvordan du vil kjøpe
+        abonnement.
       </>
     ),
+    showLogin = false,
   } = props;
 
   const [searchParams] = useSearchParams();
@@ -80,9 +82,11 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
           {!showSentEmail && (
             <div className="flex flex-col gap-8 w-full items-center">
               <div className="flex flex-col gap-5 items-center w-full">
-                <div className="w-full p-3 shadow-sm rounded-sm bg-gray-50">
-                  <p className="text-md text-left">{informationElement}</p>
-                </div>
+                {informationElement && (
+                  <div className="w-full p-3 shadow-sm rounded-sm bg-gray-50">
+                    <p className="text-md text-left">{informationElement}</p>
+                  </div>
+                )}
 
                 <div className="w-full flex flex-col">
                   <VippsButton
@@ -91,44 +95,57 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
                     link={`/createVippsAgreement${watchKey ? `?watchKey=${watchKey}` : ""}`}
                   />
                 </div>
-              </div>
 
-              <div className="w-full bg-gray-100 px-4 pt-4 pb-8 rounded-md">
-                <div className="w-full flex flex-col gap-5">
-                  <Heading as="h2" className="text-center font-bold text-xl">
-                    Logg inn / registrer deg
-                  </Heading>
-                  <div className="w-full flex flex-col gap-2">
-                    <GoogleButton
-                      className="w-full"
-                      link={`/google-login?returnUrl=/account${watchKey ? `?watchKey=${watchKey}` : ""}`}
-                    />
-                    <FacebookButton
-                      className="w-full"
-                      link={`/facebook-login?returnUrl=/account${watchKey ? `?watchKey=${watchKey}` : ""}`}
-                    />
-                  </div>
+                <div className="relative w-full">
+                  <OrDivider text="Eller" bgClassName="bg-white" />
+                </div>
 
-                  <OrDivider text="Eller" bgClassName="bg-gray-100" />
-                  <div className="w-full flex flex-col">
-                    <EmailLoginForm
-                      email={email}
-                      handleEmailInputChange={handleEmailInputChange}
-                      handleSubmit={handleSubmit}
-                      error={error}
-                      isLoading={isPending}
-                    />
-                  </div>
-                  <div className="flex justify-center">
-                    <RouterLink
-                      to="/faq#vippslogin"
-                      className="hover:underline"
-                    >
-                      Hvorfor kan jeg ikke logge inn med Vipps?
-                    </RouterLink>
-                  </div>
+                <div className="w-full flex flex-col">
+                  <StripeButton
+                    className="w-full"
+                    link={`/createStripeSubscription${watchKey ? `?watchKey=${watchKey}` : ""}`}
+                  />
                 </div>
               </div>
+
+              {showLogin && (
+                <div className="w-full bg-gray-100 px-4 pt-4 pb-8 rounded-md">
+                  <div className="w-full flex flex-col gap-5">
+                    <Heading as="h2" className="text-center font-bold text-xl">
+                      Logg inn for å administrere abonnement
+                    </Heading>
+                    <div className="w-full flex flex-col gap-2">
+                      <GoogleButton
+                        className="w-full"
+                        link={`/google-login?returnUrl=/account${watchKey ? `?watchKey=${watchKey}` : ""}`}
+                      />
+                      <FacebookButton
+                        className="w-full"
+                        link={`/facebook-login?returnUrl=/account${watchKey ? `?watchKey=${watchKey}` : ""}`}
+                      />
+                    </div>
+
+                    <OrDivider text="Eller" bgClassName="bg-gray-100" />
+                    <div className="w-full flex flex-col">
+                      <EmailLoginForm
+                        email={email}
+                        handleEmailInputChange={handleEmailInputChange}
+                        handleSubmit={handleSubmit}
+                        error={error}
+                        isLoading={isPending}
+                      />
+                    </div>
+                    <div className="flex justify-center">
+                      <RouterLink
+                        to="/faq#vippslogin"
+                        className="hover:underline"
+                      >
+                        Hvorfor kan jeg ikke logge inn med Vipps?
+                      </RouterLink>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {showSentEmail && (

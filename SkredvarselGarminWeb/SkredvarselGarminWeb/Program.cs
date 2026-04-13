@@ -55,6 +55,7 @@ builder.Services.AddTransient<IDateTimeNowProvider, DateTimeNowProvider>();
 builder.Services.AddTransient<IGarminAuthenticationService, GarminAuthenticationService>();
 builder.Services.AddTransient<IVippsAgreementService, VippsAgreementService>();
 builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IStripeGateway, StripeGateway>();
 builder.Services.AddTransient<IStripeService, StripeService>();
 builder.Services.AddTransient<INotificationService, NotificationService>();
 builder.Services.AddTransient<IForecastAreaService, ForecastAreaService>();

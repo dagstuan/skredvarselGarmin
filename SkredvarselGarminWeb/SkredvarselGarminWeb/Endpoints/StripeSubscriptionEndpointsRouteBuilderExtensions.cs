@@ -1,8 +1,12 @@
+using System.Security.Claims;
+
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 
 using SkredvarselGarminWeb.Database;
+using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Extensions;
 using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.Services;
@@ -14,37 +18,64 @@ namespace SkredvarselGarminWeb.Endpoints;
 
 public static class StripeSubscriptionEndpointsRouteBuilderExtensions
 {
+    private static ClaimsPrincipal GetStripeCheckoutPrincipal(User user)
+    {
+        List<Claim> claims =
+        [
+            new("sub", user.Id),
+            new("email", user.Email),
+        ];
+
+        if (!string.IsNullOrWhiteSpace(user.Name))
+        {
+            claims.Add(new Claim("name", user.Name));
+        }
+
+        return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
+    }
+
     public static void MapStripeSubscriptionEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/createStripeSubscription", async (
+            [FromQuery] string? watchKey,
             HttpContext ctx,
             SkredvarselDbContext dbContext,
-            IUserService userService,
             IStripeClient stripeClient,
             IOptions<StripeOptions> stripeOptions) =>
         {
-            var user = userService.GetUserOrRegisterLogin(ctx.User);
-
             var baseUrl = ctx.GetBaseUrl();
+            var user = dbContext.GetUserOrNull(ctx.User);
 
-            var userHasActiveStripeSubscriptions = dbContext.StripeSubscriptions
-                .Where(ss => ss.UserId == user.Id)
-                .Where(ss => ss.Status == Entities.StripeSubscriptionStatus.ACTIVE)
-                .Any();
-
-            if (userHasActiveStripeSubscriptions)
+            if (user != null)
             {
-                return Results.Redirect("/stripe-customer-portal");
+                var userHasActiveStripeSubscriptions = dbContext.StripeSubscriptions
+                    .Where(ss => ss.UserId == user.Id)
+                    .Where(ss => ss.Status == StripeSubscriptionStatus.ACTIVE)
+                    .Any();
+
+                if (userHasActiveStripeSubscriptions)
+                {
+                    return Results.Redirect("/stripe-customer-portal");
+                }
+            }
+
+            var successUrl = $"{baseUrl}/stripe-subscribe-callback?session_id={{CHECKOUT_SESSION_ID}}";
+            if (!string.IsNullOrWhiteSpace(watchKey))
+            {
+                successUrl += $"&watchKey={Uri.EscapeDataString(watchKey)}";
+            }
+
+            var cancelUrl = user == null ? $"{baseUrl}/subscribe" : $"{baseUrl}/account";
+            if (!string.IsNullOrWhiteSpace(watchKey))
+            {
+                cancelUrl += $"?watchKey={Uri.EscapeDataString(watchKey)}";
             }
 
             var options = new SessionCreateOptions
             {
-                SuccessUrl = $"{baseUrl}/stripe-subscribe-callback?session_id={{CHECKOUT_SESSION_ID}}",
-                CancelUrl = $"{baseUrl}/account",
+                SuccessUrl = successUrl,
+                CancelUrl = cancelUrl,
                 Mode = "subscription",
-                CustomerEmail = string.IsNullOrEmpty(user.StripeCustomerId) ? user.Email : null,
-                Customer = user.StripeCustomerId,
-                ClientReferenceId = user.Id,
                 LineItems = [
                     new SessionLineItemOptions
                     {
@@ -54,30 +85,57 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
                 ],
             };
 
+            if (user != null)
+            {
+                options.ClientReferenceId = user.Id;
+
+                if (string.IsNullOrEmpty(user.StripeCustomerId))
+                {
+                    options.CustomerEmail = user.Email;
+                }
+                else
+                {
+                    options.Customer = user.StripeCustomerId;
+                }
+            }
+
             var service = new SessionService(stripeClient);
             var session = await service.CreateAsync(options);
 
             return Results.Redirect(session.Url);
-        }).RequireAuthorization();
+        }).AllowAnonymous();
 
         app.MapGet("/stripe-subscribe-callback", async (
             HttpContext ctx,
             IStripeClient stripeClient,
             IStripeService stripeService,
+            IUserService userService,
             [FromQuery(Name = "session_id")] string sessionId,
+            [FromQuery] string? watchKey,
             ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("stripe-subscribe-callback");
             logger.LogInformation("Received stripe subscribe callback.");
 
-            var baseUrl = ctx.GetBaseUrl();
             var service = new SessionService(stripeClient);
             var session = await service.GetAsync(sessionId);
 
+            var user = stripeService.GetOrCreateUserForCheckoutSession(session);
+            var principal = GetStripeCheckoutPrincipal(user);
+
+            await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+            userService.RegisterLogin(principal);
+
             stripeService.StoreNewSubscriptionIfNotExists(session);
 
-            return Results.Redirect("/account");
-        }).RequireAuthorization();
+            var redirectUrl = "/account";
+            if (!string.IsNullOrWhiteSpace(watchKey))
+            {
+                redirectUrl += $"?watchKey={Uri.EscapeDataString(watchKey)}";
+            }
+
+            return Results.Redirect(redirectUrl);
+        }).AllowAnonymous();
 
         app.MapGet("/stripe-customer-portal", async (
             HttpContext ctx,

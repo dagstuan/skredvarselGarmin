@@ -9,6 +9,7 @@ import { cn } from "../../lib/utils";
 import { VariantProps } from "class-variance-authority";
 
 type StripeButtonProps = {
+  className?: string;
   text?: string;
   link?: string;
   size?: VariantProps<typeof buttonVariants>["size"];
@@ -16,6 +17,7 @@ type StripeButtonProps = {
 
 export const StripeButton = (props: StripeButtonProps) => {
   const {
+    className,
     text = "Kjøp abonnement med",
     link = "/createStripeSubscription",
     size,
@@ -28,12 +30,13 @@ export const StripeButton = (props: StripeButtonProps) => {
         className={cn(
           buttonVariants({ variant: "default", size }),
           "rounded-md bg-purple-600 hover:bg-purple-700 flex items-center",
+          className,
         )}
       >
         {text}
         <FaStripe className="size-auto w-16 h-8 -ml-2 mt-0.5" />
       </a>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         <FaCreditCard title="Kort" className="w-6 h-auto" />
         <FaApplePay title="Apple pay" className="w-9 h-auto" />
         <FaGooglePay title="Google pay" className="w-9 h-auto" />
