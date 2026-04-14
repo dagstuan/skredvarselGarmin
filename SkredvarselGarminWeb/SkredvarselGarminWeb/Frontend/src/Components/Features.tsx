@@ -7,10 +7,27 @@ import timelinesImage from "../assets/timelines.png?format=webp&quality=60&as=me
 import mainTextImage from "../assets/maintext.png?format=webp&quality=60&as=meta:width;height;src&imagetools";
 import problemsImage from "../assets/problems.png?format=webp&quality=60&as=meta:width;height;src&imagetools";
 import offlineImage from "../assets/offline.jpg?w=800&format=webp&as=meta:width;height;src&imagetools";
+import swedishAreasImage from "../assets/swedish_areas.png?w=800&format=webp&as=meta:width;height;src&imagetools";
+import datafield2ProblemsImage from "../assets/datafield_2_problems.png?w=800&format=webp&as=meta:width;height;src&imagetools";
 
 export const Features = () => (
-  <div className="py-10 md:py-20 flex flex-col gap-10 justify-center items-center">
-    <div className="px-5 sm:px-10 flex gap-8 md:gap-10 items-start justify-center flex-wrap">
+  <div className="py-20 flex flex-col gap-10 md:gap-20 justify-center items-center">
+    <div className="px-10 flex gap-8 md:gap-10 max-w-300 items-start justify-center flex-wrap">
+      <Feature
+        imgUrl={swedishAreasImage.src}
+        imgWidth={swedishAreasImage.width}
+        imgHeight={swedishAreasImage.height}
+        heading="Norge og Sverige"
+        text="Skredvarsler for alle varslingsregioner i Norge og Sverige."
+      />
+      <Feature
+        imgUrl={datafield2ProblemsImage.src}
+        imgWidth={datafield2ProblemsImage.width}
+        imgHeight={datafield2ProblemsImage.height}
+        heading="Datafelt"
+        text="Legg til datafeltet i aktiviteten og følg varselet underveis på turen."
+      />
+
       <Feature
         imgUrl={glanceImage.src}
         imgWidth={glanceImage.width}
@@ -23,7 +40,7 @@ export const Features = () => (
         imgWidth={timelinesImage.width}
         imgHeight={timelinesImage.height}
         heading="Tidslinjer"
-        text="Tidslinjer med farenivåer over tid for dine valgte regioner."
+        text="Tidslinjer med faregrader over tid for dine valgte regioner."
       />
       <Feature
         imgUrl={mainTextImage.src}
@@ -37,11 +54,11 @@ export const Features = () => (
         imgWidth={problemsImage.width}
         imgHeight={problemsImage.height}
         heading="Skred&shy;problemer"
-        text="Visning av alle skredproblemer meldt på en gitt dag."
+        text="Se alle meldte skredproblemer for dagen."
       />
     </div>
 
-    <Card className="mx-5 sm:mx-10 max-w-3xl flex flex-col sm:flex-row overflow-hidden shadow-2xl border">
+    <Card className="mx-10 max-w-3xl flex flex-col sm:flex-row overflow-hidden shadow-2xl border">
       <img
         className="object-cover w-full sm:w-50"
         src={offlineImage.src}

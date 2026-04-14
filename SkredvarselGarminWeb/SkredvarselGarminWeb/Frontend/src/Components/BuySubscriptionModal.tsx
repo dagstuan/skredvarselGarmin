@@ -31,8 +31,9 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
     headerText = "Kjøp abonnement",
     informationElement = (
       <>
-        Abonnement kjøpes med Vipps eller Stripe. Velg hvordan du vil kjøpe
-        abonnement.
+        Abonnement kjøpes med Vipps eller Stripe. <br /> Når du kjøper
+        abonnement har du tilgang i 12 månender fra kjøpsdato. Velg hvordan du
+        vil kjøpe abonnement.
       </>
     ),
     showLogin = false,
