@@ -6,7 +6,10 @@ namespace SkredvarselGarminWeb.Database;
 public static class DbContextAgreementExtensions
 {
     public static List<Agreement> GetAgreementsThatAreDue(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider) =>
-        [.. dbContext.Agreements.Where(a => DateOnly.FromDateTime(dateTimeNowProvider.UtcNow) >= a.NextChargeDate)];
+        [.. dbContext.Agreements.Where(a =>
+            a.NextChargeDate.HasValue &&
+            (a.Status == AgreementStatus.ACTIVE || a.Status == AgreementStatus.UNSUBSCRIBED) &&
+            DateOnly.FromDateTime(dateTimeNowProvider.UtcNow) >= a.NextChargeDate)];
 
     public static List<Agreement> GetAgreementsDueInLessThan30Days(this SkredvarselDbContext dbContext, IDateTimeNowProvider dateTimeNowProvider)
     {
