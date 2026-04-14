@@ -103,7 +103,7 @@ public class HangfireService(
     public void RemoveStaleWatchAddRequests()
     {
         var staleWatchAddRequests = dbContext.WatchAddRequests
-            .Where(a => a.Created < dateTimeNowProvider.UtcNow.AddMinutes(-10))
+            .Where(a => a.Created < dateTimeNowProvider.UtcNow.AddMinutes(-25))
             .ToList();
 
         dbContext.RemoveRange(staleWatchAddRequests);
