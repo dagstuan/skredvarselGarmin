@@ -32,7 +32,7 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
     informationElement = (
       <>
         Abonnement kjøpes med Vipps eller Stripe. <br /> Når du kjøper
-        abonnement har du tilgang i 12 månender fra kjøpsdato. Velg hvordan du
+        abonnement har du tilgang i 12 måneder fra kjøpsdato. Velg hvordan du
         vil kjøpe abonnement.
       </>
     ),
