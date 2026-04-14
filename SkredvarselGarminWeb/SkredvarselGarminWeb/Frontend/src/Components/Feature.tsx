@@ -21,7 +21,7 @@ export const Feature = ({
     <Card className="bg-white shadow-2xl rounded-md overflow-hidden sm:max-w-56">
       <div className="bg-slate-100">
         <img
-          className="w-full object-cover"
+          className="w-full object-cover aspect-square"
           width={imgWidth}
           height={imgHeight}
           src={imgUrl}
