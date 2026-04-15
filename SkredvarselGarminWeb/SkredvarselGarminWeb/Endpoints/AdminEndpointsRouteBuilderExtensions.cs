@@ -53,6 +53,19 @@ public static class AdminEndpointsRouteBuilderExtensions
             return dbContext.GetActiveAgreementsDueInLessThan30DaysWithoutNextChargeId(dateTimeNowProvider).ToList();
         }).RequireAuthorization("Admin");
 
+        app.MapGet("/api/admin/users/former-subscribers", (SkredvarselDbContext dbContext) =>
+        {
+            var formerSubscribers = dbContext.GetFormerSubscribers();
+
+            return formerSubscribers.Select(u => new FormerSubscriberAdminUser
+            {
+                Id = u.Id,
+                Name = u.Name,
+                Email = u.Email,
+                LastLoggedIn = u.LastLoggedIn,
+            }).ToList();
+        }).RequireAuthorization("Admin");
+
         app.MapGet("/api/admin/agreements/{agreementId}", (string agreementId, SkredvarselDbContext dbContext) =>
         {
             return dbContext.Agreements.Single(a => a.Id == agreementId);

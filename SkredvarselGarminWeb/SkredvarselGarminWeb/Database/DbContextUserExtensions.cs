@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using System.Security.Principal;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -63,5 +62,22 @@ public static class DbContextUserExtensions
             .Include(u => u.Agreements)
             .Include(u => u.StripeSubscriptions)
             .Where(u => u.LastLoggedIn < DateOnly.FromDateTime(dateTimeNowProvider.UtcNow.AddMonths(-1)) && u.Agreements.Count == 0 && u.StripeSubscriptions.Count == 0)];
+    }
+
+    public static List<User> GetFormerSubscribers(this SkredvarselDbContext dbContext)
+    {
+        var usersWithEndedSubscriptions = dbContext.Users
+            .Where(u =>
+                dbContext.Agreements.Any(a => a.UserId == u.Id && a.Status == AgreementStatus.STOPPED) ||
+                dbContext.StripeSubscriptions.Any(ss => ss.UserId == u.Id && ss.Status == StripeSubscriptionStatus.CANCELED));
+
+        var formerSubscribers = usersWithEndedSubscriptions
+            .Where(u =>
+                !dbContext.Agreements.Any(a => a.UserId == u.Id && a.Status != AgreementStatus.STOPPED) &&
+                !dbContext.StripeSubscriptions.Any(ss => ss.UserId == u.Id && ss.Status != StripeSubscriptionStatus.CANCELED));
+
+        return [.. formerSubscribers
+            .OrderBy(u => u.Name ?? u.Email)
+            .ThenBy(u => u.Email)];
     }
 }
