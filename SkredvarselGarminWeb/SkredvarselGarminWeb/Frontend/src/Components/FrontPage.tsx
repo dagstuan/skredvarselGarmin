@@ -1,5 +1,6 @@
 import { Features } from "./Features";
 import { Button } from "./ui/button";
+import { useTranslation } from "react-i18next";
 
 import bg from "../assets/bg.jpg?format=webp&as=source&imagetools";
 import { CiqStoreButton } from "./CiqStoreButton";
@@ -17,12 +18,15 @@ import { useUser } from "../hooks/useUser";
 import { useCallback, useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { cn } from "../lib/utils";
+import { usePathForCurrentLanguage } from "../routes";
 
 export const FrontPage = () => {
+  const { t } = useTranslation();
   const scrollPosition = useScrollPosition();
   const [isChevronVisible, setIsChevronVisible] = useState(false);
   const { data: user } = useUser();
   const navigate = useNavigate();
+  const pathFor = usePathForCurrentLanguage();
 
   useEffect(() => {
     if (scrollPosition !== 0) {
@@ -42,12 +46,12 @@ export const FrontPage = () => {
       event.currentTarget.blur();
 
       if (user) {
-        navigate("/account");
+        navigate(pathFor("account"));
       } else {
-        navigate("/subscribe");
+        navigate(pathFor("subscribe"));
       }
     },
-    [navigate, user],
+    [navigate, pathFor, user],
   );
 
   return (
@@ -62,13 +66,17 @@ export const FrontPage = () => {
         <div className="relative z-10 flex-1 flex items-center justify-center">
           <div className="flex flex-col gap-6 max-w-4xl items-start p-4 md:p-8">
             <p className="text-white font-bold leading-tight text-3xl md:text-4xl">
-              Skredvarsel for Garmin-klokker.
+              {t(($) => $.frontPage.heroLine1)}
               <br />
-              Oppdatert og tilgjengelig mens du er på tur.
+              {t(($) => $.frontPage.heroLine2)}
             </p>
             <div className="flex items-center justify-center gap-2">
-              <span className="text-white text-3xl font-extrabold">30 kr</span>
-              <span className="text-xl text-white">/år</span>
+              <span className="text-white text-3xl font-extrabold">
+                {t(($) => $.frontPage.priceValue)}
+              </span>
+              <span className="text-xl text-white">
+                {t(($) => $.frontPage.priceUnit)}
+              </span>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row sm:flex-nowrap sm:items-start">
               <div className="sm:shrink-0">
@@ -81,21 +89,26 @@ export const FrontPage = () => {
                   onClick={onBuyClick}
                 >
                   <FaSkiingNordic className="size-5 shrink-0" />
-                  <span className="flex-1 text-center">Kjøp abonnement</span>
+                  <span className="flex-1 text-center">
+                    {t(($) => $.frontPage.buySubscription)}
+                  </span>
                   <FaSkiing className="size-5 shrink-0" />
                 </Button>
                 <div className="flex items-center gap-2 px-5">
-                  <VippsIcon title="Vipps" className="w-14 h-auto text-white" />
+                  <VippsIcon
+                    title={t(($) => $.frontPage.paymentMethodVipps)}
+                    className="w-14 h-auto text-white"
+                  />
                   <FaCreditCard
-                    title="Kort"
+                    title={t(($) => $.frontPage.paymentMethodCard)}
                     className="w-7 h-auto text-white"
                   />
                   <FaApplePay
-                    title="Apple Pay"
+                    title={t(($) => $.frontPage.paymentMethodApplePay)}
                     className="w-9 h-auto text-white"
                   />
                   <FaGooglePay
-                    title="Google Pay"
+                    title={t(($) => $.frontPage.paymentMethodGooglePay)}
                     className="w-9 h-auto text-white"
                   />
                 </div>

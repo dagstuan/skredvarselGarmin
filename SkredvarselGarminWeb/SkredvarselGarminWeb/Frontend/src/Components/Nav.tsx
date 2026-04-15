@@ -1,14 +1,19 @@
 import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Button } from "./ui/button";
 import { Heading } from "./ui/heading";
 import { Spinner } from "./ui/spinner";
 
 import avalancheIcon from "../assets/avalanche_icon.svg";
 import { useUser } from "../hooks/useUser";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { usePathForCurrentLanguage } from "../routes";
 
 export const Nav = () => {
+  const { t } = useTranslation();
   const { data: user, isLoading } = useUser();
   const navigate = useNavigate();
+  const pathFor = usePathForCurrentLanguage();
 
   const handleModalNavigation = (
     event: React.MouseEvent<HTMLElement>,
@@ -21,34 +26,35 @@ export const Nav = () => {
   return (
     <div className="flex justify-center px-4 bg-gray-100">
       <div className="w-full max-w-full h-20 flex items-center gap-4 justify-between">
-        <RouterLink to="/" className="no-underline">
+        <RouterLink to={pathFor("home")} className="no-underline">
           <div className="flex gap-3 items-center">
             <img
               className="h-10"
               src={avalancheIcon}
               width={40}
               height={40}
-              alt="Avalanche icon"
+              alt={t(($) => $.nav.iconAlt)}
             />
             <Heading
               as="h1"
               className="text-xl md:text-3xl line-clamp-1 whitespace-nowrap text-ellipsis overflow-hidden"
             >
-              <span className="sm:hidden">Skredvarsel</span>
-              <span className="hidden sm:inline">Skredvarsel for Garmin</span>
+              <span className="sm:hidden">{t(($) => $.nav.shortTitle)}</span>
+              <span className="hidden sm:inline">{t(($) => $.nav.title)}</span>
             </Heading>
           </div>
         </RouterLink>
 
-        <div>
+        <div className="flex items-center gap-3">
+          <LanguageSwitcher />
           {isLoading ? (
             <Spinner className="size-8 text-gray-900" />
           ) : !user ? (
             <Button
-              onClick={(event) => handleModalNavigation(event, "/login")}
+              onClick={(event) => handleModalNavigation(event, pathFor("login"))}
               variant="blue"
             >
-              Logg inn
+              {t(($) => $.nav.login)}
             </Button>
           ) : (
             <div className="flex gap-4">
@@ -56,9 +62,9 @@ export const Nav = () => {
                 <Button
                   nativeButton={false}
                   variant="blue"
-                  render={<RouterLink to="/admin" />}
+                  render={<RouterLink to={pathFor("admin")} />}
                 >
-                  Admin
+                  {t(($) => $.nav.admin)}
                 </Button>
               )}
               <Button
@@ -66,12 +72,12 @@ export const Nav = () => {
                 variant="blue"
                 render={
                   <RouterLink
-                    to="/account"
+                    to={pathFor("account")}
                     onClick={(event) => event.currentTarget.blur()}
                   />
                 }
               >
-                Min side
+                {t(($) => $.nav.account)}
               </Button>
             </div>
           )}

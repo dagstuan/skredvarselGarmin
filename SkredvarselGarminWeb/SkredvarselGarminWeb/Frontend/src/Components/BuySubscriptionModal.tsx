@@ -9,6 +9,7 @@ import { Heading } from "./ui/heading";
 import { ReactElement, useState, useEffect } from "react";
 import { FaPaperPlane } from "react-icons/fa";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useEmailLogin } from "../hooks/useEmailLogin";
 import { useNavigateOnClose } from "../hooks/useNavigateOnClose";
 import { useNavigateToAccountIfLoggedIn } from "../hooks/useNavigateToAccountIfLoggedIn";
@@ -19,6 +20,7 @@ import { StripeButton } from "./Buttons/StripeButton";
 import { VippsButton } from "./Buttons/VippsButton";
 import { EmailLoginForm } from "./EmailLoginForm/EmailLoginForm";
 import { OrDivider } from "./OrDivider";
+import { usePathForCurrentLanguage } from "../routes";
 
 type BuySubscriptionModalProps = {
   headerText?: string;
@@ -27,18 +29,19 @@ type BuySubscriptionModalProps = {
 };
 
 export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
-  const {
-    headerText = "Kjøp abonnement",
-    informationElement = (
-      <>
-        Abonnement kjøpes med Vipps eller Stripe. <br /> Når du kjøper
-        abonnement har du tilgang i 12 måneder fra kjøpsdato. Velg hvordan du
-        vil kjøpe abonnement. Hvis du allerede har et abonnement, logg inn oppe
-        i høyre hjørne for å administrere det.
-      </>
-    ),
-    showLogin = false,
-  } = props;
+  const { t } = useTranslation();
+  const pathFor = usePathForCurrentLanguage();
+  const { headerText, informationElement, showLogin = false } = props;
+
+  const resolvedHeaderText = headerText ?? t(($) => $.buySubscription.title);
+  const resolvedInformationElement = informationElement ?? (
+    <>
+      {t(($) => $.buySubscription.infoLine1)}
+      <br />
+      {t(($) => $.buySubscription.infoLine2)}{" "}
+      {t(($) => $.buySubscription.infoLine3)}
+    </>
+  );
 
   const [searchParams] = useSearchParams();
   const watchKey = searchParams.get("watchKey");
@@ -47,7 +50,7 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
 
   useNavigateToAccountIfLoggedIn(user, isLoadingUser, watchKey);
 
-  const { isClosing, onClose } = useNavigateOnClose("/");
+  const { isClosing, onClose } = useNavigateOnClose("home");
 
   // Delay opening to allow mount animation
   const [shouldOpen, setShouldOpen] = useState(false);
@@ -74,32 +77,33 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
     >
       <DialogPopup className="flex flex-col items-center overflow-hidden">
         <DialogHeader className="w-full pb-4">
-          <DialogTitle>{headerText}</DialogTitle>
+          <DialogTitle>{resolvedHeaderText}</DialogTitle>
           <DialogDescription className="sr-only">
-            Velg hvordan du vil kjope abonnement eller logge inn for a endre
-            det.
+            {t(($) => $.buySubscription.srDescription)}
           </DialogDescription>
         </DialogHeader>
         <div className="w-full">
           {!showSentEmail && (
             <div className="flex flex-col gap-8 w-full items-center">
               <div className="flex flex-col gap-5 items-center w-full">
-                {informationElement && (
+                {resolvedInformationElement && (
                   <div className="w-full p-3 shadow-sm rounded-sm bg-gray-50">
-                    <p className="text-md text-left">{informationElement}</p>
+                    <p className="text-md text-left">
+                      {resolvedInformationElement}
+                    </p>
                   </div>
                 )}
 
                 <div className="w-full flex flex-col">
                   <VippsButton
                     className="w-full"
-                    text="Kjøp abonnement med"
+                    text={t(($) => $.buttons.vipps.buySubscriptionWith)}
                     link={`/createVippsAgreement${watchKey ? `?watchKey=${watchKey}` : ""}`}
                   />
                 </div>
 
                 <div className="relative w-full">
-                  <OrDivider text="Eller" bgClassName="bg-white" />
+                  <OrDivider bgClassName="bg-white" />
                 </div>
 
                 <div className="w-full flex flex-col">
@@ -114,20 +118,20 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
                 <div className="w-full bg-gray-100 px-4 pt-4 pb-8 rounded-md">
                   <div className="w-full flex flex-col gap-5">
                     <Heading as="h2" className="text-center font-bold text-xl">
-                      Logg inn for å administrere abonnement
+                      {t(($) => $.login.loginManageSubscription)}
                     </Heading>
                     <div className="w-full flex flex-col gap-2">
                       <GoogleButton
                         className="w-full"
-                        link={`/google-login?returnUrl=/account${watchKey ? `?watchKey=${watchKey}` : ""}`}
+                        link={`/google-login?returnUrl=${pathFor("account")}${watchKey ? `?watchKey=${watchKey}` : ""}`}
                       />
                       <FacebookButton
                         className="w-full"
-                        link={`/facebook-login?returnUrl=/account${watchKey ? `?watchKey=${watchKey}` : ""}`}
+                        link={`/facebook-login?returnUrl=${pathFor("account")}${watchKey ? `?watchKey=${watchKey}` : ""}`}
                       />
                     </div>
 
-                    <OrDivider text="Eller" bgClassName="bg-gray-100" />
+                    <OrDivider bgClassName="bg-gray-100" />
                     <div className="w-full flex flex-col">
                       <EmailLoginForm
                         email={email}
@@ -139,10 +143,10 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
                     </div>
                     <div className="flex justify-center">
                       <RouterLink
-                        to="/faq#vippslogin"
+                        to={pathFor("faq", { hash: "vippslogin" })}
                         className="hover:underline"
                       >
-                        Hvorfor kan jeg ikke logge inn med Vipps?
+                        {t(($) => $.login.whyNoVippsLogin)}
                       </RouterLink>
                     </div>
                   </div>
@@ -155,7 +159,7 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
               <div className="flex items-center justify-center bg-green-500 text-white rounded-full w-28 h-28">
                 <FaPaperPlane className="w-16 h-16" />
               </div>
-              <p>Sjekk innboksen din for en innloggingslenke.</p>
+              <p>{t(($) => $.common.checkInbox)}</p>
             </div>
           )}
         </div>

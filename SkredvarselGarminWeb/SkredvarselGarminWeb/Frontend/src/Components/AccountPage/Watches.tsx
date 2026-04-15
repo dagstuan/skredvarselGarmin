@@ -1,5 +1,6 @@
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAddWatch, useWatches } from "../../hooks/useWatches";
 import { ProblemDetails } from "../../types";
 import { Heading } from "../ui/heading";
@@ -10,6 +11,7 @@ import { Spinner } from "../ui/spinner";
 import { Watch } from "./Watch";
 
 export const Watches = () => {
+  const { t } = useTranslation();
   const { data: watches, isLoading } = useWatches();
   const addWatch = useAddWatch();
 
@@ -42,7 +44,7 @@ export const Watches = () => {
     evt.preventDefault();
 
     if (!key) {
-      setError("Du må skrive en kode.");
+      setError(t(($) => $.account.watches.codeRequired));
     } else {
       clearError();
       addWatch.mutate(key);
@@ -54,7 +56,7 @@ export const Watches = () => {
   return (
     <div>
       <Heading as="h3" className="mb-2 text-xl">
-        Klokker
+        {t(($) => $.account.watchesHeading)}
       </Heading>
 
       {isLoading ? (
@@ -64,7 +66,7 @@ export const Watches = () => {
       ) : (
         <>
           {!watches || watches.length < 1 ? (
-            <p className="mb-4">Du har ikke lagt til noen klokker.</p>
+            <p className="mb-4">{t(($) => $.account.watches.none)}</p>
           ) : (
             <>
               <ul className="mb-4 list-none">
@@ -83,7 +85,7 @@ export const Watches = () => {
         <form onSubmit={handleAddSubmit}>
           <div className="mb-2">
             <Label htmlFor="watch-key" className="mb-2 block">
-              Legg til klokke
+              {t(($) => $.account.watches.addWatchLabel)}
             </Label>
             <div className="flex gap-4">
               <Input
@@ -97,12 +99,12 @@ export const Watches = () => {
                 type="submit"
                 disabled={addWatch.isPending}
               >
-                Legg til
+                {t(($) => $.account.watches.add)}
               </Button>
             </div>
             {!isError ? (
               <p className="text-sm text-muted-foreground mt-2">
-                Skriv inn koden som står på klokka når du starter appen.
+                {t(($) => $.account.watches.help)}
               </p>
             ) : (
               <p className="text-sm text-red-600 mt-2">{error}</p>
