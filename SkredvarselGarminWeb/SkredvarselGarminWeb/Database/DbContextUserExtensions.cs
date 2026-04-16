@@ -80,4 +80,16 @@ public static class DbContextUserExtensions
             .OrderBy(u => u.Name ?? u.Email)
             .ThenBy(u => u.Email)];
     }
+
+    public static bool IsFormerSubscriber(this SkredvarselDbContext dbContext, string userId)
+    {
+        return dbContext.Users.Any(u =>
+            u.Id == userId &&
+            (
+                dbContext.Agreements.Any(a => a.UserId == u.Id && a.Status == AgreementStatus.STOPPED) ||
+                dbContext.StripeSubscriptions.Any(ss => ss.UserId == u.Id && ss.Status == StripeSubscriptionStatus.CANCELED)
+            ) &&
+            !dbContext.Agreements.Any(a => a.UserId == u.Id && a.Status != AgreementStatus.STOPPED) &&
+            !dbContext.StripeSubscriptions.Any(ss => ss.UserId == u.Id && ss.Status != StripeSubscriptionStatus.CANCELED));
+    }
 }

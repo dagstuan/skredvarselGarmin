@@ -1,5 +1,7 @@
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Endpoints.Models;
+using SkredvarselGarminWeb.Entities;
+using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Services;
 
@@ -15,7 +17,7 @@ public static class AdminEndpointsRouteBuilderExtensions
 
             var numUsers = dbContext.Users.Count();
             var activeAgreements = dbContext.Agreements.Count(a => a.Status == Entities.AgreementStatus.ACTIVE);
-            var activeStripeSubscriptions = dbContext.StripeSubscriptions.Count(ss => ss.Status == Entities.StripeSubscriptionStatus.ACTIVE);
+            var activeStripeSubscriptions = dbContext.StripeSubscriptions.WhereActive().Count();
             var unsubscribedAgreements = dbContext.Agreements.Count(a => a.Status == Entities.AgreementStatus.UNSUBSCRIBED);
             var unsubscribedStripeSubscriptions = dbContext.StripeSubscriptions.Count(a => a.Status == Entities.StripeSubscriptionStatus.UNSUBSCRIBED);
             var watches = dbContext.Watches.Count();
@@ -64,6 +66,24 @@ public static class AdminEndpointsRouteBuilderExtensions
                 Email = u.Email,
                 LastLoggedIn = u.LastLoggedIn,
             }).ToList();
+        }).RequireAuthorization("Admin");
+
+        app.MapGet("/api/admin/subscription-settings", (SkredvarselDbContext dbContext) =>
+        {
+            return dbContext.GetSubscriptionSettings();
+        }).RequireAuthorization("Admin");
+
+        app.MapPut("/api/admin/subscription-settings/former-subscriber-extra-months", (SubscriptionSettings request, SkredvarselDbContext dbContext) =>
+        {
+            if (request.FormerSubscriberExtraMonths < 0)
+            {
+                return Results.BadRequest("Extra months must be 0 or greater.");
+            }
+
+            var settings = dbContext.SetFormerSubscriberExtraMonths(request.FormerSubscriberExtraMonths);
+            dbContext.SaveChanges();
+
+            return Results.Ok(settings);
         }).RequireAuthorization("Admin");
 
         app.MapGet("/api/admin/agreements/{agreementId}", (string agreementId, SkredvarselDbContext dbContext) =>

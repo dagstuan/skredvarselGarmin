@@ -7,7 +7,8 @@ namespace SkredvarselGarminWeb.Services;
 
 public interface IStripeService
 {
+    void FulfillCheckoutSession(string sessionId);
+    User GetUserForFulfilledCheckoutSession(string sessionId);
     User GetOrCreateUserForCheckoutSession(Session session);
-    void StoreNewSubscriptionIfNotExists(Session session);
     void HandleWebhook(Event stripeEvent);
 }

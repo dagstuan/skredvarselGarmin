@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities;
+using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.Extensions;
 using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.Services;
@@ -50,7 +51,7 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
             {
                 var userHasActiveStripeSubscriptions = dbContext.StripeSubscriptions
                     .Where(ss => ss.UserId == user.Id)
-                    .Where(ss => ss.Status == StripeSubscriptionStatus.ACTIVE)
+                    .WhereActive()
                     .Any();
 
                 if (userHasActiveStripeSubscriptions)
@@ -107,7 +108,6 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
 
         app.MapGet("/stripe-subscribe-callback", async (
             HttpContext ctx,
-            IStripeClient stripeClient,
             IStripeService stripeService,
             IUserService userService,
             [FromQuery(Name = "session_id")] string sessionId,
@@ -117,16 +117,12 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
             var logger = loggerFactory.CreateLogger("stripe-subscribe-callback");
             logger.LogInformation("Received stripe subscribe callback.");
 
-            var service = new SessionService(stripeClient);
-            var session = await service.GetAsync(sessionId);
-
-            var user = stripeService.GetOrCreateUserForCheckoutSession(session);
+            stripeService.FulfillCheckoutSession(sessionId);
+            var user = stripeService.GetUserForFulfilledCheckoutSession(sessionId);
             var principal = GetStripeCheckoutPrincipal(user);
 
             await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
             userService.RegisterLogin(principal);
-
-            stripeService.StoreNewSubscriptionIfNotExists(session);
 
             var redirectUrl = "/account";
             if (!string.IsNullOrWhiteSpace(watchKey))

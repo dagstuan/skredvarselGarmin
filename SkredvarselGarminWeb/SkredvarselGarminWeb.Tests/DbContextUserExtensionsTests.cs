@@ -189,6 +189,66 @@ public class DbContextUserExtensionsTests
         result.Should().BeEmpty();
     }
 
+    [Fact]
+    public void IsFormerSubscriber_should_return_true_for_a_user_with_only_stopped_or_canceled_subscriptions()
+    {
+        using var dbContext = CreateDbContext();
+
+        var formerSubscriber = CreateUser("former-user", "former.user@example.com", "Former User");
+
+        dbContext.Users.Add(formerSubscriber);
+        dbContext.Agreements.Add(new Agreement
+        {
+            Id = "agreement-stopped",
+            CallbackId = null,
+            WatchKey = null,
+            Created = new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+            Status = AgreementStatus.STOPPED,
+            Start = new DateOnly(2025, 12, 10),
+            NextChargeDate = null,
+            UserId = formerSubscriber.Id,
+        });
+        dbContext.SaveChanges();
+
+        var result = dbContext.IsFormerSubscriber(formerSubscriber.Id);
+
+        result.Should().BeTrue();
+    }
+
+    [Fact]
+    public void IsFormerSubscriber_should_return_false_for_a_user_with_any_non_ended_subscription()
+    {
+        using var dbContext = CreateDbContext();
+
+        var user = CreateUser("current-user", "current.user@example.com", "Current User");
+
+        dbContext.Users.Add(user);
+        dbContext.Agreements.Add(new Agreement
+        {
+            Id = "agreement-stopped",
+            CallbackId = null,
+            WatchKey = null,
+            Created = new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+            Status = AgreementStatus.STOPPED,
+            Start = new DateOnly(2025, 12, 10),
+            NextChargeDate = null,
+            UserId = user.Id,
+        });
+        dbContext.StripeSubscriptions.Add(new StripeSubscription
+        {
+            SubscriptionId = "sub_trialing",
+            Created = new DateTime(2026, 3, 10, 0, 0, 0, DateTimeKind.Utc),
+            Status = StripeSubscriptionStatus.TRIALING,
+            NextChargeDate = new DateOnly(2027, 5, 10),
+            UserId = user.Id,
+        });
+        dbContext.SaveChanges();
+
+        var result = dbContext.IsFormerSubscriber(user.Id);
+
+        result.Should().BeFalse();
+    }
+
     private static SkredvarselDbContext CreateDbContext()
     {
         var dbContextOptions = new DbContextOptionsBuilder<SkredvarselDbContext>()
