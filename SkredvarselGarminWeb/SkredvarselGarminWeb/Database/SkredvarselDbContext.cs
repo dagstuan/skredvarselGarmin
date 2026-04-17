@@ -52,6 +52,10 @@ public class SkredvarselDbContext(DbContextOptions options) : DbContext(options)
             .ValueGeneratedNever();
 
         modelBuilder.Entity<SubscriptionSettings>()
-            .HasData(new SubscriptionSettings());
+            .HasData(new SubscriptionSettings
+            {
+                Id = Entities.SubscriptionSettings.SingletonId,
+                FormerSubscriberExtraMonths = 0,
+            });
     }
 }

@@ -9,5 +9,5 @@ public class SubscriptionSettings
     [Key]
     public int Id { get; set; } = SingletonId;
 
-    public int FormerSubscriberExtraMonths { get; set; } = 1;
+    public int FormerSubscriberExtraMonths { get; set; } = 0;
 }
