@@ -83,6 +83,7 @@ builder.Services.Configure<ResendClientOptions>(
     o => o.ApiToken = resendOptions!.ApiToken);
 builder.Services.AddTransient<IResend, ResendClient>();
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddTransient<IResendAudienceSyncService, ResendAudienceSyncService>();
 
 builder.Services.AddTransient<IMagicLinkTokenDataFormat, MagicLinkTokenDataFormat>();
 
@@ -140,6 +141,8 @@ using (var scope = app.Services.CreateScope())
     recurringJobManager.AddOrUpdate<HangfireService>("UpdateAgreementCharges", s => s.UpdateAgreementCharges(), "5 * * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("RemoveStaleWatchAddRequests", s => s.RemoveStaleWatchAddRequests(), "*/25 * * * *");
     recurringJobManager.AddOrUpdate<HangfireService>("RemoveStaleUsers", s => s.RemoveStaleUsers(), "0 3 * * *");
+    recurringJobManager.AddOrUpdate<HangfireService>("SyncResendAudience", s => s.SyncResendAudience(CancellationToken.None), "30 3 * * *");
+
     recurringJobManager.AddOrUpdate<HangfireService>("SeedSwedishForecastAreas", s => s.SeedSwedishForecastAreas(CancellationToken.None), Cron.Daily);
     recurringJobManager.AddOrUpdate<HangfireService>("CreateNextChargeForAgreements", s => s.CreateNextChargeForAgreements(), Cron.Hourly);
     recurringJobManager.AddOrUpdate<HangfireService>("PreWarmLavinprognoserCache", s => s.PreWarmLavinprognoserCache(CancellationToken.None), Cron.Hourly);

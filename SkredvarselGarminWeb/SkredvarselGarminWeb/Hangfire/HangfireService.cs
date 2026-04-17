@@ -18,6 +18,7 @@ public class HangfireService(
     IBackgroundJobClient backgroundJobClient,
     IDateTimeNowProvider dateTimeNowProvider,
     IVippsAgreementService vippsAgreementService,
+    IResendAudienceSyncService resendAudienceSyncService,
     ISwedishForecastAreaSeeder swedishForecastAreaSeeder,
     ILavinprognoserWarningService lavinprognoserWarningService,
     ILogger<HangfireService> logger)
@@ -142,5 +143,12 @@ public class HangfireService(
         }
 
         dbContext.SaveChanges();
+    }
+
+    [DisableConcurrentExecution(timeoutInSeconds: 1800)]
+    public async Task SyncResendAudience(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        await resendAudienceSyncService.SyncUsers(cancellationToken);
     }
 }
