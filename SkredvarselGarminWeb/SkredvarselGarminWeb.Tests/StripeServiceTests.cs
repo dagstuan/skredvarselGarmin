@@ -291,6 +291,7 @@ public class StripeServiceTests
             Created = new DateTime(2025, 4, 1, 12, 0, 0, DateTimeKind.Utc),
             NextChargeDate = null,
         });
+        _dbContext.SetFormerSubscriberExtraMonths(1);
         _dbContext.SaveChanges();
 
         var session = new Stripe.Checkout.Session
