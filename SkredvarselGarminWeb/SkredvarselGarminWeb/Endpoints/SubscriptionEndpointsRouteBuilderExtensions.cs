@@ -69,8 +69,7 @@ public static class SubscriptionEndpointsRouteBuilderExtensions
             }
 
             var activeStripeSubscription = stripeSubscriptionsInDb
-                .FirstOrDefault(ss => ss.Status == Entities.StripeSubscriptionStatus.ACTIVE
-                    || ss.Status == Entities.StripeSubscriptionStatus.UNSUBSCRIBED);
+                .FirstOrDefault(ss => ss.Status.IsActiveOrUnsubscribed());
             return activeStripeSubscription != null
                 ? Results.Ok(new SubscriptionResponse
                 {

@@ -1,4 +1,5 @@
 using SkredvarselGarminWeb.Entities;
+using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.Helpers;
 
 namespace SkredvarselGarminWeb.Database;
@@ -44,7 +45,8 @@ public static class DbContextAgreementExtensions
 
         var activeOrUnsubbedStripeSubscriptions = dbContext.StripeSubscriptions
             .Where(ss => ss.UserId == userId)
-            .Any(ss => ss.Status == StripeSubscriptionStatus.ACTIVE || ss.Status == StripeSubscriptionStatus.UNSUBSCRIBED);
+            .WhereActiveOrUnsubscribed()
+            .Any();
 
         return activeOrUnsubbedVippsAgreements || activeOrUnsubbedStripeSubscriptions;
     }

@@ -92,6 +92,43 @@ public class StripeServiceTests
     }
 
     [Fact]
+    public void GetOrCreateUserForCheckoutSession_should_prefer_existing_stripe_customer_owner_over_client_reference_user()
+    {
+        _dbContext.Users.AddRange(
+            new User
+            {
+                Id = "client-reference-user",
+                Email = "client.reference@example.com",
+                Name = "Client Reference User",
+                CreatedDate = new DateOnly(2026, 1, 1),
+                LastLoggedIn = new DateOnly(2026, 1, 1),
+            },
+            new User
+            {
+                Id = "stripe-owner-user",
+                Email = "stripe.owner@example.com",
+                Name = "Stripe Owner User",
+                CreatedDate = new DateOnly(2026, 1, 1),
+                LastLoggedIn = new DateOnly(2026, 1, 1),
+                StripeCustomerId = "cus_conflict"
+            });
+        _dbContext.SaveChanges();
+
+        var session = new Stripe.Checkout.Session
+        {
+            Id = "cs_conflict",
+            ClientReferenceId = "client-reference-user",
+            CustomerId = "cus_conflict"
+        };
+
+        var user = _stripeService.GetOrCreateUserForCheckoutSession(session);
+
+        user.Id.Should().Be("stripe-owner-user");
+        _dbContext.Users.Single(existingUser => existingUser.Id == "client-reference-user").StripeCustomerId.Should().BeNull();
+        _dbContext.Users.Single(existingUser => existingUser.Id == "stripe-owner-user").StripeCustomerId.Should().Be("cus_conflict");
+    }
+
+    [Fact]
     public void GetOrCreateUserForCheckoutSession_should_fall_back_to_customer_record_when_session_has_no_email()
     {
         _stripeGateway.GetCustomer("cus_missing_email").Returns(new Customer
@@ -163,7 +200,41 @@ public class StripeServiceTests
     }
 
     [Fact]
-    public void StoreNewSubscriptionIfNotExists_should_not_create_duplicate_subscription()
+    public void FulfillCheckoutSession_should_only_fulfill_once_per_checkout_session()
+    {
+        var session = new Stripe.Checkout.Session
+        {
+            Id = "cs_fulfill_once",
+            CustomerId = "cus_fulfill_once",
+            CustomerEmail = "once@example.com",
+            SubscriptionId = "sub_fulfill_once"
+        };
+
+        _stripeGateway.GetCheckoutSession("cs_fulfill_once").Returns(session);
+        _stripeGateway.GetSubscription("sub_fulfill_once").Returns(CreateStripeSubscription(
+            id: "sub_fulfill_once",
+            status: "active",
+            currentPeriodEnd: new DateTime(2027, 4, 12, 12, 0, 0, DateTimeKind.Utc)));
+        _stripeGateway.UpdateSubscriptionTrialEnd(
+            "sub_fulfill_once",
+            new DateTime(2027, 5, 12, 12, 0, 0, DateTimeKind.Utc)).Returns(CreateStripeSubscription(
+                id: "sub_fulfill_once",
+                status: "trialing",
+                currentPeriodEnd: new DateTime(2027, 5, 12, 12, 0, 0, DateTimeKind.Utc)));
+
+        _stripeService.FulfillCheckoutSession("cs_fulfill_once");
+        var firstUser = _stripeService.GetUserForFulfilledCheckoutSession("cs_fulfill_once");
+        _stripeService.FulfillCheckoutSession("cs_fulfill_once");
+        var secondUser = _stripeService.GetUserForFulfilledCheckoutSession("cs_fulfill_once");
+
+        secondUser.Id.Should().Be(firstUser.Id);
+        _stripeGateway.Received(1).GetCheckoutSession("cs_fulfill_once");
+        _dbContext.StripeSubscriptions.Should().ContainSingle(subscription => subscription.SubscriptionId == "sub_fulfill_once");
+        _dbContext.StripeCheckoutSessionFulfillments.Should().ContainSingle(fulfillment => fulfillment.SessionId == "cs_fulfill_once");
+    }
+
+    [Fact]
+    public void FulfillCheckoutSession_should_not_create_duplicate_subscription_when_subscription_already_exists()
     {
         _dbContext.Users.Add(new User
         {
@@ -191,10 +262,147 @@ public class StripeServiceTests
             SubscriptionId = "sub_existing"
         };
 
-        _stripeService.StoreNewSubscriptionIfNotExists(session);
+        _stripeGateway.GetCheckoutSession("cs_existing_sub").Returns(session);
+
+        _stripeService.FulfillCheckoutSession("cs_existing_sub");
 
         _dbContext.StripeSubscriptions.Should().ContainSingle(subscription => subscription.SubscriptionId == "sub_existing");
+        _dbContext.StripeCheckoutSessionFulfillments.Should().ContainSingle(fulfillment => fulfillment.SessionId == "cs_existing_sub");
         _stripeGateway.DidNotReceive().GetSubscription(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void FulfillCheckoutSession_should_extend_the_first_period_for_former_subscribers()
+    {
+        _dbContext.Users.Add(new User
+        {
+            Id = "former-user",
+            Email = "former.user@example.com",
+            Name = "Former User",
+            CreatedDate = new DateOnly(2025, 1, 1),
+            LastLoggedIn = new DateOnly(2026, 1, 1),
+            StripeCustomerId = "cus_former"
+        });
+        _dbContext.StripeSubscriptions.Add(new StripeSubscription
+        {
+            SubscriptionId = "sub_old",
+            UserId = "former-user",
+            Status = StripeSubscriptionStatus.CANCELED,
+            Created = new DateTime(2025, 4, 1, 12, 0, 0, DateTimeKind.Utc),
+            NextChargeDate = null,
+        });
+        _dbContext.SaveChanges();
+
+        var session = new Stripe.Checkout.Session
+        {
+            Id = "cs_former",
+            CustomerId = "cus_former",
+            SubscriptionId = "sub_new"
+        };
+
+        var initialSubscription = CreateStripeSubscription(
+            id: "sub_new",
+            status: "active",
+            currentPeriodEnd: new DateTime(2027, 4, 12, 12, 0, 0, DateTimeKind.Utc));
+        var extendedSubscription = CreateStripeSubscription(
+            id: "sub_new",
+            status: "trialing",
+            currentPeriodEnd: new DateTime(2027, 5, 12, 12, 0, 0, DateTimeKind.Utc));
+
+        _stripeGateway.GetCheckoutSession("cs_former").Returns(session);
+        _stripeGateway.GetSubscription("sub_new").Returns(initialSubscription);
+        _stripeGateway.UpdateSubscriptionTrialEnd(
+            "sub_new",
+            new DateTime(2027, 5, 12, 12, 0, 0, DateTimeKind.Utc)).Returns(extendedSubscription);
+
+        _stripeService.FulfillCheckoutSession("cs_former");
+
+        _stripeGateway.Received(1).UpdateSubscriptionTrialEnd(
+            "sub_new",
+            new DateTime(2027, 5, 12, 12, 0, 0, DateTimeKind.Utc));
+
+        _dbContext.StripeSubscriptions.Should().ContainSingle(subscription =>
+            subscription.SubscriptionId == "sub_new" &&
+            subscription.Status == StripeSubscriptionStatus.TRIALING &&
+            subscription.NextChargeDate == new DateOnly(2027, 5, 12));
+    }
+
+    [Fact]
+    public void FulfillCheckoutSession_should_not_extend_the_first_period_for_non_former_subscribers()
+    {
+        _dbContext.Users.Add(new User
+        {
+            Id = "new-user",
+            Email = "new.user@example.com",
+            Name = "New User",
+            CreatedDate = new DateOnly(2026, 1, 1),
+            LastLoggedIn = new DateOnly(2026, 1, 1),
+            StripeCustomerId = "cus_new"
+        });
+        _dbContext.SaveChanges();
+
+        var session = new Stripe.Checkout.Session
+        {
+            Id = "cs_new",
+            CustomerId = "cus_new",
+            SubscriptionId = "sub_new"
+        };
+
+        _stripeGateway.GetSubscription("sub_new").Returns(CreateStripeSubscription(
+            id: "sub_new",
+            status: "active",
+            currentPeriodEnd: new DateTime(2027, 4, 12, 12, 0, 0, DateTimeKind.Utc)));
+
+        _stripeGateway.GetCheckoutSession("cs_new").Returns(session);
+
+        _stripeService.FulfillCheckoutSession("cs_new");
+
+        _stripeGateway.DidNotReceive().UpdateSubscriptionTrialEnd(Arg.Any<string>(), Arg.Any<DateTime>());
+    }
+
+    [Fact]
+    public void FulfillCheckoutSession_should_not_extend_the_first_period_when_former_subscriber_extra_months_is_zero()
+    {
+        _dbContext.Users.Add(new User
+        {
+            Id = "former-user-disabled",
+            Email = "former.disabled@example.com",
+            Name = "Former User Disabled",
+            CreatedDate = new DateOnly(2025, 1, 1),
+            LastLoggedIn = new DateOnly(2026, 1, 1),
+            StripeCustomerId = "cus_former_disabled"
+        });
+        _dbContext.StripeSubscriptions.Add(new StripeSubscription
+        {
+            SubscriptionId = "sub_old_disabled",
+            UserId = "former-user-disabled",
+            Status = StripeSubscriptionStatus.CANCELED,
+            Created = new DateTime(2025, 4, 1, 12, 0, 0, DateTimeKind.Utc),
+            NextChargeDate = null,
+        });
+        _dbContext.SetFormerSubscriberExtraMonths(0);
+        _dbContext.SaveChanges();
+
+        var session = new Stripe.Checkout.Session
+        {
+            Id = "cs_former_disabled",
+            CustomerId = "cus_former_disabled",
+            SubscriptionId = "sub_new_disabled"
+        };
+
+        _stripeGateway.GetCheckoutSession("cs_former_disabled").Returns(session);
+        _stripeGateway.GetSubscription("sub_new_disabled").Returns(CreateStripeSubscription(
+            id: "sub_new_disabled",
+            status: "active",
+            currentPeriodEnd: new DateTime(2027, 4, 12, 12, 0, 0, DateTimeKind.Utc)));
+
+        _stripeService.FulfillCheckoutSession("cs_former_disabled");
+
+        _stripeGateway.DidNotReceive().UpdateSubscriptionTrialEnd(Arg.Any<string>(), Arg.Any<DateTime>());
+        _dbContext.StripeSubscriptions.Should().ContainSingle(subscription =>
+            subscription.SubscriptionId == "sub_new_disabled" &&
+            subscription.Status == StripeSubscriptionStatus.ACTIVE &&
+            subscription.NextChargeDate == new DateOnly(2027, 4, 12));
     }
 
     [Fact]

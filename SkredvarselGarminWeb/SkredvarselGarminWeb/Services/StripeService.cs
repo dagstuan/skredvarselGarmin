@@ -1,9 +1,15 @@
+using System.Data;
+using System.Security.Cryptography;
+using System.Text;
+
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities;
+using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.Entities.Mappers;
 using SkredvarselGarminWeb.Helpers;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 using Stripe;
 using Stripe.Checkout;
@@ -54,15 +60,33 @@ public class StripeService(
         return new CheckoutUserDetails(customer.Email, userDetails.Name ?? customer.Name);
     }
 
+    private User? FindUserByStripeCustomerId(string? stripeCustomerId)
+    {
+        return !string.IsNullOrWhiteSpace(stripeCustomerId)
+            ? dbContext.Users.SingleOrDefault(existingUser => existingUser.StripeCustomerId == stripeCustomerId)
+            : null;
+    }
+
     private User? FindUserBySessionIdentifiers(Session session)
     {
-        var user = !string.IsNullOrWhiteSpace(session.ClientReferenceId)
+        var userByStripeCustomerId = FindUserByStripeCustomerId(session.CustomerId);
+        var userByClientReferenceId = !string.IsNullOrWhiteSpace(session.ClientReferenceId)
             ? dbContext.GetUserByIdOrNull(session.ClientReferenceId)
             : null;
 
-        return user ?? (!string.IsNullOrWhiteSpace(session.CustomerId)
-            ? dbContext.Users.SingleOrDefault(existingUser => existingUser.StripeCustomerId == session.CustomerId)
-            : null);
+        if (userByStripeCustomerId != null &&
+            userByClientReferenceId != null &&
+            userByStripeCustomerId.Id != userByClientReferenceId.Id)
+        {
+            logger.LogWarning(
+                "Stripe checkout session {sessionId} referenced user {clientReferenceUserId}, but customer {stripeCustomerId} already belongs to user {stripeCustomerUserId}. Reusing the existing Stripe customer owner.",
+                session.Id,
+                userByClientReferenceId.Id,
+                session.CustomerId,
+                userByStripeCustomerId.Id);
+        }
+
+        return userByStripeCustomerId ?? userByClientReferenceId;
     }
 
     private User CreateUserFromSession(Session session, CheckoutUserDetails userDetails)
@@ -85,6 +109,148 @@ public class StripeService(
         };
     }
 
+    private static long CreateAdvisoryLockKey(string resourceType, string resourceId)
+    {
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes($"{resourceType}:{resourceId}"));
+        return BitConverter.ToInt64(hash, 0);
+    }
+
+    private void AcquireTransactionScopedAdvisoryLock(string resourceType, string resourceId)
+    {
+        if (!string.Equals(dbContext.Database.ProviderName, "Npgsql.EntityFrameworkCore.PostgreSQL", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        var transaction = dbContext.Database.CurrentTransaction
+            ?? throw new InvalidOperationException("A database transaction is required before acquiring a Stripe advisory lock.");
+
+        var connection = dbContext.Database.GetDbConnection();
+        var shouldCloseConnection = connection.State != ConnectionState.Open;
+
+        if (shouldCloseConnection)
+        {
+            connection.Open();
+        }
+
+        try
+        {
+            using var command = connection.CreateCommand();
+            command.Transaction = transaction.GetDbTransaction();
+            command.CommandText = "SELECT pg_advisory_xact_lock(@lock_key);";
+
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = "lock_key";
+            parameter.Value = CreateAdvisoryLockKey(resourceType, resourceId);
+            command.Parameters.Add(parameter);
+
+            _ = command.ExecuteScalar();
+        }
+        finally
+        {
+            if (shouldCloseConnection)
+            {
+                connection.Close();
+            }
+        }
+    }
+
+    private StripeCheckoutSessionFulfillment? GetCheckoutSessionFulfillment(string sessionId)
+    {
+        return dbContext.StripeCheckoutSessionFulfillments
+            .Include(f => f.User)
+            .SingleOrDefault(f => f.SessionId == sessionId);
+    }
+
+    private bool EnsureStripeSubscriptionExists(Session session, User user)
+    {
+        var subscriptionId = session.SubscriptionId
+            ?? throw new Exception($"Stripe checkout session {session.Id} did not contain a subscription id.");
+
+        AcquireTransactionScopedAdvisoryLock("stripe-subscription", subscriptionId);
+
+        var existingSubscription = dbContext.StripeSubscriptions.Find(subscriptionId);
+
+        if (existingSubscription != null)
+        {
+            return false;
+        }
+
+        var stripeSubscription = stripeGateway.GetSubscription(subscriptionId);
+
+        var formerSubscriberExtraMonths = dbContext.IsFormerSubscriber(user.Id)
+            ? dbContext.GetFormerSubscriberExtraMonths()
+            : 0;
+
+        if (formerSubscriberExtraMonths > 0)
+        {
+            stripeSubscription = stripeGateway.UpdateSubscriptionTrialEnd(
+                subscriptionId,
+                stripeSubscription.Items.Data[0].CurrentPeriodEnd.AddMonths(formerSubscriberExtraMonths));
+        }
+
+        var status = stripeSubscription.ToStripeSubscriptionStatus();
+
+        dbContext.StripeSubscriptions.Add(new StripeSubscription
+        {
+            Created = dateTimeNowProvider.Now.ToUniversalTime(),
+            SubscriptionId = subscriptionId,
+            UserId = user.Id,
+            Status = status,
+            NextChargeDate = DateOnly.FromDateTime(stripeSubscription.Items.Data[0].CurrentPeriodEnd)
+        });
+
+        return status.IsActive();
+    }
+
+    public void FulfillCheckoutSession(string sessionId)
+    {
+        using var transaction = dbContext.Database.BeginTransaction();
+
+        AcquireTransactionScopedAdvisoryLock("stripe-checkout-session", sessionId);
+
+        var existingFulfillment = GetCheckoutSessionFulfillment(sessionId);
+
+        if (existingFulfillment != null)
+        {
+            transaction.Commit();
+            return;
+        }
+
+        var session = stripeGateway.GetCheckoutSession(sessionId);
+
+        if (!string.IsNullOrWhiteSpace(session.CustomerId))
+        {
+            AcquireTransactionScopedAdvisoryLock("stripe-customer", session.CustomerId);
+        }
+
+        var user = GetOrCreateUserForCheckoutSession(session);
+        var wasSubscriptionCreated = EnsureStripeSubscriptionExists(session, user);
+
+        dbContext.StripeCheckoutSessionFulfillments.Add(new StripeCheckoutSessionFulfillment
+        {
+            SessionId = sessionId,
+            UserId = user.Id,
+            SubscriptionId = session.SubscriptionId
+                ?? throw new Exception($"Stripe checkout session {sessionId} did not contain a subscription id."),
+            FulfilledAt = dateTimeNowProvider.Now.ToUniversalTime()
+        });
+
+        dbContext.SaveChanges();
+        transaction.Commit();
+
+        if (wasSubscriptionCreated)
+        {
+            _ = Task.Run(notificationService.NotifyUserSubscribed);
+        }
+    }
+
+    public User GetUserForFulfilledCheckoutSession(string sessionId)
+    {
+        return GetCheckoutSessionFulfillment(sessionId)?.User
+            ?? throw new Exception($"Stripe checkout session {sessionId} has not been fulfilled.");
+    }
+
     public User GetOrCreateUserForCheckoutSession(Session session)
     {
         var userByIdentifiers = FindUserBySessionIdentifiers(session);
@@ -92,6 +258,21 @@ public class StripeService(
         var userByEmail = !string.IsNullOrWhiteSpace(userDetails.Email)
             ? dbContext.GetUserByEmailOrNull(userDetails.Email)
             : null;
+
+        if (userByIdentifiers != null &&
+            userByEmail != null &&
+            userByIdentifiers.Id != userByEmail.Id &&
+            !string.IsNullOrWhiteSpace(session.CustomerId) &&
+            string.Equals(userByIdentifiers.StripeCustomerId, session.CustomerId, StringComparison.Ordinal))
+        {
+            logger.LogWarning(
+                "Stripe checkout session {sessionId} matched email {email} to user {emailUserId}, but customer {stripeCustomerId} is already linked to user {stripeCustomerUserId}. Reusing the existing Stripe customer owner.",
+                session.Id,
+                userDetails.Email,
+                userByEmail.Id,
+                session.CustomerId,
+                userByIdentifiers.Id);
+        }
 
         var resolvedUser = userByIdentifiers ?? userByEmail;
 
@@ -131,7 +312,7 @@ public class StripeService(
         if (stripeEvent.Type == EventTypes.CheckoutSessionCompleted)
         {
             var session = (Session)stripeEvent.Data.Object;
-            StoreNewSubscriptionIfNotExists(session);
+            FulfillCheckoutSession(session.Id);
         }
         else if (
             stripeEvent.Type is
@@ -148,46 +329,6 @@ public class StripeService(
             // Unexpected event type
             logger.LogWarning("Unhandled event type: {eventType}", stripeEvent.Type);
         }
-    }
-
-    public void StoreNewSubscriptionIfNotExists(Session session)
-    {
-        using var transaction = dbContext.Database.BeginTransaction();
-
-        var user = GetOrCreateUserForCheckoutSession(session);
-
-        var subscriptionId = session.SubscriptionId
-            ?? throw new Exception($"Stripe checkout session {session.Id} did not contain a subscription id.");
-
-        var existingSubscription = dbContext.StripeSubscriptions.Find(subscriptionId);
-
-        if (existingSubscription != null)
-        {
-            transaction.Commit();
-            return;
-        }
-
-        var stripeSubscription = stripeGateway.GetSubscription(subscriptionId);
-
-        var status = stripeSubscription.ToStripeSubscriptionStatus();
-
-        if (status == StripeSubscriptionStatus.ACTIVE)
-        {
-            _ = Task.Run(notificationService.NotifyUserSubscribed);
-        }
-
-        dbContext.StripeSubscriptions.Add(new StripeSubscription
-        {
-            Created = dateTimeNowProvider.Now.ToUniversalTime(),
-            SubscriptionId = subscriptionId,
-            UserId = user.Id,
-            Status = status,
-            NextChargeDate = DateOnly.FromDateTime(stripeSubscription.Items.Data[0].CurrentPeriodEnd)
-        });
-
-        dbContext.SaveChanges();
-
-        transaction.Commit();
     }
 
     public void HandleSubscriptionUpdated(Subscription subscription)

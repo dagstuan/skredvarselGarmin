@@ -192,6 +192,8 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                 {
                     try
                     {
+                        var freeMonths = 0;
+
                         if (string.IsNullOrEmpty(agreement.UserId))
                         {
                             var signedInUser = dbContext.GetUserOrNull(ctx.User);
@@ -199,6 +201,9 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                             {
                                 // User is already signed in. Associate agreement with logged in user instead of vipps-sub.
                                 agreement.SetUserId(signedInUser.Id);
+                                freeMonths = dbContext.IsFormerSubscriber(signedInUser.Id)
+                                    ? dbContext.GetFormerSubscriberExtraMonths()
+                                    : 0;
                             }
                             else
                             {
@@ -215,6 +220,10 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
 
                                 if (existingUser != null)
                                 {
+                                    freeMonths = dbContext.IsFormerSubscriber(existingUser.Id)
+                                        ? dbContext.GetFormerSubscriberExtraMonths()
+                                        : 0;
+
                                     try
                                     {
                                         await StopOldAgreementsForUser(existingUser, dbContext, subscriptionService);
@@ -262,6 +271,11 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                         try
                         {
                             await subscriptionService.UpdateAgreementCharges(agreement.Id);
+
+                            if (freeMonths > 0 && agreement.NextChargeDate.HasValue)
+                            {
+                                agreement.NextChargeDate = agreement.NextChargeDate.Value.AddMonths(freeMonths);
+                            }
                         }
                         catch (Exception e)
                         {
