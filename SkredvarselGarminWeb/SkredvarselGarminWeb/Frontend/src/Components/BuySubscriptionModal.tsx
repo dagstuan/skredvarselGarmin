@@ -33,7 +33,8 @@ export const BuySubscriptionModal = (props: BuySubscriptionModalProps) => {
       <>
         Abonnement kjøpes med Vipps eller Stripe. <br /> Når du kjøper
         abonnement har du tilgang i 12 måneder fra kjøpsdato. Velg hvordan du
-        vil kjøpe abonnement.
+        vil kjøpe abonnement. Hvis du allerede har et abonnement, logg inn oppe
+        i høyre hjørne for å administrere det.
       </>
     ),
     showLogin = false,
