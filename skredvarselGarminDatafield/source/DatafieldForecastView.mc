@@ -21,14 +21,18 @@ class DatafieldForecastView {
   private var _regionNameX0 as Numeric = 0;
   private var _noProblemView as DatafieldNoProblemView? = null;
 
-  private var _updatedAtBitmap as Gfx.BufferedBitmap? = null;
-  private var _updatedAtBitmapW as Numeric = 0;
-  private var _updatedAtBitmapH as Numeric = 0;
+  private var _updatedAtText as String? = null;
+  private var _updatedAtIcon as Ui.BitmapResource? = null;
+  private var _updatedAtStartX as Numeric = 0;
+  private var _updatedAtIconW as Number = 0;
+  private var _updatedAtIconH as Number = 0;
+  private var _updatedAtContentH as Number = 0;
 
   private var _fieldWidth as Number = 0;
   private var _fieldHeight as Number = 0;
   private var _isActivityRunning as Boolean = false;
   private var _needsFullRebuild as Boolean = false;
+  private var _lastBgColor as Gfx.ColorType = Gfx.COLOR_BLACK;
 
   public function onDataChanged() as Void {
     _needsFullRebuild = true;
@@ -135,6 +139,11 @@ class DatafieldForecastView {
   public function onUpdate(dc as Gfx.Dc) as Void {
     AvalancheUi.tickScrollingTexts();
 
+    if ($.CurrentBgColor != _lastBgColor) {
+      _lastBgColor = $.CurrentBgColor;
+      _needsFullRebuild = true;
+    }
+
     if (_needsFullRebuild) {
       _needsFullRebuild = false;
       _loadDataFromStorage();
@@ -144,7 +153,7 @@ class DatafieldForecastView {
     }
 
     dc.setClip(0, 0, _fieldWidth, _fieldHeight);
-    dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
+    dc.setColor($.CurrentBgColor, $.CurrentBgColor);
     dc.clear();
 
     if (_locationDetailedForecast == null) {
@@ -210,8 +219,8 @@ class DatafieldForecastView {
       :containerHeight => regionNameFontH,
       :scrollSpeed => 2,
       :font => regionNameFont,
-      :color => Gfx.COLOR_WHITE,
-      :backgroundColor => Gfx.COLOR_BLACK,
+      :color => $.getTextColor(),
+      :backgroundColor => $.CurrentBgColor,
     });
 
     _regionNameScrollingText.onShow();
@@ -221,7 +230,13 @@ class DatafieldForecastView {
     _problemUis = [null, null, null];
     _numProblems = 0;
     _noProblemView = null;
-    _updatedAtBitmap = null;
+    _updatedAtText = null;
+    _updatedAtIcon = null;
+    _updatedAtStartX = 0;
+    _updatedAtIconW = 0;
+    _updatedAtIconH = 0;
+    _updatedAtContentH = 0;
+
     if (_detailedWarning == null) {
       return;
     }
@@ -230,6 +245,7 @@ class DatafieldForecastView {
       _detailedWarning["avalancheProblems"] as Array<AvalancheProblem>;
 
     // if ($.Debug) {
+    //   (_detailedWarning as DetailedAvalancheWarning)["dangerLevel"] = 4; // --- IGNORE --- Simulate danger level 4
     //   problems = problems.slice(0, 1); // --- IGNORE --- Force one-problem layout for testing
     //   problems.add(problems[0]); // --- IGNORE --- Force three-problem layout for testing
     // }
@@ -522,8 +538,8 @@ class DatafieldForecastView {
   }
 
   private function _getUpdatedAtContentHeight() as Numeric {
-    if (_updatedAtBitmapH > 0) {
-      return _updatedAtBitmapH;
+    if (_updatedAtContentH > 0) {
+      return _updatedAtContentH;
     }
 
     var fontH = Gfx.getFontHeight(Gfx.FONT_XTINY);
@@ -538,7 +554,7 @@ class DatafieldForecastView {
 
   private function _drawDivider(dc as Gfx.Dc, y as Numeric) as Void {
     var dividerInset = (_fieldWidth * 0.14).toNumber();
-    dc.setColor(Gfx.COLOR_DK_GRAY, Gfx.COLOR_TRANSPARENT);
+    dc.setColor(Graphics.COLOR_DK_GRAY, Gfx.COLOR_TRANSPARENT);
     dc.drawLine(dividerInset, y, _fieldWidth - dividerInset, y);
   }
 
@@ -550,24 +566,10 @@ class DatafieldForecastView {
 
     var dangerLevel =
       _detailedWarning != null ? _detailedWarning["dangerLevel"] as Number : 0;
-    var dangerColor = $.colorize(dangerLevel);
 
     // --- Danger level header (top 30%) ---
-    var levelText = $.getOrLoadResourceString("Faregrad", :Level);
-    var headerText = Lang.format("$1$ $2$", [levelText, dangerLevel]);
     var headerFont = Gfx.FONT_MEDIUM;
     var headerFontH = Gfx.getFontHeight(headerFont);
-
-    var icon =
-      Ui.loadResource($.getIconResourceForDangerLevel(dangerLevel)) as
-      Ui.BitmapResource;
-    var iconW = icon.getWidth();
-    var iconH = icon.getHeight();
-    var gapX = (_fieldWidth * 0.02).toNumber();
-
-    var textW = dc.getTextWidthInPixels(headerText, headerFont);
-    var totalW = textW + gapX + iconW;
-    var headerX = (_fieldWidth - totalW) / 2;
 
     var regionNameFontH = Gfx.getFontHeight(Gfx.FONT_XTINY);
     var headerContentH = _getHeaderContentHeight(dangerLevel);
@@ -582,15 +584,13 @@ class DatafieldForecastView {
 
     var dangerMidY =
       startY + _getHeaderGapY() + regionNameFontH + headerFontH / 2;
-    dc.setColor(dangerColor, Gfx.COLOR_TRANSPARENT);
-    dc.drawText(
-      headerX,
-      dangerMidY,
+    $.drawDangerLevelHeader(
+      dc,
+      _fieldWidth,
+      dangerMidY.toNumber(),
       headerFont,
-      headerText,
-      Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
+      dangerLevel
     );
-    dc.drawBitmap(headerX + textW + gapX, dangerMidY - iconH / 2, icon);
 
     // --- Problems area ---
 
@@ -636,7 +636,7 @@ class DatafieldForecastView {
         }
       }
       // Vertical divider at center
-      dc.setColor(Gfx.COLOR_DK_GRAY, Gfx.COLOR_TRANSPARENT);
+      dc.setColor(Graphics.COLOR_DK_GRAY, Gfx.COLOR_TRANSPARENT);
       dc.drawLine(centerX, curY, centerX, curY + row0H);
 
       curY += row0H;
@@ -685,51 +685,47 @@ class DatafieldForecastView {
       return;
     }
 
-    if (_updatedAtBitmap == null) {
+    if (_updatedAtText == null) {
       var publishedTime = _detailedWarning["published"] as String;
       var publishedMoment = $.parseDate(publishedTime);
       var dateText = $.getHumanReadableDateText(publishedMoment);
       var timestamp = $.getFormattedTimestamp(publishedMoment);
-      var text = Lang.format("$1$ $2$", [dateText, timestamp]);
+      _updatedAtText = Lang.format("$1$ $2$", [dateText, timestamp]);
 
       var font = Gfx.FONT_XTINY;
       var fontH = Gfx.getFontHeight(font);
-      var updatedIcon =
-        Ui.loadResource($.Rez.Drawables.UpdatedIcon) as Ui.BitmapResource;
-      var iconW = updatedIcon.getWidth();
-      var iconH = updatedIcon.getHeight();
+      _updatedAtIcon =
+        Ui.loadResource(
+          $.isLightBackground()
+            ? $.Rez.Drawables.UpdatedIconInverted
+            : $.Rez.Drawables.UpdatedIcon
+        ) as Ui.BitmapResource;
+      _updatedAtIconW = (_updatedAtIcon as Ui.BitmapResource).getWidth();
+      _updatedAtIconH = (_updatedAtIcon as Ui.BitmapResource).getHeight();
       var gap = 4;
-
-      var textDimensions = dc.getTextDimensions(text, font);
-      _updatedAtBitmapW = iconW + gap + textDimensions[0];
-      _updatedAtBitmapH = textDimensions[1] > iconH ? textDimensions[1] : iconH;
-
-      _updatedAtBitmap = $.newBufferedBitmap({
-        :width => _updatedAtBitmapW,
-        :height => _updatedAtBitmapH,
-      });
-      var bufferedDc = _updatedAtBitmap.getDc();
-      if (bufferedDc has :setAntiAlias) {
-        bufferedDc.setAntiAlias(true);
-      }
-      bufferedDc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
-      bufferedDc.drawBitmap(0, _updatedAtBitmapH / 2 - iconH / 2, updatedIcon);
-      bufferedDc.drawText(
-        iconW + gap,
-        _updatedAtBitmapH / 2 - fontH / 2,
-        font,
-        text,
-        Gfx.TEXT_JUSTIFY_LEFT
-      );
+      _updatedAtContentH = fontH > _updatedAtIconH ? fontH : _updatedAtIconH;
+      var textW = dc.getTextWidthInPixels(_updatedAtText, font);
+      _updatedAtStartX = (_fieldWidth - (_updatedAtIconW + gap + textW)) / 2;
     }
 
-    var bitmapX = (_fieldWidth - _updatedAtBitmapW) / 2;
-    var bitmapY = _fieldHeight - footerPadding - _updatedAtBitmapH;
-    dc.drawBitmap(bitmapX, bitmapY, _updatedAtBitmap);
+    var footerY = _fieldHeight - footerPadding - _updatedAtContentH;
+    dc.drawBitmap(
+      _updatedAtStartX,
+      footerY + _updatedAtContentH / 2 - _updatedAtIconH / 2,
+      _updatedAtIcon
+    );
+    dc.setColor($.getTextColor(), Gfx.COLOR_TRANSPARENT);
+    dc.drawText(
+      (_updatedAtStartX + _updatedAtIconW + 4).toNumber(),
+      (footerY + _updatedAtContentH / 2).toNumber(),
+      Gfx.FONT_XTINY,
+      _updatedAtText,
+      Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
+    );
   }
 
   private function _drawCenteredText(dc as Gfx.Dc, text as String) as Void {
-    dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+    dc.setColor($.getTextColor(), Gfx.COLOR_TRANSPARENT);
     dc.drawText(
       _fieldWidth / 2,
       _fieldHeight / 2,

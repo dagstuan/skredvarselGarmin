@@ -181,18 +181,25 @@ module AvalancheUi {
   public class ExposedHeight {
     private var _bufferedBitmap as Gfx.BufferedBitmap?;
     private var _size as Numeric;
+    private var _exposedHeightFill as Number;
+    private var _dangerFillColor as Gfx.ColorType;
+    private var _nonDangerFillColor as Gfx.ColorType;
 
     public function initialize(settings as ExposedHeightSettings) {
       _size = settings[:size];
+      _exposedHeightFill = settings[:exposedHeightFill];
+      _dangerFillColor = settings[:dangerFillColor];
+      _nonDangerFillColor = settings[:nonDangerFillColor];
 
       _bufferedBitmap = createBufferedBitmap(
         _size,
-        settings[:exposedHeightFill],
-        settings[:dangerFillColor],
-        settings[:nonDangerFillColor]
+        _exposedHeightFill,
+        _dangerFillColor,
+        _nonDangerFillColor
       );
     }
 
+    (:bufferedBitmaps)
     private static function createBufferedBitmap(
       size as Numeric,
       exposedHeightFill as Number,
@@ -218,43 +225,112 @@ module AvalancheUi {
       }
 
       if (exposedHeightFill == 1) {
-        drawPoly(bufferedDc, getTopHalfPoints(), dangerFillColor, size);
-        drawPoly(bufferedDc, getBottomHalfPoints(), nonDangerFillColor, size);
+        drawPoly(bufferedDc, getTopHalfPoints(), dangerFillColor, size, 0, 0);
+        drawPoly(
+          bufferedDc,
+          getBottomHalfPoints(),
+          nonDangerFillColor,
+          size,
+          0,
+          0
+        );
       } else if (exposedHeightFill == 2) {
-        drawPoly(bufferedDc, getTopHalfPoints(), nonDangerFillColor, size);
-        drawPoly(bufferedDc, getBottomHalfPoints(), dangerFillColor, size);
+        drawPoly(
+          bufferedDc,
+          getTopHalfPoints(),
+          nonDangerFillColor,
+          size,
+          0,
+          0
+        );
+        drawPoly(
+          bufferedDc,
+          getBottomHalfPoints(),
+          dangerFillColor,
+          size,
+          0,
+          0
+        );
       } else if (exposedHeightFill >= 3 && exposedHeightFill <= 9) {
         // above=fill 3,5,7,9  mid=fill 3,4,7,8,9  below=fill 3,6,8,9  (see exposedHeightZonesToFill)
-        var above = exposedHeightFill == 3 || exposedHeightFill == 5 || exposedHeightFill == 7 || exposedHeightFill == 9;
-        var mid   = exposedHeightFill == 3 || exposedHeightFill == 4 || exposedHeightFill == 7 || exposedHeightFill == 8 || exposedHeightFill == 9;
-        var below = exposedHeightFill == 3 || exposedHeightFill == 6 || exposedHeightFill == 8 || exposedHeightFill == 9;
-        drawPoly(bufferedDc, getTopTripletPoints(),    above ? dangerFillColor : nonDangerFillColor, size);
-        drawPoly(bufferedDc, getMidTripletPoints(),    mid   ? dangerFillColor : nonDangerFillColor, size);
-        drawPoly(bufferedDc, getBottomTripletPoints(), below ? dangerFillColor : nonDangerFillColor, size);
+        var above =
+          exposedHeightFill == 3 ||
+          exposedHeightFill == 5 ||
+          exposedHeightFill == 7 ||
+          exposedHeightFill == 9;
+        var mid =
+          exposedHeightFill == 3 ||
+          exposedHeightFill == 4 ||
+          exposedHeightFill == 7 ||
+          exposedHeightFill == 8 ||
+          exposedHeightFill == 9;
+        var below =
+          exposedHeightFill == 3 ||
+          exposedHeightFill == 6 ||
+          exposedHeightFill == 8 ||
+          exposedHeightFill == 9;
+        drawPoly(
+          bufferedDc,
+          getTopTripletPoints(),
+          above ? dangerFillColor : nonDangerFillColor,
+          size,
+          0,
+          0
+        );
+        drawPoly(
+          bufferedDc,
+          getMidTripletPoints(),
+          mid ? dangerFillColor : nonDangerFillColor,
+          size,
+          0,
+          0
+        );
+        drawPoly(
+          bufferedDc,
+          getBottomTripletPoints(),
+          below ? dangerFillColor : nonDangerFillColor,
+          size,
+          0,
+          0
+        );
       }
 
       return bufferedBitmap;
+    }
+
+    (:noBufferedBitmaps)
+    private static function createBufferedBitmap(
+      size as Numeric,
+      exposedHeightFill as Number,
+      dangerFillColor as Gfx.ColorType,
+      nonDangerFillColor as Gfx.ColorType
+    ) {
+      return null;
     }
 
     private static function drawPoly(
       dc as Gfx.Dc,
       points as Array<Gfx.Point2D>,
       color as Gfx.ColorType,
-      size as Numeric
+      size as Numeric,
+      x0 as Numeric,
+      y0 as Numeric
     ) {
       dc.setColor(color, color);
-      dc.fillPolygon(calcPoints(points, size));
+      dc.fillPolygon(calcPoints(points, size, x0, y0));
     }
 
     private static function calcPoints(
       points as Array<Gfx.Point2D>,
-      size as Numeric
+      size as Numeric,
+      x0 as Numeric,
+      y0 as Numeric
     ) as Array<Gfx.Point2D> {
       var numPoints = points.size();
       var ret = new [numPoints];
       for (var i = 0; i < points.size(); i++) {
         var point = points[i];
-        ret[i] = calcPoint(point[0], point[1], size);
+        ret[i] = calcPoint(point[0], point[1], size, x0, y0);
       }
       return ret;
     }
@@ -262,19 +338,85 @@ module AvalancheUi {
     private static function calcPoint(
       x as Numeric,
       y as Numeric,
-      size as Numeric
+      size as Numeric,
+      x0 as Numeric,
+      y0 as Numeric
     ) as Array<Numeric> {
       var scalingFactor = size / 42.0;
 
-      return [x * scalingFactor, y * scalingFactor];
+      return [x0 + x * scalingFactor, y0 + y * scalingFactor];
     }
 
     public function getSize() {
       return _size;
     }
 
+    (:bufferedBitmaps)
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
       dc.drawBitmap(x0, y0, _bufferedBitmap);
+    }
+
+    (:noBufferedBitmaps)
+    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
+      if ($.DrawOutlines) {
+        $.drawOutline(dc, x0, y0, _size, _size);
+      }
+
+      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
+      dc.setPenWidth(1);
+
+      if (dc has :setAntiAlias) {
+        dc.setAntiAlias(true);
+      }
+
+      if (_exposedHeightFill == 1) {
+        drawPoly(dc, getTopHalfPoints(), _dangerFillColor, _size, x0, y0);
+        drawPoly(dc, getBottomHalfPoints(), _nonDangerFillColor, _size, x0, y0);
+      } else if (_exposedHeightFill == 2) {
+        drawPoly(dc, getTopHalfPoints(), _nonDangerFillColor, _size, x0, y0);
+        drawPoly(dc, getBottomHalfPoints(), _dangerFillColor, _size, x0, y0);
+      } else if (_exposedHeightFill >= 3 && _exposedHeightFill <= 9) {
+        var above =
+          _exposedHeightFill == 3 ||
+          _exposedHeightFill == 5 ||
+          _exposedHeightFill == 7 ||
+          _exposedHeightFill == 9;
+        var mid =
+          _exposedHeightFill == 3 ||
+          _exposedHeightFill == 4 ||
+          _exposedHeightFill == 7 ||
+          _exposedHeightFill == 8 ||
+          _exposedHeightFill == 9;
+        var below =
+          _exposedHeightFill == 3 ||
+          _exposedHeightFill == 6 ||
+          _exposedHeightFill == 8 ||
+          _exposedHeightFill == 9;
+        drawPoly(
+          dc,
+          getTopTripletPoints(),
+          above ? _dangerFillColor : _nonDangerFillColor,
+          _size,
+          x0,
+          y0
+        );
+        drawPoly(
+          dc,
+          getMidTripletPoints(),
+          mid ? _dangerFillColor : _nonDangerFillColor,
+          _size,
+          x0,
+          y0
+        );
+        drawPoly(
+          dc,
+          getBottomTripletPoints(),
+          below ? _dangerFillColor : _nonDangerFillColor,
+          _size,
+          x0,
+          y0
+        );
+      }
     }
   }
 }

@@ -137,6 +137,7 @@ module AvalancheUi {
       }
     }
 
+    (:bufferedBitmaps)
     private function setupHorizontal(dc as Gfx.Dc) {
       _textWidth = dc.getTextWidthInPixels(_text, _font);
 
@@ -161,6 +162,19 @@ module AvalancheUi {
       }
     }
 
+    (:noBufferedBitmaps)
+    private function setupHorizontal(dc as Gfx.Dc) {
+      _textWidth = dc.getTextWidthInPixels(_text, _font);
+
+      if (_textWidth > _containerWidth) {
+        var scrollDurationMs = Math.ceil(
+          ((_textWidth - _containerWidth).toFloat() * 100.0) / _speed.toFloat()
+        ).toNumber();
+        _cycleTicks = MS_AT_START_END + scrollDurationMs + MS_AT_START_END;
+      }
+    }
+
+    (:bufferedBitmaps)
     private function setupVertical(dc as Gfx.Dc) {
       var fitText = Gfx.fitTextToArea(
         _text,
@@ -206,6 +220,21 @@ module AvalancheUi {
       }
     }
 
+    (:noBufferedBitmaps)
+    private function setupVertical(dc as Gfx.Dc) {
+      var fitText = Gfx.fitTextToArea(
+        _text,
+        _font,
+        _containerWidth,
+        _containerHeight * 10,
+        true
+      );
+
+      var fitTextDimensions = dc.getTextDimensions(fitText, _font);
+      _textWidth = fitTextDimensions[0];
+      _textHeight = fitTextDimensions[1];
+    }
+
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {
       calcTextOffset();
 
@@ -220,6 +249,7 @@ module AvalancheUi {
       }
     }
 
+    (:bufferedBitmaps)
     public function drawHorizontal(
       dc as Gfx.Dc,
       x0 as Numeric,
@@ -252,6 +282,46 @@ module AvalancheUi {
       }
     }
 
+    (:noBufferedBitmaps)
+    public function drawHorizontal(
+      dc as Gfx.Dc,
+      x0 as Numeric,
+      y0 as Numeric
+    ) as Void {
+      dc.setColor(_color, _backgroundColor);
+
+      if (_textWidth > _containerWidth) {
+        dc.setClip(
+          x0,
+          y0 + _horizontalTextYOffset,
+          _containerWidth,
+          _fontHeight
+        );
+        dc.drawText(
+          (x0 + _textOffset).toNumber(),
+          (y0 + _horizontalTextYOffset).toNumber(),
+          _font,
+          _text,
+          Gfx.TEXT_JUSTIFY_LEFT
+        );
+        dc.clearClip();
+      } else {
+        var xOffset =
+          _textXAlignment == X_ALIGN_CENTER
+            ? _containerWidth / 2 - _textWidth / 2
+            : 0;
+
+        dc.drawText(
+          (x0 + xOffset).toNumber(),
+          (y0 + _horizontalTextYOffset).toNumber(),
+          _font,
+          _text,
+          Gfx.TEXT_JUSTIFY_LEFT
+        );
+      }
+    }
+
+    (:bufferedBitmaps)
     public function drawVertical(
       dc as Gfx.Dc,
       x0 as Numeric,
@@ -266,6 +336,42 @@ module AvalancheUi {
           x0,
           y0 + _containerHeight / 2 - _textHeight / 2,
           _bufferedBitmapText
+        );
+      }
+    }
+
+    (:noBufferedBitmaps)
+    public function drawVertical(
+      dc as Gfx.Dc,
+      x0 as Numeric,
+      y0 as Numeric
+    ) as Void {
+      var fitText = Gfx.fitTextToArea(
+        _text,
+        _font,
+        _containerWidth,
+        _containerHeight * 10,
+        true
+      );
+      dc.setColor(_color, _backgroundColor);
+
+      if (_textHeight > _containerHeight) {
+        dc.setClip(x0, y0, _containerWidth, _containerHeight);
+        dc.drawText(
+          (x0 + _containerWidth / 2).toNumber(),
+          (y0 + _textOffset).toNumber(),
+          _font,
+          fitText,
+          Gfx.TEXT_JUSTIFY_CENTER
+        );
+        dc.clearClip();
+      } else {
+        dc.drawText(
+          (x0 + _containerWidth / 2).toNumber(),
+          (y0 + _containerHeight / 2).toNumber(),
+          _font,
+          fitText,
+          Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
         );
       }
     }

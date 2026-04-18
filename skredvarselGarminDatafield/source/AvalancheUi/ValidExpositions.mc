@@ -18,28 +18,32 @@ module AvalancheUi {
     private var _font as Ui.Resource = Ui.loadResource($.Rez.Fonts.roboto);
     private var _fontHeight as Number = Gfx.getFontAscent(_font);
 
-    private var _bufferedBitmap as Gfx.BufferedBitmap;
+    private var _bufferedBitmap as Gfx.BufferedBitmap?;
+    private var _validExpositions as Array;
+    private var _dangerFillColor as Gfx.ColorType;
+    private var _nonDangerFillColor as Gfx.ColorType;
+    private var _labelColor as Gfx.ColorType;
 
     public function initialize(settings as ValidExpositionsSettings) {
       _radius = settings[:radius];
-
-      _bufferedBitmap = createBufferedBitmap(settings);
-    }
-
-    private function createBufferedBitmap(
-      settings as ValidExpositionsSettings
-    ) as Gfx.BufferedBitmap {
-      var validExpositions = settings[:validExpositions].toCharArray();
-      var numChars = validExpositions.size();
-      if (numChars != 8) {
+      _validExpositions = settings[:validExpositions].toCharArray();
+      if (_validExpositions.size() != 8) {
         throw new SkredvarselGarminException(
           "Invalid char array for valid expositions."
         );
       }
-      var dangerFillColor = settings[:dangerFillColor];
-      var nonDangerFillColor = settings[:nonDangerFillColor];
-      var labelColor =
+      _dangerFillColor = settings[:dangerFillColor];
+      _nonDangerFillColor = settings[:nonDangerFillColor];
+      _labelColor =
         settings[:labelColor] != null ? settings[:labelColor] : Gfx.COLOR_WHITE;
+
+      _bufferedBitmap = createBufferedBitmap(settings);
+    }
+
+    (:bufferedBitmaps)
+    private function createBufferedBitmap(
+      settings as ValidExpositionsSettings
+    ) as Gfx.BufferedBitmap {
       var bufferedBitmap = $.newBufferedBitmap({
         :width => _radius * 2,
         :height => _radius * 2 + _fontHeight,
@@ -47,45 +51,60 @@ module AvalancheUi {
 
       var bufferedDc = bufferedBitmap.getDc();
 
-      bufferedDc.setColor(labelColor, Gfx.COLOR_TRANSPARENT);
-      bufferedDc.drawText(
-        _radius,
-        _fontHeight / 2,
+      drawToDc(bufferedDc, 0, 0);
+
+      return bufferedBitmap;
+    }
+
+    (:noBufferedBitmaps)
+    private function createBufferedBitmap(
+      settings as ValidExpositionsSettings
+    ) as Gfx.BufferedBitmap? {
+      return null;
+    }
+
+    private function drawToDc(
+      dc as Gfx.Dc,
+      x0 as Numeric,
+      y0 as Numeric
+    ) as Void {
+      dc.setColor(_labelColor, Gfx.COLOR_TRANSPARENT);
+      dc.drawText(
+        x0 + _radius,
+        y0 + _fontHeight / 2,
         _font,
         "N",
         Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
       );
 
       if ($.DrawOutlines) {
-        $.drawOutline(bufferedDc, 0, 0, _radius * 2, _radius * 2 + _fontHeight);
+        $.drawOutline(dc, x0, y0, _radius * 2, _radius * 2 + _fontHeight);
       }
 
-      bufferedDc.setPenWidth(_radius);
+      dc.setPenWidth(_radius);
 
-      if (bufferedDc has :setAntiAlias) {
-        bufferedDc.setAntiAlias(true);
+      if (dc has :setAntiAlias) {
+        dc.setAntiAlias(true);
       }
 
       var anglePerChar = 360 / 8;
       var originalStartAngle = 90 + Math.ceil(anglePerChar / 2);
       var startAngle = originalStartAngle;
 
-      var centerX = _radius;
-      var centerY = _radius + _fontHeight;
+      var centerX = x0 + _radius;
+      var centerY = y0 + _radius + _fontHeight;
 
-      // Draw cake slices
       for (var i = 0; i < 8; i++) {
-        var currChar = validExpositions[i];
-
+        var currChar = _validExpositions[i];
         var endAngle = (startAngle - anglePerChar) % 360;
 
         if (currChar == '0') {
-          bufferedDc.setColor(nonDangerFillColor, nonDangerFillColor);
+          dc.setColor(_nonDangerFillColor, _nonDangerFillColor);
         } else {
-          bufferedDc.setColor(dangerFillColor, dangerFillColor);
+          dc.setColor(_dangerFillColor, _dangerFillColor);
         }
 
-        bufferedDc.drawArc(
+        dc.drawArc(
           centerX,
           centerY,
           _radius / 2,
@@ -97,23 +116,18 @@ module AvalancheUi {
         startAngle = endAngle;
       }
 
-      var lineColor = Gfx.COLOR_BLACK;
+      dc.setPenWidth(1);
+      dc.setColor($.CurrentBgColor, Gfx.COLOR_TRANSPARENT);
 
-      bufferedDc.setPenWidth(1);
-      bufferedDc.setColor(lineColor, lineColor);
-
-      // draw lines
       startAngle = originalStartAngle;
       for (var i = 0; i < 4; i++) {
         var endAngle = (startAngle + 180) % 360;
         var start = calcCirclePoint(centerX, centerY, _radius, startAngle);
         var end = calcCirclePoint(centerX, centerY, _radius, endAngle);
 
-        bufferedDc.drawLine(start[0], start[1], end[0], end[1]);
+        dc.drawLine(start[0], start[1], end[0], end[1]);
         startAngle = (startAngle + 45) % 360;
       }
-
-      return bufferedBitmap;
     }
 
     public function getSize() {
@@ -124,10 +138,16 @@ module AvalancheUi {
       return _radius * 2 + _fontHeight;
     }
 
+    (:bufferedBitmaps)
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
       var Y0 = y0 - _fontHeight;
 
       dc.drawBitmap(x0, Y0, _bufferedBitmap);
+    }
+
+    (:noBufferedBitmaps)
+    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
+      drawToDc(dc, x0, y0 - _fontHeight);
     }
   }
 

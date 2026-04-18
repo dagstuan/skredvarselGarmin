@@ -209,13 +209,14 @@ class DatafieldProblemUi {
       :dangerFillColor => activeDangerFillColor,
       :nonDangerFillColor => activeNonDangerFillColor,
       :radius => _iconSize / 2,
+      :labelColor => $.getTextColor(),
     });
     _validExpositionsUiGrayscale = new AvalancheUi.ValidExpositions({
       :validExpositions => problem["validExpositions"] as String,
       :dangerFillColor => grayscaleDangerFillColor,
       :nonDangerFillColor => grayscaleNonDangerFillColor,
       :radius => _iconSize / 2,
-      :labelColor => Gfx.COLOR_WHITE,
+      :labelColor => $.getTextColor(),
     });
 
     _exposedHeightUi = new AvalancheUi.ExposedHeight({
@@ -250,6 +251,7 @@ class DatafieldProblemUi {
         :exposedHeight2 => exposedHeight2,
         :exposedHeightFill => exposedHeightFill,
         :dangerFillColor => activeDangerFillColor,
+        :textColor => $.getTextColor(),
         :maxWidth => exposedHeightSize,
         :maxHeight => exposedHeightSize,
       });
@@ -275,8 +277,8 @@ class DatafieldProblemUi {
       :containerHeight => _headingHeight,
       :scrollSpeed => 3,
       :font => _headingFont,
-      :color => Gfx.COLOR_WHITE,
-      :backgroundColor => Gfx.COLOR_BLACK,
+      :color => $.getTextColor(),
+      :backgroundColor => $.CurrentBgColor,
     });
 
     _height = _headingHeight + _headingGap + _iconRowHeight;
@@ -344,6 +346,11 @@ class DatafieldProblemUi {
       : $.colorize(_dangerLevel);
     dc.setColor(dangerColor, Gfx.COLOR_TRANSPARENT);
     dc.fillRectangle(x0, y0, _dangerLineWidth, _height);
+    if ($.isLightBackground()) {
+      // Draw outline around danger line.
+      dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_TRANSPARENT);
+      dc.drawRectangle(x0 - 1, y0 - 1, _dangerLineWidth + 2, _height + 2);
+    }
 
     _problemTextElement.draw(dc, iconRowX, y0);
 

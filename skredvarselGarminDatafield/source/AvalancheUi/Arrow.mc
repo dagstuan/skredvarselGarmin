@@ -36,10 +36,23 @@ module AvalancheUi {
       return _width;
     }
 
+    (:bufferedBitmaps)
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
       dc.drawBitmap(x0, y0, _bufferedBitmap);
     }
 
+    (:noBufferedBitmaps)
+    public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
+      dc.setColor(_color, _color);
+
+      if (_direction == UP) {
+        drawUpArrow(dc, x0, y0);
+      } else if (_direction == DOWN) {
+        drawDownArrow(dc, x0, y0);
+      }
+    }
+
+    (:bufferedBitmaps)
     private function createBufferedBitmap() {
       _bufferedBitmap = $.newBufferedBitmap({
         :width => _width,
@@ -51,40 +64,43 @@ module AvalancheUi {
       bufferedDc.setColor(_color, _color);
 
       if (_direction == UP) {
-        drawUpArrow(bufferedDc);
+        drawUpArrow(bufferedDc, 0, 0);
       } else if (_direction == DOWN) {
-        drawDownArrow(bufferedDc);
+        drawDownArrow(bufferedDc, 0, 0);
       }
     }
 
-    private function drawUpArrow(dc as Gfx.Dc) {
+    (:noBufferedBitmaps)
+    private function createBufferedBitmap() {}
+
+    private function drawUpArrow(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
       var shaftWidth = 0.3334 * _width;
       var shaftHeight = 0.5 * _height;
 
       dc.fillPolygon([
-        [0, shaftHeight],
-        [_width / 2, 0],
-        [_width, shaftHeight],
-        [_width - shaftWidth, shaftHeight],
-        [_width - shaftWidth, _height],
-        [shaftWidth, _height],
-        [shaftWidth, _height - shaftHeight],
+        [x0, y0 + shaftHeight],
+        [x0 + _width / 2, y0],
+        [x0 + _width, y0 + shaftHeight],
+        [x0 + _width - shaftWidth, y0 + shaftHeight],
+        [x0 + _width - shaftWidth, y0 + _height],
+        [x0 + shaftWidth, y0 + _height],
+        [x0 + shaftWidth, y0 + _height - shaftHeight],
       ]);
     }
 
-    private function drawDownArrow(dc as Gfx.Dc) {
+    private function drawDownArrow(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) {
       var shaftWidth = 0.3334 * _width;
       var shaftHeight = 0.5 * _height;
       var spaceLeftRight = (_width - shaftWidth) / 2;
 
       dc.fillPolygon([
-        [0, shaftHeight],
-        [spaceLeftRight, shaftHeight],
-        [spaceLeftRight, 0],
-        [spaceLeftRight + shaftWidth, 0],
-        [spaceLeftRight + shaftWidth, shaftHeight],
-        [_width, shaftHeight],
-        [_width / 2, _height],
+        [x0, y0 + shaftHeight],
+        [x0 + spaceLeftRight, y0 + shaftHeight],
+        [x0 + spaceLeftRight, y0],
+        [x0 + spaceLeftRight + shaftWidth, y0],
+        [x0 + spaceLeftRight + shaftWidth, y0 + shaftHeight],
+        [x0 + _width, y0 + shaftHeight],
+        [x0 + _width / 2, y0 + _height],
       ]);
     }
   }

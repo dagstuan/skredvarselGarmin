@@ -314,9 +314,71 @@ function drawOutline(
   height as Numeric
 ) {
   dc.setPenWidth(1);
-  dc.setColor(Graphics.COLOR_WHITE, Graphics.COLOR_TRANSPARENT);
+  dc.setColor($.getTextColor(), Graphics.COLOR_TRANSPARENT);
 
   dc.drawRectangle(x0, y0, width, height);
+}
+
+function drawTextWithOutline(
+  dc as Graphics.Dc,
+  x as Number,
+  y as Number,
+  font as Graphics.FontType,
+  text as String,
+  justify as Number,
+  fillColor as Graphics.ColorType,
+  outlineColor as Graphics.ColorType
+) as Void {
+  dc.setColor(outlineColor, Graphics.COLOR_TRANSPARENT);
+  dc.drawText(x - 1, y, font, text, justify);
+  dc.drawText(x + 1, y, font, text, justify);
+  dc.drawText(x, y - 1, font, text, justify);
+  dc.drawText(x, y + 1, font, text, justify);
+  dc.setColor(fillColor, Graphics.COLOR_TRANSPARENT);
+  dc.drawText(x, y, font, text, justify);
+}
+
+function drawDangerLevelHeader(
+  dc as Graphics.Dc,
+  fieldWidth as Number,
+  dangerMidY as Number,
+  font as Graphics.FontType,
+  dangerLevel as Number
+) as Void {
+  var headerText = Lang.format("$1$ $2$", [
+    $.getOrLoadResourceString("Faregrad", :Level),
+    dangerLevel,
+  ]);
+  var icon =
+    Ui.loadResource($.getIconResourceForDangerLevel(dangerLevel)) as
+    Ui.BitmapResource;
+  var gapX = (fieldWidth * 0.02).toNumber();
+  var textW = dc.getTextWidthInPixels(headerText, font);
+  var headerX = (fieldWidth - (textW + gapX + icon.getWidth())) / 2;
+  var dangerColor = $.colorize(dangerLevel);
+  var justify = Graphics.TEXT_JUSTIFY_LEFT | Graphics.TEXT_JUSTIFY_VCENTER;
+
+  if ($.isLightBackground()) {
+    $.drawTextWithOutline(
+      dc,
+      headerX.toNumber(),
+      dangerMidY.toNumber(),
+      font,
+      headerText,
+      justify,
+      dangerColor,
+      Graphics.COLOR_BLACK
+    );
+  } else {
+    dc.setColor(dangerColor, Graphics.COLOR_TRANSPARENT);
+    dc.drawText(headerX, dangerMidY, font, headerText, justify);
+  }
+
+  dc.drawBitmap(
+    headerX + textW + gapX,
+    dangerMidY - icon.getHeight() / 2,
+    icon
+  );
 }
 
 // Converts [aboveTreeline, atTreeline, belowTreeline] booleans to an exposedHeightFill value.
@@ -390,6 +452,18 @@ public function getDateIndexForDetailedWarnings(
   }
 
   return -1;
+}
+
+// Current background color — updated by DatafieldRootView on every onUpdate.
+// Defaults to black (dark background) until the watch face reports otherwise.
+var CurrentBgColor as Graphics.ColorType = Graphics.COLOR_BLACK;
+
+function isLightBackground() as Boolean {
+  return $.CurrentBgColor == Graphics.COLOR_WHITE;
+}
+
+function getTextColor() as Graphics.ColorType {
+  return $.isLightBackground() ? Graphics.COLOR_BLACK : Graphics.COLOR_WHITE;
 }
 
 public function newBufferedBitmap(
