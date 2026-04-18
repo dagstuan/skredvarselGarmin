@@ -77,14 +77,15 @@ class DatafieldNoProblemView {
       :containerHeight => fontH,
       :scrollSpeed => 2,
       :font => _font,
-      :color => Gfx.COLOR_WHITE,
-      :backgroundColor => Gfx.COLOR_BLACK,
+      :color => $.getTextColor(),
+      :backgroundColor => $.CurrentBgColor,
     });
 
     var noProblemsText = $.getOrLoadResourceString(
       "Ingen skredproblemer.",
       :NoProblems
     );
+
     _noProblemsScrollingText = new AvalancheUi.ScrollingText({
       :dc => dc,
       :text => noProblemsText,
@@ -92,8 +93,8 @@ class DatafieldNoProblemView {
       :containerHeight => fontH,
       :scrollSpeed => 2,
       :font => _font,
-      :color => Gfx.COLOR_WHITE,
-      :backgroundColor => Gfx.COLOR_BLACK,
+      :color => $.getTextColor(),
+      :backgroundColor => $.CurrentBgColor,
     });
 
     // Sync cycle lengths
@@ -120,17 +121,9 @@ class DatafieldNoProblemView {
     var icon =
       Ui.loadResource($.getIconResourceForDangerLevel(_dangerLevel)) as
       Ui.BitmapResource;
-    var iconW = icon.getWidth();
     var iconH = icon.getHeight();
-    var gapX = (_fieldWidth * 0.02).toNumber();
 
     var dangerLevel = _dangerLevel;
-    var dangerColor = $.colorize(dangerLevel);
-    var levelText = $.getOrLoadResourceString("Faregrad", :Level);
-    var headerText = Lang.format("$1$ $2$", [levelText, dangerLevel]);
-    var textW = dc.getTextWidthInPixels(headerText, _headerFont);
-    var totalW = textW + gapX + iconW;
-    var headerX = (_fieldWidth - totalW) / 2;
 
     // Region name
     _regionNameScrollingText.draw(dc, _regionNameX0, _startY);
@@ -138,15 +131,13 @@ class DatafieldNoProblemView {
     // Danger level line — center both text and icon around the midpoint of headerLineH
     var headerLineH = headerFontH > iconH ? headerFontH : iconH;
     var dangerMidY = _startY + _headerGapY + fontH + headerLineH / 2;
-    dc.setColor(dangerColor, Gfx.COLOR_TRANSPARENT);
-    dc.drawText(
-      headerX,
-      dangerMidY,
+    $.drawDangerLevelHeader(
+      dc,
+      _fieldWidth,
+      dangerMidY.toNumber(),
       _headerFont,
-      headerText,
-      Gfx.TEXT_JUSTIFY_LEFT | Gfx.TEXT_JUSTIFY_VCENTER
+      dangerLevel
     );
-    dc.drawBitmap(headerX + textW + gapX, dangerMidY - iconH / 2, icon);
 
     // No problems text
     var noProblemsY =

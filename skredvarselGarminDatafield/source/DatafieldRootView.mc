@@ -13,6 +13,7 @@ class DatafieldRootView extends Ui.DataField {
   public function initialize(showSubscription as Boolean) {
     DataField.initialize();
     _showSubscription = showSubscription;
+    $.CurrentBgColor = getBackgroundColor();
   }
 
   public function onDataChanged() as Void {
@@ -75,6 +76,8 @@ class DatafieldRootView extends Ui.DataField {
   }
 
   public function onUpdate(dc as Gfx.Dc) as Void {
+    $.CurrentBgColor = getBackgroundColor();
+
     if (_showSubscription) {
       _ensureSubscriptionView();
       (_subscriptionView as DatafieldSubscriptionView).onShow();

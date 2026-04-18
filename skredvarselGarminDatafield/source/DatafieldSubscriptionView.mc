@@ -29,6 +29,7 @@ class DatafieldSubscriptionView {
   private var _lastDcWidth as Number = 0;
   private var _lastDcHeight as Number = 0;
   private var _lastRenderedText as String = "";
+  private var _lastBgColor as Gfx.ColorType = Gfx.COLOR_BLACK;
 
   public function initialize() {}
 
@@ -78,15 +79,17 @@ class DatafieldSubscriptionView {
       _textArea == null ||
       w != _lastDcWidth ||
       h != _lastDcHeight ||
-      text != _lastRenderedText
+      text != _lastRenderedText ||
+      $.CurrentBgColor != _lastBgColor
     ) {
       _lastDcWidth = w;
       _lastDcHeight = h;
       _lastRenderedText = text;
+      _lastBgColor = $.CurrentBgColor;
       _buildTextArea(dc, text);
     }
 
-    dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
+    dc.setColor($.getTextColor(), $.CurrentBgColor);
     dc.clear();
     if (_textArea != null) {
       (_textArea as Ui.TextArea).draw(dc);
@@ -100,7 +103,7 @@ class DatafieldSubscriptionView {
   private function _buildTextArea(dc as Gfx.Dc, text as String) as Void {
     _textArea = new Ui.TextArea({
       :text => text,
-      :color => Gfx.COLOR_WHITE,
+      :color => $.getTextColor(),
       :font => [Gfx.FONT_MEDIUM, Gfx.FONT_SMALL, Gfx.FONT_XTINY],
       :locX => Ui.LAYOUT_HALIGN_CENTER,
       :locY => Ui.LAYOUT_VALIGN_CENTER,

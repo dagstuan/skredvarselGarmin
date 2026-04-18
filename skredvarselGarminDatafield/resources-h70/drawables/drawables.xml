@@ -25,4 +25,5 @@
 	<bitmap id="ProblemPersistentWeakLayerLargeGray" filename="../../resources/drawables/problem_persistent_weak_layer_gray.svg" automaticPalette="false" scaleX="0.8642" scaleY="0.8642" scaleRelativeTo="image" />
 	<bitmap id="ProblemGlidingSnowLargeGray" filename="../../resources/drawables/problem_gliding_snow_gray.svg" automaticPalette="false" scaleX="0.8642" scaleY="0.8642" scaleRelativeTo="image" />
 	<bitmap id="UpdatedIcon" filename="updated_icon_28x28.png" />
+	<bitmap id="UpdatedIconInverted" filename="updated_icon_28x28_inverted.png" />
 </drawables>
