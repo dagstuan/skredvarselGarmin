@@ -105,7 +105,7 @@ module AvalancheUi {
     var preferredRegionName = regionName;
     if (
       dc.getTextWidthInPixels(preferredRegionName, Gfx.FONT_GLANCE) >
-        availableTitleWidth
+      availableTitleWidth
     ) {
       preferredRegionName = $.getShortRegionName(regionId);
     }
