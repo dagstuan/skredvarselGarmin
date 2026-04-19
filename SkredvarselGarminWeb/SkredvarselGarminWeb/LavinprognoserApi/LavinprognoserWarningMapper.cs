@@ -107,10 +107,11 @@ public static partial class LavinprognoserWarningMapper
         1 => AvalancheProblemType.NewSnowLooseSnowAvalanches,
         2 => AvalancheProblemType.WindDriftedSnowSlabAvalanches,
         3 => AvalancheProblemType.PersistentWeakLayerSlabAvalanches,
-        4 => AvalancheProblemType.WetSnowLooseSnowAvalanches,
+        4 => AvalancheProblemType.WetSnowSlabAvalanches,
         5 => AvalancheProblemType.GlidingSnowAvalanches,
         6 => AvalancheProblemType.WindDriftedSnowSlabAvalanches,
         7 => AvalancheProblemType.NewSnowSlabAvalanches,
+        11 => AvalancheProblemType.WetSnowLooseSnowAvalanches,
         _ => AvalancheProblemType.NotGiven,
     };
 

@@ -41,8 +41,9 @@ public static class LavinprognoserWarningMapper
         AvalancheProblemType.NewSnowSlabAvalanches => "Nysnöflak",
         AvalancheProblemType.PersistentWeakLayerSlabAvalanches => "Ihållande svagt lager",
         AvalancheProblemType.WindDriftedSnowSlabAvalanches => "Drevsnöflak",
-        AvalancheProblemType.WetSnowLooseSnowAvalanches => "Våtsnölaviner",
+        AvalancheProblemType.WetSnowLooseSnowAvalanches => "Våta laviner",
         AvalancheProblemType.GlidingSnowAvalanches => "Glidlaviner",
+        AvalancheProblemType.WetSnowSlabAvalanches => "Våta flaklaviner",
         _ => string.Empty,
     };
 }
