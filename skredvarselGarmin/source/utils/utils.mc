@@ -171,6 +171,68 @@ function getRegionName(regionId as String or Number) as String {
   return "Ukjent region";
 }
 
+(:glance)
+function getShortRegionName(regionId as String or Number) as String {
+  if (regionId instanceof Lang.String) {
+    if ($.isSwedishRegion(regionId as String)) {
+      return $.getSwedishShortRegionName(regionId as String);
+    }
+    regionId = regionId.toNumber();
+  }
+
+  if (regionId == 3003) {
+    return "Nordenskiöld L.";
+  } else if (regionId == 3006) {
+    return "Finnmarksk.";
+  } else if (regionId == 3007) {
+    return "V. Finnmark";
+  } else if (regionId == 3009) {
+    return "N. Troms";
+  } else if (regionId == 3010) {
+    return "Lyngen";
+  } else if (regionId == 3011) {
+    return "Tromsø";
+  } else if (regionId == 3012) {
+    return "S. Troms";
+  } else if (regionId == 3013) {
+    return "I. Troms";
+  } else if (regionId == 3014) {
+    return "Lofoten/Vesterål.";
+  } else if (regionId == 3015) {
+    return "Ofoten";
+  } else if (regionId == 3016) {
+    return "Salten";
+  } else if (regionId == 3017) {
+    return "Svartisen";
+  } else if (regionId == 3018) {
+    return "Helgeland";
+  } else if (regionId == 3022) {
+    return "Trollheimen";
+  } else if (regionId == 3023) {
+    return "Romsdal";
+  } else if (regionId == 3024) {
+    return "Sunnmøre";
+  } else if (regionId == 3027) {
+    return "I. Fjordane";
+  } else if (regionId == 3028) {
+    return "Jotunheimen";
+  } else if (regionId == 3029) {
+    return "I. Sogn";
+  } else if (regionId == 3031) {
+    return "Voss";
+  } else if (regionId == 3032) {
+    return "Hallingdal";
+  } else if (regionId == 3034) {
+    return "Hardanger";
+  } else if (regionId == 3035) {
+    return "V. Telemark";
+  } else if (regionId == 3037) {
+    return "Heiane";
+  }
+
+  return $.getRegionName(regionId);
+}
+
 (:background)
 function canMakeWebRequest() as Boolean {
   var deviceSettings = System.getDeviceSettings();

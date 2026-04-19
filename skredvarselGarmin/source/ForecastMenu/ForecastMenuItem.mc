@@ -127,6 +127,7 @@ public class ForecastMenuItem extends Ui.CustomMenuItem {
         :locY => 0,
         :width => width - marginRight,
         :height => height,
+        :regionId => getRegionId(),
         :regionName => $.getRegionName(getRegionId()),
         :forecast => forecast,
         :isLocationForecast => _isLocationForecast,

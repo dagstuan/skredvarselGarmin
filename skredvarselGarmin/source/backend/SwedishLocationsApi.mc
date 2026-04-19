@@ -46,3 +46,34 @@ function getSwedishRegionName(regionId as String) as String {
 
   return regionId;
 }
+
+(:glance)
+function getSwedishShortRegionName(regionId as String) as String {
+  var numericId = regionId.substring(3, regionId.length()).toNumber();
+
+  if (numericId == 15) {
+    return "Abisko/Riksgr. Ö";
+  } else if (numericId == 16) {
+    return "Abisko/Riksgr. V";
+  } else if (numericId == 17) {
+    return "Kebnekaise V";
+  } else if (numericId == 11) {
+    return "Kebnekaise Ö";
+  } else if (numericId == 18) {
+    return "V. Vindelfj. V";
+  } else if (numericId == 19) {
+    return "V. Vindelfj. Ö";
+  } else if (numericId == 12) {
+    return "S. Jämtlandsfj. V";
+  } else if (numericId == 14) {
+    return "S. Jämtlandsfj. Ö";
+  } else if (numericId == 20) {
+    return "S. Lapplandsfj. N";
+  } else if (numericId == 21) {
+    return "S. Lapplandsfj. S";
+  } else if (numericId == 7) {
+    return "V. Härjedalsfj.";
+  }
+
+  return $.getSwedishRegionName(regionId);
+}

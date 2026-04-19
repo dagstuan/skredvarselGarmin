@@ -104,6 +104,7 @@ class GlanceView extends Ui.GlanceView {
       :locY => 0,
       :width => _width,
       :height => _height,
+      :regionId => _displayRegionId,
       :regionName => $.getRegionName(_displayRegionId),
       :forecast => _displayingLocationForecast
         ? (_forecastData as LocationAvalancheForecast)["warnings"]

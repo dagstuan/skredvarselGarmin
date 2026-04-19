@@ -3,8 +3,44 @@ import Toybox.Lang;
 using Toybox.Graphics as Gfx;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
+using Toybox.WatchUi as Ui;
 
 module AvalancheUi {
+  (:glance)
+  function getLocationIconDrawable() as Ui.BitmapResource {
+    var resourceId =
+      $.getDeviceScreenWidth() > 280
+        ? $.Rez.Drawables.LocationIcon20
+        : $.Rez.Drawables.LocationIcon13;
+
+    return Ui.loadResource(resourceId) as Ui.BitmapResource;
+  }
+
+  (:glance)
+  function fitTextWithEllipsis(
+    dc as Gfx.Dc,
+    text as String,
+    font as Gfx.FontType,
+    maxWidth as Numeric
+  ) as String {
+    if (dc.getTextWidthInPixels(text, font) <= maxWidth) {
+      return text;
+    }
+
+    var ellipsis = "…";
+    var prefixLength = text.length() - 1;
+    while (prefixLength > 0) {
+      var candidateText = text.substring(0, prefixLength) + ellipsis;
+      if (dc.getTextWidthInPixels(candidateText, font) <= maxWidth) {
+        return candidateText;
+      }
+
+      prefixLength -= 1;
+    }
+
+    return ellipsis;
+  }
+
   typedef ForecastTimelineSettings as {
     :locX as Numeric,
     :locY as Numeric,
@@ -25,6 +61,7 @@ module AvalancheUi {
     var locY = settings[:locY];
     var width = settings[:width];
     var height = settings[:height];
+    var regionId = settings[:regionId];
     var forecast = settings[:forecast] as SimpleAvalancheForecast;
     var regionName = settings[:regionName] as String?;
     var isLocationForecast = settings[:isLocationForecast] == true;
@@ -56,36 +93,44 @@ module AvalancheUi {
       $.drawOutline(dc, locX, currYOffset, width, fontHeight);
     }
 
+    var locationIcon = null;
+    var locationIconGap = 0;
+    var availableTitleWidth = width;
+    if (isLocationForecast) {
+      locationIcon = getLocationIconDrawable();
+      locationIconGap = locationIcon.getWidth() == 20 ? 6 : 4;
+      availableTitleWidth -= locationIconGap + locationIcon.getWidth();
+    }
+
+    var preferredRegionName = regionName;
+    if (
+      dc.getTextWidthInPixels(preferredRegionName, Gfx.FONT_GLANCE) >
+        availableTitleWidth
+    ) {
+      preferredRegionName = $.getShortRegionName(regionId);
+    }
+
+    var titleText = fitTextWithEllipsis(
+      dc,
+      preferredRegionName,
+      Gfx.FONT_GLANCE,
+      availableTitleWidth
+    );
+    var titleTextWidth = dc.getTextWidthInPixels(titleText, Gfx.FONT_GLANCE);
+
     dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
     dc.drawText(
       locX,
       currYOffset,
       Gfx.FONT_GLANCE,
-      regionName,
+      titleText,
       Gfx.TEXT_JUSTIFY_LEFT
     );
 
-    if (isLocationForecast) {
-      var textDimensions = dc.getTextDimensions(regionName, Gfx.FONT_GLANCE);
-
-      var iconSize = $.getDeviceScreenWidth() > 280 ? 20 : 13;
-      var iconGap = iconSize == 20 ? 6 : 4;
-      var iconX = locX + textDimensions[0] + iconGap;
-      var iconY = currYOffset + textDimensions[1] / 2 - iconSize / 2;
-      var scale = iconSize / 100.0;
-      dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_TRANSPARENT);
-      dc.fillPolygon([
-        [iconX + 87.13 * scale, iconY + 0.0],
-        [iconX + 86.49 * scale, iconY + 0.09 * scale],
-        [iconX + 85.61 * scale, iconY + 0.55 * scale],
-        [iconX + 11.34 * scale, iconY + 62.37 * scale],
-        [iconX + 12.96 * scale, iconY + 66.59 * scale],
-        [iconX + 50.92 * scale, iconY + 65.11 * scale],
-        [iconX + 68.62 * scale, iconY + 98.73 * scale],
-        [iconX + 73.08 * scale, iconY + 98.02 * scale],
-        [iconX + 89.48 * scale, iconY + 2.79 * scale],
-        [iconX + 87.14 * scale, iconY + 0.0],
-      ]);
+    if (isLocationForecast && locationIcon != null) {
+      var iconX = locX + titleTextWidth + locationIconGap;
+      var iconY = currYOffset + fontHeight / 2 - locationIcon.getHeight() / 2;
+      dc.drawBitmap(iconX, iconY, locationIcon);
     }
 
     currYOffset += fontHeight + gapY;

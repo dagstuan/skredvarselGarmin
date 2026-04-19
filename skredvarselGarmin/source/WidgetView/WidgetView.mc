@@ -137,6 +137,7 @@ public class WidgetView extends Ui.View {
         :locY => 0,
         :width => forecastWidth,
         :height => _forecastHeight,
+        :regionId => regionId,
         :regionName => $.getRegionName(regionId),
         :forecast => forecast,
         :isLocationForecast => _useLocation,
