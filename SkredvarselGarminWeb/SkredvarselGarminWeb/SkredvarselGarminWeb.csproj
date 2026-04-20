@@ -15,18 +15,18 @@
     <PackageReference Include="Hangfire.PostgreSql" Version="1.21.1" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="Macross.Json.Extensions" Version="3.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="10.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="10.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5">
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="10.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="10.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaProxy" Version="10.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="10.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.6">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="10.0.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.6" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="10.0.6" />
     <PackageReference Include="NetTopologySuite" Version="2.6.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="4.0.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON4STJ" Version="4.0.0" />
@@ -36,7 +36,7 @@
     <PackageReference Include="ProjNet4GeoAPI" Version="1.4.1" />
     <PackageReference Include="Refit" Version="10.1.6" />
     <PackageReference Include="Refit.HttpClientFactory" Version="10.1.6" />
-    <PackageReference Include="Resend" Version="0.4.0" />
+    <PackageReference Include="Resend" Version="0.5.0" />
     <PackageReference Include="Stripe.net" Version="51.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
   </ItemGroup>
