@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api } from "../api";
 import { queryClient } from "../main";
 import { ProblemDetails, Watch } from "../types";
@@ -16,17 +17,19 @@ export const useWatches = () =>
 const addWatch = (key: string) => api.post(`/api/watches/${key}`);
 
 export const useAddWatch = (onSuccess?: () => void, onSettled?: () => void) => {
+  const { t } = useTranslation();
+
   return useMutation({
     mutationFn: addWatch,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
-      toast.success("Klokke lagt til");
+      toast.success(t(($) => $.account.watches.added));
       onSuccess?.();
     },
     onError: (error) => {
       toast.error(
         ((error as AxiosError).response?.data as ProblemDetails).detail ??
-          "Det skjedde en feil når vi prøvde å legge til klokken. Prøv igjen senere.",
+          t(($) => $.account.watches.addFailed),
       );
     },
     onSettled,

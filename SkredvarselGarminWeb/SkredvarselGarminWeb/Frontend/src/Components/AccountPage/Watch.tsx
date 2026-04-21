@@ -1,4 +1,5 @@
 import { BsWatch, BsTrash } from "react-icons/bs";
+import { useTranslation } from "react-i18next";
 import { useRemoveWatch } from "../../hooks/useWatches";
 import { Watch as WatchType } from "../../types";
 import { Button } from "../ui/button";
@@ -8,6 +9,7 @@ export type WatchProps = {
 };
 
 export const Watch = ({ watch: { name, id } }: WatchProps) => {
+  const { t } = useTranslation();
   const removeWatch = useRemoveWatch();
 
   return (
@@ -20,7 +22,7 @@ export const Watch = ({ watch: { name, id } }: WatchProps) => {
         variant="red"
         size="icon"
         onClick={() => removeWatch.mutate(id)}
-        aria-label="delete"
+        aria-label={t(($) => $.account.watches.deleteAriaLabel, { name })}
       >
         <BsTrash />
       </Button>

@@ -5,6 +5,7 @@ import {
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useNavigateOnClose } from "../../hooks/useNavigateOnClose";
 import { useUser } from "../../hooks/useUser";
 import { useAddWatch } from "../../hooks/useWatches";
@@ -20,19 +21,22 @@ import { Button } from "../ui/button";
 import { PersonalInfo } from "./PersonalInfo";
 import { Subscription } from "./Subscription";
 import { Watches } from "./Watches";
+import { usePathForCurrentLanguage } from "../../routes";
 
 export const AccountPage = () => {
+  const { t } = useTranslation();
   const { data: user, isLoading: isLoadingUser } = useUser();
+  const pathFor = usePathForCurrentLanguage();
 
   const navigate = useNavigate();
 
-  const { isClosing, onClose } = useNavigateOnClose("/");
+  const { isClosing, onClose } = useNavigateOnClose("home");
 
   useEffect(() => {
     if (!user && !isLoadingUser) {
-      navigate("/login");
+      navigate(pathFor("login"));
     }
-  }, [user, isLoadingUser]);
+  }, [isLoadingUser, navigate, pathFor, user]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const watchKey = searchParams.get("watchKey");
@@ -78,13 +82,13 @@ export const AccountPage = () => {
           }
         }}
       >
-        <DrawerTitle className="sr-only">Min side</DrawerTitle>
+        <DrawerTitle className="sr-only">{t(($) => $.account.pageTitle)}</DrawerTitle>
         <DrawerDescription className="sr-only">
-          Administrer abonnement, klokker og personlige opplysninger.
+          {t(($) => $.account.srDescription)}
         </DrawerDescription>
         <DrawerClose className="absolute right-3 top-3 inline-flex items-center justify-center size-9 rounded-md cursor-pointer opacity-70 transition-all hover:opacity-100 hover:bg-muted focus:outline-none disabled:pointer-events-none">
           <XIcon className="size-5" />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">{t(($) => $.common.close)}</span>
         </DrawerClose>
         <div
           className="overflow-y-auto h-full p-4 select-text"
@@ -92,20 +96,20 @@ export const AccountPage = () => {
         >
           <div className="flex flex-col gap-4">
             <Heading as="h2" className="mt-2 mb-4 text-xl">
-              Min side
+              {t(($) => $.account.pageTitle)}
             </Heading>
 
             <p className="mb-6">
-              Lurer du på noe? Se{" "}
-              <RouterLink to="/faq" className="text-blue-600 hover:underline">
-                ofte stilte spørsmål
+              {t(($) => $.account.faqPromptPrefix)}
+              <RouterLink to={pathFor("faq")} className="text-blue-600 hover:underline">
+                {t(($) => $.account.faqPromptLink)}
               </RouterLink>
-              .
+              {t(($) => $.account.faqPromptSuffix)}
             </p>
 
             <div className="mb-6">
               <Heading as="h3" className="mb-2 text-xl">
-                Abonnement
+                {t(($) => $.account.subscriptionHeading)}
               </Heading>
 
               <Subscription />
@@ -117,7 +121,7 @@ export const AccountPage = () => {
 
             <div className="mb-6">
               <Heading as="h3" className="mb-2 text-xl">
-                Personlige opplysninger
+                {t(($) => $.account.personalInfoHeading)}
               </Heading>
 
               <PersonalInfo />
@@ -129,7 +133,7 @@ export const AccountPage = () => {
                 render={(props) => <a {...props} href="/logout" />}
                 variant="blue"
               >
-                Logg ut
+                {t(($) => $.account.logout)}
               </Button>
             </div>
           </div>

@@ -1,64 +1,69 @@
 import { ReactNode } from "react";
 import { Link as RouterLink } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { usePathForCurrentLanguage } from "../routes";
 
 const ListHeader = ({ children }: { children: ReactNode }) => {
   return <div className="font-medium text-lg mb-2">{children}</div>;
 };
 
 export const Footer = () => {
+  const { t } = useTranslation();
+  const pathFor = usePathForCurrentLanguage();
+
   return (
     <div className="bg-gray-50 text-gray-700">
       <div className="mx-auto w-full max-w-6xl px-4 pt-10 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-8">
           <div className="space-y-6 md:col-span-2">
-            <div>Dag Stuan</div>
+            <div>{t(($) => $.footer.owner)}</div>
             <p className="text-sm">
-              Varsler fra Snøskredvarslingen i Norge (
+              {t(($) => $.footer.sourcesPrefix)}
               <a
                 href="https://www.varsom.no"
                 className="underline hover:no-underline"
               >
                 www.varsom.no
               </a>
-              ) og Naturvårdsverket i Sverige (
+              {t(($) => $.footer.sourcesMiddle)}
               <a
                 href="https://www.lavinprognoser.se/"
                 className="underline hover:no-underline"
               >
                 www.lavinprognoser.se
               </a>
-              )
+              {t(($) => $.footer.sourcesSuffix)}
             </p>
             <p className="text-sm">
-              Ikoner fra{" "}
+              {t(($) => $.footer.iconsPrefix)}
               <a
                 href="https://www.avalanches.org/"
                 className="underline hover:no-underline"
               >
-                European Avalanche Warning Services.
+                {t(($) => $.footer.iconsLinkLabel)}
               </a>
             </p>
           </div>
           <div className="flex flex-col items-start space-y-2">
-            <ListHeader>Om</ListHeader>
-            <RouterLink to="faq" className="hover:underline">
-              Ofte stilte spørsmål
+            <ListHeader>{t(($) => $.footer.aboutHeading)}</ListHeader>
+            <RouterLink to={pathFor("faq")} className="hover:underline">
+              {t(($) => $.footer.faq)}
             </RouterLink>
-            <RouterLink to="privacy" className="hover:underline">
-              Personvern og informasjonskapsler
+            <RouterLink to={pathFor("privacy")} className="hover:underline">
+              {t(($) => $.footer.privacy)}
             </RouterLink>
-            <RouterLink to="salesconditions" className="hover:underline">
-              Salgsbetingelser
+            <RouterLink to={pathFor("salesConditions")} className="hover:underline">
+              {t(($) => $.footer.salesConditions)}
             </RouterLink>
             <a
               href="https://github.com/dagstuan/skredvarselGarmin/"
               className="hover:underline"
             >
-              Kildekode
+              {t(($) => $.footer.sourceCode)}
             </a>
           </div>
           <div className="flex flex-col items-start space-y-2">
-            <ListHeader>Sosiale medier</ListHeader>
+            <ListHeader>{t(($) => $.footer.socialHeading)}</ListHeader>
             <a
               href="https://www.instagram.com/skredvarselgarmin/"
               className="hover:underline"
@@ -73,14 +78,7 @@ export const Footer = () => {
       </div>
       <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <p className="text-xs max-w-3xl">
-          Bruk varslene og datagrunnlaget på eget ansvar. Det kan forekomme feil
-          og mangler. Varselet er et hjelpemiddel, ikke en fasit. Gjør alltid
-          egne vurderinger. Tilpass egen risiko i utsatte områder ved å velge
-          hvor, når og hvordan du ferdes. Varslene er regionale og basert på
-          tilgjengelige observasjoner og værprognoser. Forholdene kan være
-          komplekse og avvike fra det som er varslet. Verken NVE eller Dag Stuan
-          gir garantier for informasjonens aktualitet og tar ikke ansvar for at
-          data kan gi feil eller villedende informasjon.
+          {t(($) => $.footer.disclaimer)}
         </p>
       </div>
     </div>

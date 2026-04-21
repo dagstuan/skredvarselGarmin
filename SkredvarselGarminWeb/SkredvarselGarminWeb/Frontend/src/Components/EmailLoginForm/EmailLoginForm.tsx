@@ -1,5 +1,6 @@
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { useTranslation } from "react-i18next";
 
 type EmailLoginFormProps = {
   email: string | undefined;
@@ -10,6 +11,7 @@ type EmailLoginFormProps = {
 };
 
 export const EmailLoginForm = (props: EmailLoginFormProps) => {
+  const { t } = useTranslation();
   const { email, handleEmailInputChange, handleSubmit, error, isLoading } =
     props;
 
@@ -19,7 +21,7 @@ export const EmailLoginForm = (props: EmailLoginFormProps) => {
         <Input
           type="email"
           className="bg-white"
-          placeholder="E-post"
+          placeholder={t(($) => $.login.emailPlaceholder)}
           value={email}
           onChange={handleEmailInputChange}
           aria-invalid={!!error}
@@ -37,7 +39,7 @@ export const EmailLoginForm = (props: EmailLoginFormProps) => {
         isLoading={isLoading}
         type="submit"
       >
-        Logg inn med e-post
+        {t(($) => $.login.loginWithEmail)}
       </Button>
     </form>
   );

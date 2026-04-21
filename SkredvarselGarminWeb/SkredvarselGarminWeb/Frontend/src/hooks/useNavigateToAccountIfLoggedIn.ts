@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User } from "../types";
+import { usePathForCurrentLanguage } from "../routes";
 
 export const useNavigateToAccountIfLoggedIn = (
   user: User | null | undefined,
@@ -8,10 +9,13 @@ export const useNavigateToAccountIfLoggedIn = (
   watchKey: string | null,
 ) => {
   const navigate = useNavigate();
+  const pathFor = usePathForCurrentLanguage();
 
   useEffect(() => {
     if (user && !isLoadingUser) {
-      navigate(`/account${watchKey ? `?watchKey=${watchKey}` : ""}`);
+      navigate(
+        pathFor("account", { search: watchKey ? `watchKey=${watchKey}` : undefined }),
+      );
     }
-  }, [user, isLoadingUser]);
+  }, [isLoadingUser, navigate, pathFor, user, watchKey]);
 };
