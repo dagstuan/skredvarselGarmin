@@ -50,6 +50,14 @@ vivoactive6.resourcePath = $(base.resourcePath);resources-h54
 venu441mm.resourcePath = $(base.resourcePath);resources-h54
 venu445mm.resourcePath = $(base.resourcePath);resources-h65
 venu445mm.resourcePath = $(base.resourcePath);resources-h60
+fr70.resourcePath = $(base.resourcePath);resources-h54
+fr170.resourcePath = $(base.resourcePath);resources-h54
+fr170m.resourcePath = $(base.resourcePath);resources-h54
+fenix943mm.resourcePath = $(base.resourcePath);resources-complications;resources-h60
+fenix947mm.resourcePath = $(base.resourcePath);resources-complications;resources-h65
+fenix9pro43mm.resourcePath = $(base.resourcePath);resources-complications;resources-h60
+fenix9pro47mm.resourcePath = $(base.resourcePath);resources-complications;resources-h65
+fenix9pro51mm.resourcePath = $(base.resourcePath);resources-complications;resources-h65
 
 base.excludeAnnotations=hasSelectedRegionLimitEnabled;gpsmap;limitedBackgroundMemory
 descentmk2.excludeAnnotations=hasComplication;useBufferedBitmapOnGlance;hasSelectedRegionLimitEnabled;gpsmap;noLimitedBackgroundMemory
