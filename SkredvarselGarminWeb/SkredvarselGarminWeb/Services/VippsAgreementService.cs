@@ -221,7 +221,7 @@ public class VippsAgreementService(
                     {
                         _ = Task.Run(notificationService.NotifyChargeFailed);
 
-                        logger.LogError(response.Error, "Failed to capture charge. Response content: {responseContent}", response.Error?.Content);
+                        logger.LogError(response.Error, "Failed to capture charge {chargeId} for agreement {agreementId}.", nextCharge.Id, agreement.Id);
                         throw new Exception($"Failed to capture charge {nextCharge.Id}.");
                     }
                 }

@@ -78,10 +78,10 @@ public class ResendAudienceSyncServiceTests
                         FirstName = "Current",
                         LastName = "User",
                         MomentCreated = DateTime.UtcNow,
-                        Properties = new Dictionary<string, string>
+                        Properties = new Dictionary<string, ContactPropertyValue>
                         {
-                            ["skredvarsel_user_id"] = currentUser.Id,
-                            ["skredvarsel_user_status"] = "former_subscriber",
+                            ["skredvarsel_user_id"] = new() { Value = System.Text.Json.JsonSerializer.SerializeToElement(currentUser.Id), PropertyType = ContactPropertyType.String },
+                            ["skredvarsel_user_status"] = new() { Value = System.Text.Json.JsonSerializer.SerializeToElement("former_subscriber"), PropertyType = ContactPropertyType.String },
                         },
                     },
                     new Contact
@@ -89,10 +89,10 @@ public class ResendAudienceSyncServiceTests
                         Id = staleContactId,
                         Email = "stale.user@example.com",
                         MomentCreated = DateTime.UtcNow,
-                        Properties = new Dictionary<string, string>
+                        Properties = new Dictionary<string, ContactPropertyValue>
                         {
-                            ["skredvarsel_user_id"] = "deleted-user",
-                            ["skredvarsel_user_status"] = "local_user",
+                            ["skredvarsel_user_id"] = new() { Value = System.Text.Json.JsonSerializer.SerializeToElement("deleted-user"), PropertyType = ContactPropertyType.String },
+                            ["skredvarsel_user_status"] = new() { Value = System.Text.Json.JsonSerializer.SerializeToElement("local_user"), PropertyType = ContactPropertyType.String },
                         },
                     },
                     new Contact
