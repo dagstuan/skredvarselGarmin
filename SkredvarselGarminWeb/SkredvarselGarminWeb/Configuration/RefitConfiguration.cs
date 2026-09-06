@@ -41,7 +41,7 @@ public static class RefitConfiguration
 
         var timeoutPolicy = Policy.TimeoutAsync<HttpResponseMessage>(TimeSpan.FromSeconds(30));
 
-        serviceCollection.AddRefitClient<IVippsApiClient>()
+        serviceCollection.AddRefitGeneratedClient<IVippsApiClient>()
             .ConfigureHttpClient(c => c.BaseAddress = new Uri(vippsOptions.BaseUrl))
             .AddPolicyHandler(retryPolicy)
             .AddPolicyHandler(timeoutPolicy)
@@ -51,13 +51,13 @@ public static class RefitConfiguration
         {
             UrlParameterFormatter = new DateOnlyUrlParameterFormatter()
         };
-        serviceCollection.AddRefitClient<IVarsomApi>(varsomApiSettings)
+        serviceCollection.AddRefitGeneratedClient<IVarsomApi>(varsomApiSettings)
             .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://api01.nve.no/hydrology/forecast/avalanche/v6.3.0/api"))
             .AddPolicyHandler(retryPolicy)
             .AddPolicyHandler(timeoutPolicy);
 
         serviceCollection.AddTransient<LavinprognoserLoggingHandler>();
-        serviceCollection.AddRefitClient<ILavinprognoserWfsApi>(LavinprognoserRefitSettings)
+        serviceCollection.AddRefitGeneratedClient<ILavinprognoserWfsApi>(LavinprognoserRefitSettings)
             .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://nvgis.naturvardsverket.se/geoserver/lavinprognoser/"))
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
@@ -67,7 +67,7 @@ public static class RefitConfiguration
             .AddPolicyHandler(retryPolicy)
             .AddPolicyHandler(timeoutPolicy);
 
-        serviceCollection.AddRefitClient<ILavinprognoserWebsiteApi>(LavinprognoserRefitSettings)
+        serviceCollection.AddRefitGeneratedClient<ILavinprognoserWebsiteApi>(LavinprognoserRefitSettings)
             .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://www.lavinprognoser.se/"))
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
@@ -78,7 +78,7 @@ public static class RefitConfiguration
 
         serviceCollection.AddTransient<ILavinprognoserApi, LavinprognoserApiClient>();
 
-        serviceCollection.AddRefitClient<INtfyApiClient>()
+        serviceCollection.AddRefitGeneratedClient<INtfyApiClient>()
             .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://ntfy.sh/skredvarsel"));
     }
 }
