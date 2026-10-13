@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0.400 AS base
+FROM mcr.microsoft.com/dotnet/sdk:10.0.401 AS base
 RUN apt-get update
 RUN apt-get install -y npm
 RUN npm install -g n
@@ -14,7 +14,7 @@ WORKDIR /app
 RUN dotnet test
 RUN dotnet publish SkredvarselGarminWeb -c Release -o publish
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0.400
+FROM mcr.microsoft.com/dotnet/sdk:10.0.401
 EXPOSE 8080
 WORKDIR /app
 COPY --from=builder /app/publish ./
