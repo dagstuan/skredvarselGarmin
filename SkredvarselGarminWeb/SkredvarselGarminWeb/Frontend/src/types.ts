@@ -12,11 +12,7 @@ type StripeSubscriptionStatus =
   | "UNPAID";
 
 type VippsAgreementStatus =
-  | "ACTIVE"
-  | "STOPPED"
-  | "EXPIRED"
-  | "PENDING"
-  | "UNSUBSCRIBED";
+  "ACTIVE" | "STOPPED" | "EXPIRED" | "PENDING" | "UNSUBSCRIBED";
 
 export type Subscription<TType extends SubscriptionType> = {
   subscriptionType: TType;
