@@ -7,6 +7,7 @@ import {
 } from "react-icons/fa";
 import { cn } from "../../lib/utils";
 import { VariantProps } from "class-variance-authority";
+import { useTranslation } from "react-i18next";
 
 type StripeButtonProps = {
   className?: string;
@@ -16,12 +17,8 @@ type StripeButtonProps = {
 };
 
 export const StripeButton = (props: StripeButtonProps) => {
-  const {
-    className,
-    text = "Kjøp abonnement med",
-    link = "/createStripeSubscription",
-    size,
-  } = props;
+  const { t } = useTranslation();
+  const { className, text, link = "/createStripeSubscription", size } = props;
 
   return (
     <div className="flex flex-col gap-0 items-start">
@@ -33,13 +30,22 @@ export const StripeButton = (props: StripeButtonProps) => {
           className,
         )}
       >
-        {text}
+        {text ?? t(($) => $.buttons.stripe.buySubscriptionWith)}
         <FaStripe className="size-auto w-16 h-8 -ml-2 mt-0.5" />
       </a>
       <div className="flex items-center gap-2">
-        <FaCreditCard title="Kort" className="w-6 h-auto" />
-        <FaApplePay title="Apple pay" className="w-9 h-auto" />
-        <FaGooglePay title="Google pay" className="w-9 h-auto" />
+        <FaCreditCard
+          title={t(($) => $.buttons.stripe.card)}
+          className="w-6 h-auto"
+        />
+        <FaApplePay
+          title={t(($) => $.buttons.stripe.applePay)}
+          className="w-9 h-auto"
+        />
+        <FaGooglePay
+          title={t(($) => $.buttons.stripe.googlePay)}
+          className="w-9 h-auto"
+        />
       </div>
     </div>
   );

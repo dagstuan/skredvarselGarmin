@@ -1,6 +1,7 @@
 import { buttonVariants } from "../ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { cn } from "../../lib/utils";
+import { useTranslation } from "react-i18next";
 
 type GoogleButtonProps = {
   link: string;
@@ -8,6 +9,8 @@ type GoogleButtonProps = {
 };
 
 export const GoogleButton = ({ link, className }: GoogleButtonProps) => {
+  const { t } = useTranslation();
+
   return (
     <a
       href={link}
@@ -18,7 +21,7 @@ export const GoogleButton = ({ link, className }: GoogleButtonProps) => {
       )}
     >
       <FcGoogle className="h-6 w-6" />
-      <span>Logg inn med Google</span>
+      <span>{t(($) => $.buttons.google.login)}</span>
     </a>
   );
 };

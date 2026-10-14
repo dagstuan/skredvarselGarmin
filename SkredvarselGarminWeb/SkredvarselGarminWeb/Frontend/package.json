@@ -29,6 +29,8 @@
     "react-icons": "^5.7.0",
     "react-router-dom": "^7.18.4",
     "tailwind-merge": "^3.7.0",
+    "i18next": "^26.0.4",
+    "react-i18next": "^17.0.3",
     "vaul": "^1.1.2"
   },
   "devDependencies": {
@@ -45,18 +47,6 @@
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
     "vite-imagetools": "^12.0.1"
-  },
-  "pnpm": {
-    "peerDependencyRules": {
-      "allowAny": [
-        "react",
-        "react-dom"
-      ]
-    },
-    "overrides": {
-      "@types/react": "^19.0.0",
-      "@types/react-dom": "^19.0.0"
-    }
   },
   "packageManager": "pnpm@12.11.2"
 }

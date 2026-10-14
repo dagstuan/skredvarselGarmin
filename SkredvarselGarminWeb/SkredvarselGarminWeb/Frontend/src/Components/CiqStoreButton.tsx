@@ -1,6 +1,7 @@
 import { buttonVariants } from "./ui/button";
 import { cn } from "../lib/utils";
 import { VariantProps } from "class-variance-authority";
+import { useTranslation } from "react-i18next";
 
 import ciqLogo from "../assets/ciq_logo.png?format=webp&as=meta:width;height;src&imagetools";
 
@@ -10,6 +11,7 @@ type CiqStoreButtonProps = {
 };
 
 export const CiqStoreButton = (props: CiqStoreButtonProps) => {
+  const { t } = useTranslation();
   const { size, className } = props;
   const isLarge = size === "lg";
 
@@ -32,7 +34,9 @@ export const CiqStoreButton = (props: CiqStoreButtonProps) => {
         alt=""
       />
       <div className="flex flex-col gap-0.5">
-        <span className="text-xs leading-none">Last ned på</span>
+        <span className="text-xs leading-none">
+          {t(($) => $.ciqStore.downloadOn)}
+        </span>
         <span
           className={cn(
             "font-semibold",

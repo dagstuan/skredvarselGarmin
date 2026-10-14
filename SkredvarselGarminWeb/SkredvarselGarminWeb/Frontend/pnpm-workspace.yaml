@@ -2,3 +2,10 @@ allowBuilds:
   esbuild: false
 minimumReleaseAgeExclude:
   - lucide-react@1.56.0
+overrides:
+  "@types/react": ^19.0.0
+  "@types/react-dom": ^19.0.0
+peerDependencyRules:
+  allowAny:
+    - react
+    - react-dom
