@@ -59,6 +59,7 @@ builder.Services.AddTransient<IStripeService, StripeService>();
 builder.Services.AddTransient<INotificationService, NotificationService>();
 builder.Services.AddTransient<IForecastAreaService, ForecastAreaService>();
 builder.Services.AddTransient<ILavinprognoserWarningService, LavinprognoserWarningService>();
+builder.Services.AddHostedService<LavinprognoserCacheWarmer>();
 builder.Services.AddTransient<IVarsomWarningService, VarsomWarningService>();
 builder.Services.AddTransient<ISwedishForecastAreaSeeder, SwedishForecastAreaSeeder>();
 builder.Services.AddTransient<IWatchService, WatchService>();
@@ -96,7 +97,6 @@ using (var scope = app.Services.CreateScope())
 
     var backgroundJobClient = scope.ServiceProvider.GetRequiredService<IBackgroundJobClient>();
     backgroundJobClient.Enqueue<HangfireService>(s => s.SeedSwedishForecastAreas(CancellationToken.None));
-    backgroundJobClient.Enqueue<HangfireService>(s => s.PreWarmLavinprognoserCache(CancellationToken.None));
 }
 
 app.Use(next => context =>
@@ -145,9 +145,9 @@ using (var scope = app.Services.CreateScope())
 
     recurringJobManager.AddOrUpdate<HangfireService>("SeedSwedishForecastAreas", s => s.SeedSwedishForecastAreas(CancellationToken.None), Cron.Daily);
     recurringJobManager.AddOrUpdate<HangfireService>("CreateNextChargeForAgreements", s => s.CreateNextChargeForAgreements(), Cron.Hourly);
-    recurringJobManager.AddOrUpdate<HangfireService>("PreWarmLavinprognoserCache", s => s.PreWarmLavinprognoserCache(CancellationToken.None), Cron.Hourly);
 
     recurringJobManager.RemoveIfExists("CreateNextChargeForAgreement");
+    recurringJobManager.RemoveIfExists("PreWarmLavinprognoserCache");
 }
 
 if (app.Environment.IsDevelopment())

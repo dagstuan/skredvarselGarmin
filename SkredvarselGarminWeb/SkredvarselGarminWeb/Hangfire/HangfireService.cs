@@ -3,7 +3,6 @@ using Hangfire;
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.Helpers;
-using SkredvarselGarminWeb.LavinprognoserApi;
 using SkredvarselGarminWeb.Services;
 using SkredvarselGarminWeb.VippsApi;
 
@@ -20,7 +19,6 @@ public class HangfireService(
     IVippsAgreementService vippsAgreementService,
     IResendAudienceSyncService resendAudienceSyncService,
     ISwedishForecastAreaSeeder swedishForecastAreaSeeder,
-    ILavinprognoserWarningService lavinprognoserWarningService,
     ILogger<HangfireService> logger)
 {
     public async Task UpdatePendingAgreements()
@@ -116,20 +114,6 @@ public class HangfireService(
     {
         cancellationToken.ThrowIfCancellationRequested();
         await swedishForecastAreaSeeder.SeedAsync();
-    }
-
-    [DisableConcurrentExecution(timeoutInSeconds: 300)]
-    public async Task PreWarmLavinprognoserCache(CancellationToken cancellationToken)
-    {
-        var today = DateOnly.FromDateTime(dateTimeNowProvider.UtcNow);
-        var from = today.AddDays(-2);
-        var to = today.AddDays(3);
-
-        foreach (var areaId in SwedishForecastAreaRegistry.AreasById.Keys)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            await lavinprognoserWarningService.GetDetailedWarningsByArea(areaId, from, to);
-        }
     }
 
     public void RemoveStaleUsers()
