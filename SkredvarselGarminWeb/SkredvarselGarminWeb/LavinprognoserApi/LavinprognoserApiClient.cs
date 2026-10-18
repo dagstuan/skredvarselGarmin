@@ -36,6 +36,16 @@ public partial class LavinprognoserApiClient(
             .Select(offset => ResolveWarningForDay(slug, from.AddDays(offset))));
     }
 
+    // Fetches fresh forecasts and replaces the cached ones, keeping the cached forecast if a fetch fails.
+    public async Task RefreshForecastsByArea(int areaId, DateOnly from, DateOnly to)
+    {
+        var slug = SwedishForecastAreaRegistry.GetSlug(areaId);
+        if (slug == null) return;
+
+        await Task.WhenAll(Enumerable.Range(0, to.DayNumber - from.DayNumber + 1)
+            .Select(offset => FetchForecastForDate(slug, from.AddDays(offset), bypassCache: true)));
+    }
+
     private async Task<LavinprognoserDetailedWarning> ResolveWarningForDay(string slug, DateOnly day)
     {
         var forecast = await FetchForecastForDate(slug, day);
@@ -46,10 +56,10 @@ public partial class LavinprognoserApiClient(
             : day.ToMissingWarning();
     }
 
-    private async Task<LavinprognoserWebForecast?> FetchForecastForDate(string slug, DateOnly date)
+    private async Task<LavinprognoserWebForecast?> FetchForecastForDate(string slug, DateOnly date, bool bypassCache = false)
     {
         var cacheKey = $"LavinprognoserForecast_{slug}_{date:yyyy-MM-dd}";
-        if (memoryCache.TryGetValue<LavinprognoserWebForecast?>(cacheKey, out var cached))
+        if (!bypassCache && memoryCache.TryGetValue<LavinprognoserWebForecast?>(cacheKey, out var cached))
         {
             return cached;
         }
@@ -57,7 +67,7 @@ public partial class LavinprognoserApiClient(
         await FetchSemaphore.WaitAsync();
         try
         {
-            if (memoryCache.TryGetValue<LavinprognoserWebForecast?>(cacheKey, out cached))
+            if (!bypassCache && memoryCache.TryGetValue<LavinprognoserWebForecast?>(cacheKey, out cached))
             {
                 return cached;
             }
