@@ -140,15 +140,15 @@ public class ResendAudienceSyncServiceTests
             Arg.Is<ContactData>(data =>
                 data.Email == currentUser.Email &&
                 data.Properties != null &&
-                data.Properties["skredvarsel_user_id"] == currentUser.Id &&
-                data.Properties["skredvarsel_user_status"] == "local_user"),
+                Equals(data.Properties["skredvarsel_user_id"], currentUser.Id) &&
+                Equals(data.Properties["skredvarsel_user_status"], "local_user")),
             Arg.Any<CancellationToken>());
         await resend.Received(1).ContactAddAsync(
             Arg.Is<ContactData>(data =>
                 data.Email == formerUser.Email &&
                 data.Properties != null &&
-                data.Properties["skredvarsel_user_id"] == formerUser.Id &&
-                data.Properties["skredvarsel_user_status"] == "former_subscriber"),
+                Equals(data.Properties["skredvarsel_user_id"], formerUser.Id) &&
+                Equals(data.Properties["skredvarsel_user_status"], "former_subscriber")),
             Arg.Any<CancellationToken>());
         await resend.Received(1).ContactRemoveFromSegmentAsync(currentContactId, formerSubscribersSegmentId, Arg.Any<CancellationToken>());
         await resend.Received(1).ContactAddToSegmentAsync(formerContactId, formerSubscribersSegmentId, Arg.Any<CancellationToken>());

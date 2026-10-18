@@ -251,7 +251,7 @@ public class ResendAudienceSyncService(
         return new ContactData
         {
             Email = user.Email,
-            Properties = new Dictionary<string, string>
+            Properties = new Dictionary<string, object?>
             {
                 [LocalUserIdPropertyKey] = user.Id,
                 [UserStatusPropertyKey] = isFormerSubscriber
