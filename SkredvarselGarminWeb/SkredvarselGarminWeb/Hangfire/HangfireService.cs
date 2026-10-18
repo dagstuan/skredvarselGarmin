@@ -1,8 +1,11 @@
 using Hangfire;
 
+using Microsoft.Extensions.Options;
+
 using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.Helpers;
+using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.Services;
 using SkredvarselGarminWeb.VippsApi;
 
@@ -19,8 +22,12 @@ public class HangfireService(
     IVippsAgreementService vippsAgreementService,
     IResendAudienceSyncService resendAudienceSyncService,
     ISwedishForecastAreaSeeder swedishForecastAreaSeeder,
+    IHttpClientFactory httpClientFactory,
+    IOptions<HealthchecksOptions> healthchecksOptions,
     ILogger<HangfireService> logger)
 {
+    public const string HealthchecksHttpClientName = "Healthchecks";
+
     public async Task UpdatePendingAgreements()
     {
         var pendingAgreementsInDb = dbContext.Agreements
@@ -134,5 +141,20 @@ public class HangfireService(
     {
         cancellationToken.ThrowIfCancellationRequested();
         await resendAudienceSyncService.SyncUsers(cancellationToken);
+    }
+
+    // Retrying a missed ping is pointless, the next scheduled ping replaces it.
+    [AutomaticRetry(Attempts = 0)]
+    public async Task PingHealthchecks(CancellationToken cancellationToken)
+    {
+        var pingUrl = healthchecksOptions.Value.PingUrl;
+        if (string.IsNullOrEmpty(pingUrl))
+        {
+            throw new InvalidOperationException("Healthchecks:PingUrl is not configured.");
+        }
+
+        var client = httpClientFactory.CreateClient(HealthchecksHttpClientName);
+        var response = await client.GetAsync(pingUrl, cancellationToken);
+        response.EnsureSuccessStatusCode();
     }
 }

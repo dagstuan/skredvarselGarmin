@@ -76,6 +76,10 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddHttpClient<ResendClient>();
 
+var healthchecksOptionsSection = builder.Configuration.GetSection("Healthchecks");
+builder.Services.Configure<HealthchecksOptions>(healthchecksOptionsSection);
+builder.Services.AddHttpClient(HangfireService.HealthchecksHttpClientName, client => client.Timeout = TimeSpan.FromSeconds(10));
+
 var resendOptionsSection = builder.Configuration.GetSection("Resend");
 builder.Services.Configure<ResendOptions>(resendOptionsSection);
 var resendOptions = resendOptionsSection.Get<ResendOptions>() ?? new ResendOptions();
@@ -145,6 +149,8 @@ using (var scope = app.Services.CreateScope())
 
     recurringJobManager.AddOrUpdate<HangfireService>("SeedSwedishForecastAreas", s => s.SeedSwedishForecastAreas(CancellationToken.None), Cron.Daily);
     recurringJobManager.AddOrUpdate<HangfireService>("CreateNextChargeForAgreements", s => s.CreateNextChargeForAgreements(), Cron.Hourly);
+
+    recurringJobManager.AddOrUpdate<HangfireService>("PingHealthchecks", s => s.PingHealthchecks(CancellationToken.None), "*/10 * * * *");
 
     recurringJobManager.RemoveIfExists("CreateNextChargeForAgreement");
     recurringJobManager.RemoveIfExists("PreWarmLavinprognoserCache");
