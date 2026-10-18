@@ -26,9 +26,8 @@ builder.Services.AddProblemDetails();
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
 
-var dataProtectionPath = builder.Configuration.GetValue<string>("DataProtectionPath");
 builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath!));
+    .PersistKeysToDbContext<SkredvarselDbContext>();
 
 builder.Services.Configure<AppOptions>(builder.Configuration.GetSection("App"));
 

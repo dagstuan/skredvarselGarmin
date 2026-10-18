@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 using SkredvarselGarminWeb.Entities;
 
 namespace SkredvarselGarminWeb.Database;
 
-public class SkredvarselDbContext(DbContextOptions options) : DbContext(options)
+public class SkredvarselDbContext(DbContextOptions options) : DbContext(options), IDataProtectionKeyContext
 {
     public virtual DbSet<User> Users => Set<User>();
     public virtual DbSet<Agreement> Agreements => Set<Agreement>();
@@ -14,6 +15,7 @@ public class SkredvarselDbContext(DbContextOptions options) : DbContext(options)
     public virtual DbSet<StripeCheckoutSessionFulfillment> StripeCheckoutSessionFulfillments => Set<StripeCheckoutSessionFulfillment>();
     public virtual DbSet<SubscriptionSettings> SubscriptionSettings => Set<SubscriptionSettings>();
     public virtual DbSet<ForecastArea> ForecastAreas => Set<ForecastArea>();
+    public virtual DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
