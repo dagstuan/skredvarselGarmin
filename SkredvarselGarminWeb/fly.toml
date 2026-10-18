@@ -17,11 +17,6 @@ kill_timeout = "5s"
 [env]
   PRIMARY_REGION = "arn"
 
-[[mounts]]
-  source = "skredvarselGarmin_data_machines"
-  destination = "/data"
-  processes = ["app"]
-
 [[services]]
   protocol = "tcp"
   internal_port = 8080
