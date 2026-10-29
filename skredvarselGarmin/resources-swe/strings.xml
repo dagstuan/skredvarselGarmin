@@ -20,6 +20,7 @@
 	<string id="SeenWatchInactiveSubscription">Gå till skredvarsel.app på mobilen för att registrera dig för appen.</string>
 	<string id="FailedToSetupSubscription">Det gick inte att konfigurera abonnemanget. Stäng appen och försök igen.</string>
 	<string id="NewWatch">Logga in på skredvarsel.app på mobilen och lägg till klockan med koden:</string>
+	<string id="FrontendUrl">https://skredvarsel.app/sv</string>
 	<string id="UseWatchLanguage">Använd klockans språk för användargränssnittet</string>
 	<string id="ForecastLanguage">Prognosspråk (för norska prognoser)</string>
 	<string id="AppVersionTitle">Appversion</string>

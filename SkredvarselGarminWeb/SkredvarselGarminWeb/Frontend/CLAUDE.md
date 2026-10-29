@@ -4,15 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is the frontend for **Skredvarsel for Garmin** - a subscription-based web application that delivers avalanche warnings (Skredvarsel from Varsom) to Garmin smartwatches. Built as a React SPA with TypeScript, Vite, and React Router v7.
+This is the frontend for **Skredvarsel for Garmin** - a subscription-based web application that delivers avalanche warnings (Skredvarsel from Varsom and Lavinprognoser) to Garmin smartwatches. Built as a React SPA with TypeScript, Vite, and React Router v7. The site is available in Norwegian (default), English and Swedish.
 
 **Tech Stack:**
 
 - React 19 + TypeScript + Vite
 - TanStack React Query v5 (state management)
-- Tailwind CSS + Base UI (styling)
+- Tailwind CSS v4 + Base UI (styling)
 - React Router v7 (routing with lazy loading)
-- pnpm 9.15.2 (package manager)
+- i18next + react-i18next (translations)
+- pnpm 12 (package manager)
 
 **Backend:** ASP.NET server at `https://localhost:8080` (proxied via Vite)
 
@@ -50,28 +51,69 @@ pnpm check
 
 **Routing Pattern:** Modals as nested routes
 
-- Parent route (`/`) renders `<App />` wrapper (Nav + Footer)
+- Root route renders `<App />` wrapper (Nav + Footer)
 - Child routes render as overlay modals/drawers while keeping FrontPage visible
 - Uses lazy loading for all pages via `lazy: () => import()`
 
-**Key Routes:**
+**Localized routes:** Defined in [src/routes.ts](src/routes.ts) and registered in [src/main.tsx](src/main.tsx).
 
-- `/` - FrontPage (landing page)
-- `/account` - AccountPage (drawer modal)
-- `/subscribe` - BuySubscriptionModalPage (modal)
-- `/addwatch` - AddWatchModalPage (modal)
-- `/login` - LoginModalPage (modal)
-- `/faq`, `/privacy`, `/salesconditions` - Full page routes
-- `/admin` - AdminPage
+- Norwegian has no prefix, English uses `/en`, Swedish uses `/sv`
+- Each route has a key (`AppRouteKey`) and a translated path segment per language in `routeSegments`
+- Every route sets `handle: { routeKey }` so the current route can be resolved with `useCurrentRouteKey()`
+- **The URL is the source of truth for the language.** i18n is initialized from the pathname, and `useSyncLanguageWithRoute()` keeps it in sync on navigation. There is no stored language preference.
+
+| Route key         | Norwegian          | English                | Swedish                |
+| ----------------- | ------------------ | ---------------------- | ---------------------- |
+| `home`            | `/`                | `/en`                  | `/sv`                  |
+| `account`         | `/account`         | `/en/account`          | `/sv/konto`            |
+| `subscribe`       | `/subscribe`       | `/en/buy-subscription` | `/sv/kop-abonnemang`   |
+| `addWatch`        | `/addwatch`        | `/en/add-watch`        | `/sv/lagg-till-klocka` |
+| `login`           | `/login`           | `/en/login`            | `/sv/logga-in`         |
+| `faq`             | `/faq`             | `/en/faq`              | `/sv/fragor-och-svar`  |
+| `salesConditions` | `/salesconditions` | `/en/terms`            | `/sv/kopvillkor`       |
+| `privacy`         | `/privacy`         | `/en/privacy`          | `/sv/integritet`       |
+| `admin`           | `/admin`           | `/en/admin`            | `/sv/admin`            |
+
+`account`, `subscribe`, `addWatch` and `login` are modals nested under `home`; the rest are full pages.
+
+**Untranslated aliases:** The Norwegian segments `account`, `subscribe`, `addwatch` and `login` also work under every language prefix (e.g. `/sv/subscribe`) and redirect to the translated route, keeping the query string. The watch apps and the backend rely on this, since they only add a language prefix. Don't remove these aliases.
+
+**Building links:** Never hardcode paths. Use the helpers from `routes.ts`:
+
+```typescript
+const pathFor = usePathForCurrentLanguage();
+<RouterLink to={pathFor("faq", { hash: "vippslogin" })} />
+
+// Links to backend endpoints that redirect back to the frontend (payment, Stripe portal).
+// Adds ?lang= so the backend can redirect to the localized route.
+const language = useCurrentLanguage();
+<a href={buildBackendUrl("/createStripeSubscription", language, { watchKey })} />
+```
 
 **Modal/Drawer Closing Pattern:**
 
 ```typescript
-const { isClosing, onClose } = useNavigateOnClose("/")
+const { isClosing, onClose } = useNavigateOnClose("home") // takes a route key
 <Drawer open={shouldOpen && !isClosing} onOpenChange={(open) => !open && onClose()}>
 ```
 
 The `isClosing` flag triggers the close animation before navigation.
+
+### Translations (i18n)
+
+- Setup in [src/i18n/index.ts](src/i18n/index.ts), strings in [src/i18n/resources.ts](src/i18n/resources.ts). Long page content (FAQ, privacy, sales conditions, SEO) lives in [src/i18n/resources/](src/i18n/resources/).
+- Norwegian (`no`) is the reference language. `en` and `sv` are typed with `satisfies TranslationSchema<typeof no>`, so a missing or extra key is a type error. Add new keys to all three languages.
+- Use the selector syntax (typed via [src/i18n.d.ts](src/i18n.d.ts)):
+
+```typescript
+const { t } = useTranslation();
+t(($) => $.account.watches.added);
+t(($) => $.account.subscription.renewsOn, { date: formattedDate });
+```
+
+- Format dates and numbers with `Intl` and `intlLocales[language]` from `i18n/resources.ts`, not fixed patterns.
+- Page title, meta description, Open Graph tags, canonical and `hreflang` links are set per route by `useRouteMetadata()`.
+- Don't show error text from the backend directly; it isn't translated. Map status codes to translated strings instead (see `isWatchNotFoundError` in `useWatches.ts`).
 
 ### State Management
 
@@ -94,15 +136,18 @@ const useWatches = () =>
   });
 
 // Mutation (POST/PUT/DELETE)
-const useAddWatch = (onSuccess?: () => void) =>
-  useMutation({
+const useAddWatch = (onSuccess?: () => void) => {
+  const { t } = useTranslation();
+
+  return useMutation({
     mutationFn: addWatch,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["watches"] });
-      toast.success("Klokke lagt til!");
+      toast.success(t(($) => $.account.watches.added));
       onSuccess?.();
     },
   });
+};
 ```
 
 ### API Layer
@@ -116,7 +161,7 @@ const api = axios.create({
 });
 ```
 
-**Backend Proxy:** All requests to `/api/*`, `/vipps`, `/google`, `/facebook`, `/stripe`, `/email`, `/logout`, and `/create*` are proxied to `https://localhost:8080`
+**Backend Proxy:** Requests to `/api/*`, `/vipps*`, `/google*`, `/facebook*`, `/stripe*`, `/email*`, `/logout` and `/createVippsAgreement` / `/createStripeSubscription` are proxied to `https://localhost:8080`
 
 **CSRF Protection:** Custom header `X-CSRF: 1` is sent with user API calls
 
@@ -124,25 +169,33 @@ const api = axios.create({
 
 - `GET /api/user` - Fetch current user
 - `GET /api/watches` - List user's watches
-- `POST /api/watches/:watchKey` - Add a watch
+- `POST /api/watches/:watchKey` - Add a watch (400 if no watch has the code)
 - `DELETE /api/watches/:watchId` - Remove a watch
 - `GET /api/subscription` - Get subscription status
 - `DELETE /api/vippsAgreement` - Cancel Vipps subscription
 - `PUT /api/vippsAgreement/reactivate` - Reactivate Vipps
-- `POST /email-login-send?email=...&returnUrl=...` - Send magic link
-- OAuth: `/google`, `/facebook`, `/vipps`, `/stripe`
+- `POST /email-login-send?email=...&returnUrl=...` - Send magic link. The email's language is taken from `returnUrl`.
+- `/createVippsAgreement`, `/createStripeSubscription`, `/stripe-customer-portal` - accept `?lang=` and `?watchKey=`; build these links with `buildBackendUrl`
+- OAuth: `/google-login`, `/facebook-login` with `?returnUrl=`
+
+`returnUrl` must be a local path (starting with a single `/`); the backend rejects or ignores anything else.
 
 ### Custom Hooks (`src/hooks/`)
 
-All API calls are abstracted into custom hooks:
+API calls are abstracted into custom hooks:
 
 - `useUser()` - Query user data
 - `useWatches()`, `useAddWatch()`, `useRemoveWatch()` - Manage watches
 - `useSubscription()`, `useStopVippsAgreement()`, `useReactivateVippsAgreement()` - Manage subscriptions
 - `useEmailLogin()` - Handle email auth flow with local state
+- `useAdminData()` - Admin statistics
 - `useScrollToTopOnNavigate()` - Auto-scroll on route change
 - `useNavigateOnClose()` - Navigate when modal/drawer closes (with animation delay)
 - `useNavigateToAccountIfLoggedIn()` - Redirect if already logged in
+- `useSyncLanguageWithRoute()` - Keep i18n language in sync with the URL
+- `useRouteMetadata()` - Localized title, meta tags, canonical and `hreflang` links
+
+Route and language hooks (`useCurrentLanguage()`, `useCurrentRouteKey()`, `usePathForCurrentLanguage()`) live in `src/routes.ts`.
 
 ### Component Organization
 
@@ -153,16 +206,18 @@ src/
 ├── Components/
 │   ├── AccountPage/         # Account management components
 │   ├── Admin/               # Admin panel
-│   ├── Buttons/             # Login buttons (Google, Facebook, Vipps, Stripe)
+│   ├── Buttons/             # Login and payment buttons (Google, Facebook, Vipps, Stripe)
 │   ├── EmailLoginForm/      # Email authentication
 │   ├── Icons/               # SVG icon components
 │   ├── LoginModal/          # Login modal
 │   ├── ui/                  # Base UI components (shadcn-style)
-│   └── [Other feature dirs] # Feature-specific components
+│   └── [Other components]   # Pages and shared components (Nav, Footer, LanguageSwitcher, ...)
 ├── Pages/                   # Route loaders (lazy imports)
 ├── hooks/                   # Custom React hooks
-├── lib/                     # Utility functions (cn, etc.)
+├── i18n/                    # i18next setup and translations
+├── lib/                     # Utility functions (cn, toast)
 ├── api.ts                   # Axios instance
+├── routes.ts                # Localized routes and link helpers
 ├── types.ts                 # TypeScript types
 └── main.tsx                 # Entry point + routing
 ```
@@ -205,10 +260,14 @@ import { cn } from "../lib/utils"
 - `card.tsx` - Card container components
 - `dialog.tsx` - Modal dialog (Base UI Dialog)
 - `drawer.tsx` - Slide-out drawer (Base UI Dialog)
+- `popover.tsx` - Popover (Base UI Popover), used by `LanguageSwitcher`
 - `heading.tsx` - Typography headings with size variants
 - `input.tsx` - Form input (Base UI Input)
+- `label.tsx` - Form label
+- `separator.tsx` - Horizontal/vertical divider
 - `accordion.tsx` - Collapsible sections (Base UI Collapsible)
 - `spinner.tsx` - Loading spinner
+- `toast.tsx` - Toast renderer (Base UI Toast)
 
 **Custom Tailwind Colors** (defined in `src/index.css`):
 
@@ -221,7 +280,9 @@ import { cn } from "../lib/utils"
 ### Query String Parameters
 
 - `?watchKey=xyz` - Auto-add watch after login
-- `?returnUrl=/account` - Redirect destination after OAuth
+- `?returnUrl=/en/account` - Redirect destination after OAuth or email login (local paths only)
+- `?lang=en` - Language for backend endpoints that redirect back to the frontend
+- `?error=expired|invalid` - Set on the login route when a magic link can't be used
 
 ### Image Optimization
 
@@ -238,17 +299,19 @@ Vite automatically generates ASP.NET dev certificates (`~/.aspnet/https/frontend
 ### Payment Integrations
 
 - **Vipps** - Norwegian mobile payment
-- **Stripe** - Credit card (with Apple Pay, Google Pay)
+- **Stripe** - Credit card (with Apple Pay, Google Pay). Checkout and the customer portal are shown in the page's language.
 - **Email** - Magic link authentication
+
+The price is in NOK for all languages.
 
 ### Toast Notifications
 
-Uses `sonner` for toast notifications:
+Uses a small wrapper around Base UI Toast in [src/lib/toast.ts](src/lib/toast.ts):
 
 ```typescript
-import { toast } from "sonner";
-toast.success("Success message");
-toast.error("Error message");
+import { toast } from "../lib/toast";
+toast.success(t(($) => $.account.watches.added));
+toast.error(t(($) => $.account.watches.addFailed));
 ```
 
 ## TypeScript Configuration
@@ -261,20 +324,28 @@ toast.error("Error message");
 ## Key Files
 
 - [src/main.tsx](src/main.tsx) - Entry point, routing, providers
+- [src/routes.ts](src/routes.ts) - Localized route segments and link helpers
+- [src/i18n/resources.ts](src/i18n/resources.ts) - Translations
 - [src/App.tsx](src/App.tsx) - Root component (Nav + Footer wrapper)
 - [src/api.ts](src/api.ts) - Axios instance
 - [src/types.ts](src/types.ts) - TypeScript type definitions
 - [src/lib/utils.ts](src/lib/utils.ts) - Utility functions (cn for class merging)
 - [vite.config.ts](vite.config.ts) - Vite configuration, proxy, HTTPS
-- [tailwind.config.js](tailwind.config.js) - Tailwind CSS configuration
+- [src/index.css](src/index.css) - Tailwind setup and theme colors
 - [package.json](package.json) - Dependencies and scripts
 
-## Norwegian Language Notes
+## Related Code Outside the Frontend
 
-The app is in Norwegian. Common terms:
+- **Watch apps** (`skredvarselGarmin/`, `skredvarselGarminDatafield/` in the repo root) open `/subscribe` and `/addwatch?watchKey=...` with a language prefix from the `FrontendUrl` string resource.
+- **Backend** (`../Helpers/FrontendLanguage.cs`) maps `lang` to the path prefix when redirecting to the frontend, and picks the login email language.
+
+## Norwegian Terms
+
+Code and comments are in English, but many identifiers and texts come from the original Norwegian app:
 
 - **Skredvarsel** - Avalanche warning
 - **Varsom** - Norwegian avalanche warning service (varsom.no)
+- **Lavinprognoser** - Swedish avalanche forecasts (lavinprognoser.se)
 - **Abonnement** - Subscription
 - **Klokke** - Watch
 - **Min side** - My account/page

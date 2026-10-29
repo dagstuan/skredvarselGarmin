@@ -20,7 +20,8 @@ class AddWatchView extends Ui.View {
     _addWatchKey = addWatchKey;
 
     Comm.openWebPage(
-      $.FrontendBaseUrl + "/addwatch?watchKey=" + addWatchKey,
+      $.getOrLoadResourceString($.FrontendBaseUrl, :FrontendUrl) +
+        "/addwatch?watchKey=" + addWatchKey,
       null,
       null
     );
