@@ -169,14 +169,15 @@ function getBottomTripletPoints() {
 }
 
 module AvalancheUi {
-  typedef ExposedHeightSettings as {
-    :exposedHeight1 as Number,
-    :exposedHeight2 as Number,
-    :exposedHeightFill as Number,
-    :dangerFillColor as Gfx.ColorType,
-    :nonDangerFillColor as Gfx.ColorType,
-    :size as Numeric,
-  };
+  typedef ExposedHeightSettings as
+    {
+      :exposedHeight1 as Number,
+      :exposedHeight2 as Number,
+      :exposedHeightFill as Number,
+      :dangerFillColor as Gfx.ColorType,
+      :nonDangerFillColor as Gfx.ColorType,
+      :size as Numeric,
+    };
 
   public class ExposedHeight {
     private var _bufferedBitmap as Gfx.BufferedBitmap?;
@@ -327,7 +328,7 @@ module AvalancheUi {
       y0 as Numeric
     ) as Array<Gfx.Point2D> {
       var numPoints = points.size();
-      var ret = new [numPoints];
+      var ret = new Array<Gfx.Point2D>[numPoints];
       for (var i = 0; i < points.size(); i++) {
         var point = points[i];
         ret[i] = calcPoint(point[0], point[1], size, x0, y0);
@@ -341,7 +342,7 @@ module AvalancheUi {
       size as Numeric,
       x0 as Numeric,
       y0 as Numeric
-    ) as Array<Numeric> {
+    ) as Gfx.Point2D {
       var scalingFactor = size / 42.0;
 
       return [x0 + x * scalingFactor, y0 + y * scalingFactor];
