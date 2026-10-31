@@ -1,7 +1,8 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api } from "../api";
 import { queryClient } from "../main";
-import { ProblemDetails, Watch } from "../types";
+import { Watch } from "../types";
 import { toast } from "../lib/toast";
 import { AxiosError } from "axios";
 
@@ -15,18 +16,25 @@ export const useWatches = () =>
 
 const addWatch = (key: string) => api.post(`/api/watches/${key}`);
 
+// The backend answers 400 when no watch has the given code.
+export const isWatchNotFoundError = (error: unknown) =>
+  (error as AxiosError).response?.status === 400;
+
 export const useAddWatch = (onSuccess?: () => void, onSettled?: () => void) => {
+  const { t } = useTranslation();
+
   return useMutation({
     mutationFn: addWatch,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
-      toast.success("Klokke lagt til");
+      toast.success(t(($) => $.account.watches.added));
       onSuccess?.();
     },
     onError: (error) => {
       toast.error(
-        ((error as AxiosError).response?.data as ProblemDetails).detail ??
-          "Det skjedde en feil når vi prøvde å legge til klokken. Prøv igjen senere.",
+        isWatchNotFoundError(error)
+          ? t(($) => $.account.watches.notFound)
+          : t(($) => $.account.watches.addFailed),
       );
     },
     onSettled,

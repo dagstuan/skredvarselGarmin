@@ -36,7 +36,7 @@ public class EmailService : IEmailService
         FallbackBefore: "Hvis du har problemer med å trykke på knappen over,",
         FallbackLink: "trykk her",
         NotYouTitle: "Ikke deg?",
-        NotYouText: "Hvis det ikke var du som prøvde å logge deg inn kan du trygt se bort fra denne eposten.");
+        NotYouText: "Hvis det ikke var du som prøvde å logge deg inn kan du trygt se bort fra denne e-posten.");
 
     private static readonly LoginEmailTexts EnglishLoginEmail = new(
         HtmlLang: "en",

@@ -1,6 +1,7 @@
 import { buttonVariants } from "../ui/button";
 import { SiFacebook } from "react-icons/si";
 import { cn } from "../../lib/utils";
+import { useTranslation } from "react-i18next";
 
 type FacebookButtonProps = {
   link: string;
@@ -8,6 +9,8 @@ type FacebookButtonProps = {
 };
 
 export const FacebookButton = ({ link, className }: FacebookButtonProps) => {
+  const { t } = useTranslation();
+
   return (
     <a
       href={link}
@@ -18,7 +21,7 @@ export const FacebookButton = ({ link, className }: FacebookButtonProps) => {
       )}
     >
       <SiFacebook className="h-6 w-6" />
-      <span>Logg inn med Facebook</span>
+      <span>{t(($) => $.buttons.facebook.login)}</span>
     </a>
   );
 };

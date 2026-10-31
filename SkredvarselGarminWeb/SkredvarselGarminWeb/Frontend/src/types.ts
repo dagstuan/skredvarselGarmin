@@ -36,13 +36,6 @@ export type Watch = {
   name: string;
 };
 
-export type ProblemDetails = {
-  type: string;
-  title: string;
-  status: number;
-  detail: string;
-};
-
 type AdminDataUser = {
   id: string;
   name: string;

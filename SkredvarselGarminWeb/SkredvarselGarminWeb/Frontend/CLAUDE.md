@@ -58,25 +58,16 @@ pnpm check
 **Localized routes:** Defined in [src/routes.ts](src/routes.ts) and registered in [src/main.tsx](src/main.tsx).
 
 - Norwegian has no prefix, English uses `/en`, Swedish uses `/sv`
-- Each route has a key (`AppRouteKey`) and a translated path segment per language in `routeSegments`
+- Each route has a key (`AppRouteKey`) and one path segment in `routeSegments`. The segment is the same in every language; only the prefix differs (e.g. `/faq`, `/en/faq`, `/sv/faq`).
+- `createLanguageRoutes()` in `main.tsx` generates the same routes for each language. Add new routes to `modalRoutes` or `pageRoutes` there, and their segment to `routeSegments`.
 - Every route sets `handle: { routeKey }` so the current route can be resolved with `useCurrentRouteKey()`
-- **The URL is the source of truth for the language.** i18n is initialized from the pathname, and `useSyncLanguageWithRoute()` keeps it in sync on navigation. There is no stored language preference.
+- **The URL is the source of truth for the language.** `<LanguageProvider>` picks an i18next instance for the URL's language during render (one cloned instance per language), so there is no global language to keep in sync. Never call `i18n.changeLanguage()`; change the URL instead. There is no stored language preference.
 
-| Route key         | Norwegian          | English                | Swedish                |
-| ----------------- | ------------------ | ---------------------- | ---------------------- |
-| `home`            | `/`                | `/en`                  | `/sv`                  |
-| `account`         | `/account`         | `/en/account`          | `/sv/konto`            |
-| `subscribe`       | `/subscribe`       | `/en/buy-subscription` | `/sv/kop-abonnemang`   |
-| `addWatch`        | `/addwatch`        | `/en/add-watch`        | `/sv/lagg-till-klocka` |
-| `login`           | `/login`           | `/en/login`            | `/sv/logga-in`         |
-| `faq`             | `/faq`             | `/en/faq`              | `/sv/fragor-och-svar`  |
-| `salesConditions` | `/salesconditions` | `/en/terms`            | `/sv/kopvillkor`       |
-| `privacy`         | `/privacy`         | `/en/privacy`          | `/sv/integritet`       |
-| `admin`           | `/admin`           | `/en/admin`            | `/sv/admin`            |
+`account`, `subscribe`, `addwatch` and `login` are modals nested under the home route; `faq`, `salesconditions`, `privacy` and `admin` are full pages.
 
-`account`, `subscribe`, `addWatch` and `login` are modals nested under `home`; the rest are full pages.
+The watch apps and the backend build URLs as language prefix + segment, e.g. `/sv/addwatch?watchKey=...`. Don't rename a segment without updating them and adding a redirect.
 
-**Untranslated aliases:** The Norwegian segments `account`, `subscribe`, `addwatch` and `login` also work under every language prefix (e.g. `/sv/subscribe`) and redirect to the translated route, keeping the query string. The watch apps and the backend rely on this, since they only add a language prefix. Don't remove these aliases.
+Old Norwegian paths `/minSide`, `/salgsbetingelser` and `/personvern` redirect to their current routes.
 
 **Building links:** Never hardcode paths. Use the helpers from `routes.ts`:
 
@@ -112,7 +103,7 @@ t(($) => $.account.subscription.renewsOn, { date: formattedDate });
 ```
 
 - Format dates and numbers with `Intl` and `intlLocales[language]` from `i18n/resources.ts`, not fixed patterns.
-- Page title, meta description, Open Graph tags, canonical and `hreflang` links are set per route by `useRouteMetadata()`.
+- Page title, all SEO, Open Graph and Twitter meta tags, canonical and `hreflang` links are rendered by the `<RouteMetadata />` component, using React 19's support for `<title>`, `<meta>` and `<link>` in components. Don't add per-page tags to `index.html`; React can't replace them, so they would show up twice.
 - Don't show error text from the backend directly; it isn't translated. Map status codes to translated strings instead (see `isWatchNotFoundError` in `useWatches.ts`).
 
 ### State Management
@@ -192,8 +183,6 @@ API calls are abstracted into custom hooks:
 - `useScrollToTopOnNavigate()` - Auto-scroll on route change
 - `useNavigateOnClose()` - Navigate when modal/drawer closes (with animation delay)
 - `useNavigateToAccountIfLoggedIn()` - Redirect if already logged in
-- `useSyncLanguageWithRoute()` - Keep i18n language in sync with the URL
-- `useRouteMetadata()` - Localized title, meta tags, canonical and `hreflang` links
 
 Route and language hooks (`useCurrentLanguage()`, `useCurrentRouteKey()`, `usePathForCurrentLanguage()`) live in `src/routes.ts`.
 

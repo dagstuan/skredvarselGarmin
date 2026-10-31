@@ -19,7 +19,7 @@ public class FrontendLanguageTests
 
     [Theory]
     [InlineData("/en/account?watchKey=abc", "/en")]
-    [InlineData("/sv/konto", "/sv")]
+    [InlineData("/sv/account", "/sv")]
     [InlineData("/en", "/en")]
     [InlineData("/account", "")]
     [InlineData("/english", "")]

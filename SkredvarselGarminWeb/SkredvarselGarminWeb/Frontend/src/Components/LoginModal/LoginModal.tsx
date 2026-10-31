@@ -10,15 +10,21 @@ import { LoginContent } from "./LoginContent";
 
 import { FaPaperPlane } from "react-icons/fa";
 import { useEmailLogin } from "../../hooks/useEmailLogin";
+import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router-dom";
 
 type LoginModalProps = {
   loginText?: string;
 };
 
 export const LoginModal = (props: LoginModalProps) => {
+  const { t } = useTranslation();
   const { loginText } = props;
 
-  const { isClosing, onClose } = useNavigateOnClose("/");
+  const { isClosing, onClose } = useNavigateOnClose("home");
+  // Set by the backend when a magic link can't be used.
+  const [searchParams] = useSearchParams();
+  const linkError = searchParams.get("error");
 
   const {
     email,
@@ -34,15 +40,24 @@ export const LoginModal = (props: LoginModalProps) => {
       <DialogPopup className="flex flex-col items-center">
         <DialogHeader className="w-full pb-4">
           <DialogTitle>
-            {!showSentEmail ? "Logg inn" : "E-post sendt"}
+            {!showSentEmail
+              ? t(($) => $.login.title)
+              : t(($) => $.login.emailSentTitle)}
           </DialogTitle>
           <DialogDescription className="sr-only">
             {!showSentEmail
-              ? "Logg inn eller registrer deg med e-post eller sosiale innlogginger."
-              : "Det er sendt en innloggingslenke til e-postadressen din."}
+              ? t(($) => $.login.loginDescription)
+              : t(($) => $.login.emailSentDescription)}
           </DialogDescription>
         </DialogHeader>
         <div className="w-full pb-4 max-w-sm">
+          {!showSentEmail && linkError && (
+            <p role="alert" className="mb-6 text-sm text-red-500 text-center">
+              {linkError === "expired"
+                ? t(($) => $.login.linkExpired)
+                : t(($) => $.login.linkInvalid)}
+            </p>
+          )}
           {!showSentEmail && (
             <LoginContent
               loginText={loginText}
@@ -58,7 +73,7 @@ export const LoginModal = (props: LoginModalProps) => {
               <div className="flex items-center justify-center bg-green-500 text-white rounded-full w-28 h-28">
                 <FaPaperPlane className="w-16 h-16" />
               </div>
-              <p>Sjekk innboksen din for en innloggingslenke.</p>
+              <p>{t(($) => $.common.checkInbox)}</p>
             </div>
           )}
         </div>
