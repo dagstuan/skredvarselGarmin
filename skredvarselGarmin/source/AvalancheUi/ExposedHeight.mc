@@ -251,7 +251,7 @@ module AvalancheUi {
       size as Numeric
     ) as Array<Gfx.Point2D> {
       var numPoints = points.size();
-      var ret = new [numPoints];
+      var ret = new Array<Gfx.Point2D>[numPoints];
       for (var i = 0; i < points.size(); i++) {
         var point = points[i];
         ret[i] = calcPoint(point[0], point[1], size);
@@ -263,7 +263,7 @@ module AvalancheUi {
       x as Numeric,
       y as Numeric,
       size as Numeric
-    ) as Array<Numeric> {
+    ) as Gfx.Point2D {
       var scalingFactor = size / 42.0;
 
       return [x * scalingFactor, y * scalingFactor];
