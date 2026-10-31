@@ -194,7 +194,7 @@ public static class TestEndpointsRouteBuilderExtensions
             return Results.Ok();
         });
 
-        app.MapGet("/api/test/testEmail", async (IEmailService emailService) => await emailService.SendLoginEmail("d.stuan@gmail.com", "token"));
+        app.MapGet("/api/test/testEmail", async (IEmailService emailService) => await emailService.SendLoginEmail("d.stuan@gmail.com", "token", null));
 
         app.MapGet("/api/test/testLogin", async (HttpContext ctx) =>
         {

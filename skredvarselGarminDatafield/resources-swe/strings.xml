@@ -37,6 +37,7 @@
     <string id="ResetSubscription">Återställ prenumerationsstatus</string>
     <string id="CheckingSubscription">Kontrollerar prenumeration...</string>
     <string id="NewWatch">Logga in på skredvarsel.app på mobilen och lägg till klockan med koden:</string>
+    <string id="FrontendUrl">https://skredvarsel.app/sv</string>
     <string id="SeenWatchInactiveSubscription">Gå till skredvarsel.app på mobilen för att teckna ett abonnemang.</string>
     <string id="FailedToSetupSubscription">Det gick inte att konfigurera prenumerationen. Avsluta appen och försök igen.</string>
 </strings>

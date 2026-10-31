@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
 using SkredvarselGarminWeb.Database;
+using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.MagicLink;
 using SkredvarselGarminWeb.Services;
 
@@ -67,6 +68,11 @@ public static class AuthRouteBuilderExtensions
                 return Results.BadRequest("Invalid email address");
             }
 
+            if (!LocalUrl.IsLocal(returnUrl))
+            {
+                return Results.BadRequest("Invalid return url");
+            }
+
             var user = dbContext.GetUserByEmailOrNull(email);
 
             var token = magicLinkTokenDataFormat.Protect(new MagicLinkToken
@@ -76,7 +82,7 @@ public static class AuthRouteBuilderExtensions
                 ReturnUrl = returnUrl,
             });
 
-            await emailService.SendLoginEmail(email, token);
+            await emailService.SendLoginEmail(email, token, FrontendLanguage.GetLanguageFromPath(returnUrl));
 
             return Results.Ok();
         }).AllowAnonymous();
@@ -89,23 +95,31 @@ public static class AuthRouteBuilderExtensions
             [FromQuery] string token) =>
         {
             var magicLinkToken = magicLinkTokenDataFormat.Unprotect(token);
-            if (magicLinkToken != null)
+            if (magicLinkToken == null)
             {
-                var isAuthenticated = ctx.User.Identity?.IsAuthenticated ?? false;
-                if (!isAuthenticated && DateTime.Now < magicLinkToken.ExpirationTime)
-                {
-                    var claims = magicLinkToken.GetClaims(dbContext);
-                    var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
-
-                    await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-                    userService.RegisterLogin(principal);
-                }
-
-                return Results.Redirect(magicLinkToken.ReturnUrl);
+                // The language is unknown since the return url is inside the token.
+                return Results.Redirect("/login?error=invalid");
             }
 
-            return Results.Redirect("/login-failed");
+            var isAuthenticated = ctx.User.Identity?.IsAuthenticated ?? false;
+            if (!isAuthenticated)
+            {
+                if (DateTime.UtcNow >= magicLinkToken.ExpirationTime)
+                {
+                    var languagePrefix = FrontendLanguage.GetPathPrefixFromPath(magicLinkToken.ReturnUrl);
+                    return Results.Redirect($"{languagePrefix}/login?error=expired");
+                }
+
+                var claims = magicLinkToken.GetClaims(dbContext);
+                var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
+
+                await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+                userService.RegisterLogin(principal);
+            }
+
+            // Also checked here since tokens sent before the check in /email-login-send are still valid.
+            return Results.Redirect(LocalUrl.IsLocal(magicLinkToken.ReturnUrl) ? magicLinkToken.ReturnUrl : "/");
         }).ExcludeFromDescription();
 
         app.MapGet("/logout", async (HttpContext ctx) =>
@@ -128,8 +142,9 @@ public static class AuthRouteBuilderExtensions
 
             userService.RegisterLogin(ctx.User);
 
-            ctx.Request.Query.TryGetValue("returnUrl", out StringValues returnUrl);
-            return Results.Redirect(returnUrl.FirstOrDefault() ?? "/");
+            ctx.Request.Query.TryGetValue("returnUrl", out StringValues returnUrls);
+            var returnUrl = returnUrls.FirstOrDefault();
+            return Results.Redirect(LocalUrl.IsLocal(returnUrl) ? returnUrl! : "/");
         }).ExcludeFromDescription();
     }
 }

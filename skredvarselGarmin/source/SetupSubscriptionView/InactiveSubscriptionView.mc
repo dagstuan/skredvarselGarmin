@@ -17,7 +17,12 @@ class InactiveSubscriptionView extends Ui.View {
     View.initialize();
     startTimer();
 
-    Comm.openWebPage($.FrontendBaseUrl + "/subscribe", null, null);
+    Comm.openWebPage(
+      $.getOrLoadResourceString($.FrontendBaseUrl, :FrontendUrl) +
+        "/subscribe",
+      null,
+      null
+    );
   }
 
   function onLayout(dc as Gfx.Dc) {

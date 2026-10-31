@@ -1,9 +1,9 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="{lang}">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign in to Skredvarsel for Garmin</title>
+    <title>{heading}</title>
     <style type="text/css">
       #outlook a {
         padding: 0;
@@ -149,7 +149,7 @@
         visibility: hidden;
         width: 0px;
       "
-      >Use the following link to sign in to Skredvarsel for Garmin</span
+      >{preheader}</span
     >
     <table
       cellpadding="0"
@@ -223,7 +223,7 @@
                                 font-weight: bold;
                               "
                             >
-                              Logg inn på Skredvarsel for Garmin
+                              {heading}
                             </h1>
                             <p
                               align="left"
@@ -236,9 +236,7 @@
                                 line-height: 21px;
                               "
                             >
-                              Trykk på knappen under for å logge inn på
-                              Skrevarsel for Garmin. Denne lenken vil utløpe
-                              innen 10 minutter.
+                              {intro}
                             </p>
                             <table
                               cellpadding="0"
@@ -290,7 +288,7 @@
                                         border: 1px solid #3182ce;
                                         padding: 15px 24px;
                                       "
-                                      >Logg inn</a
+                                      >{button}</a
                                     >
                                   </td>
                                 </tr>
@@ -306,8 +304,7 @@
                                 line-height: 21px;
                               "
                             >
-                              Hvis du har problemer med å trykke på knappen
-                              over,&nbsp;<a
+                              {fallbackBefore}&nbsp;<a
                                 href="{loginUrl}"
                                 class="cl-branded-link"
                                 style="
@@ -319,7 +316,7 @@
                                   text-decoration: underline;
                                 "
                                 target="_blank"
-                                >trykk her</a
+                                >{fallbackLink}</a
                               >.
                             </p>
                             <p
@@ -332,7 +329,7 @@
                                 line-height: 21px;
                               "
                             >
-                              <b>Ikke deg?</b>
+                              <b>{notYouTitle}</b>
                             </p>
                             <p
                               style="
@@ -344,8 +341,7 @@
                                 line-height: 21px;
                               "
                             >
-                              Hvis det ikke var du som prøvde å logge deg inn
-                              kan du trygt se bort fra denne eposten.
+                              {notYouText}
                             </p>
                           </td>
                         </tr>

@@ -337,7 +337,12 @@ class DatafieldSubscriptionView {
 
   (:foregroundRequest)
   private function _openSubscriptionPage() as Void {
-    Comm.openWebPage($.FrontendBaseUrl + "/subscribe", null, null);
+    Comm.openWebPage(
+      $.getOrLoadResourceString($.FrontendBaseUrl, :FrontendUrl) +
+        "/subscribe",
+      null,
+      null
+    );
   }
 
   (:noForegroundRequest)
@@ -352,7 +357,8 @@ class DatafieldSubscriptionView {
   (:foregroundRequest)
   private function _openAddWatchPage() as Void {
     Comm.openWebPage(
-      $.FrontendBaseUrl + "/addwatch?watchKey=" + _addWatchKey,
+      $.getOrLoadResourceString($.FrontendBaseUrl, :FrontendUrl) +
+        "/addwatch?watchKey=" + _addWatchKey,
       null,
       null
     );

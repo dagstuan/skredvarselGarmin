@@ -2,6 +2,8 @@ import { buttonVariants } from "../ui/button";
 import { VippsIcon } from "../Icons/VippsIcon";
 import { cn } from "../../lib/utils";
 import { VariantProps } from "class-variance-authority";
+import { useTranslation } from "react-i18next";
+import { buildBackendUrl, useCurrentLanguage } from "../../routes";
 
 type VippsButtonProps = {
   text?: string;
@@ -11,9 +13,11 @@ type VippsButtonProps = {
 };
 
 export const VippsButton = (props: VippsButtonProps) => {
+  const { t } = useTranslation();
+  const language = useCurrentLanguage();
   const {
-    text = "Fortsett med",
-    link = "/createVippsAgreement",
+    text,
+    link = buildBackendUrl("/createVippsAgreement", language),
     size = "lg",
     className,
   } = props;
@@ -27,7 +31,9 @@ export const VippsButton = (props: VippsButtonProps) => {
         className,
       )}
     >
-      <span className="leading-none">{text}</span>
+      <span className="leading-none">
+        {text ?? t(($) => $.buttons.vipps.continueWith)}
+      </span>
       <VippsIcon className="size-auto w-14 h-4 translate-y-0.5" />
     </a>
   );

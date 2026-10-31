@@ -2,6 +2,7 @@ import { Navigate } from "react-router-dom";
 import { useUser } from "../../hooks/useUser";
 import { ReactElement } from "react";
 import { Spinner } from "../ui/spinner";
+import { buildLocalizedPath, useCurrentLanguage } from "../../routes";
 
 type RequireAdminProps = {
   children: ReactElement;
@@ -9,6 +10,7 @@ type RequireAdminProps = {
 
 export const RequireAdmin = ({ children }: RequireAdminProps) => {
   const { data: user, isLoading } = useUser();
+  const language = useCurrentLanguage();
 
   if (isLoading) {
     return (
@@ -20,13 +22,13 @@ export const RequireAdmin = ({ children }: RequireAdminProps) => {
 
   if (!user) {
     setTimeout(() => {
-      window.location.href = "/google-login?returnUrl=/admin";
+      window.location.href = `/google-login?returnUrl=${buildLocalizedPath(language, "admin")}`;
     }, 0);
     return null;
   }
 
   if (!user.isAdmin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={buildLocalizedPath(language, "home")} replace />;
   }
 
   return children;

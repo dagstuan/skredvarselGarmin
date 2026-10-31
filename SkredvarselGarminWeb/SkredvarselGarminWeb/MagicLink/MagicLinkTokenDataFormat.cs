@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using System.Text.Json;
 
 using Microsoft.AspNetCore.DataProtection;
@@ -15,7 +16,7 @@ public class MagicLinkTokenDataFormat : IMagicLinkTokenDataFormat
 
     public string Protect(MagicLinkToken data)
     {
-        var json = Newtonsoft.Json.JsonConvert.SerializeObject(data);
+        var json = JsonSerializer.Serialize(data);
         var bytes = System.Text.Encoding.UTF8.GetBytes(json);
         var protectedTokenBytes = _dataProtector.Protect(bytes);
         return Convert.ToBase64String(protectedTokenBytes);
@@ -26,12 +27,25 @@ public class MagicLinkTokenDataFormat : IMagicLinkTokenDataFormat
         throw new NotImplementedException();
     }
 
+    // Returns null for tokens that are malformed, tampered with or protected with a key we no longer have.
     public MagicLinkToken? Unprotect(string? protectedText)
     {
-        var protectedTokenBytes = Convert.FromBase64String(protectedText ?? "");
-        var bytes = _dataProtector.Unprotect(protectedTokenBytes);
-        var json = System.Text.Encoding.UTF8.GetString(bytes);
-        return JsonSerializer.Deserialize<MagicLinkToken>(json);
+        if (string.IsNullOrEmpty(protectedText))
+        {
+            return null;
+        }
+
+        try
+        {
+            var protectedTokenBytes = Convert.FromBase64String(protectedText);
+            var bytes = _dataProtector.Unprotect(protectedTokenBytes);
+            var json = System.Text.Encoding.UTF8.GetString(bytes);
+            return JsonSerializer.Deserialize<MagicLinkToken>(json);
+        }
+        catch (Exception e) when (e is FormatException or CryptographicException or JsonException)
+        {
+            return null;
+        }
     }
 
     public MagicLinkToken? Unprotect(string? protectedText, string? purpose)

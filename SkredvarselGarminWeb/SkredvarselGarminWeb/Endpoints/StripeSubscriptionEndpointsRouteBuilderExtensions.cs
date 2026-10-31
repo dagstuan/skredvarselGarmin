@@ -9,6 +9,7 @@ using SkredvarselGarminWeb.Database;
 using SkredvarselGarminWeb.Entities;
 using SkredvarselGarminWeb.Entities.Extensions;
 using SkredvarselGarminWeb.Extensions;
+using SkredvarselGarminWeb.Helpers;
 using SkredvarselGarminWeb.Options;
 using SkredvarselGarminWeb.Services;
 
@@ -39,12 +40,14 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
     {
         app.MapGet("/createStripeSubscription", async (
             [FromQuery] string? watchKey,
+            [FromQuery] string? lang,
             HttpContext ctx,
             SkredvarselDbContext dbContext,
             IStripeClient stripeClient,
             IOptions<StripeOptions> stripeOptions) =>
         {
             var baseUrl = ctx.GetBaseUrl();
+            var languagePrefix = FrontendLanguage.GetPathPrefix(lang);
             var user = dbContext.GetUserOrNull(ctx.User);
 
             if (user != null)
@@ -56,7 +59,9 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
 
                 if (userHasActiveStripeSubscriptions)
                 {
-                    return Results.Redirect("/stripe-customer-portal");
+                    return Results.Redirect(string.IsNullOrEmpty(languagePrefix)
+                        ? "/stripe-customer-portal"
+                        : $"/stripe-customer-portal?lang={lang}");
                 }
             }
 
@@ -65,8 +70,14 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
             {
                 successUrl += $"&watchKey={Uri.EscapeDataString(watchKey)}";
             }
+            if (!string.IsNullOrEmpty(languagePrefix))
+            {
+                successUrl += $"&lang={lang}";
+            }
 
-            var cancelUrl = user == null ? $"{baseUrl}/subscribe" : $"{baseUrl}/account";
+            var cancelUrl = user == null
+                ? $"{baseUrl}{languagePrefix}/subscribe"
+                : $"{baseUrl}{languagePrefix}/account";
             if (!string.IsNullOrWhiteSpace(watchKey))
             {
                 cancelUrl += $"?watchKey={Uri.EscapeDataString(watchKey)}";
@@ -76,6 +87,7 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
             {
                 SuccessUrl = successUrl,
                 CancelUrl = cancelUrl,
+                Locale = FrontendLanguage.GetStripeLocale(lang),
                 Mode = "subscription",
                 LineItems = [
                     new SessionLineItemOptions
@@ -112,6 +124,7 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
             IUserService userService,
             [FromQuery(Name = "session_id")] string sessionId,
             [FromQuery] string? watchKey,
+            [FromQuery] string? lang,
             ILoggerFactory loggerFactory) =>
         {
             var logger = loggerFactory.CreateLogger("stripe-subscribe-callback");
@@ -124,7 +137,7 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
             await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
             userService.RegisterLogin(principal);
 
-            var redirectUrl = "/account";
+            var redirectUrl = $"{FrontendLanguage.GetPathPrefix(lang)}/account";
             if (!string.IsNullOrWhiteSpace(watchKey))
             {
                 redirectUrl += $"?watchKey={Uri.EscapeDataString(watchKey)}";
@@ -134,6 +147,7 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
         }).AllowAnonymous();
 
         app.MapGet("/stripe-customer-portal", async (
+            [FromQuery] string? lang,
             HttpContext ctx,
             IStripeClient stripeClient,
             SkredvarselDbContext dbContext) =>
@@ -144,7 +158,8 @@ public static class StripeSubscriptionEndpointsRouteBuilderExtensions
             var options = new Stripe.BillingPortal.SessionCreateOptions
             {
                 Customer = user.StripeCustomerId,
-                ReturnUrl = $"{baseUrl}/account",
+                ReturnUrl = $"{baseUrl}{FrontendLanguage.GetPathPrefix(lang)}/account",
+                Locale = FrontendLanguage.GetStripeLocale(lang),
             };
 
             var service = new Stripe.BillingPortal.SessionService(stripeClient);

@@ -75,6 +75,8 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
         app.MapGet("/createVippsAgreement", async (
             [FromQuery]
             string? watchKey,
+            [FromQuery]
+            string? lang,
             HttpContext ctx,
             IVippsApiClient vippsApiClient,
             IUserService userService,
@@ -82,6 +84,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
             IDateTimeNowProvider dateTimeNowProvider) =>
         {
             var baseUrl = ctx.GetBaseUrl();
+            var languagePrefix = FrontendLanguage.GetPathPrefix(lang);
             string? userId = null;
 
             var callbackId = Guid.NewGuid();
@@ -98,7 +101,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
 
                 if (existingAgreementsForUser.Any(x => x.Status == AgreementStatus.ACTIVE))
                 {
-                    return Results.Redirect($"{baseUrl}/account");
+                    return Results.Redirect($"{baseUrl}{languagePrefix}/account");
                 }
 
                 var pendingAgreementForUser = existingAgreementsForUser.FirstOrDefault(x => x.Status == AgreementStatus.PENDING);
@@ -125,8 +128,10 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
                     Description = "Skredvarsel for Garmin"
                 },
                 ProductName = "Skredvarsel for Garmin",
-                MerchantAgreementUrl = $"{baseUrl}/account",
-                MerchantRedirectUrl = $"{baseUrl}/vipps-subscribe-callback?callbackId={callbackId}",
+                MerchantAgreementUrl = $"{baseUrl}{languagePrefix}/account",
+                MerchantRedirectUrl = string.IsNullOrEmpty(languagePrefix)
+                    ? $"{baseUrl}/vipps-subscribe-callback?callbackId={callbackId}"
+                    : $"{baseUrl}/vipps-subscribe-callback?callbackId={callbackId}&lang={lang}",
                 Scope = "name email"
             };
 
@@ -161,6 +166,8 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
             [FromQuery]
             [BindRequired]
             Guid callbackId,
+            [FromQuery]
+            string? lang,
             HttpContext ctx,
             SkredvarselDbContext dbContext,
             IVippsApiClient vippsApiClient,
@@ -300,7 +307,7 @@ public static class VippsSubscriptionEndpointsRouteBuilderExtensions
 
             transaction.Commit();
 
-            return Results.Redirect("/account");
+            return Results.Redirect($"{FrontendLanguage.GetPathPrefix(lang)}/account");
         }).AllowAnonymous();
 
         app.MapDelete("/api/vippsAgreement", async (

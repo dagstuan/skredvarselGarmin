@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { type AppRouteKey, usePathForCurrentLanguage } from "../routes";
 
-export const useNavigateOnClose = (target: string) => {
+export const useNavigateOnClose = (target: AppRouteKey) => {
   const navigate = useNavigate();
+  const pathFor = usePathForCurrentLanguage();
 
   const [isClosing, setIsClosing] = useState<boolean>(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -12,9 +14,9 @@ export const useNavigateOnClose = (target: string) => {
       clearTimeout(timeoutRef.current);
     }
     timeoutRef.current = setTimeout(() => {
-      navigate(target);
+      navigate(pathFor(target));
     }, 200);
-  }, [navigate]);
+  }, [navigate, pathFor, target]);
 
   return {
     isClosing,

@@ -2,5 +2,5 @@ namespace SkredvarselGarminWeb.Services;
 
 public interface IEmailService
 {
-    Task SendLoginEmail(string email, string token);
+    Task SendLoginEmail(string email, string token, string? lang);
 }

@@ -37,6 +37,7 @@
     <string id="ResetSubscription">Reset subscription status</string>
     <string id="CheckingSubscription">Checking subscription...</string>
     <string id="NewWatch">Log in to skredvarsel.app on your phone and add the watch with the code:</string>
+    <string id="FrontendUrl">https://skredvarsel.app/en</string>
     <string id="SeenWatchInactiveSubscription">Go to skredvarsel.app on your phone to subscribe to the app.</string>
     <string id="FailedToSetupSubscription">Failed to set up subscription. Exit the app and try again.</string>
 </strings>
