@@ -3,6 +3,8 @@ RUN apt-get update
 RUN apt-get install -y npm
 RUN npm install -g n
 RUN n lts
+# Node 25+ no longer bundles corepack.
+RUN npm install -g corepack
 RUN corepack enable
 
 FROM base AS builder
