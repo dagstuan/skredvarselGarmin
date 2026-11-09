@@ -33,12 +33,12 @@
     <PackageReference Include="NetTopologySuite.IO.GeoJSON4STJ" Version="4.0.0" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="10.0.3" />
-    <PackageReference Include="Polly" Version="8.8.0" />
+    <PackageReference Include="Polly" Version="8.9.1" />
     <PackageReference Include="ProjNet4GeoAPI" Version="1.4.1" />
     <PackageReference Include="Refit" Version="16.4.0" />
     <PackageReference Include="Refit.HttpClientFactory" Version="16.4.0" />
     <PackageReference Include="Resend" Version="0.24.0" />
-    <PackageReference Include="Stripe.net" Version="53.0.0" />
+    <PackageReference Include="Stripe.net" Version="53.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.1" />
   </ItemGroup>
   <ItemGroup>
