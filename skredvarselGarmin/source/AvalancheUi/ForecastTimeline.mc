@@ -137,7 +137,7 @@ module AvalancheUi {
 
     // cutoff = 2 days ago, in seconds
     var earlyCutoffTime = new Time.Moment(
-      Time.now().value() - 2 * Gregorian.SECONDS_PER_DAY
+      $.getNow().value() - 2 * Gregorian.SECONDS_PER_DAY
     );
     var oneDaySeconds = Gregorian.SECONDS_PER_DAY.toFloat();
     var currXOffset = locX;

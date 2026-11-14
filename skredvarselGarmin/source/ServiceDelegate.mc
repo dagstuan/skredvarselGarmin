@@ -130,7 +130,7 @@ class ServiceDelegate extends System.ServiceDelegate {
 
     var language = $.getForecastLanguage();
 
-    var now = Time.now();
+    var now = $.getNow();
     var start = $.getBackgroundDetailedForecastStartDate(now);
     var regionId = _currentData[0];
     var end = $.getBackgroundDetailedForecastEndDate(now, regionId);

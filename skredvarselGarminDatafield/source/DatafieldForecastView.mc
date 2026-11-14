@@ -754,7 +754,7 @@ class DatafieldForecastView {
       var warnings =
         _locationDetailedForecast["warnings"] as
         Array<DetailedAvalancheWarning>;
-      var idx = $.getDateIndexForDetailedWarnings(warnings, Time.today());
+      var idx = $.getDateIndexForDetailedWarnings(warnings, $.getToday());
       if (idx >= 0) {
         _detailedWarning = warnings[idx];
       }

@@ -20,7 +20,7 @@ function loadDetailedWarningsForLocation(
   }
 
   var language = $.getForecastLanguage();
-  var now = Time.now();
+  var now = $.getNow();
   var start = $.getFormattedDateForApiCall(now);
   var end = $.getFormattedDateForApiCall(now);
 

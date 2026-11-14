@@ -4,6 +4,46 @@ using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.System;
 
+// Return a date like "2026-02-15" to make debug builds treat that date as
+// today, e.g. to test the app outside the avalanche season. The time of day
+// still follows the real clock.
+(:debug,:glance,:background)
+function getDebugToday() as String? {
+  return "2025-03-15";
+}
+
+(:debug,:glance,:background)
+function getDebugOffsetSeconds() as Number {
+  var debugToday = $.getDebugToday();
+  if (debugToday == null) {
+    return 0;
+  }
+
+  return (
+    $.parseDate(debugToday + "T00:00:00").value() - Time.today().value()
+  );
+}
+
+(:debug,:glance,:background)
+function getNow() as Time.Moment {
+  return new Time.Moment(Time.now().value() + $.getDebugOffsetSeconds());
+}
+
+(:debug,:glance,:background)
+function getToday() as Time.Moment {
+  return new Time.Moment(Time.today().value() + $.getDebugOffsetSeconds());
+}
+
+(:release,:glance,:background)
+function getNow() as Time.Moment {
+  return Time.now();
+}
+
+(:release,:glance,:background)
+function getToday() as Time.Moment {
+  return Time.today();
+}
+
 (:background)
 function dayDuration(numDays as Number) as Time.Duration {
   return new Time.Duration(Gregorian.SECONDS_PER_DAY * numDays);
@@ -44,7 +84,7 @@ function parseDate(dateString as String) as Time.Moment {
 }
 
 function isToday(shortInfo as Gregorian.Info) {
-  var today = Gregorian.info(Time.today(), Time.FORMAT_SHORT);
+  var today = Gregorian.info($.getToday(), Time.FORMAT_SHORT);
 
   return (
     shortInfo.day == today.day &&
@@ -55,7 +95,7 @@ function isToday(shortInfo as Gregorian.Info) {
 
 function isYesterday(shortInfo as Gregorian.Info) {
   var yesterday = Gregorian.info(
-    $.subtractDays(Time.today(), 1),
+    $.subtractDays($.getToday(), 1),
     Time.FORMAT_SHORT
   );
 
@@ -67,7 +107,7 @@ function isYesterday(shortInfo as Gregorian.Info) {
 }
 
 function isTomorrow(shortInfo as Gregorian.Info) {
-  var tomorrow = Gregorian.info($.addDays(Time.today(), 1), Time.FORMAT_SHORT);
+  var tomorrow = Gregorian.info($.addDays($.getToday(), 1), Time.FORMAT_SHORT);
 
   return (
     shortInfo.day == tomorrow.day &&

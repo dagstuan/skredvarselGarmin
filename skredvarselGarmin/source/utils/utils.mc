@@ -441,7 +441,7 @@ function max(arr as Array<Numeric>) {
 public function getDangerLevelToday(
   forecast as SimpleAvalancheForecast
 ) as Number {
-  var today = Time.today();
+  var today = $.getToday();
   for (var i = 0; i < forecast.size(); i++) {
     var warning = forecast[i];
     var validity = warning["validity"] as Array;
@@ -465,8 +465,8 @@ public function getDisplayDateForWarning(
 }
 
 public function getStartDateForDetailedWarnings() {
-  var startDate = Time.today();
-  var now = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+  var startDate = $.getToday();
+  var now = Gregorian.info($.getNow(), Time.FORMAT_SHORT);
   if (now.hour >= $.NEXT_DAY_FORECAST_HOUR) {
     startDate = addDays(startDate, 1);
   }

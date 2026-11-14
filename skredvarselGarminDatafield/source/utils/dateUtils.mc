@@ -4,6 +4,46 @@ using Toybox.Time;
 using Toybox.Time.Gregorian;
 using Toybox.System;
 
+// Return a date like "2026-02-15" to make debug builds treat that date as
+// today, e.g. to test the datafield outside the avalanche season. The time of
+// day still follows the real clock.
+(:debug,:background)
+function getDebugToday() as String? {
+  return "2025-03-15";
+}
+
+(:debug,:background)
+function getDebugOffsetSeconds() as Number {
+  var debugToday = $.getDebugToday();
+  if (debugToday == null) {
+    return 0;
+  }
+
+  return (
+    $.parseDate(debugToday + "T00:00:00").value() - Time.today().value()
+  );
+}
+
+(:debug,:background)
+function getNow() as Time.Moment {
+  return new Time.Moment(Time.now().value() + $.getDebugOffsetSeconds());
+}
+
+(:debug,:background)
+function getToday() as Time.Moment {
+  return new Time.Moment(Time.today().value() + $.getDebugOffsetSeconds());
+}
+
+(:release,:background)
+function getNow() as Time.Moment {
+  return Time.now();
+}
+
+(:release,:background)
+function getToday() as Time.Moment {
+  return Time.today();
+}
+
 function getFormattedTimestamp(moment as Time.Moment) {
   var info = Gregorian.info(moment, Time.FORMAT_SHORT);
 
@@ -33,12 +73,12 @@ function _toDayNumber(info as Gregorian.Info) as Number {
 }
 
 function isToday(shortInfo as Gregorian.Info) {
-  var today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+  var today = Gregorian.info($.getNow(), Time.FORMAT_SHORT);
   return _toDayNumber(shortInfo) == _toDayNumber(today);
 }
 
 function isYesterday(shortInfo as Gregorian.Info) {
-  var today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+  var today = Gregorian.info($.getNow(), Time.FORMAT_SHORT);
   var infoNum = _toDayNumber(shortInfo);
   // Build yesterday's date by constructing a moment at noon of today then subtracting a day
   var todayNoon = Gregorian.moment({
@@ -57,7 +97,7 @@ function isYesterday(shortInfo as Gregorian.Info) {
 }
 
 function isTomorrow(shortInfo as Gregorian.Info) {
-  var today = Gregorian.info(Time.now(), Time.FORMAT_SHORT);
+  var today = Gregorian.info($.getNow(), Time.FORMAT_SHORT);
   var infoNum = _toDayNumber(shortInfo);
   var todayNoon = Gregorian.moment({
     :year => today.year,

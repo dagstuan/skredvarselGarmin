@@ -51,7 +51,7 @@ function loadDetailedWarningsForRegion(
 
   var language = $.getForecastLanguage();
 
-  var now = Time.now();
+  var now = $.getNow();
   var start = $.getFormattedDateForApiCall($.subtractDays(now, 2));
   var end = $.getForecastEndDateForApiCall(now, regionId);
 
