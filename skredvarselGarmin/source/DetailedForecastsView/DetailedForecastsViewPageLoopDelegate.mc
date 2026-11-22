@@ -17,6 +17,11 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
   private var _detailedWarnings as Array<DetailedAvalancheWarning>;
   private var _fetchedTime as Time.Moment;
 
+  // A pull changes day both when released and when the system reports the
+  // same touch as a swipe. Both can reach this delegate before the new view
+  // is shown, so only the first one changes day.
+  private var _hasChangedPage as Boolean = false;
+
   public function initialize(
     settings as DetailedWarningsViewPageLoopDelegateSettings
   ) {
@@ -99,12 +104,28 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     return DetailedForecastViewDelegate.onKey(evt);
   }
 
+  public function onDrag(evt as Ui.DragEvent) as Boolean {
+    var result = _view.onDrag(evt);
+    if (result == DRAG_TO_NEXT_DAY) {
+      onNxtPage();
+    } else if (result == DRAG_TO_PREVIOUS_DAY) {
+      onPrevPage();
+    }
+    return result != DRAG_IGNORED;
+  }
+
   public function onSwipe(evt as Ui.SwipeEvent) as Boolean {
     var direction = evt.getDirection();
     var isVertical = direction == Ui.SWIPE_UP || direction == Ui.SWIPE_DOWN;
-    if (isVertical && _view.isSwipeDraggingText(direction)) {
-      return true;
-    } else if (direction == Ui.SWIPE_UP) {
+    if (isVertical && $.isLatestTouchDragged) {
+      // Vertical touches are handled by onDrag. A quick flick that pulled the
+      // page changes day though, even if it didn't pull far enough.
+      if (!_view.isPulledInSwipeDirection(direction)) {
+        return true;
+      }
+    }
+
+    if (direction == Ui.SWIPE_UP) {
       onNxtPage();
       return true;
     } else if (direction == Ui.SWIPE_DOWN) {
@@ -115,6 +136,11 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
   }
 
   private function onNxtPage() as Void {
+    if (_hasChangedPage) {
+      return;
+    }
+    _hasChangedPage = true;
+
     var newVisibleDate = $.addDays(_visibleDate, 1);
 
     var newIndex = $.getDateIndexForDetailedWarnings(
@@ -135,6 +161,11 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
   }
 
   private function onPrevPage() as Void {
+    if (_hasChangedPage) {
+      return;
+    }
+    _hasChangedPage = true;
+
     var newVisibleDate = $.subtractDays(_visibleDate, 1);
 
     var newIndex = $.getDateIndexForDetailedWarnings(

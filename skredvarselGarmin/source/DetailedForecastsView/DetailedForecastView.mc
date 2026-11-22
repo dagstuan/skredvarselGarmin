@@ -7,6 +7,18 @@ using Toybox.Timer;
 
 using AvalancheUi;
 
+// True if the latest touch was reported as a drag. Vertical swipes are then
+// handled by DetailedForecastView.onDrag instead. Global, since the swipe can
+// arrive after a drag switched to another day's view.
+var isLatestTouchDragged as Boolean = false;
+
+enum DetailedForecastDragResult {
+  DRAG_IGNORED,
+  DRAG_HANDLED,
+  DRAG_TO_NEXT_DAY,
+  DRAG_TO_PREVIOUS_DAY,
+}
+
 typedef DetailedForecastViewSettings as {
   :regionId as String,
   :index as Number,
@@ -16,6 +28,15 @@ typedef DetailedForecastViewSettings as {
 
 class DetailedForecastView extends Ui.View {
   private const TICK_DURATION = 100;
+
+  private enum DragMode {
+    DRAG_MODE_NONE,
+    DRAG_MODE_UNDECIDED,
+    DRAG_MODE_TEXT,
+    DRAG_MODE_PULL,
+  }
+  // Movement before a drag counts as horizontal or vertical.
+  private const DRAG_SLOP = 8;
 
   private var _warning as DetailedAvalancheWarning?;
   private var _warnings as Array<DetailedAvalancheWarning>?;
@@ -33,11 +54,21 @@ class DetailedForecastView extends Ui.View {
   private var _footerHeight as Numeric = 0;
 
   private var _mainContent as DetailedForecastElements?;
-  // Where the text was scrolled when the latest touch started on it, from 0
-  // at the top to 1 at the bottom. Null if the touch didn't start on text
-  // that scrolls.
-  private var _touchStartScrollPosition as Float? = null;
+  // Touch dragging, see onDrag. Where the text was scrolled when the drag
+  // started on it, from 0 at the top to 1 at the bottom. Null if the drag
+  // didn't start on text that scrolls.
+  private var _dragStartScrollPosition as Float? = null;
+  private var _dragMode as Number = DRAG_MODE_NONE;
+  // Direction of the latest pull: -1 towards the next day, 1 towards the
+  // previous day, 0 if the latest drag wasn't a pull.
+  private var _pullDirection as Number = 0;
+  private var _dragStartX as Numeric = 0;
+  private var _dragStartY as Numeric = 0;
   private var _lastDragY as Numeric = 0;
+
+  // How far the page is pulled to change day. Negative when pulled up, towards
+  // the next day. Public, so it can be animated back.
+  public var pullOffset as Numeric = 0;
   private var _currentElement as Number = 0;
   private var _numElements as Number?;
 
@@ -148,9 +179,9 @@ class DetailedForecastView extends Ui.View {
     dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
     dc.clear();
 
-    _header.draw(dc);
+    _header.draw(dc, pullOffset);
 
-    var dangerLevelY0 = _headerHeight;
+    var dangerLevelY0 = _headerHeight + pullOffset;
     if ($.DrawOutlines) {
       $.drawOutline(dc, 0, dangerLevelY0, _width, _dangerLevelHeight);
     }
@@ -166,6 +197,10 @@ class DetailedForecastView extends Ui.View {
 
     var footerY0 = mainContentY0 + _mainContentHeight;
     _footer.draw(dc, footerY0);
+
+    if (pullOffset != 0) {
+      drawPullTarget(dc);
+    }
 
     _pageIndicator.draw(dc, _numWarnings, _index);
 
@@ -248,39 +283,192 @@ class DetailedForecastView extends Ui.View {
     });
   }
 
-  // Drags that start on text that scrolls drag the text.
-  public function onDrag(evt as Ui.DragEvent) as Boolean {
-    var y = evt.getCoordinates()[1];
+  // Touch dragging. A vertical drag that starts on text that scrolls drags
+  // the text, unless the text is already at the end in that direction. Other
+  // vertical drags pull the page towards the next or previous day, showing
+  // that day at the edge, and change to it when released far enough.
+  // Horizontal drags are left to the page swipes.
+  public function onDrag(evt as Ui.DragEvent) as DetailedForecastDragResult {
+    var coordinates = evt.getCoordinates();
+    var y = coordinates[1];
+    var type = evt.getType();
 
-    if (evt.getType() == Ui.DRAG_TYPE_START) {
+    if (type == Ui.DRAG_TYPE_START) {
+      $.isLatestTouchDragged = true;
+      _dragMode = DRAG_MODE_UNDECIDED;
+      _pullDirection = 0;
+      _dragStartX = coordinates[0];
+      _dragStartY = y;
+      _lastDragY = y;
+
       var mainContentY0 = _headerHeight + _dangerLevelHeight;
       var isInMainContent =
         y >= mainContentY0 && y <= mainContentY0 + _mainContentHeight;
-      _touchStartScrollPosition =
+      _dragStartScrollPosition =
         _mainContent != null && isInMainContent
           ? _mainContent.getScrollPosition()
           : null;
-    } else if (_touchStartScrollPosition != null) {
-      _mainContent.dragBy(y - _lastDragY);
-      Ui.requestUpdate();
+
+      // Grabbing the page while it springs back.
+      if (pullOffset != 0 && Ui has :cancelAllAnimations) {
+        Ui.cancelAllAnimations();
+      }
+      return DRAG_IGNORED;
     }
 
+    if (_dragMode == DRAG_MODE_UNDECIDED) {
+      decideDragMode(coordinates[0], y);
+    }
+
+    var dy = y - _lastDragY;
     _lastDragY = y;
-    return _touchStartScrollPosition != null;
+    if (_dragMode == DRAG_MODE_TEXT) {
+      _mainContent.dragBy(dy);
+    } else if (_dragMode == DRAG_MODE_PULL) {
+      var maxPull = getPullThreshold() * 1.3;
+      pullOffset = $.clamp(pullOffset + dy, -maxPull, maxPull);
+    }
+    Ui.requestUpdate();
+
+    // Only handled when dragging, so taps and horizontal swipes still work.
+    var result =
+      _dragMode == DRAG_MODE_TEXT || _dragMode == DRAG_MODE_PULL
+        ? DRAG_HANDLED
+        : DRAG_IGNORED;
+    if (type == Ui.DRAG_TYPE_STOP) {
+      if (_dragMode == DRAG_MODE_PULL) {
+        result = releasePull();
+      }
+      _dragMode = DRAG_MODE_NONE;
+    }
+    return result;
   }
 
-  // True if a vertical swipe dragged text, instead of changing the day. That
-  // is when the touch started on text that scrolls, unless the text was
-  // already at the bottom for swipes up, or at the top for swipes down.
-  public function isSwipeDraggingText(
+  private function decideDragMode(x as Numeric, y as Numeric) as Void {
+    var dx = x - _dragStartX;
+    var dy = y - _dragStartY;
+    if (dx.abs() < DRAG_SLOP && dy.abs() < DRAG_SLOP) {
+      return;
+    }
+
+    if (dx.abs() > dy.abs()) {
+      _dragMode = DRAG_MODE_NONE;
+    } else if (
+      _dragStartScrollPosition != null &&
+      (dy < 0 ? _dragStartScrollPosition < 1 : _dragStartScrollPosition > 0)
+    ) {
+      _dragMode = DRAG_MODE_TEXT;
+    } else {
+      _dragMode = DRAG_MODE_PULL;
+      _pullDirection = dy < 0 ? -1 : 1;
+    }
+  }
+
+  // True if the latest drag pulled the page in the direction of a swipe. A
+  // quick flick then changes day, even if it didn't pull far enough.
+  public function isPulledInSwipeDirection(
     direction as Ui.SwipeDirection
   ) as Boolean {
-    if (_touchStartScrollPosition == null) {
-      return false;
+    return direction == Ui.SWIPE_UP ? _pullDirection < 0 : _pullDirection > 0;
+  }
+
+  // Changes day if the page is pulled far enough, otherwise springs back.
+  private function releasePull() as DetailedForecastDragResult {
+    if (pullOffset.abs() >= getPullThreshold()) {
+      return pullOffset < 0 ? DRAG_TO_NEXT_DAY : DRAG_TO_PREVIOUS_DAY;
     }
-    return direction == Ui.SWIPE_UP
-      ? _touchStartScrollPosition < 1
-      : _touchStartScrollPosition > 0;
+
+    Ui.animate(
+      self,
+      :pullOffset,
+      Ui.ANIM_TYPE_EASE_OUT,
+      pullOffset,
+      0,
+      0.2,
+      null
+    );
+    return DRAG_HANDLED;
+  }
+
+  // How far the page must be pulled to change day: until the whole pull
+  // strip is visible, with some space to the edge of the screen. The strip
+  // has a gap, two lines of text, a gap and the chevron, as in
+  // drawPullTarget.
+  private function getPullThreshold() as Numeric {
+    return $.max([
+      _height * 0.25,
+      Gfx.getFontHeight(Gfx.FONT_XTINY) * (0.3 + 2 + 0.3 + 0.3 + 0.8),
+    ]);
+  }
+
+  // The day the page is pulled towards, in the space it was pulled from.
+  private function drawPullTarget(dc as Gfx.Dc) as Void {
+    var isNextDay = pullOffset < 0;
+    var targetIndex = isNextDay
+      ? (_index + 1) % _numWarnings
+      : (_index - 1 + _numWarnings) % _numWarnings;
+    var target = _warnings[targetIndex];
+
+    var areaHeight = pullOffset.abs();
+    var areaY0 = isNextDay ? _height - areaHeight : 0;
+    dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_BLACK);
+    dc.fillRectangle(0, areaY0, _width, areaHeight);
+
+    // The line and chevron turn white when releasing changes day.
+    var edgeY = isNextDay ? areaY0 : areaHeight;
+    dc.setColor(
+      areaHeight >= getPullThreshold() ? Gfx.COLOR_WHITE : Gfx.COLOR_DK_GRAY,
+      Gfx.COLOR_TRANSPARENT
+    );
+    dc.drawLine(0, edgeY, _width, edgeY);
+
+    var font = Gfx.FONT_XTINY;
+    var lineHeight = Gfx.getFontHeight(font);
+    var gap = lineHeight * 0.3;
+
+    var textY0 = isNextDay ? edgeY + gap : edgeY - gap - lineHeight * 2;
+
+    // The chevron is on the far side of the text, pointing towards the edge
+    // the day comes from: down below the next day, up above the previous day.
+    var chevronBaseY = isNextDay ? textY0 + lineHeight * 2 + gap : textY0 - gap;
+    var chevronTipY = chevronBaseY + lineHeight * 0.3 * (isNextDay ? 1 : -1);
+    var chevronHalfWidth = lineHeight * 0.4;
+    dc.setPenWidth(3);
+    dc.drawLine(
+      _width / 2 - chevronHalfWidth,
+      chevronBaseY,
+      _width / 2,
+      chevronTipY
+    );
+    dc.drawLine(
+      _width / 2,
+      chevronTipY,
+      _width / 2 + chevronHalfWidth,
+      chevronBaseY
+    );
+    dc.setPenWidth(1);
+
+    dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+    dc.drawText(
+      _width / 2,
+      textY0,
+      font,
+      $.getHumanReadableDateText($.getDisplayDateForWarning(target)),
+      Gfx.TEXT_JUSTIFY_CENTER
+    );
+
+    var dangerLevel = target["dangerLevel"];
+    dc.setColor($.colorize(dangerLevel), Gfx.COLOR_TRANSPARENT);
+    dc.drawText(
+      _width / 2,
+      textY0 + lineHeight,
+      font,
+      Lang.format("$1$ $2$", [
+        $.getOrLoadResourceString("Faregrad", :Level),
+        dangerLevel,
+      ]),
+      Gfx.TEXT_JUSTIFY_CENTER
+    );
   }
 
   public function goToNextVisibleElement() {

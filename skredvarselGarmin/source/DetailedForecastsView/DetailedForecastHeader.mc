@@ -118,9 +118,9 @@ public class DetailedForecastHeader {
     });
   }
 
-  public function draw(dc as Gfx.Dc) {
+  public function draw(dc as Gfx.Dc, offsetY as Numeric) {
     var totalHeight = _fontHeight * 2;
-    var topY = _locY + (_height - totalHeight) / 2;
+    var topY = _locY + offsetY + (_height - totalHeight) / 2;
 
     dc.drawBitmap(_locX + _width / 2 - _dateBitmapWidth / 2, topY, _dateBitmap);
 

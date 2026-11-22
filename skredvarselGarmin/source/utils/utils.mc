@@ -339,6 +339,15 @@ function exposedHeightZonesToFill(zones as Array<Boolean>) as Number {
   return 0;
 }
 
+function clamp(value as Numeric, low as Numeric, high as Numeric) as Numeric {
+  if (value < low) {
+    return low;
+  } else if (value > high) {
+    return high;
+  }
+  return value;
+}
+
 function min(a as Numeric, b as Numeric) {
   return a < b ? a : b;
 }
