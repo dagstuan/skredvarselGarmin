@@ -11,6 +11,8 @@ public class LavinprognoserDetailedWarning
     public required string MainText { get; init; }
     public required bool IsTendency { get; init; }
     public required IEnumerable<LavinprognoserAvalancheProblem> AvalancheProblems { get; init; }
+    public string SnowpackHistory { get; init; } = string.Empty;
+    public string MountainWeather { get; init; } = string.Empty;
 }
 
 public class LavinprognoserAvalancheProblem

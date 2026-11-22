@@ -15,6 +15,14 @@ public class DetailedAvalancheWarning
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public required string? EmergencyWarning { get; init; }
+
+    // Only included when requested, since they are long and the watch has
+    // little memory. When requested they are always set (empty if missing).
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? SnowpackHistory { get; init; }
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? MountainWeather { get; init; }
 }
 
 public class AvalancheProblem

@@ -10,8 +10,7 @@ using AvalancheUi;
 typedef DetailedForecastViewSettings as {
   :regionId as String,
   :index as Number,
-  :numWarnings as Number,
-  :warning as DetailedAvalancheWarning,
+  :warnings as Array<DetailedAvalancheWarning>,
   :fetchedTime as Time.Moment,
 };
 
@@ -19,6 +18,7 @@ class DetailedForecastView extends Ui.View {
   private const TICK_DURATION = 100;
 
   private var _warning as DetailedAvalancheWarning?;
+  private var _warnings as Array<DetailedAvalancheWarning>?;
   private var _isLoading as Boolean = false;
   private var _index as Number = 0;
   private var _numWarnings as Number = 0;
@@ -56,12 +56,7 @@ class DetailedForecastView extends Ui.View {
 
     _regionId = settings[:regionId];
 
-    setWarning(
-      settings[:index],
-      settings[:numWarnings],
-      settings[:warning],
-      settings[:fetchedTime]
-    );
+    setWarning(settings[:index], settings[:warnings], settings[:fetchedTime]);
   }
 
   public function onShow() {
@@ -228,7 +223,9 @@ class DetailedForecastView extends Ui.View {
   private function setupMainContent(dc as Gfx.Dc) {
     _mainContent = new DetailedForecastElements({
       :dc => dc,
-      :warning => _warning,
+      :regionId => _regionId,
+      :warnings => _warnings,
+      :index => _index,
       :height => _mainContentHeight,
       :fullWidth => _width,
     });
@@ -276,13 +273,13 @@ class DetailedForecastView extends Ui.View {
 
   public function setWarning(
     index as Number,
-    numWarnings as Number,
-    warning as DetailedAvalancheWarning,
+    warnings as Array<DetailedAvalancheWarning>,
     fetchedTime as Time.Moment
   ) {
     _index = index;
-    _numWarnings = numWarnings;
-    _warning = warning;
+    _numWarnings = warnings.size();
+    _warnings = warnings;
+    _warning = warnings[index];
 
     _header = null;
     _dangerLevelBitmap = null;
@@ -290,7 +287,11 @@ class DetailedForecastView extends Ui.View {
     _mainContent = null;
     _footer = null;
 
-    _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
+    _numElements = $.getNumDetailedForecastElements(
+      _regionId,
+      _warnings,
+      _index
+    );
     _forecastElementsIndicator = new AvalancheUi.ForecastElementsIndicator(
       _numElements
     );

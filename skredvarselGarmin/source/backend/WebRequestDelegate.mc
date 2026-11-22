@@ -83,6 +83,36 @@ class WebRequestDelegate {
     $.makeGetRequestWithAuthorization($.ApiBaseUrl + _path, method(:onReceive));
   }
 
+  // For detailed forecasts, stores the texts per day under their own keys.
+  // The texts are removed from data, and data without them is returned, to be
+  // stored as the forecast. Storing it all as one value needs more memory than
+  // the background process has. See DetailedWarningTexts.mc.
+  //
+  // Returns the same object, not a copy, since a copy would need memory for
+  // the forecast twice.
+  (:noLimitedBackgroundMemory)
+  private function storeTexts(
+    data as WebRequestCallbackData
+  ) as WebRequestCallbackData {
+    if (data instanceof Array && $.isDetailedWarningsCacheKey(_storageKey)) {
+      // Passed on directly, so the texts are freed before the forecast is
+      // stored.
+      $.storeDetailedWarningTexts(
+        _storageKey,
+        $.removeDetailedWarningTexts(data as Array)
+      );
+    }
+    return data;
+  }
+
+  // Limited devices don't fetch the texts.
+  (:limitedBackgroundMemory)
+  private function storeTexts(
+    data as WebRequestCallbackData
+  ) as WebRequestCallbackData {
+    return data;
+  }
+
   function onReceive(
     responseCode as Number,
     data as WebRequestCallbackData
@@ -95,7 +125,8 @@ class WebRequestDelegate {
       }
 
       Storage.deleteValue(_storageKey);
-      Storage.setValue(_storageKey, [data, Time.now().value()]);
+      var dataWithoutTexts = storeTexts(data);
+      Storage.setValue(_storageKey, [dataWithoutTexts, Time.now().value()]);
     } else if (responseCode == 401) {
       if ($.Debug) {
         $.log("Api responded with 401. No subscription for user.");

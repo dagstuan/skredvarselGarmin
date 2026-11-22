@@ -139,7 +139,8 @@ class ServiceDelegate extends System.ServiceDelegate {
       regionId,
       language,
       start,
-      end
+      end,
+      $.fetchSnowpackAndWeather()
     );
     var storageKey = $.getDetailedWarningsCacheKeyForRegion(regionId);
 

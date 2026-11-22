@@ -76,12 +76,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
         }
       }
 
-      _view.setWarning(
-        index,
-        _detailedWarnings.size(),
-        _detailedWarnings[index],
-        _fetchedTime
-      );
+      _view.setWarning(index, _detailedWarnings, _fetchedTime);
     }
 
     _view.setIsLoading(false);
@@ -157,8 +152,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     return new DetailedForecastView({
       :regionId => _regionId,
       :index => index,
-      :numWarnings => _detailedWarnings.size(),
-      :warning => _detailedWarnings[index],
+      :warnings => _detailedWarnings,
       :fetchedTime => _fetchedTime,
     });
   }

@@ -95,8 +95,7 @@ public class ForecastMenuDelegate extends Ui.Menu2InputDelegate {
     var view = new DetailedForecastView({
       :regionId => regionId,
       :index => startIndex,
-      :numWarnings => data.size(),
-      :warning => data[startIndex],
+      :warnings => data,
       :fetchedTime => fetchedTime,
     });
     var delegate = new DetailedForecastViewPageLoopDelegate({

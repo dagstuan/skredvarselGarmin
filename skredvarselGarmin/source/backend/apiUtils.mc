@@ -30,12 +30,26 @@ function getForecastEndDateForApiCall(
   return $.getFormattedDateForApiCall($.addDays(now, endOffset));
 }
 
+// Snowpack history and mountain weather roughly triple the size of the
+// detailed forecasts (about 12 KB of JSON for six Swedish days), which is too
+// much for devices with limited memory. They show the forecasts without them.
+(:background,:limitedBackgroundMemory)
+function fetchSnowpackAndWeather() as Boolean {
+  return false;
+}
+
+(:background,:noLimitedBackgroundMemory)
+function fetchSnowpackAndWeather() as Boolean {
+  return true;
+}
+
 // Returns start/end dates for a background detailed forecast fetch.
 // On memory-limited devices, only fetch today or tomorrow (single day).
 (:background,:limitedBackgroundMemory)
 function getBackgroundDetailedForecastStartDate(now as Time.Moment) as String {
   var nowInfo = Gregorian.info(now, Time.FORMAT_SHORT);
-  var targetDay = nowInfo.hour >= $.NEXT_DAY_FORECAST_HOUR ? $.addDays(now, 1) : now;
+  var targetDay =
+    nowInfo.hour >= $.NEXT_DAY_FORECAST_HOUR ? $.addDays(now, 1) : now;
   return $.getFormattedDateForApiCall(targetDay);
 }
 
@@ -50,7 +64,8 @@ function getBackgroundDetailedForecastEndDate(
   regionId as String?
 ) as String {
   var nowInfo = Gregorian.info(now, Time.FORMAT_SHORT);
-  var targetDay = nowInfo.hour >= $.NEXT_DAY_FORECAST_HOUR ? $.addDays(now, 1) : now;
+  var targetDay =
+    nowInfo.hour >= $.NEXT_DAY_FORECAST_HOUR ? $.addDays(now, 1) : now;
   return $.getFormattedDateForApiCall(targetDay);
 }
 

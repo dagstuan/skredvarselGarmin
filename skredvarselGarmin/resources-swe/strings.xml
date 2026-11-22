@@ -54,4 +54,6 @@
 	<string id="ProblemTypeWetSnowSlab">Våt snö (flaklavin)</string>
 	<string id="ProblemTypeGlidingSnow">Glidlavin</string>
 	<string id="NoForecastText">Ingen prognostext tillgänglig.</string>
+	<string id="SnowpackHistory">Snötäckets historik</string>
+	<string id="MountainWeather">Fjällväder</string>
 </strings>

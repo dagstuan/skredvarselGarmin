@@ -39,6 +39,20 @@ public class LavinprognoserWebForecast
 
     [JsonPropertyName("avalancheProblem")]
     public LavinprognoserWebAvalancheProblemContainer? AvalancheProblemContainer { get; init; }
+
+    // "Rapport från området": field work, avalanche activity, snow and weather observations.
+    [JsonPropertyName("snowInfo")]
+    public LavinprognoserWebTextSection? SnowInfo { get; init; }
+
+    // "Fjällväderprognos": the mountain weather forecast for the validity period.
+    [JsonPropertyName("weatherInfo")]
+    public LavinprognoserWebTextSection? WeatherInfo { get; init; }
+}
+
+public class LavinprognoserWebTextSection
+{
+    [JsonPropertyName("content")]
+    public string? Content { get; init; }
 }
 
 public class LavinprognoserWebAvalancheProblemContainer

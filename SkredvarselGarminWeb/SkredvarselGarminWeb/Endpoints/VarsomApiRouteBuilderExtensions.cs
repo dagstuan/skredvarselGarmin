@@ -25,11 +25,12 @@ public static class VarsomApiRouteBuilderExtensions
             string langKey,
             DateOnly from,
             DateOnly to,
+            bool? includeSnowpackAndWeather,
             IVarsomWarningService varsomWarningService) =>
         {
             var varsomWarnings = await varsomWarningService.GetDetailedWarningsByRegion(regionId, langKey, from, to);
 
-            return varsomWarnings.Select(vw => vw.ToDetailedAvalancheWarning(langKey));
+            return varsomWarnings.Select(vw => vw.ToDetailedAvalancheWarning(langKey, includeSnowpackAndWeather ?? false));
         });
 
         if (authOptions.UseWatchAuthorization)

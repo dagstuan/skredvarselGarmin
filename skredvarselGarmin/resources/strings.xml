@@ -54,4 +54,6 @@
 	<string id="ProblemTypeWetSnowSlab">Wet snow (slab avalanche)</string>
 	<string id="ProblemTypeGlidingSnow">Gliding snow avalanche</string>
 	<string id="NoForecastText">No forecast text available.</string>
+	<string id="SnowpackHistory">Snowpack history</string>
+	<string id="MountainWeather">Mountain weather</string>
 </strings>

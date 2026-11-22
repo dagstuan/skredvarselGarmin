@@ -13,7 +13,7 @@ public static class LavinprognoserWarningMapper
         HasEmergency = false,
     };
 
-    public static DetailedAvalancheWarning ToDetailedAvalancheWarning(this LavinprognoserDetailedWarning warning) => new()
+    public static DetailedAvalancheWarning ToDetailedAvalancheWarning(this LavinprognoserDetailedWarning warning, bool includeSnowpackAndWeather = false) => new()
     {
         Published = warning.PublishTime,
         DangerLevel = warning.DangerLevel,
@@ -32,6 +32,8 @@ public static class LavinprognoserWarningMapper
             TriggerSensitivity = p.TriggerSensitivity,
             Propagation = p.Propagation,
         }),
+        SnowpackHistory = includeSnowpackAndWeather ? warning.SnowpackHistory : null,
+        MountainWeather = includeSnowpackAndWeather ? warning.MountainWeather : null,
     };
 
     // Names match lavinprognoser.se display labels

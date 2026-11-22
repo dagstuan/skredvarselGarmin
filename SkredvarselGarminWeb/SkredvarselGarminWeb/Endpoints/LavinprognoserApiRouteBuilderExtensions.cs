@@ -29,10 +29,11 @@ public static class LavinprognoserApiRouteBuilderExtensions
             int areaId,
             DateOnly from,
             DateOnly to,
+            bool? includeSnowpackAndWeather,
             ILavinprognoserWarningService lavinprognoserWarningService) =>
         {
             var warnings = await lavinprognoserWarningService.GetDetailedWarningsByArea(areaId, from, to);
-            return Results.Ok(warnings.Select(w => w.ToDetailedAvalancheWarning()));
+            return Results.Ok(warnings.Select(w => w.ToDetailedAvalancheWarning(includeSnowpackAndWeather ?? false)));
         });
 
         if (authOptions.UseWatchAuthorization)

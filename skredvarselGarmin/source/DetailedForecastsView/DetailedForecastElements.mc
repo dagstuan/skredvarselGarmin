@@ -14,17 +14,91 @@ typedef AvalancheForecastElement as interface {
 
 typedef DetailedForecastElementsSettings as {
   :dc as Gfx.Dc,
-  :warning as DetailedAvalancheWarning,
+  :regionId as String,
+  :warnings as Array<DetailedAvalancheWarning>,
+  :index as Number,
   :locY as Numeric,
   :height as Numeric,
   :fullWidth as Numeric,
 };
 
+(:noLimitedBackgroundMemory)
+function hasText(text as String?) as Boolean {
+  return text != null && text.length() > 0;
+}
+
+// [snowpack history parts, mountain weather parts] for the warning at index.
+// Mountain weather is shown for the day and the day before it, newest first.
+(:noLimitedBackgroundMemory)
+function getTextSectionParts(
+  regionId as String,
+  warnings as Array<DetailedAvalancheWarning>,
+  index as Number
+) as [Array<AvalancheUi.TextSectionPart>, Array<AvalancheUi.TextSectionPart>] {
+  var snowpackParts = [] as Array<AvalancheUi.TextSectionPart>;
+  var weatherParts = [] as Array<AvalancheUi.TextSectionPart>;
+
+  for (var i = index; i >= 0 && i >= index - 1; i--) {
+    var texts = $.getDetailedWarningTexts(regionId, warnings, i);
+    if (texts == null) {
+      continue;
+    }
+
+    if (i == index && $.hasText(texts[0])) {
+      snowpackParts.add([
+        // Written when the forecast was published, like on varsom.no.
+        $.getHumanReadableDateText($.parseDate(warnings[i]["published"])),
+        texts[0],
+      ]);
+    }
+
+    if ($.hasText(texts[1])) {
+      weatherParts.add([
+        $.getHumanReadableDateText($.getDisplayDateForWarning(warnings[i])),
+        texts[1],
+      ]);
+    }
+  }
+
+  return [snowpackParts, weatherParts];
+}
+
+// Main text, one page per avalanche problem, then snowpack history and
+// mountain weather when present.
+(:noLimitedBackgroundMemory)
+function getNumDetailedForecastElements(
+  regionId as String,
+  warnings as Array<DetailedAvalancheWarning>,
+  index as Number
+) as Number {
+  var numElements =
+    (warnings[index]["avalancheProblems"] as Array).size() + 1;
+  var parts = $.getTextSectionParts(regionId, warnings, index);
+  for (var i = 0; i < parts.size(); i++) {
+    if (parts[i].size() > 0) {
+      numElements += 1;
+    }
+  }
+  return numElements;
+}
+
+(:limitedBackgroundMemory)
+function getNumDetailedForecastElements(
+  regionId as String,
+  warnings as Array<DetailedAvalancheWarning>,
+  index as Number
+) as Number {
+  return (warnings[index]["avalancheProblems"] as Array).size() + 1;
+}
+
 public class DetailedForecastElements {
   private const ANIMATION_TIME_SECONDS = 0.3;
   private const ANIMATION_STEPS = ANIMATION_TIME_SECONDS * 60; // 60 FPS
 
+  private var _regionId as String;
   private var _warning as DetailedAvalancheWarning;
+  private var _warnings as Array<DetailedAvalancheWarning>;
+  private var _index as Number;
 
   private var _fullWidth as Numeric;
 
@@ -46,14 +120,21 @@ public class DetailedForecastElements {
       : "See complete forecast at varsom.no";
 
   public function initialize(settings as DetailedForecastElementsSettings) {
-    _warning = settings[:warning];
+    _regionId = settings[:regionId];
+    _warnings = settings[:warnings];
+    _index = settings[:index];
+    _warning = _warnings[_index];
     _fullWidth = settings[:fullWidth];
 
     _areaWidth = Math.ceil(_fullWidth * 0.84);
     _areaHeight = settings[:height];
     _x0 = _fullWidth / 2 - _areaWidth / 2;
 
-    _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
+    _numElements = $.getNumDetailedForecastElements(
+      _regionId,
+      _warnings,
+      _index
+    );
     _elements = new [_numElements];
     setupElements(settings[:dc]);
 
@@ -144,30 +225,53 @@ public class DetailedForecastElements {
 
   private function setupElements(dc as Gfx.Dc) {
     var avalancheProblems = _warning["avalancheProblems"] as Array;
+    var numProblems = avalancheProblems.size();
 
-    for (var i = 0; i < _elements.size(); i++) {
-      if (i == 0) {
-        var mainText = new AvalancheUi.MainText({
+    _elements[0] = new AvalancheUi.MainText({
+      :dc => dc,
+      :text => getMainText(),
+      :emergencyWarning => _warning["emergencyWarning"],
+      :width => _areaWidth,
+      :height => _areaHeight,
+    });
+
+    for (var i = 0; i < numProblems; i++) {
+      _elements[i + 1] = new AvalancheUi.AvalancheProblemUi({
+        :dc => dc,
+        :problem => avalancheProblems[i],
+        :width => _areaWidth,
+        :height => _areaHeight,
+      });
+    }
+
+    setupTextElements(dc, numProblems + 1);
+  }
+
+  // Snowpack history and mountain weather pages, starting at nextIndex.
+  (:noLimitedBackgroundMemory)
+  private function setupTextElements(dc as Gfx.Dc, nextIndex as Number) {
+    var parts = $.getTextSectionParts(_regionId, _warnings, _index);
+    var titles = [
+      $.getOrLoadResourceString("Snødekkehistorikk", :SnowpackHistory),
+      $.getOrLoadResourceString("Fjellvær", :MountainWeather),
+    ];
+
+    for (var i = 0; i < parts.size(); i++) {
+      if (parts[i].size() > 0) {
+        _elements[nextIndex] = new AvalancheUi.TextSection({
           :dc => dc,
-          :text => getMainText(),
-          :emergencyWarning => _warning["emergencyWarning"],
+          :title => titles[i],
+          :parts => parts[i],
           :width => _areaWidth,
           :height => _areaHeight,
         });
-
-        _elements[i] = mainText;
-      } else {
-        var problemUi = new AvalancheUi.AvalancheProblemUi({
-          :dc => dc,
-          :problem => avalancheProblems[i - 1],
-          :width => _areaWidth,
-          :height => _areaHeight,
-        });
-
-        _elements[i] = problemUi;
+        nextIndex += 1;
       }
     }
   }
+
+  (:limitedBackgroundMemory)
+  private function setupTextElements(dc as Gfx.Dc, nextIndex as Number) {}
 
   public function draw(dc as Gfx.Dc, y0 as Numeric) {
     if ($.DrawOutlines) {
