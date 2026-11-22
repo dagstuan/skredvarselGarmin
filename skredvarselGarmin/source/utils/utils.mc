@@ -1,6 +1,7 @@
 import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
+using Toybox.Application;
 using Toybox.Graphics;
 using Toybox.Time;
 using Toybox.Time.Gregorian;
@@ -111,126 +112,42 @@ function getSwedishNumericRegionId(regionId as String) as String {
 
 (:glance)
 function getRegionName(regionId as String or Number) as String {
-  if (regionId instanceof Lang.String) {
-    if ($.isSwedishRegion(regionId as String)) {
-      return $.getSwedishRegionName(regionId as String);
-    }
-    regionId = regionId.toNumber();
-  }
-
-  if (regionId == 3003) {
-    return "Nordenskiöld Land";
-  } else if (regionId == 3006) {
-    return "Finnmarkskysten";
-  } else if (regionId == 3007) {
-    return "Vest-Finnmark";
-  } else if (regionId == 3009) {
-    return "Nord-Troms";
-  } else if (regionId == 3010) {
-    return "Lyngen";
-  } else if (regionId == 3011) {
-    return "Tromsø";
-  } else if (regionId == 3012) {
-    return "Sør-Troms";
-  } else if (regionId == 3013) {
-    return "Indre Troms";
-  } else if (regionId == 3014) {
-    return "Lofoten og Vesterålen";
-  } else if (regionId == 3015) {
-    return "Ofoten";
-  } else if (regionId == 3016) {
-    return "Salten";
-  } else if (regionId == 3017) {
-    return "Svartisen";
-  } else if (regionId == 3018) {
-    return "Helgeland";
-  } else if (regionId == 3022) {
-    return "Trollheimen";
-  } else if (regionId == 3023) {
-    return "Romsdal";
-  } else if (regionId == 3024) {
-    return "Sunnmøre";
-  } else if (regionId == 3027) {
-    return "Indre Fjordane";
-  } else if (regionId == 3028) {
-    return "Jotunheimen";
-  } else if (regionId == 3029) {
-    return "Indre Sogn";
-  } else if (regionId == 3031) {
-    return "Voss";
-  } else if (regionId == 3032) {
-    return "Hallingdal";
-  } else if (regionId == 3034) {
-    return "Hardanger";
-  } else if (regionId == 3035) {
-    return "Vest-Telemark";
-  } else if (regionId == 3037) {
-    return "Heiane";
-  }
-
-  return "Ukjent region";
+  return $.getRegionNames(regionId)[0];
 }
 
 (:glance)
 function getShortRegionName(regionId as String or Number) as String {
-  if (regionId instanceof Lang.String) {
-    if ($.isSwedishRegion(regionId as String)) {
-      return $.getSwedishShortRegionName(regionId as String);
-    }
-    regionId = regionId.toNumber();
+  return $.getRegionNames(regionId)[1];
+}
+
+// [name, short name] of a region. The names are stored in one string resource
+// per country instead of in code, since the glance has little memory and only
+// shows one region. Only that country's names are loaded, while looking up.
+(:glance)
+function getRegionNames(regionId as String or Number) as [String, String] {
+  var id = regionId.toString();
+  var isSwedish = $.isSwedishRegion(id);
+  var key = ";" + (isSwedish ? $.getSwedishNumericRegionId(id) : id) + "=";
+
+  var names =
+    Application.loadResource(
+      isSwedish
+        ? Rez.Strings.SwedishRegionNames
+        : Rez.Strings.NorwegianRegionNames
+    ) as String;
+  var start = names.find(key);
+  if (start == null) {
+    var unknownName = isSwedish ? id : "Ukjent region";
+    return [unknownName, unknownName];
   }
 
-  if (regionId == 3003) {
-    return "Nordenskiöld L.";
-  } else if (regionId == 3006) {
-    return "Finnmarksk.";
-  } else if (regionId == 3007) {
-    return "V. Finnmark";
-  } else if (regionId == 3009) {
-    return "N. Troms";
-  } else if (regionId == 3010) {
-    return "Lyngen";
-  } else if (regionId == 3011) {
-    return "Tromsø";
-  } else if (regionId == 3012) {
-    return "S. Troms";
-  } else if (regionId == 3013) {
-    return "I. Troms";
-  } else if (regionId == 3014) {
-    return "Lofoten/Vesterål.";
-  } else if (regionId == 3015) {
-    return "Ofoten";
-  } else if (regionId == 3016) {
-    return "Salten";
-  } else if (regionId == 3017) {
-    return "Svartisen";
-  } else if (regionId == 3018) {
-    return "Helgeland";
-  } else if (regionId == 3022) {
-    return "Trollheimen";
-  } else if (regionId == 3023) {
-    return "Romsdal";
-  } else if (regionId == 3024) {
-    return "Sunnmøre";
-  } else if (regionId == 3027) {
-    return "I. Fjordane";
-  } else if (regionId == 3028) {
-    return "Jotunheimen";
-  } else if (regionId == 3029) {
-    return "I. Sogn";
-  } else if (regionId == 3031) {
-    return "Voss";
-  } else if (regionId == 3032) {
-    return "Hallingdal";
-  } else if (regionId == 3034) {
-    return "Hardanger";
-  } else if (regionId == 3035) {
-    return "V. Telemark";
-  } else if (regionId == 3037) {
-    return "Heiane";
-  }
-
-  return $.getRegionName(regionId);
+  names = names.substring(start + key.length(), names.length());
+  names = names.substring(0, names.find(";"));
+  var separator = names.find("|");
+  return [
+    names.substring(0, separator),
+    names.substring(separator + 1, names.length()),
+  ];
 }
 
 (:background)
