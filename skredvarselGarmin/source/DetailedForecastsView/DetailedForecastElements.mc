@@ -93,7 +93,9 @@ function getNumDetailedForecastElements(
 
 public class DetailedForecastElements {
   private const ANIMATION_TIME_SECONDS = 0.3;
-  private const ANIMATION_STEPS = ANIMATION_TIME_SECONDS * 60; // 60 FPS
+  // How far, in pages, a page must be dragged sideways to change page,
+  // unless it is flicked.
+  private const DRAG_THRESHOLD = 0.25;
 
   private var _regionId as String;
   private var _warning as DetailedAvalancheWarning;
@@ -106,10 +108,17 @@ public class DetailedForecastElements {
   private var _areaHeight as Numeric;
   private var _x0 as Numeric;
 
-  public var animationTime = 0;
-  private var _animating = false;
+  // The pages loop. position is the horizontal scroll position in pages: 0
+  // when the first page is shown, 1 for the second and so on. It follows the
+  // finger when dragged, and is animated towards _target, the page being
+  // moved to. Neither is wrapped around while moving, so going past the last
+  // page moves on to page _numElements, which is drawn as the first page.
+  // Public, so it can be animated.
+  public var position as Float = 0.0;
+  private var _target as Number = 0;
+  private var _isAnimating as Boolean = false;
+  // The page being moved to, wrapped around.
   private var _currentPage = 0;
-  private var _previousPage = -1;
   private var _numElements as Number;
 
   private var _elements as Array<AvalancheForecastElement?>;
@@ -161,30 +170,56 @@ public class DetailedForecastElements {
     }
   }
 
+  // Each of these returns the page being moved to.
   public function goToNextElement() as Number {
-    if (_currentPage == _numElements - 1) {
-      return _currentPage;
-    }
-
-    setPage(_currentPage + 1);
-    animateToVisibleElement();
-    return _currentPage;
+    finishAnimation();
+    return goToElement(_target + 1);
   }
 
   public function goToPreviousElement() as Number {
-    if (_currentPage == 0) {
-      return _currentPage;
-    }
+    finishAnimation();
+    return goToElement(_target - 1);
+  }
 
-    setPage(_currentPage - 1);
-    animateToVisibleElement();
+  // Touch dragging sideways: true if there are other pages to drag to.
+  public function canDragSideways() as Boolean {
+    return _numElements > 1;
+  }
+
+  // Moves the pages by dx with the finger, at most one page either way.
+  public function dragSidewaysBy(dx as Numeric) as Void {
+    position = $.clamp(
+      position - dx.toFloat() / _fullWidth,
+      _target - 1,
+      _target + 1
+    );
+  }
+
+  // Moves to the page dragged towards if it was dragged far enough or
+  // flicked the same way, otherwise back to the current page. flick is 1 if
+  // flicked towards the next page, -1 towards the previous, otherwise 0.
+  public function releaseSidewaysDrag(flick as Number) as Number {
+    var dragged = position - _target;
+    if (dragged >= DRAG_THRESHOLD || (flick > 0 && dragged > 0)) {
+      return goToNextElement();
+    } else if (dragged <= -DRAG_THRESHOLD || (flick < 0 && dragged < 0)) {
+      return goToPreviousElement();
+    }
+    animateToTarget();
     return _currentPage;
   }
 
-  public function toggleVisibleElement() as Number {
-    setPage((_currentPage + 1) % _numElements);
-    animateToVisibleElement();
-    return _currentPage;
+  // Finishes a running page animation at once, so a drag can start from a
+  // page at rest.
+  public function finishAnimation() as Void {
+    if (_isAnimating && Ui has :cancelAllAnimations) {
+      Ui.cancelAllAnimations();
+    }
+  }
+
+  // True while the pages are dragged or animated.
+  private function isMoving() as Boolean {
+    return position != _target.toFloat();
   }
 
   // For dragging the visible element's text on touch screens. Null if it
@@ -192,7 +227,7 @@ public class DetailedForecastElements {
   // top to 1 at the bottom.
   public function getScrollPosition() as Float? {
     var element = _elements[_currentPage];
-    if (!_animating && element != null && element has :getScrollPosition) {
+    if (!isMoving() && element != null && element has :getScrollPosition) {
       return element.getScrollPosition();
     }
     return null;
@@ -207,39 +242,49 @@ public class DetailedForecastElements {
     }
   }
 
-  private function setPage(newPage as Number) {
-    var prevPage = _currentPage;
+  private function goToElement(target as Number) as Number {
+    if (_numElements < 2) {
+      return _currentPage;
+    }
+
+    var newPage = ((target % _numElements) + _numElements) % _numElements;
+    if (newPage != _currentPage) {
+      var prevElement = _elements[_currentPage];
+      if (prevElement != null) {
+        prevElement.onHide();
+      }
+      var newElement = _elements[newPage];
+      if (newElement != null) {
+        newElement.onShow();
+      }
+    }
+
+    _target = target;
     _currentPage = newPage;
-    _previousPage = prevPage;
-
-    var prevElement = _elements[_previousPage];
-    if (prevElement != null) {
-      prevElement.onHide();
-    }
-
-    var currElement = _elements[_currentPage];
-    if (currElement != null) {
-      currElement.onShow();
-    }
+    animateToTarget();
+    return _currentPage;
   }
 
-  private function animateToVisibleElement() as Void {
-    _animating = true;
-
+  private function animateToTarget() as Void {
+    _isAnimating = true;
     Ui.animate(
       self,
-      :animationTime,
-      Ui.ANIM_TYPE_EASE_IN_OUT,
-      0,
-      ANIMATION_STEPS,
+      :position,
+      Ui.ANIM_TYPE_EASE_OUT,
+      position,
+      _target,
       ANIMATION_TIME_SECONDS,
-      method(:pageAnimateComplete)
+      method(:onAnimationComplete)
     );
   }
 
-  public function pageAnimateComplete() as Void {
-    _animating = false;
-    animationTime = 0;
+  // Wraps the position back around once at rest.
+  public function onAnimationComplete() as Void {
+    _isAnimating = false;
+    if (!isMoving()) {
+      _target = _currentPage;
+      position = _currentPage.toFloat();
+    }
     Ui.requestUpdate();
   }
 
@@ -298,26 +343,20 @@ public class DetailedForecastElements {
       $.drawOutline(dc, _x0, y0, _areaWidth, _areaHeight);
     }
 
-    var xOffset = -(_currentPage * _fullWidth);
-
-    if (_animating) {
-      var direction = _currentPage > _previousPage ? 1 : -1;
-      var diff = ((_currentPage - _previousPage) * _fullWidth).abs();
-
-      if (direction > 0) {
-        xOffset =
-          -_previousPage * _fullWidth -
-          (animationTime / ANIMATION_STEPS) * diff;
-      } else {
-        xOffset =
-          -_previousPage * _fullWidth +
-          (animationTime / ANIMATION_STEPS) * diff;
+    // Draws the pages that are on screen, in pages from the position,
+    // wrapped around so the last page is next to the first.
+    var half = _numElements / 2.0;
+    for (var i = 0; i < _numElements; i++) {
+      var pagesAway = i - position;
+      while (pagesAway > half) {
+        pagesAway -= _numElements;
       }
-    }
-
-    for (var i = 0; i < _elements.size(); i++) {
-      _elements[i].draw(dc, _x0 + xOffset, y0);
-      xOffset += _fullWidth;
+      while (pagesAway <= -half) {
+        pagesAway += _numElements;
+      }
+      if (pagesAway.abs() < 1) {
+        _elements[i].draw(dc, _x0 + pagesAway * _fullWidth, y0);
+      }
     }
   }
 

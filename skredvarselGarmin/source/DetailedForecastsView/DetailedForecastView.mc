@@ -8,9 +8,9 @@ using Toybox.Timer;
 
 using AvalancheUi;
 
-// True if the latest touch was reported as a drag. Vertical swipes are then
-// ignored, since DetailedForecastView.onDrag handles the touch. Global, since
-// the swipe can arrive after a drag switched to another day's view.
+// True if the latest touch was reported as a drag. Swipes are then ignored,
+// since DetailedForecastView.onDrag handles the touch. Global, since the
+// swipe can arrive after a drag switched to another day's view.
 var isLatestTouchDragged as Boolean = false;
 
 enum DetailedForecastDragResult {
@@ -35,11 +35,13 @@ class DetailedForecastView extends Ui.View {
     DRAG_MODE_UNDECIDED,
     DRAG_MODE_TEXT,
     DRAG_MODE_PULL,
+    DRAG_MODE_SIDEWAYS,
   }
   // Movement before a drag counts as horizontal or vertical.
   private const DRAG_SLOP = 8;
-  // Releasing a pull at least this fast, in screens per second, flicks to the
-  // next or previous day, even if it wasn't pulled far enough.
+  // Releasing a pull or sideways drag at least this fast, in screens per
+  // second, flicks to the next or previous day or page, even if it wasn't
+  // dragged far enough.
   private const FLICK_SPEED = 1.5;
   // The speed of a drag is measured over at least this long. Drag events
   // can come only a millisecond apart, too close to measure speed between.
@@ -68,11 +70,14 @@ class DetailedForecastView extends Ui.View {
   private var _dragMode as Number = DRAG_MODE_NONE;
   private var _dragStartX as Numeric = 0;
   private var _dragStartY as Numeric = 0;
+  private var _lastDragX as Numeric = 0;
   private var _lastDragY as Numeric = 0;
   // Where the finger was at two earlier times, at least
   // DRAG_SPEED_SAMPLE_MS apart, to measure how fast it moves.
+  private var _dragSampleX as Numeric = 0;
   private var _dragSampleY as Numeric = 0;
   private var _dragSampleTime as Number = 0;
+  private var _previousDragSampleX as Numeric = 0;
   private var _previousDragSampleY as Numeric = 0;
   private var _previousDragSampleTime as Number = 0;
 
@@ -297,7 +302,7 @@ class DetailedForecastView extends Ui.View {
   // the text, unless the text is already at the end in that direction. Other
   // vertical drags pull the page towards the next or previous day, showing
   // that day at the edge, and change to it when released far enough.
-  // Horizontal drags are left to the page swipes.
+  // Horizontal drags move the pages of the forecast sideways.
   public function onDrag(evt as Ui.DragEvent) as DetailedForecastDragResult {
     var coordinates = evt.getCoordinates();
     var x = coordinates[0];
@@ -307,12 +312,15 @@ class DetailedForecastView extends Ui.View {
     if (type == Ui.DRAG_TYPE_START) {
       $.isLatestTouchDragged = true;
       _dragMode = DRAG_MODE_UNDECIDED;
+      _dragSampleX = x;
       _dragSampleY = y;
       _dragSampleTime = System.getTimer();
+      _previousDragSampleX = x;
       _previousDragSampleY = y;
       _previousDragSampleTime = _dragSampleTime;
       _dragStartX = x;
       _dragStartY = y;
+      _lastDragX = x;
       _lastDragY = y;
 
       var mainContentY0 = _headerHeight + _dangerLevelHeight;
@@ -327,6 +335,9 @@ class DetailedForecastView extends Ui.View {
       if (pullOffset != 0 && Ui has :cancelAllAnimations) {
         Ui.cancelAllAnimations();
       }
+      if (_mainContent != null) {
+        _mainContent.finishAnimation();
+      }
       return DRAG_IGNORED;
     }
 
@@ -334,13 +345,17 @@ class DetailedForecastView extends Ui.View {
       decideDragMode(x, y);
     }
 
+    var dx = x - _lastDragX;
     var dy = y - _lastDragY;
+    _lastDragX = x;
     _lastDragY = y;
 
     var now = System.getTimer();
     if (now - _dragSampleTime >= DRAG_SPEED_SAMPLE_MS) {
+      _previousDragSampleX = _dragSampleX;
       _previousDragSampleY = _dragSampleY;
       _previousDragSampleTime = _dragSampleTime;
+      _dragSampleX = x;
       _dragSampleY = y;
       _dragSampleTime = now;
     }
@@ -349,27 +364,33 @@ class DetailedForecastView extends Ui.View {
     } else if (_dragMode == DRAG_MODE_PULL) {
       var maxPull = getPullThreshold() * 1.3;
       pullOffset = $.clamp(pullOffset + dy, -maxPull, maxPull);
+    } else if (_dragMode == DRAG_MODE_SIDEWAYS) {
+      _mainContent.dragSidewaysBy(dx);
     }
     Ui.requestUpdate();
 
-    // Only handled when dragging, so taps and horizontal swipes still work.
+    // Only handled when dragging, so taps still work.
     var result =
-      _dragMode == DRAG_MODE_TEXT || _dragMode == DRAG_MODE_PULL
-        ? DRAG_HANDLED
-        : DRAG_IGNORED;
+      _dragMode == DRAG_MODE_UNDECIDED || _dragMode == DRAG_MODE_NONE
+        ? DRAG_IGNORED
+        : DRAG_HANDLED;
     if (type == Ui.DRAG_TYPE_STOP) {
       if (_dragMode == DRAG_MODE_PULL) {
         result = releasePull(getFlick(_previousDragSampleY - y, _height, now));
+      } else if (_dragMode == DRAG_MODE_SIDEWAYS) {
+        _currentElement = _mainContent.releaseSidewaysDrag(
+          getFlick(_previousDragSampleX - x, _width, now)
+        );
       }
       _dragMode = DRAG_MODE_NONE;
     }
     return result;
   }
 
-  // 1 if the finger was flicked up, towards the next day, -1 if flicked down,
-  // otherwise 0. moved is how far the finger moved up over the last 100 to
-  // 200 ms, or since the start of a shorter drag, and screenSize the height
-  // of the screen.
+  // 1 if the finger was flicked up or left, towards the next day or page, -1
+  // if flicked down or right, otherwise 0. moved is how far the finger moved
+  // up or left over the last 100 to 200 ms, or since the start of a shorter
+  // drag, and screenSize the height or width of the screen.
   private function getFlick(
     moved as Numeric,
     screenSize as Numeric,
@@ -393,7 +414,10 @@ class DetailedForecastView extends Ui.View {
     }
 
     if (dx.abs() > dy.abs()) {
-      _dragMode = DRAG_MODE_NONE;
+      _dragMode =
+        _mainContent != null && _mainContent.canDragSideways()
+          ? DRAG_MODE_SIDEWAYS
+          : DRAG_MODE_NONE;
     } else if (
       _dragStartScrollPosition != null &&
       (dy < 0 ? _dragStartScrollPosition < 1 : _dragStartScrollPosition > 0)
@@ -518,12 +542,6 @@ class DetailedForecastView extends Ui.View {
   public function goToPreviousVisibleElement() {
     if (_mainContent != null) {
       _currentElement = _mainContent.goToPreviousElement();
-    }
-  }
-
-  public function toggleVisibleElement() {
-    if (_mainContent != null) {
-      _currentElement = _mainContent.toggleVisibleElement();
     }
   }
 

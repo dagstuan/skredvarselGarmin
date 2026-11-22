@@ -54,19 +54,24 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
 
   public function onSwipe(evt as Ui.SwipeEvent) as Boolean {
     var direction = evt.getDirection();
-    if (direction == Ui.SWIPE_RIGHT) {
-      _view.goToPreviousVisibleElement();
+    if (direction != Ui.SWIPE_LEFT && direction != Ui.SWIPE_RIGHT) {
+      return false;
+    }
+
+    if ($.isLatestTouchDragged) {
+      // The pages follow the finger, see DetailedForecastView.onDrag.
       return true;
     } else if (direction == Ui.SWIPE_LEFT) {
       _view.goToNextVisibleElement();
-      return true;
+    } else {
+      _view.goToPreviousVisibleElement();
     }
-    return false;
+    return true;
   }
 
   public function onKey(evt as Ui.KeyEvent) as Boolean {
     if (Ui.KEY_ENTER == evt.getKey()) {
-      _view.toggleVisibleElement();
+      _view.goToNextVisibleElement();
       return true;
     }
     return false;
