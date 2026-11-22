@@ -20,6 +20,8 @@ module AvalancheUi {
     :font as Gfx.FontType,
     :color as Gfx.ColorValue?,
     :backgroundColor as Gfx.ColorValue?,
+    // Hold the backlight on until the text has scrolled through once.
+    :holdBacklight as Boolean?,
   };
 
   public class ScrollingText {
@@ -53,6 +55,8 @@ module AvalancheUi {
 
     private var _isVisible as Boolean;
 
+    private var _backlightHold as BacklightHold?;
+
     public function initialize(settings as ScrollingTextSettings) {
       _text = settings[:text];
       _containerWidth = settings[:containerWidth];
@@ -63,6 +67,10 @@ module AvalancheUi {
       _color = settings[:color] != null ? settings[:color] : Gfx.COLOR_WHITE;
 
       _speed = settings[:scrollSpeed] != null ? settings[:scrollSpeed] : 2;
+
+      if (settings[:holdBacklight] == true) {
+        _backlightHold = new BacklightHold();
+      }
 
       _backgroundColor =
         settings[:backgroundColor] != null
@@ -92,16 +100,33 @@ module AvalancheUi {
 
     public function onShow() as Void {
       _isVisible = true;
+
+      if (_backlightHold != null && isOverflowing()) {
+        _backlightHold.start();
+      }
     }
 
     public function onHide() as Void {
       _isVisible = false;
+
+      if (_backlightHold != null) {
+        _backlightHold.stop();
+      }
     }
 
     public function onTick() as Void {
       if (_isVisible) {
+        if (_backlightHold != null) {
+          _backlightHold.onTick();
+        }
         calcTextOffset();
       }
+    }
+
+    private function isOverflowing() as Boolean {
+      return _scrollDirection == SCROLL_DIRECTION_HORIZONTAL
+        ? _textWidth > _containerWidth
+        : _textHeight > _containerHeight;
     }
 
     public function reset() as Void {
@@ -259,6 +284,10 @@ module AvalancheUi {
       if (atEnd && _ticksAtEnd > TICKS_AT_START_END) {
         _textOffset = 0;
         _ticksAtEnd = 0;
+
+        if (_backlightHold != null) {
+          _backlightHold.stop();
+        }
       }
     }
   }
