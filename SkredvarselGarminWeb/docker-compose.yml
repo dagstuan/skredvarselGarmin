@@ -1,14 +1,14 @@
 services:
   db:
     container_name: skredvarsel-garmin-db
-    image: imresamu/postgis:16-3.5.2-bullseye
+    image: imresamu/postgis:18-3.6.1-trixie
     restart: always
     environment:
       POSTGRES_PASSWORD: dev
     ports:
       - 5432:5432
     volumes:
-      - postgres-data-volume:/var/lib/postgresql/data:z
+      - postgres-data-volume:/var/lib/postgresql:z
       - ./postgres-init:/docker-entrypoint-initdb.d
 
 volumes:
