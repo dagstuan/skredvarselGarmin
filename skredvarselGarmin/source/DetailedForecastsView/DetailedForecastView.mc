@@ -2,14 +2,15 @@ import Toybox.Lang;
 
 using Toybox.WatchUi as Ui;
 using Toybox.Graphics as Gfx;
+using Toybox.System;
 using Toybox.Time;
 using Toybox.Timer;
 
 using AvalancheUi;
 
 // True if the latest touch was reported as a drag. Vertical swipes are then
-// handled by DetailedForecastView.onDrag instead. Global, since the swipe can
-// arrive after a drag switched to another day's view.
+// ignored, since DetailedForecastView.onDrag handles the touch. Global, since
+// the swipe can arrive after a drag switched to another day's view.
 var isLatestTouchDragged as Boolean = false;
 
 enum DetailedForecastDragResult {
@@ -37,6 +38,12 @@ class DetailedForecastView extends Ui.View {
   }
   // Movement before a drag counts as horizontal or vertical.
   private const DRAG_SLOP = 8;
+  // Releasing a pull at least this fast, in screens per second, flicks to the
+  // next or previous day, even if it wasn't pulled far enough.
+  private const FLICK_SPEED = 1.5;
+  // The speed of a drag is measured over at least this long. Drag events
+  // can come only a millisecond apart, too close to measure speed between.
+  private const DRAG_SPEED_SAMPLE_MS = 100;
 
   private var _warning as DetailedAvalancheWarning?;
   private var _warnings as Array<DetailedAvalancheWarning>?;
@@ -59,12 +66,15 @@ class DetailedForecastView extends Ui.View {
   // didn't start on text that scrolls.
   private var _dragStartScrollPosition as Float? = null;
   private var _dragMode as Number = DRAG_MODE_NONE;
-  // Direction of the latest pull: -1 towards the next day, 1 towards the
-  // previous day, 0 if the latest drag wasn't a pull.
-  private var _pullDirection as Number = 0;
   private var _dragStartX as Numeric = 0;
   private var _dragStartY as Numeric = 0;
   private var _lastDragY as Numeric = 0;
+  // Where the finger was at two earlier times, at least
+  // DRAG_SPEED_SAMPLE_MS apart, to measure how fast it moves.
+  private var _dragSampleY as Numeric = 0;
+  private var _dragSampleTime as Number = 0;
+  private var _previousDragSampleY as Numeric = 0;
+  private var _previousDragSampleTime as Number = 0;
 
   // How far the page is pulled to change day. Negative when pulled up, towards
   // the next day. Public, so it can be animated back.
@@ -290,14 +300,18 @@ class DetailedForecastView extends Ui.View {
   // Horizontal drags are left to the page swipes.
   public function onDrag(evt as Ui.DragEvent) as DetailedForecastDragResult {
     var coordinates = evt.getCoordinates();
+    var x = coordinates[0];
     var y = coordinates[1];
     var type = evt.getType();
 
     if (type == Ui.DRAG_TYPE_START) {
       $.isLatestTouchDragged = true;
       _dragMode = DRAG_MODE_UNDECIDED;
-      _pullDirection = 0;
-      _dragStartX = coordinates[0];
+      _dragSampleY = y;
+      _dragSampleTime = System.getTimer();
+      _previousDragSampleY = y;
+      _previousDragSampleTime = _dragSampleTime;
+      _dragStartX = x;
       _dragStartY = y;
       _lastDragY = y;
 
@@ -317,11 +331,19 @@ class DetailedForecastView extends Ui.View {
     }
 
     if (_dragMode == DRAG_MODE_UNDECIDED) {
-      decideDragMode(coordinates[0], y);
+      decideDragMode(x, y);
     }
 
     var dy = y - _lastDragY;
     _lastDragY = y;
+
+    var now = System.getTimer();
+    if (now - _dragSampleTime >= DRAG_SPEED_SAMPLE_MS) {
+      _previousDragSampleY = _dragSampleY;
+      _previousDragSampleTime = _dragSampleTime;
+      _dragSampleY = y;
+      _dragSampleTime = now;
+    }
     if (_dragMode == DRAG_MODE_TEXT) {
       _mainContent.dragBy(dy);
     } else if (_dragMode == DRAG_MODE_PULL) {
@@ -337,11 +359,30 @@ class DetailedForecastView extends Ui.View {
         : DRAG_IGNORED;
     if (type == Ui.DRAG_TYPE_STOP) {
       if (_dragMode == DRAG_MODE_PULL) {
-        result = releasePull();
+        result = releasePull(getFlick(_previousDragSampleY - y, _height, now));
       }
       _dragMode = DRAG_MODE_NONE;
     }
     return result;
+  }
+
+  // 1 if the finger was flicked up, towards the next day, -1 if flicked down,
+  // otherwise 0. moved is how far the finger moved up over the last 100 to
+  // 200 ms, or since the start of a shorter drag, and screenSize the height
+  // of the screen.
+  private function getFlick(
+    moved as Numeric,
+    screenSize as Numeric,
+    now as Number
+  ) as Number {
+    var elapsed = $.max([now - _previousDragSampleTime, 1]);
+    var speed = (moved.toFloat() * 1000) / elapsed / screenSize;
+    if (speed >= FLICK_SPEED) {
+      return 1;
+    } else if (speed <= -FLICK_SPEED) {
+      return -1;
+    }
+    return 0;
   }
 
   private function decideDragMode(x as Numeric, y as Numeric) as Void {
@@ -360,22 +401,19 @@ class DetailedForecastView extends Ui.View {
       _dragMode = DRAG_MODE_TEXT;
     } else {
       _dragMode = DRAG_MODE_PULL;
-      _pullDirection = dy < 0 ? -1 : 1;
     }
   }
 
-  // True if the latest drag pulled the page in the direction of a swipe. A
-  // quick flick then changes day, even if it didn't pull far enough.
-  public function isPulledInSwipeDirection(
-    direction as Ui.SwipeDirection
-  ) as Boolean {
-    return direction == Ui.SWIPE_UP ? _pullDirection < 0 : _pullDirection > 0;
-  }
-
-  // Changes day if the page is pulled far enough, otherwise springs back.
-  private function releasePull() as DetailedForecastDragResult {
-    if (pullOffset.abs() >= getPullThreshold()) {
-      return pullOffset < 0 ? DRAG_TO_NEXT_DAY : DRAG_TO_PREVIOUS_DAY;
+  // Changes day if the page is pulled far enough or flicked the way it is
+  // pulled, otherwise springs back. flick is as returned by getFlick.
+  private function releasePull(flick as Number) as DetailedForecastDragResult {
+    var isPulledUp = pullOffset < 0;
+    if (
+      pullOffset.abs() >= getPullThreshold() ||
+      (flick > 0 && isPulledUp) ||
+      (flick < 0 && pullOffset > 0)
+    ) {
+      return isPulledUp ? DRAG_TO_NEXT_DAY : DRAG_TO_PREVIOUS_DAY;
     }
 
     Ui.animate(
