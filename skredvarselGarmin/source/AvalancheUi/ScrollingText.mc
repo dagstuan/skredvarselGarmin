@@ -26,6 +26,8 @@ module AvalancheUi {
 
   public class ScrollingText {
     private const TICKS_AT_START_END = 20;
+    // Auto scroll pause after the text is dragged on touch screens.
+    private const TICKS_PAUSED_AFTER_DRAG = 30;
 
     private var _text as String;
     private var _containerWidth as Numeric;
@@ -54,6 +56,8 @@ module AvalancheUi {
     private var _bufferedBitmapText as Gfx.BufferedBitmap?;
 
     private var _isVisible as Boolean;
+
+    private var _ticksPausedAfterDrag as Number = 0;
 
     private var _backlightHold as BacklightHold?;
 
@@ -119,8 +123,38 @@ module AvalancheUi {
         if (_backlightHold != null) {
           _backlightHold.onTick();
         }
-        calcTextOffset();
+
+        if (_ticksPausedAfterDrag > 0) {
+          _ticksPausedAfterDrag -= 1;
+        } else {
+          calcTextOffset();
+        }
       }
+    }
+
+    // For dragging on touch screens. Null if the text doesn't scroll,
+    // otherwise how far it is scrolled, from 0 at the top to 1 at the bottom.
+    public function getScrollPosition() as Float? {
+      if (_scrollDirection != SCROLL_DIRECTION_VERTICAL || !isOverflowing()) {
+        return null;
+      }
+      return _textOffset.toFloat() / (_containerHeight - _textHeight);
+    }
+
+    // Moves the text by dy when dragged on touch screens, and pauses the
+    // auto scroll for a while.
+    public function dragBy(dy as Numeric) as Void {
+      var minOffset = _containerHeight - _textHeight;
+      _textOffset += dy;
+      if (_textOffset > 0) {
+        _textOffset = 0;
+      } else if (_textOffset < minOffset) {
+        _textOffset = minOffset;
+      }
+
+      _ticksAtStart = 0;
+      _ticksAtEnd = 0;
+      _ticksPausedAfterDrag = TICKS_PAUSED_AFTER_DRAG;
     }
 
     private function isOverflowing() as Boolean {
@@ -133,6 +167,7 @@ module AvalancheUi {
       _textOffset = 0.0;
       _ticksAtStart = 0;
       _ticksAtEnd = 0;
+      _ticksPausedAfterDrag = 0;
     }
 
     public function getWidth() {

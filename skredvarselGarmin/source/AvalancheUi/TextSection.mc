@@ -23,6 +23,8 @@ module AvalancheUi {
   class TextSection {
     private const TICKS_AT_START_END = 20;
     private const SCROLL_SPEED = 2;
+    // Auto scroll pause after the text is dragged on touch screens.
+    private const TICKS_PAUSED_AFTER_DRAG = 30;
 
     private var _width as Numeric;
     private var _height as Numeric;
@@ -41,6 +43,7 @@ module AvalancheUi {
     private var _ticksAtStart = 0;
     private var _ticksAtEnd = 0;
     private var _isVisible = false;
+    private var _ticksPausedAfterDrag = 0;
     private var _backlightHold as BacklightHold = new BacklightHold();
 
     public function initialize(settings as TextSectionSettings) {
@@ -85,6 +88,7 @@ module AvalancheUi {
       _ticksAtStart = 0;
       _ticksAtEnd = 0;
       _isVisible = true;
+      _ticksPausedAfterDrag = 0;
 
       // Hold the backlight until the text has scrolled through once.
       if (_contentHeight > _height) {
@@ -104,6 +108,11 @@ module AvalancheUi {
 
       _backlightHold.onTick();
 
+      if (_ticksPausedAfterDrag > 0) {
+        _ticksPausedAfterDrag -= 1;
+        return;
+      }
+
       var atEnd = _contentOffset < _height - _contentHeight;
       if (atEnd) {
         _ticksAtEnd += 1;
@@ -119,6 +128,31 @@ module AvalancheUi {
         _ticksAtEnd = 0;
         _backlightHold.stop();
       }
+    }
+
+    // For dragging on touch screens. Null if the text doesn't scroll,
+    // otherwise how far it is scrolled, from 0 at the top to 1 at the bottom.
+    public function getScrollPosition() as Float? {
+      if (_contentHeight <= _height) {
+        return null;
+      }
+      return _contentOffset.toFloat() / (_height - _contentHeight);
+    }
+
+    // Moves the text by dy when dragged on touch screens, and pauses the
+    // auto scroll for a while.
+    public function dragBy(dy as Numeric) as Void {
+      var minOffset = _height - _contentHeight;
+      _contentOffset += dy;
+      if (_contentOffset > 0) {
+        _contentOffset = 0;
+      } else if (_contentOffset < minOffset) {
+        _contentOffset = minOffset;
+      }
+
+      _ticksAtStart = 0;
+      _ticksAtEnd = 0;
+      _ticksPausedAfterDrag = TICKS_PAUSED_AFTER_DRAG;
     }
 
     public function draw(dc as Gfx.Dc, x0 as Numeric, y0 as Numeric) as Void {

@@ -187,6 +187,26 @@ public class DetailedForecastElements {
     return _currentPage;
   }
 
+  // For dragging the visible element's text on touch screens. Null if it
+  // has no text that scrolls, otherwise how far it is scrolled, from 0 at the
+  // top to 1 at the bottom.
+  public function getScrollPosition() as Float? {
+    var element = _elements[_currentPage];
+    if (!_animating && element != null && element has :getScrollPosition) {
+      return element.getScrollPosition();
+    }
+    return null;
+  }
+
+  // Moves the visible element's text by dy, and pauses its auto scroll for a
+  // while.
+  public function dragBy(dy as Numeric) as Void {
+    var element = _elements[_currentPage];
+    if (element != null && element has :dragBy) {
+      element.dragBy(dy);
+    }
+  }
+
   private function setPage(newPage as Number) {
     var prevPage = _currentPage;
     _currentPage = newPage;

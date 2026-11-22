@@ -64,6 +64,10 @@ class DetailedForecastViewDelegate extends Ui.BehaviorDelegate {
     return false;
   }
 
+  public function onDrag(evt as Ui.DragEvent) as Boolean {
+    return _view.onDrag(evt);
+  }
+
   public function onKey(evt as Ui.KeyEvent) as Boolean {
     if (Ui.KEY_ENTER == evt.getKey()) {
       _view.toggleVisibleElement();

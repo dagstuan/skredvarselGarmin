@@ -33,6 +33,11 @@ class DetailedForecastView extends Ui.View {
   private var _footerHeight as Numeric = 0;
 
   private var _mainContent as DetailedForecastElements?;
+  // Where the text was scrolled when the latest touch started on it, from 0
+  // at the top to 1 at the bottom. Null if the touch didn't start on text
+  // that scrolls.
+  private var _touchStartScrollPosition as Float? = null;
+  private var _lastDragY as Numeric = 0;
   private var _currentElement as Number = 0;
   private var _numElements as Number?;
 
@@ -241,6 +246,41 @@ class DetailedForecastView extends Ui.View {
       :height => _footerHeight,
       :isLoading => _isLoading,
     });
+  }
+
+  // Drags that start on text that scrolls drag the text.
+  public function onDrag(evt as Ui.DragEvent) as Boolean {
+    var y = evt.getCoordinates()[1];
+
+    if (evt.getType() == Ui.DRAG_TYPE_START) {
+      var mainContentY0 = _headerHeight + _dangerLevelHeight;
+      var isInMainContent =
+        y >= mainContentY0 && y <= mainContentY0 + _mainContentHeight;
+      _touchStartScrollPosition =
+        _mainContent != null && isInMainContent
+          ? _mainContent.getScrollPosition()
+          : null;
+    } else if (_touchStartScrollPosition != null) {
+      _mainContent.dragBy(y - _lastDragY);
+      Ui.requestUpdate();
+    }
+
+    _lastDragY = y;
+    return _touchStartScrollPosition != null;
+  }
+
+  // True if a vertical swipe dragged text, instead of changing the day. That
+  // is when the touch started on text that scrolls, unless the text was
+  // already at the bottom for swipes up, or at the top for swipes down.
+  public function isSwipeDraggingText(
+    direction as Ui.SwipeDirection
+  ) as Boolean {
+    if (_touchStartScrollPosition == null) {
+      return false;
+    }
+    return direction == Ui.SWIPE_UP
+      ? _touchStartScrollPosition < 1
+      : _touchStartScrollPosition > 0;
   }
 
   public function goToNextVisibleElement() {

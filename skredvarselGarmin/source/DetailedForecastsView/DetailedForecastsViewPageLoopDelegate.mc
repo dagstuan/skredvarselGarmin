@@ -34,7 +34,10 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     // Memory constrained devices only fetch a single day in the background, refetch since we are in foreground now.
     var numWarnings = _detailedWarnings.size();
 
-    if ((dataAge > $.TIME_TO_CONSIDER_DATA_STALE || numWarnings <= 1) && $.canMakeWebRequest()) {
+    if (
+      (dataAge > $.TIME_TO_CONSIDER_DATA_STALE || numWarnings <= 1) &&
+      $.canMakeWebRequest()
+    ) {
       if ($.Debug) {
         $.log("Stale forecast, try to reload in background");
       }
@@ -98,7 +101,10 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
 
   public function onSwipe(evt as Ui.SwipeEvent) as Boolean {
     var direction = evt.getDirection();
-    if (direction == Ui.SWIPE_UP) {
+    var isVertical = direction == Ui.SWIPE_UP || direction == Ui.SWIPE_DOWN;
+    if (isVertical && _view.isSwipeDraggingText(direction)) {
+      return true;
+    } else if (direction == Ui.SWIPE_UP) {
       onNxtPage();
       return true;
     } else if (direction == Ui.SWIPE_DOWN) {
