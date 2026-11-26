@@ -15,7 +15,7 @@ public static class DetailedAvalancheWarningMapper
         HasEmergency = !string.IsNullOrWhiteSpace(varsomWarning.EmergencyWarning?.ToEmergencyWarning(langKey, varsomWarning.AvalancheProblems)),
     };
 
-    public static DetailedAvalancheWarning ToDetailedAvalancheWarning(this VarsomDetailedAvalancheWarning varsomWarning, string langKey) => new()
+    public static DetailedAvalancheWarning ToDetailedAvalancheWarning(this VarsomDetailedAvalancheWarning varsomWarning, string langKey, bool includeSnowpackAndWeather = false) => new()
     {
         Published = varsomWarning.PublishTime,
         DangerLevel = int.Parse(varsomWarning.DangerLevel),
@@ -40,8 +40,35 @@ public static class DetailedAvalancheWarningMapper
             Propagation = problem.AvalPropagationId,
         }).OrderByDescending(x => x.DangerLevel),
         IsTendency = varsomWarning.IsTendency,
-        EmergencyWarning = varsomWarning.EmergencyWarning?.ToEmergencyWarning(langKey, varsomWarning.AvalancheProblems)
+        EmergencyWarning = varsomWarning.EmergencyWarning?.ToEmergencyWarning(langKey, varsomWarning.AvalancheProblems),
+        SnowpackHistory = includeSnowpackAndWeather ? varsomWarning.ToSnowpackHistory() : null,
+        MountainWeather = includeSnowpackAndWeather ? varsomWarning.MountainWeather.ToMountainWeather() : null,
     };
+
+    // Matches the "Snødekkehistorikk" section on varsom.no, one paragraph per line.
+    private static string ToSnowpackHistory(this VarsomDetailedAvalancheWarning varsomWarning) =>
+        JoinSentences("\n", [
+            varsomWarning.SnowSurface,
+            varsomWarning.CurrentWeaklayers,
+            varsomWarning.LatestAvalancheActivity,
+            varsomWarning.LatestObservations,
+        ]);
+
+    // Matches the "Fjellvær" section on varsom.no.
+    private static string ToMountainWeather(this VarsomMountainWeather? mountainWeather) =>
+        mountainWeather == null ? string.Empty : JoinSentences(" ", [
+            .. (mountainWeather.MeasurementTexts ?? [])
+                .OrderBy(measurementText => measurementText.SortOrder)
+                .Select(measurementText => measurementText.Text),
+            mountainWeather.CloudCoverName,
+            mountainWeather.Comment,
+        ]);
+
+    private static string JoinSentences(string separator, IEnumerable<string?> sentences) =>
+        string.Join(separator, sentences
+            .Where(sentence => !string.IsNullOrWhiteSpace(sentence))
+            .Select(sentence => sentence!.Trim())
+            .Select(sentence => char.IsLetterOrDigit(sentence[^1]) ? $"{sentence}." : sentence));
 
     private static string? ToEmergencyWarning(this string emergencyWarning, string langKey, IEnumerable<VarsomAvalancheProblem>? avalancheProblems)
     {

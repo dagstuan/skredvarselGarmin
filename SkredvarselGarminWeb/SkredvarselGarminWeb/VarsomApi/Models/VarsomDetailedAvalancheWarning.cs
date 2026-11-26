@@ -10,6 +10,24 @@ public class VarsomDetailedAvalancheWarning
     public required IEnumerable<VarsomAvalancheProblem> AvalancheProblems { get; init; }
     public required string EmergencyWarning { get; init; }
     public required bool IsTendency { get; init; }
+    public string? SnowSurface { get; init; }
+    public string? CurrentWeaklayers { get; init; }
+    public string? LatestAvalancheActivity { get; init; }
+    public string? LatestObservations { get; init; }
+    public VarsomMountainWeather? MountainWeather { get; init; }
+}
+
+public class VarsomMountainWeather
+{
+    public string? CloudCoverName { get; init; }
+    public string? Comment { get; init; }
+    public IEnumerable<VarsomMeasurementText>? MeasurementTexts { get; init; }
+}
+
+public class VarsomMeasurementText
+{
+    public required int SortOrder { get; init; }
+    public string? Text { get; init; }
 }
 
 public class VarsomAvalancheProblem

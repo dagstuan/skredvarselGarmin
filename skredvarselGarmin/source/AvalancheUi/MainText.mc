@@ -68,6 +68,18 @@ module AvalancheUi {
       }
     }
 
+    // For dragging the main text on touch screens. Null if it doesn't
+    // scroll, otherwise how far it is scrolled, from 0 at the top to 1 at the
+    // bottom.
+    public function getScrollPosition() as Float? {
+      return _mainText != null ? _mainText.getScrollPosition() : null;
+    }
+
+    // Moves the main text by dy, and pauses its auto scroll for a while.
+    public function dragBy(dy as Numeric) as Void {
+      _mainText.dragBy(dy);
+    }
+
     public function onTick() as Void {
       if (_emergencyWarningText != null) {
         _emergencyWarningText.onTick();

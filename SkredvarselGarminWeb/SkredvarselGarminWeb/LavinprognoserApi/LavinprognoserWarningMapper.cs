@@ -46,6 +46,8 @@ public static partial class LavinprognoserWarningMapper
             MainText = StripHtml(forecast.AssessmentContent),
             IsTendency = isTendency,
             AvalancheProblems = [.. (forecast.AvalancheProblemContainer?.Problems ?? []).Select(problem => problem.ToAvalancheProblem())],
+            SnowpackHistory = HtmlToLines(forecast.SnowInfo?.Content),
+            MountainWeather = HtmlToLines(forecast.WeatherInfo?.Content),
         };
     }
 
@@ -99,6 +101,58 @@ public static partial class LavinprognoserWarningMapper
 
         var text = HtmlEntity.DeEntitize(document.DocumentNode.InnerText);
         return WhitespaceRegex().Replace(text, " ").Trim();
+    }
+
+    private static readonly HashSet<string> BlockElements =
+        ["div", "p", "li", "ul", "ol", "h1", "h2", "h3", "h4", "h5", "h6", "tr", "table", "blockquote"];
+
+    // Converts the Word-pasted HTML from lavinprognoser.se into plain text with
+    // one paragraph or subheading per line. Subheadings like "Lavinaktivitet"
+    // are bold text in their own block or followed by <br>, so they end up on
+    // their own line.
+    public static string HtmlToLines(string? html)
+    {
+        if (string.IsNullOrWhiteSpace(html)) return string.Empty;
+        var document = new HtmlDocument();
+        document.LoadHtml(html);
+
+        var builder = new System.Text.StringBuilder();
+        AppendText(document.DocumentNode, builder);
+
+        var lines = builder.ToString()
+            .Split('\n')
+            .Select(line => WhitespaceRegex().Replace(line, " ").Trim())
+            .Where(line => line.Length > 0);
+        return string.Join("\n", lines);
+    }
+
+    private static void AppendText(HtmlNode node, System.Text.StringBuilder builder)
+    {
+        switch (node.NodeType)
+        {
+            case HtmlNodeType.Comment:
+                return;
+            case HtmlNodeType.Text:
+                // Newlines in the source are just formatting, not line breaks.
+                builder.Append(HtmlEntity.DeEntitize(((HtmlTextNode)node).Text).Replace('\n', ' '));
+                return;
+        }
+
+        var name = node.Name.ToLowerInvariant();
+        if (name is "style" or "script" or "xml") return;
+        if (name == "br")
+        {
+            builder.Append('\n');
+            return;
+        }
+
+        var isBlock = BlockElements.Contains(name);
+        if (isBlock) builder.Append('\n');
+        foreach (var child in node.ChildNodes)
+        {
+            AppendText(child, builder);
+        }
+        if (isBlock) builder.Append('\n');
     }
 
     // Swedish problem type ID → Varsom/EAWS AvalancheProblemType

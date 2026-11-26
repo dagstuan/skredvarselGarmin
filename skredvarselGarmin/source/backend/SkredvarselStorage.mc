@@ -19,6 +19,11 @@ function getDetailedWarningsCacheKeyForRegion(regionId as String) {
   return "detailed_" + regionId;
 }
 
+(:background,:noLimitedBackgroundMemory)
+function isDetailedWarningsCacheKey(storageKey as String) as Boolean {
+  return storageKey.find("detailed_") == 0;
+}
+
 (:background)
 function getSelectedRegionIds() as Array<String> {
   var valueFromStorage =
@@ -160,5 +165,7 @@ public function getMaxSelectedRegions() as Number {
 
 function removeForecastDataForRegion(regionId as String) {
   Storage.deleteValue(getSimpleForecastCacheKeyForRegion(regionId));
-  Storage.deleteValue(getDetailedWarningsCacheKeyForRegion(regionId));
+  var detailedKey = getDetailedWarningsCacheKeyForRegion(regionId);
+  Storage.deleteValue(detailedKey);
+  $.deleteDetailedWarningTexts(detailedKey);
 }

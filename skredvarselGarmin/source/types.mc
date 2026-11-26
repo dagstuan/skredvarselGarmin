@@ -33,6 +33,8 @@ typedef DetailedAvalancheWarning as {
   "isTendency" as Boolean,
   "emergencyWarning" as String?,
   "destructiveSize" as Number,
+  "snowpackHistory" as String?,
+  "mountainWeather" as String?,
 };
 
 typedef SetupSubscriptionResponse as {

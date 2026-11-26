@@ -1,0 +1,8 @@
+<strings>
+  <!--
+    The full and short names of the regions in each country, as
+    ";id=Name|Short name;". See getRegionNames.
+  -->
+  <string id="NorwegianRegionNames" scope="glance">;3003=Nordenskiöld Land|Nordenskiöld L.;3006=Finnmarkskysten|Finnmarksk.;3007=Vest-Finnmark|V. Finnmark;3009=Nord-Troms|N. Troms;3010=Lyngen|Lyngen;3011=Tromsø|Tromsø;3012=Sør-Troms|S. Troms;3013=Indre Troms|I. Troms;3014=Lofoten og Vesterålen|Lofoten/Vesterål.;3015=Ofoten|Ofoten;3016=Salten|Salten;3017=Svartisen|Svartisen;3018=Helgeland|Helgeland;3022=Trollheimen|Trollheimen;3023=Romsdal|Romsdal;3024=Sunnmøre|Sunnmøre;3027=Indre Fjordane|I. Fjordane;3028=Jotunheimen|Jotunheimen;3029=Indre Sogn|I. Sogn;3031=Voss|Voss;3032=Hallingdal|Hallingdal;3034=Hardanger|Hardanger;3035=Vest-Telemark|V. Telemark;3037=Heiane|Heiane;</string>
+  <string id="SwedishRegionNames" scope="glance">;15=Abisko/Riksgränsfjällen Öst|Abisko/Riksgr. Ö;16=Abisko/Riksgränsfjällen Väst|Abisko/Riksgr. V;17=Kebnekaisefjällen Väst|Kebnekaise V;11=Kebnekaisefjällen Öst|Kebnekaise Ö;18=Västra Vindelfjällen Väst|V. Vindelfj. V;19=Västra Vindelfjällen Öst|V. Vindelfj. Ö;12=Södra Jämtlandsfjällen Väst|S. Jämtlandsfj. V;14=Södra Jämtlandsfjällen Öst|S. Jämtlandsfj. Ö;20=Södra Lapplandsfjällen Nord|S. Lapplandsfj. N;21=Södra Lapplandsfjällen Syd|S. Lapplandsfj. S;7=Västra Härjedalsfjällen|V. Härjedalsfj.;</string>
+</strings>

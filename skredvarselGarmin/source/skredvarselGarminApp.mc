@@ -117,6 +117,34 @@ function switchToInitialView(transition as Ui.SlideType) {
   );
 }
 
+// The body of skredvarselGarminApp.getInitialView. It's a global function,
+// since the app class is also loaded in the glance and background processes,
+// which have little memory and never show these views.
+function getAppInitialView(
+  app as skredvarselGarminApp
+) as [Ui.Views] or [Ui.Views, Ui.InputDelegates] {
+  if ($.getHasSubscription() == false) {
+    if ($.Debug) {
+      $.log("No subscription detected.");
+    }
+
+    return [new SetupSubscriptionView(), new SetupSubscriptionViewDelegate()];
+  }
+
+  $.registerTemporalEvent();
+
+  if (app has :fetchPositionIfStale) {
+    app.fetchPositionIfStale();
+  }
+  var initialViewAndDelegate = $.getInitialViewAndDelegate();
+
+  if (initialViewAndDelegate[1] != null) {
+    return initialViewAndDelegate;
+  } else {
+    return [initialViewAndDelegate[0]];
+  }
+}
+
 (:background)
 class skredvarselGarminApp extends Application.AppBase {
   function initialize() {
@@ -173,26 +201,7 @@ class skredvarselGarminApp extends Application.AppBase {
   }
 
   function getInitialView() as [Ui.Views] or [Ui.Views, Ui.InputDelegates] {
-    if ($.getHasSubscription() == false) {
-      if ($.Debug) {
-        $.log("No subscription detected.");
-      }
-
-      return [new SetupSubscriptionView(), new SetupSubscriptionViewDelegate()];
-    }
-
-    $.registerTemporalEvent();
-
-    if (self has :fetchPositionIfStale) {
-      fetchPositionIfStale();
-    }
-    var initialViewAndDelegate = $.getInitialViewAndDelegate();
-
-    if (initialViewAndDelegate[1] != null) {
-      return initialViewAndDelegate;
-    } else {
-      return [initialViewAndDelegate[0]];
-    }
+    return $.getAppInitialView(self);
   }
 
   (:glance)

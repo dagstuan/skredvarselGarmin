@@ -54,4 +54,6 @@
 	<string id="ProblemTypeWetSnowSlab">Våt snø (flakskred)</string>
 	<string id="ProblemTypeGlidingSnow">Glideskred</string>
 	<string id="NoForecastText">Ingen varseltekst tilgjengelig.</string>
+	<string id="SnowpackHistory">Snødekkehistorikk</string>
+	<string id="MountainWeather">Fjellvær</string>
 </strings>

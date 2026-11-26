@@ -34,7 +34,10 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     // Memory constrained devices only fetch a single day in the background, refetch since we are in foreground now.
     var numWarnings = _detailedWarnings.size();
 
-    if ((dataAge > $.TIME_TO_CONSIDER_DATA_STALE || numWarnings <= 1) && $.canMakeWebRequest()) {
+    if (
+      (dataAge > $.TIME_TO_CONSIDER_DATA_STALE || numWarnings <= 1) &&
+      $.canMakeWebRequest()
+    ) {
       if ($.Debug) {
         $.log("Stale forecast, try to reload in background");
       }
@@ -76,12 +79,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
         }
       }
 
-      _view.setWarning(
-        index,
-        _detailedWarnings.size(),
-        _detailedWarnings[index],
-        _fetchedTime
-      );
+      _view.setWarning(index, _detailedWarnings, _fetchedTime);
     }
 
     _view.setIsLoading(false);
@@ -101,8 +99,24 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     return DetailedForecastViewDelegate.onKey(evt);
   }
 
+  public function onDrag(evt as Ui.DragEvent) as Boolean {
+    var result = _view.onDrag(evt);
+    if (result == DRAG_TO_NEXT_DAY) {
+      onNxtPage();
+    } else if (result == DRAG_TO_PREVIOUS_DAY) {
+      onPrevPage();
+    }
+    return result != DRAG_IGNORED;
+  }
+
   public function onSwipe(evt as Ui.SwipeEvent) as Boolean {
     var direction = evt.getDirection();
+    var isVertical = direction == Ui.SWIPE_UP || direction == Ui.SWIPE_DOWN;
+    if (isVertical && $.isLatestTouchDragged) {
+      // The page follows the finger, see DetailedForecastView.onDrag.
+      return true;
+    }
+
     if (direction == Ui.SWIPE_UP) {
       onNxtPage();
       return true;
@@ -157,8 +171,7 @@ class DetailedForecastViewPageLoopDelegate extends DetailedForecastViewDelegate 
     return new DetailedForecastView({
       :regionId => _regionId,
       :index => index,
-      :numWarnings => _detailedWarnings.size(),
-      :warning => _detailedWarnings[index],
+      :warnings => _detailedWarnings,
       :fetchedTime => _fetchedTime,
     });
   }

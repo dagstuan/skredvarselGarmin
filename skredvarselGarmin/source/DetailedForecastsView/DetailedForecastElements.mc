@@ -14,17 +14,93 @@ typedef AvalancheForecastElement as interface {
 
 typedef DetailedForecastElementsSettings as {
   :dc as Gfx.Dc,
-  :warning as DetailedAvalancheWarning,
+  :regionId as String,
+  :warnings as Array<DetailedAvalancheWarning>,
+  :index as Number,
   :locY as Numeric,
   :height as Numeric,
   :fullWidth as Numeric,
 };
 
+(:noLimitedBackgroundMemory)
+function hasText(text as String?) as Boolean {
+  return text != null && text.length() > 0;
+}
+
+// [snowpack history parts, mountain weather parts] for the warning at index.
+// Mountain weather is shown for the day and the day before it, newest first.
+(:noLimitedBackgroundMemory)
+function getTextSectionParts(
+  regionId as String,
+  warnings as Array<DetailedAvalancheWarning>,
+  index as Number
+) as [Array<AvalancheUi.TextSectionPart>, Array<AvalancheUi.TextSectionPart>] {
+  var snowpackParts = [] as Array<AvalancheUi.TextSectionPart>;
+  var weatherParts = [] as Array<AvalancheUi.TextSectionPart>;
+
+  for (var i = index; i >= 0 && i >= index - 1; i--) {
+    var texts = $.getDetailedWarningTexts(regionId, warnings, i);
+    if (texts == null) {
+      continue;
+    }
+
+    if (i == index && $.hasText(texts[0])) {
+      snowpackParts.add([
+        // Written when the forecast was published, like on varsom.no.
+        $.getHumanReadableDateText($.parseDate(warnings[i]["published"])),
+        texts[0],
+      ]);
+    }
+
+    if ($.hasText(texts[1])) {
+      weatherParts.add([
+        $.getHumanReadableDateText($.getDisplayDateForWarning(warnings[i])),
+        texts[1],
+      ]);
+    }
+  }
+
+  return [snowpackParts, weatherParts];
+}
+
+// Main text, one page per avalanche problem, then snowpack history and
+// mountain weather when present.
+(:noLimitedBackgroundMemory)
+function getNumDetailedForecastElements(
+  regionId as String,
+  warnings as Array<DetailedAvalancheWarning>,
+  index as Number
+) as Number {
+  var numElements =
+    (warnings[index]["avalancheProblems"] as Array).size() + 1;
+  var parts = $.getTextSectionParts(regionId, warnings, index);
+  for (var i = 0; i < parts.size(); i++) {
+    if (parts[i].size() > 0) {
+      numElements += 1;
+    }
+  }
+  return numElements;
+}
+
+(:limitedBackgroundMemory)
+function getNumDetailedForecastElements(
+  regionId as String,
+  warnings as Array<DetailedAvalancheWarning>,
+  index as Number
+) as Number {
+  return (warnings[index]["avalancheProblems"] as Array).size() + 1;
+}
+
 public class DetailedForecastElements {
   private const ANIMATION_TIME_SECONDS = 0.3;
-  private const ANIMATION_STEPS = ANIMATION_TIME_SECONDS * 60; // 60 FPS
+  // How far, in pages, a page must be dragged sideways to change page,
+  // unless it is flicked.
+  private const DRAG_THRESHOLD = 0.25;
 
+  private var _regionId as String;
   private var _warning as DetailedAvalancheWarning;
+  private var _warnings as Array<DetailedAvalancheWarning>;
+  private var _index as Number;
 
   private var _fullWidth as Numeric;
 
@@ -32,10 +108,17 @@ public class DetailedForecastElements {
   private var _areaHeight as Numeric;
   private var _x0 as Numeric;
 
-  public var animationTime = 0;
-  private var _animating = false;
+  // The pages loop. position is the horizontal scroll position in pages: 0
+  // when the first page is shown, 1 for the second and so on. It follows the
+  // finger when dragged, and is animated towards _target, the page being
+  // moved to. Neither is wrapped around while moving, so going past the last
+  // page moves on to page _numElements, which is drawn as the first page.
+  // Public, so it can be animated.
+  public var position as Float = 0.0;
+  private var _target as Number = 0;
+  private var _isAnimating as Boolean = false;
+  // The page being moved to, wrapped around.
   private var _currentPage = 0;
-  private var _previousPage = -1;
   private var _numElements as Number;
 
   private var _elements as Array<AvalancheForecastElement?>;
@@ -46,14 +129,21 @@ public class DetailedForecastElements {
       : "See complete forecast at varsom.no";
 
   public function initialize(settings as DetailedForecastElementsSettings) {
-    _warning = settings[:warning];
+    _regionId = settings[:regionId];
+    _warnings = settings[:warnings];
+    _index = settings[:index];
+    _warning = _warnings[_index];
     _fullWidth = settings[:fullWidth];
 
     _areaWidth = Math.ceil(_fullWidth * 0.84);
     _areaHeight = settings[:height];
     _x0 = _fullWidth / 2 - _areaWidth / 2;
 
-    _numElements = (_warning["avalancheProblems"] as Array).size() + 1;
+    _numElements = $.getNumDetailedForecastElements(
+      _regionId,
+      _warnings,
+      _index
+    );
     _elements = new [_numElements];
     setupElements(settings[:dc]);
 
@@ -80,120 +170,193 @@ public class DetailedForecastElements {
     }
   }
 
+  // Each of these returns the page being moved to.
   public function goToNextElement() as Number {
-    if (_currentPage == _numElements - 1) {
-      return _currentPage;
-    }
-
-    setPage(_currentPage + 1);
-    animateToVisibleElement();
-    return _currentPage;
+    finishAnimation();
+    return goToElement(_target + 1);
   }
 
   public function goToPreviousElement() as Number {
-    if (_currentPage == 0) {
-      return _currentPage;
-    }
-
-    setPage(_currentPage - 1);
-    animateToVisibleElement();
-    return _currentPage;
+    finishAnimation();
+    return goToElement(_target - 1);
   }
 
-  public function toggleVisibleElement() as Number {
-    setPage((_currentPage + 1) % _numElements);
-    animateToVisibleElement();
-    return _currentPage;
+  // Touch dragging sideways: true if there are other pages to drag to.
+  public function canDragSideways() as Boolean {
+    return _numElements > 1;
   }
 
-  private function setPage(newPage as Number) {
-    var prevPage = _currentPage;
-    _currentPage = newPage;
-    _previousPage = prevPage;
-
-    var prevElement = _elements[_previousPage];
-    if (prevElement != null) {
-      prevElement.onHide();
-    }
-
-    var currElement = _elements[_currentPage];
-    if (currElement != null) {
-      currElement.onShow();
-    }
-  }
-
-  private function animateToVisibleElement() as Void {
-    _animating = true;
-
-    Ui.animate(
-      self,
-      :animationTime,
-      Ui.ANIM_TYPE_EASE_IN_OUT,
-      0,
-      ANIMATION_STEPS,
-      ANIMATION_TIME_SECONDS,
-      method(:pageAnimateComplete)
+  // Moves the pages by dx with the finger, at most one page either way.
+  public function dragSidewaysBy(dx as Numeric) as Void {
+    position = $.clamp(
+      position - dx.toFloat() / _fullWidth,
+      _target - 1,
+      _target + 1
     );
   }
 
-  public function pageAnimateComplete() as Void {
-    _animating = false;
-    animationTime = 0;
+  // Moves to the page dragged towards if it was dragged far enough or
+  // flicked the same way, otherwise back to the current page. flick is 1 if
+  // flicked towards the next page, -1 towards the previous, otherwise 0.
+  public function releaseSidewaysDrag(flick as Number) as Number {
+    var dragged = position - _target;
+    if (dragged >= DRAG_THRESHOLD || (flick > 0 && dragged > 0)) {
+      return goToNextElement();
+    } else if (dragged <= -DRAG_THRESHOLD || (flick < 0 && dragged < 0)) {
+      return goToPreviousElement();
+    }
+    animateToTarget();
+    return _currentPage;
+  }
+
+  // Finishes a running page animation at once, so a drag can start from a
+  // page at rest.
+  public function finishAnimation() as Void {
+    if (_isAnimating && Ui has :cancelAllAnimations) {
+      Ui.cancelAllAnimations();
+    }
+  }
+
+  // True while the pages are dragged or animated.
+  private function isMoving() as Boolean {
+    return position != _target.toFloat();
+  }
+
+  // For dragging the visible element's text on touch screens. Null if it
+  // has no text that scrolls, otherwise how far it is scrolled, from 0 at the
+  // top to 1 at the bottom.
+  public function getScrollPosition() as Float? {
+    var element = _elements[_currentPage];
+    if (!isMoving() && element != null && element has :getScrollPosition) {
+      return element.getScrollPosition();
+    }
+    return null;
+  }
+
+  // Moves the visible element's text by dy, and pauses its auto scroll for a
+  // while.
+  public function dragBy(dy as Numeric) as Void {
+    var element = _elements[_currentPage];
+    if (element != null && element has :dragBy) {
+      element.dragBy(dy);
+    }
+  }
+
+  private function goToElement(target as Number) as Number {
+    if (_numElements < 2) {
+      return _currentPage;
+    }
+
+    var newPage = ((target % _numElements) + _numElements) % _numElements;
+    if (newPage != _currentPage) {
+      var prevElement = _elements[_currentPage];
+      if (prevElement != null) {
+        prevElement.onHide();
+      }
+      var newElement = _elements[newPage];
+      if (newElement != null) {
+        newElement.onShow();
+      }
+    }
+
+    _target = target;
+    _currentPage = newPage;
+    animateToTarget();
+    return _currentPage;
+  }
+
+  private function animateToTarget() as Void {
+    _isAnimating = true;
+    Ui.animate(
+      self,
+      :position,
+      Ui.ANIM_TYPE_EASE_OUT,
+      position,
+      _target,
+      ANIMATION_TIME_SECONDS,
+      method(:onAnimationComplete)
+    );
+  }
+
+  // Wraps the position back around once at rest.
+  public function onAnimationComplete() as Void {
+    _isAnimating = false;
+    if (!isMoving()) {
+      _target = _currentPage;
+      position = _currentPage.toFloat();
+    }
     Ui.requestUpdate();
   }
 
   private function setupElements(dc as Gfx.Dc) {
     var avalancheProblems = _warning["avalancheProblems"] as Array;
+    var numProblems = avalancheProblems.size();
 
-    for (var i = 0; i < _elements.size(); i++) {
-      if (i == 0) {
-        var mainText = new AvalancheUi.MainText({
+    _elements[0] = new AvalancheUi.MainText({
+      :dc => dc,
+      :text => getMainText(),
+      :emergencyWarning => _warning["emergencyWarning"],
+      :width => _areaWidth,
+      :height => _areaHeight,
+    });
+
+    for (var i = 0; i < numProblems; i++) {
+      _elements[i + 1] = new AvalancheUi.AvalancheProblemUi({
+        :dc => dc,
+        :problem => avalancheProblems[i],
+        :width => _areaWidth,
+        :height => _areaHeight,
+      });
+    }
+
+    setupTextElements(dc, numProblems + 1);
+  }
+
+  // Snowpack history and mountain weather pages, starting at nextIndex.
+  (:noLimitedBackgroundMemory)
+  private function setupTextElements(dc as Gfx.Dc, nextIndex as Number) {
+    var parts = $.getTextSectionParts(_regionId, _warnings, _index);
+    var titles = [
+      $.getOrLoadResourceString("Snødekkehistorikk", :SnowpackHistory),
+      $.getOrLoadResourceString("Fjellvær", :MountainWeather),
+    ];
+
+    for (var i = 0; i < parts.size(); i++) {
+      if (parts[i].size() > 0) {
+        _elements[nextIndex] = new AvalancheUi.TextSection({
           :dc => dc,
-          :text => getMainText(),
-          :emergencyWarning => _warning["emergencyWarning"],
+          :title => titles[i],
+          :parts => parts[i],
           :width => _areaWidth,
           :height => _areaHeight,
         });
-
-        _elements[i] = mainText;
-      } else {
-        var problemUi = new AvalancheUi.AvalancheProblemUi({
-          :dc => dc,
-          :problem => avalancheProblems[i - 1],
-          :width => _areaWidth,
-          :height => _areaHeight,
-        });
-
-        _elements[i] = problemUi;
+        nextIndex += 1;
       }
     }
   }
+
+  (:limitedBackgroundMemory)
+  private function setupTextElements(dc as Gfx.Dc, nextIndex as Number) {}
 
   public function draw(dc as Gfx.Dc, y0 as Numeric) {
     if ($.DrawOutlines) {
       $.drawOutline(dc, _x0, y0, _areaWidth, _areaHeight);
     }
 
-    var xOffset = -(_currentPage * _fullWidth);
-
-    if (_animating) {
-      var direction = _currentPage > _previousPage ? 1 : -1;
-      var diff = ((_currentPage - _previousPage) * _fullWidth).abs();
-
-      if (direction > 0) {
-        xOffset =
-          -_previousPage * _fullWidth -
-          (animationTime / ANIMATION_STEPS) * diff;
-      } else {
-        xOffset =
-          -_previousPage * _fullWidth +
-          (animationTime / ANIMATION_STEPS) * diff;
+    // Draws the pages that are on screen, in pages from the position,
+    // wrapped around so the last page is next to the first.
+    var half = _numElements / 2.0;
+    for (var i = 0; i < _numElements; i++) {
+      var pagesAway = i - position;
+      while (pagesAway > half) {
+        pagesAway -= _numElements;
       }
-    }
-
-    for (var i = 0; i < _elements.size(); i++) {
-      _elements[i].draw(dc, _x0 + xOffset, y0);
-      xOffset += _fullWidth;
+      while (pagesAway <= -half) {
+        pagesAway += _numElements;
+      }
+      if (pagesAway.abs() < 1) {
+        _elements[i].draw(dc, _x0 + pagesAway * _fullWidth, y0);
+      }
     }
   }
 
