@@ -44,7 +44,6 @@ module AvalancheUi {
     private var _ticksAtEnd = 0;
     private var _isVisible = false;
     private var _ticksPausedAfterDrag = 0;
-    private var _backlightHold as BacklightHold = new BacklightHold();
 
     public function initialize(settings as TextSectionSettings) {
       var dc = settings[:dc];
@@ -89,24 +88,16 @@ module AvalancheUi {
       _ticksAtEnd = 0;
       _isVisible = true;
       _ticksPausedAfterDrag = 0;
-
-      // Hold the backlight until the text has scrolled through once.
-      if (_contentHeight > _height) {
-        _backlightHold.start();
-      }
     }
 
     public function onHide() as Void {
       _isVisible = false;
-      _backlightHold.stop();
     }
 
     public function onTick() as Void {
       if (!_isVisible || _contentHeight <= _height) {
         return;
       }
-
-      _backlightHold.onTick();
 
       if (_ticksPausedAfterDrag > 0) {
         _ticksPausedAfterDrag -= 1;
@@ -126,7 +117,6 @@ module AvalancheUi {
       if (atEnd && _ticksAtEnd > TICKS_AT_START_END) {
         _contentOffset = 0;
         _ticksAtEnd = 0;
-        _backlightHold.stop();
       }
     }
 

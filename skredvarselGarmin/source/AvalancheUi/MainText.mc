@@ -141,7 +141,6 @@ module AvalancheUi {
         :containerHeight => containerHeight,
         :font => Gfx.FONT_SYSTEM_XTINY,
         :scrollDirection => SCROLL_DIRECTION_VERTICAL,
-        :holdBacklight => true,
       });
     }
 
